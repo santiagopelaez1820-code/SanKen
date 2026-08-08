@@ -1,0 +1,84 @@
+import { useQuery } from "@tanstack/react-query"
+import { Link } from "react-router-dom"
+import type { DashboardStats } from "@sanken/core"
+import { api } from "@/lib/api"
+import { useAuthStore } from "@/lib/auth-store"
+import { Button } from "@/components/ui/button"
+import { StatTile } from "@/components/dashboard/StatTile"
+import { NextWorkoutCard } from "@/components/dashboard/NextWorkoutCard"
+import { MuscleVolumeChart } from "@/components/dashboard/MuscleVolumeChart"
+import { ProgressChart } from "@/components/dashboard/ProgressChart"
+import { RecentPRsList } from "@/components/dashboard/RecentPRsList"
+import { WorkoutHistoryList } from "@/components/dashboard/WorkoutHistoryList"
+import { BodyMeasurementsPanel } from "@/components/dashboard/BodyMeasurementsPanel"
+
+export function DashboardPage() {
+  const user = useAuthStore((state) => state.user)
+  const clearSession = useAuthStore((state) => state.clearSession)
+
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ["stats", "dashboard"],
+    queryFn: () => api.get<DashboardStats>("/stats/dashboard"),
+  })
+
+  return (
+    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6">
+        <header className="flex items-center justify-between">
+          <div>
+            <h1 className="font-heading text-2xl font-medium tracking-tight">
+              San<span className="text-primary">Ken</span>
+            </h1>
+            <p className="text-sm text-muted-foreground">Hola, {user?.name ?? "atleta"}.</p>
+          </div>
+          <div className="flex items-center gap-2">
+            {user?.role === "trainer" && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/trainer">Mis clientes</Link>
+              </Button>
+            )}
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/settings">Configuración</Link>
+            </Button>
+            <Button variant="outline" size="sm" onClick={clearSession}>
+              Cerrar sesión
+            </Button>
+          </div>
+        </header>
+
+        <NextWorkoutCard />
+
+        <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          <StatTile label="Horas entrenadas" value={isLoading ? "…" : `${stats?.total_hours ?? 0} h`} />
+          <StatTile label="Series totales" value={isLoading ? "…" : `${stats?.total_sets ?? 0}`} />
+          <StatTile
+            label="Toneladas movidas"
+            value={isLoading ? "…" : `${((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t`}
+          />
+          <StatTile
+            label="Racha actual"
+            value={isLoading ? "…" : `${stats?.current_streak_days ?? 0} días`}
+            hint={stats && stats.current_streak_days > 0 ? "¡Sigue así!" : undefined}
+          />
+        </section>
+
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <MuscleVolumeChart />
+          <ProgressChart />
+        </section>
+
+        <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="lg:col-span-1">
+            <RecentPRsList records={stats?.recent_personal_records ?? []} />
+          </div>
+          <div className="lg:col-span-1">
+            <WorkoutHistoryList />
+          </div>
+          <div className="lg:col-span-1">
+            <BodyMeasurementsPanel />
+          </div>
+        </section>
+      </div>
+    </main>
+  )
+}

@@ -1,0 +1,39 @@
+name: Mobile (Expo)
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps/mobile/**", "packages/core/**", ".github/workflows/mobile.yml"]
+  pull_request:
+    paths: ["apps/mobile/**", "packages/core/**", ".github/workflows/mobile.yml"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Install dependencies
+        # apps/mobile se instala de forma aislada (no es parte del workspace raíz):
+        # el tooling de Expo (@expo/cli, expo-router) rompe su resolución de módulos
+        # si se hoistea a la raíz del monorepo. @sanken/core se consume vía `file:`.
+        run: npm install
+
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      - name: Unit tests
+        run: npx jest
+
+      - name: Export web bundle (smoke test)
+        run: npx expo export --platform web

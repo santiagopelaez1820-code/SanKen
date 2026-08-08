@@ -1,0 +1,120 @@
+export interface ApiSuccess<T> {
+  data: T;
+  meta?: Record<string, unknown>;
+}
+
+export interface ApiErrorBody {
+  message: string;
+  errors?: Record<string, string[]>;
+}
+
+export class ApiError extends Error {
+  readonly status: number;
+  readonly body: ApiErrorBody;
+
+  constructor(status: number, body: ApiErrorBody) {
+    super(body.message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.body = body;
+  }
+}
+
+export interface ApiClientConfig {
+  /** e.g. https://api.sanken.app or http://localhost:8000 */
+  baseUrl: string;
+  /** Returns the current Sanctum bearer token, if any (mobile). */
+  getToken?: () => string | null | undefined;
+  /**
+   * Web SPA only: send/receive cookies and attach the Sanctum CSRF header,
+   * per Sanctum's "stateful" flow (ver docs/03-api.md §1). Requires calling
+   * `bootstrapCsrf()` once before the first mutating request.
+   */
+  withCredentials?: boolean;
+  /** Returns the current XSRF-TOKEN cookie value, URL-decoded. Web only. */
+  getCsrfToken?: () => string | null | undefined;
+}
+
+/**
+ * Thin, framework-agnostic wrapper around fetch for the SanKen API (/api/v1/*).
+ * Shared between the web (Vite) and mobile (Expo) clients so request/response
+ * shapes only need to be defined once. See docs/03-api.md for the contract.
+ */
+export class ApiClient {
+  private readonly baseUrl: string;
+  private readonly getToken?: () => string | null | undefined;
+  private readonly withCredentials: boolean;
+  private readonly getCsrfToken?: () => string | null | undefined;
+
+  constructor(config: ApiClientConfig) {
+    this.baseUrl = config.baseUrl.replace(/\/+$/, '');
+    this.getToken = config.getToken;
+    this.withCredentials = config.withCredentials ?? false;
+    this.getCsrfToken = config.getCsrfToken;
+  }
+
+  /**
+   * Pide la cookie XSRF-TOKEN a Sanctum. Debe llamarse (una vez, o antes de
+   * cada login) antes de cualquier request mutante desde la SPA web.
+   */
+  async bootstrapCsrf(): Promise<void> {
+    await fetch(`${this.baseUrl}/sanctum/csrf-cookie`, {
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+  }
+
+  get<T>(path: string) {
+    return this.request<T>('GET', path).then((envelope) => envelope.data);
+  }
+
+  post<T>(path: string, body?: unknown) {
+    return this.request<T>('POST', path, body).then((envelope) => envelope.data);
+  }
+
+  patch<T>(path: string, body?: unknown) {
+    return this.request<T>('PATCH', path, body).then((envelope) => envelope.data);
+  }
+
+  delete<T>(path: string) {
+    return this.request<T>('DELETE', path).then((envelope) => envelope.data);
+  }
+
+  /**
+   * Igual que `get`, pero conserva `meta` (paginación, next_day_id, etc.)
+   * en vez de descartarlo. Usar solo cuando el endpoint documenta un `meta`
+   * relevante — ver docs/03-api.md.
+   */
+  getWithMeta<T>(path: string): Promise<ApiSuccess<T>> {
+    return this.request<T>('GET', path);
+  }
+
+  private async request<T>(method: string, path: string, body?: unknown): Promise<ApiSuccess<T>> {
+    const token = this.getToken?.();
+    const csrfToken = this.withCredentials ? this.getCsrfToken?.() : null;
+    const isMutating = method !== 'GET';
+
+    const res = await fetch(`${this.baseUrl}/api/v1${path}`, {
+      method,
+      credentials: this.withCredentials ? 'include' : 'same-origin',
+      headers: {
+        Accept: 'application/json',
+        ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(isMutating && csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {}),
+      },
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+    });
+
+    const json = (await res.json().catch(() => null)) as
+      | ApiSuccess<T>
+      | ApiErrorBody
+      | null;
+
+    if (!res.ok) {
+      throw new ApiError(res.status, (json as ApiErrorBody) ?? { message: res.statusText });
+    }
+
+    return json as ApiSuccess<T>;
+  }
+}
