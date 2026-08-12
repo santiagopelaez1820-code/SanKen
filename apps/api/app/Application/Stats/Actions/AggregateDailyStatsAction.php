@@ -3,6 +3,7 @@
 namespace App\Application\Stats\Actions;
 
 use App\Domain\Stats\Services\StreakCalculator;
+use App\Events\StreakMilestone;
 use App\Models\User;
 use App\Models\UserStatsDaily;
 use App\Models\WorkoutSession;
@@ -65,6 +66,8 @@ class AggregateDailyStatsAction implements ShouldQueue
             ->whereDate('stat_date', $this->date)
             ->first() ?? new UserStatsDaily(['user_id' => $this->user->id, 'stat_date' => $this->date]);
 
+        $previousStreak = (int) ($stat->current_streak_days ?? 0);
+
         $stat->fill([
             'workouts_count' => $sessions->count(),
             'total_sets' => $workingSets->count(),
@@ -74,6 +77,13 @@ class AggregateDailyStatsAction implements ShouldQueue
         ])->save();
 
         Cache::forget(CacheKeys::statsDashboard($this->user->id));
+
+        // Solo dispara si el umbral se cruza recién ahora, no en cada
+        // recálculo posterior mientras la racha se mantenga por encima.
+        $crossedMilestone = collect([7, 30, 100])->first(fn (int $m) => $previousStreak < $m && $streak >= $m);
+        if ($crossedMilestone !== null) {
+            StreakMilestone::dispatch($this->user, $streak);
+        }
 
         return $stat;
     }

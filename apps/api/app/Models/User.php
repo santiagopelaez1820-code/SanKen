@@ -6,6 +6,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -33,6 +34,8 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'is_public_profile',
         'is_banned',
         'two_factor_enabled',
+        'last_active_at',
+        'trainer_verified_at',
     ];
 
     /**
@@ -62,6 +65,8 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'two_factor_recovery_codes' => 'array',
             'is_public_profile' => 'boolean',
             'is_banned' => 'boolean',
+            'last_active_at' => 'datetime',
+            'trainer_verified_at' => 'datetime',
         ];
     }
 
@@ -110,6 +115,29 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(TrainerClient::class, 'trainer_id');
     }
 
+    /**
+     * Inverso de trainerClients(): las filas trainer_clients donde este
+     * usuario es el cliente, no el entrenador. Sin uso hasta Sprint 11 (chat)
+     * — antes no existía ninguna vista del lado cliente de la relación.
+     */
+    public function clientRelationships(): HasMany
+    {
+        return $this->hasMany(TrainerClient::class, 'client_id');
+    }
+
+    public function xp(): HasOne
+    {
+        return $this->hasOne(UserXp::class);
+    }
+
+    public function achievements(): BelongsToMany
+    {
+        return $this->belongsToMany(Achievement::class, 'user_achievements')
+            ->using(UserAchievement::class)
+            ->withPivot('achieved_at')
+            ->withTimestamps();
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -124,7 +152,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     {
         return LogOptions::defaults()
             ->useLogName('user')
-            ->logOnly(['role', 'is_banned', 'two_factor_enabled'])
+            ->logOnly(['role', 'is_banned', 'two_factor_enabled', 'trainer_verified_at'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }

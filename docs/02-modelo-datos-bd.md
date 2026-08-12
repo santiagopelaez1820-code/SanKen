@@ -26,6 +26,8 @@ erDiagram
         boolean two_factor_enabled
         boolean is_public_profile
         boolean is_banned
+        timestamp last_active_at "Sprint 16 — alimenta DAU/WAU/MAU, sin tabla de eventos"
+        timestamp trainer_verified_at "Sprint 16 — toggle manual de admin, solo relevante si role=trainer"
         timestamp email_verified_at
         timestamp created_at
     }
@@ -192,7 +194,17 @@ erDiagram
     USERS ||--o{ CHALLENGE_PARTICIPANTS : joins
     CHALLENGES ||--o{ CHALLENGE_PARTICIPANTS : has
     USERS ||--o{ NOTIFICATIONS : receives
-    USERS ||--o{ CALENDAR_EVENTS : has
+    USERS ||--o{ CALENDAR_REMINDERS : has
+    TRAINER_CLIENTS ||--o| CHAT_CONVERSATIONS : has
+    CHAT_CONVERSATIONS ||--o{ CHAT_MESSAGES : contains
+    USERS ||--o{ CHAT_MESSAGES : sends
+    USERS ||--o{ PUSH_DEVICE_TOKENS : registers
+    USERS ||--o{ PUSH_SUBSCRIPTIONS : registers
+    USERS ||--o{ MEAL_LOGS : logs
+    FOOD_ITEMS ||--o{ MEAL_LOGS : "logged as"
+    USERS ||--o{ REPORTS : "reporter_id"
+    USERS ||--o{ REPORTS : "resolved_by"
+    USERS ||--o{ NEWS_PROMOTIONS : "admin_id"
 
     BODY_MEASUREMENTS {
         bigint id PK
@@ -250,6 +262,7 @@ erDiagram
     }
     CHALLENGES {
         bigint id PK
+        string code "identifica la plantilla de origen (ChallengeCatalog), para generación idempotente — no está en el diseño original"
         string title
         text description
         enum type "weekly|monthly"
@@ -265,21 +278,122 @@ erDiagram
         boolean completed
     }
     NOTIFICATIONS {
-        bigint id PK
-        bigint user_id FK
-        string type
+        char id PK "uuid"
+        string notifiable_type "siempre App.Models.User por ahora"
+        bigint notifiable_id
+        string type "clase de Notification, ej. NewChatMessageNotification"
         json data
         timestamp read_at
     }
-    CALENDAR_EVENTS {
+    CALENDAR_REMINDERS {
         bigint id PK
         bigint user_id FK
-        enum type "workout_planned|workout_completed|reminder|custom"
         date event_date
-        bigint routine_day_id FK "nullable"
         string title
+        text notes "nullable"
+    }
+    CHAT_CONVERSATIONS {
+        bigint id PK
+        bigint trainer_client_id FK UK "una conversación por relación entrenador-cliente"
+    }
+    CHAT_MESSAGES {
+        bigint id PK
+        bigint conversation_id FK
+        bigint sender_id FK "users"
+        text body
+        timestamp read_at "nullable; se marca al pedir GET /conversations/{id}/messages"
+    }
+    PUSH_DEVICE_TOKENS {
+        bigint id PK
+        bigint user_id FK
+        string token UK "token de push de Expo"
+        string platform "expo"
+    }
+    PUSH_SUBSCRIPTIONS {
+        bigint id PK
+        bigint user_id FK
+        string endpoint UK "endpoint de push del navegador"
+        string public_key "keys.p256dh de PushSubscription.toJSON()"
+        string auth_token "keys.auth de PushSubscription.toJSON()"
+    }
+    FOOD_ITEMS {
+        bigint id PK
+        string barcode UK "nullable — único solo cuando no es null"
+        string name
+        string brand "nullable"
+        decimal calories_per_100g
+        decimal protein_per_100g
+        decimal carbs_per_100g
+        decimal fat_per_100g
+        string source "open_food_facts|manual"
+        string source_id "nullable"
+    }
+    MEAL_LOGS {
+        bigint id PK
+        bigint user_id FK
+        bigint food_item_id FK
+        enum meal_type "breakfast|lunch|dinner|snack"
+        decimal quantity_grams
+        date logged_at
+    }
+    REPORTS {
+        bigint id PK
+        bigint reporter_id FK
+        string reportable_type "morph — solo chat_message por ahora"
+        bigint reportable_id
+        string reason "abuse|spam|inappropriate_content|other"
+        text details "nullable"
+        string status "pending|resolved|dismissed"
+        bigint resolved_by FK "nullable"
+        timestamp resolved_at "nullable"
+        text resolution_notes "nullable"
+    }
+    NEWS_PROMOTIONS {
+        bigint id PK
+        bigint admin_id FK
+        string title
+        text body
+        string image_url "nullable"
+        timestamp published_at "nullable — null = borrador"
     }
 ```
+
+Nota (Sprint 10): `CALENDAR_REMINDERS` reemplaza el `CALENDAR_EVENTS` genérico
+del diseño original — solo los recordatorios creados a mano necesitan
+persistencia. "Completados" y "planeados" se arman al leer directo de
+`WORKOUT_SESSIONS`/`ROUTINE_DAYS`, sin duplicar datos: las rutinas no tienen
+un día de la semana fijo (rotan por sesiones completadas, ver
+`DetermineNextRoutineDayAction`), así que "planeado" es solo el entrenamiento
+sugerido de hoy — no hay proyección de una semana completa hacia adelante.
+
+Nota (Sprint 11): `NOTIFICATIONS` ya no es el boceto original
+(`user_id`/`type`/`data`/`read_at`) — se implementó con la tabla estándar de
+Laravel (`notifiable_type`/`notifiable_id` polimórfico, `id` uuid), reusando
+el sistema de Notifications ya presente en `User` (usado hasta ahora solo
+para verificación de email). `chat_conversations`/`chat_messages`/
+`push_device_tokens`/`push_subscriptions` no tenían diseño de columnas en el
+boceto original (solo una fila de una línea en la tabla de soporte más
+abajo) — este sprint es el que efectivamente los diseñó.
+
+Nota (Sprint 12): `food_items` hace también de `barcode_cache` que el boceto
+original mencionaba como tabla separada — un lookup (por barcode o texto)
+revisa primero `food_items` y solo llama a Open Food Facts en un miss,
+cacheando el resultado. `meal_type` es un campo nuevo, no estaba en el
+boceto original, pero un diario de comidas sin agrupar por desayuno/almuerzo/
+cena/snack es un vacío de UX poco común — se agregó deliberadamente.
+
+Nota (Sprint 16): **no existe una tabla `audit_logs` propia** pese a que el
+boceto original de la fila de soporte de abajo la menciona — el panel admin
+lee directo de `activity_log` (Spatie, instalado desde Sprint 7), que ya
+registra cambios de `User`/`Routine`/`TrainerClient`. `reports.reportable`
+es la primera relación polimórfica propia de la app (`REPORTS` arriba) — el
+único tipo aceptado hoy es `chat_message`, vía un `morphMap` no estricto
+(`Relation::morphMap()`, no `enforceMorphMap()` — ver nota de implementación
+en `AppServiceProvider`, este último rompe `activity_log`/notifications que
+ya usan morphs con el FQCN crudo). `users.last_active_at` no tiene su propia
+tabla de eventos: es un único timestamp actualizado por un middleware global
+con throttle de 5 minutos, así que DAU/WAU/MAU/retención son aproximaciones,
+no un cohort analysis completo.
 
 ## 4. Tablas de soporte (catálogo / sistema)
 
@@ -290,17 +404,18 @@ erDiagram
 | `exercise_secondary_muscles` | Pivote N:M `exercise_id` ↔ `muscle_id` |
 | `exercise_alternatives` | Pivote N:M `exercise_id` ↔ `alternative_exercise_id` (para "modo gimnasio ocupado") |
 | `gym_memberships` | Pivote `user_id` ↔ `gym_id` (para ranking por gimnasio) |
-| `subscriptions` | `user_id`, `plan (free/premium)`, `provider`, `status`, `renews_at` |
-| `training_plans_marketplace` (F2) | Planes que un entrenador vende, `trainer_id`, `price`, `routine_template_id` |
+| `subscriptions` | `user_id`, `plan (free/premium)`, `provider`, `status`, `renews_at` — **diferido indefinidamente**, la app queda gratuita por ahora (decisión del usuario, no técnica) |
+| `training_plans_marketplace` (F2) | Planes que un entrenador vende, `trainer_id`, `price`, `routine_template_id` — **diferido indefinidamente junto con `subscriptions`**, la compra de planes depende de pagos reales |
 | `routine_templates` | Plantillas reutilizables de un entrenador (`is_template = true` sobre `routines`) |
-| `trainer_notes` | Notas privadas del entrenador sobre un cliente |
-| `chat_conversations`, `chat_messages` | Chat entrenador-cliente (vía Reverb) |
-| `domain_config` | Tablas de configuración del motor: rangos MEV/MAV/MRV por nivel, plantillas de split, tabla de RIR por objetivo — **editable sin deploy** |
-| `audit_logs` | `admin_id`, `action`, `target_type`, `target_id`, `payload`, para panel administrativo |
-| `reports` | Reportes de usuarios (abuso, contenido) para moderación |
-| `news_promotions` | Noticias/promociones publicadas por admin |
-| `food_items`, `meal_logs`, `barcode_cache` | Fase 2 — nutrición |
-| `wearable_connections` | Fase 2 — tokens OAuth Apple Health/Google Fit/Garmin/Fitbit |
+| `trainer_notes` | Notas privadas del entrenador sobre un cliente — **todavía no implementado**, no estaba en el alcance del Sprint 11 pese a estar en esta misma sección de "Módulo Entrenador" en docs/03 |
+| `chat_conversations`, `chat_messages` | Chat entrenador-cliente vía Reverb — **implementado en Sprint 11**, ver ERD arriba |
+| `push_device_tokens`, `push_subscriptions` | Tokens de push Expo (mobile) y suscripciones web push — **implementado en Sprint 11**, ver ERD arriba |
+| `domain_config` | Tablas de configuración del motor: rangos MEV/MAV/MRV por nivel, plantillas de split, tabla de RIR por objetivo — sigue siendo `config/*.php` estático (no editable sin deploy pese a lo que sugiere el boceto original); **no se abordó en Sprint 16**, no estaba en el alcance de ese sprint |
+| `audit_logs` | **No implementado como tabla propia** — el panel admin (Sprint 16) lee `activity_log` (Spatie), ver nota arriba |
+| `reports` | Reportes de contenido (hoy solo mensajes de chat) para moderación — **implementado en Sprint 16**, ver ERD arriba |
+| `news_promotions` | Noticias/promociones publicadas por admin — **implementado en Sprint 16**, ver ERD arriba |
+| `food_items`, `meal_logs` | **Implementado en Sprint 12**, ver ERD arriba — `food_items` hace de caché local de Open Food Facts (reemplaza el `barcode_cache` separado del boceto original) |
+| `wearable_connections` | Fase 2 — tokens OAuth Apple Health/Google Fit/Garmin/Fitbit — **diferido indefinidamente**, requiere cuentas de desarrollador externas (Garmin/Fitbit/Google) y hardware/OS que este entorno no puede emular |
 
 ## 5. Índices críticos (rendimiento a escala)
 

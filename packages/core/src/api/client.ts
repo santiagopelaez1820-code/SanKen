@@ -76,8 +76,16 @@ export class ApiClient {
     return this.request<T>('PATCH', path, body).then((envelope) => envelope.data);
   }
 
-  delete<T>(path: string) {
-    return this.request<T>('DELETE', path).then((envelope) => envelope.data);
+  /**
+   * `body` es opcional (ej. DELETE /calendar/reminders/{id} no lo necesita,
+   * el id ya va en la URL) pero /push/expo-token y /push/web-subscription
+   * (Sprint 11) sí lo usan: son recursos sin id propio del lado servidor,
+   * el token/endpoint a borrar viaja en el body. `envelope` puede ser
+   * `null` acá porque un 204 No Content no trae body — `res.json()`
+   * rechaza y `request()` lo atrapa como null.
+   */
+  delete<T = void>(path: string, body?: unknown) {
+    return this.request<T>('DELETE', path, body).then((envelope) => envelope?.data as T);
   }
 
   /**
@@ -87,6 +95,14 @@ export class ApiClient {
    */
   getWithMeta<T>(path: string): Promise<ApiSuccess<T>> {
     return this.request<T>('GET', path);
+  }
+
+  /**
+   * Igual que `post`, pero conserva `meta` (p. ej. meta.gamification al
+   * completar una sesión) en vez de descartarlo.
+   */
+  postWithMeta<T>(path: string, body?: unknown): Promise<ApiSuccess<T>> {
+    return this.request<T>('POST', path, body);
   }
 
   private async request<T>(method: string, path: string, body?: unknown): Promise<ApiSuccess<T>> {

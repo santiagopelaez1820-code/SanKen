@@ -15,8 +15,17 @@ return [
     |
     */
 
+    // Guard por defecto = sanctum, no web: esta app es API-only, autentica
+    // todo por Bearer token (nunca sesión) — routes/web.php no tiene nada
+    // real. Encontrado en Sprint 11: `$request->user()` sin guard explícito
+    // (que es lo que usa Broadcasting internamente para autorizar canales
+    // privados en `retrieveUser()`, sin que Broadcast::routes() lo pueda
+    // sobreescribir por canal) resolvía contra el guard 'web' (sesión, sin
+    // usuario) en vez de 'sanctum', tirando 403 en /broadcasting/auth pese a
+    // que el Bearer token era válido — canal privado roto para cualquier
+    // suscripción a Reverb, no solo la de chat.
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
+        'guard' => env('AUTH_GUARD', 'sanctum'),
         'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
     ],
 

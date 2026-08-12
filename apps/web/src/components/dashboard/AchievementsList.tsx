@@ -1,0 +1,36 @@
+import { Lock, Trophy } from "lucide-react"
+import type { Achievement } from "@sanken/core"
+
+export function AchievementsList({ achievements }: { achievements: Achievement[] }) {
+  return (
+    <div className="rounded-xl border border-border bg-card p-5">
+      <h2 className="font-heading text-sm font-medium text-foreground">Logros</h2>
+
+      {achievements.length === 0 ? (
+        <p className="mt-4 text-sm text-muted-foreground">Todavía no hay logros disponibles.</p>
+      ) : (
+        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {achievements.map((achievement) => (
+            <div
+              key={achievement.code}
+              title={achievement.description}
+              className={`flex flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-center ${
+                achievement.unlocked
+                  ? "border-primary/25 bg-primary/8"
+                  : "border-border bg-background opacity-50"
+              }`}
+            >
+              {achievement.unlocked ? (
+                <Trophy className="size-6 text-primary" />
+              ) : (
+                <Lock className="size-6 text-muted-foreground" />
+              )}
+              <p className="text-xs font-medium text-foreground">{achievement.name}</p>
+              <p className="text-[10px] text-muted-foreground">+{achievement.xp_bonus} XP</p>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}

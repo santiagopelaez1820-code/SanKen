@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
+import { ToggleRow } from '@/components/ui/toggle-row';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuthStore } from '@/store/auth-store';
 import { useSettingsStore } from '@/store/settings-store';
@@ -19,10 +20,12 @@ export default function SettingsScreen() {
     recoveryCodes,
     isSubmitting,
     submitError,
+    isUpdatingPrivacy,
     enableTwoFactor,
     confirmTwoFactor,
     disableTwoFactor,
     dismissRecoveryCodes,
+    setPublicProfile,
   } = useSettingsStore();
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
@@ -125,6 +128,16 @@ export default function SettingsScreen() {
                 />
               </ThemedView>
             )}
+          </ThemedView>
+
+          <ThemedView type="backgroundElement" style={styles.card}>
+            <ToggleRow
+              label="Rankings públicos"
+              description="Si activás esto, tu volumen total aparece en los rankings de ciudad, país, gimnasio, edad, sexo y categoría de fuerza."
+              value={user?.is_public_profile ?? false}
+              disabled={isUpdatingPrivacy}
+              onValueChange={(value) => setPublicProfile(value)}
+            />
           </ThemedView>
 
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />

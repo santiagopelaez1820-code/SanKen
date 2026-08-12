@@ -13,6 +13,13 @@ export interface TrainerClient {
   client: User;
 }
 
+/** GET /me/trainers — perspectiva del cliente sobre su propia relación (Sprint 11, antes no existía). */
+export interface MyTrainer {
+  trainer_client_id: number;
+  status: TrainerClientStatus;
+  trainer: User;
+}
+
 export interface AddClientPayload {
   email: string;
 }

@@ -8,6 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useChatStore } from '@/store/chat-store';
 import { useTrainerClientsStore } from '@/store/trainer-clients-store';
 
 const STATUS_LABELS: Record<TrainerClientStatus, string> = {
@@ -23,10 +24,16 @@ export default function TrainerClientDetailScreen() {
 
   const { selectedClient, activeRoutine, isLoadingDetail, detailError, isSubmitting, loadDetail, updateStatus } =
     useTrainerClientsStore();
+  const openConversationForTrainerClient = useChatStore((s) => s.openConversationForTrainerClient);
 
   useEffect(() => {
     if (id) loadDetail(id);
   }, [id, loadDetail]);
+
+  const openChat = async () => {
+    const conversationId = await openConversationForTrainerClient(id);
+    router.push(`/chat/${conversationId}`);
+  };
 
   if (isLoadingDetail || !selectedClient) {
     return (
@@ -63,6 +70,7 @@ export default function TrainerClientDetailScreen() {
           </ThemedText>
 
           <ThemedView style={styles.buttonRow}>
+            {selectedClient.status === 'active' && <PrimaryButton label="Chat" onPress={openChat} />}
             {selectedClient.status === 'active' && (
               <PrimaryButton
                 label="Pausar"

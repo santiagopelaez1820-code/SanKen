@@ -50,4 +50,35 @@ class TrainerClientPolicyTest extends TestCase
         $this->assertFalse($this->policy->view($otherTrainer, $relation));
         $this->assertFalse($this->policy->update($otherTrainer, $relation));
     }
+
+    public function test_both_trainer_and_client_can_converse_while_active(): void
+    {
+        $trainer = User::factory()->create(['role' => 'trainer']);
+        $client = User::factory()->create();
+        $relation = $this->makeRelation($trainer, $client);
+
+        $this->assertTrue($this->policy->converse($trainer, $relation));
+        $this->assertTrue($this->policy->converse($client, $relation));
+    }
+
+    public function test_a_stranger_cannot_converse(): void
+    {
+        $trainer = User::factory()->create(['role' => 'trainer']);
+        $client = User::factory()->create();
+        $stranger = User::factory()->create();
+        $relation = $this->makeRelation($trainer, $client);
+
+        $this->assertFalse($this->policy->converse($stranger, $relation));
+    }
+
+    public function test_neither_party_can_converse_once_the_relationship_is_paused_or_ended(): void
+    {
+        $trainer = User::factory()->create(['role' => 'trainer']);
+        $client = User::factory()->create();
+        $paused = $this->makeRelation($trainer, $client);
+        $paused->update(['status' => 'paused']);
+
+        $this->assertFalse($this->policy->converse($trainer, $paused));
+        $this->assertFalse($this->policy->converse($client, $paused));
+    }
 }

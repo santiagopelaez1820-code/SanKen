@@ -1,12 +1,29 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AdminAuditLogController;
+use App\Http\Controllers\Api\V1\Admin\AdminExerciseController;
+use App\Http\Controllers\Api\V1\Admin\AdminNewsController;
+use App\Http\Controllers\Api\V1\Admin\AdminReportController;
+use App\Http\Controllers\Api\V1\Admin\AdminStatsController;
+use App\Http\Controllers\Api\V1\Admin\AdminUserController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
 use App\Http\Controllers\Api\V1\Auth\EmailVerificationController;
 use App\Http\Controllers\Api\V1\Auth\TwoFactorController;
 use App\Http\Controllers\Api\V1\BodyMeasurementController;
+use App\Http\Controllers\Api\V1\CalendarController;
+use App\Http\Controllers\Api\V1\ChallengeController;
+use App\Http\Controllers\Api\V1\ChatController;
 use App\Http\Controllers\Api\V1\ExerciseController;
+use App\Http\Controllers\Api\V1\GamificationController;
+use App\Http\Controllers\Api\V1\MyTrainerController;
+use App\Http\Controllers\Api\V1\NewsController;
+use App\Http\Controllers\Api\V1\NotificationController;
+use App\Http\Controllers\Api\V1\NutritionController;
 use App\Http\Controllers\Api\V1\OnboardingController;
 use App\Http\Controllers\Api\V1\PingController;
+use App\Http\Controllers\Api\V1\PushController;
+use App\Http\Controllers\Api\V1\RankingController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\RoutineController;
 use App\Http\Controllers\Api\V1\StatsController;
 use App\Http\Controllers\Api\V1\Trainer\TrainerClientController;
@@ -106,6 +123,61 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::get('/progress', [StatsController::class, 'progress'])->name('progress');
     });
 
+    Route::middleware('auth:sanctum')->prefix('gamification')->name('gamification.')->group(function () {
+        Route::get('/', [GamificationController::class, 'index'])->name('index');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('rankings')->name('rankings.')->group(function () {
+        Route::get('/', [RankingController::class, 'index'])->name('index');
+        Route::post('/opt-in', [RankingController::class, 'optIn'])->middleware('throttle:writes')->name('opt-in');
+        Route::post('/opt-out', [RankingController::class, 'optOut'])->middleware('throttle:writes')->name('opt-out');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('challenges')->name('challenges.')->group(function () {
+        Route::get('/', [ChallengeController::class, 'index'])->name('index');
+        Route::post('/{challenge}/join', [ChallengeController::class, 'join'])->middleware('throttle:writes')->name('join');
+        Route::get('/{challenge}/leaderboard', [ChallengeController::class, 'leaderboard'])->name('leaderboard');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('calendar')->name('calendar.')->group(function () {
+        Route::get('/', [CalendarController::class, 'index'])->name('index');
+        Route::post('/reminders', [CalendarController::class, 'storeReminder'])->middleware('throttle:writes')->name('reminders.store');
+        Route::delete('/reminders/{reminder}', [CalendarController::class, 'destroyReminder'])->middleware('throttle:writes')->name('reminders.destroy');
+    });
+
+    Route::middleware('auth:sanctum')->get('/me/trainers', [MyTrainerController::class, 'index'])->name('me.trainers');
+
+    Route::middleware('auth:sanctum')->prefix('trainer-clients')->name('trainer-clients.')->group(function () {
+        Route::get('/{trainerClient}/conversation', [ChatController::class, 'conversation'])->name('conversation');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('conversations')->name('conversations.')->group(function () {
+        Route::get('/', [ChatController::class, 'index'])->name('index');
+        Route::get('/{conversation}/messages', [ChatController::class, 'messages'])->name('messages.index');
+        Route::post('/{conversation}/messages', [ChatController::class, 'sendMessage'])->middleware('throttle:writes')->name('messages.store');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::post('/{notification}/read', [NotificationController::class, 'markRead'])->middleware('throttle:writes')->name('read');
+        Route::post('/read-all', [NotificationController::class, 'markAllRead'])->middleware('throttle:writes')->name('read-all');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('push')->name('push.')->group(function () {
+        Route::post('/expo-token', [PushController::class, 'storeExpoToken'])->middleware('throttle:writes')->name('expo-token.store');
+        Route::delete('/expo-token', [PushController::class, 'destroyExpoToken'])->middleware('throttle:writes')->name('expo-token.destroy');
+        Route::post('/web-subscription', [PushController::class, 'storeWebSubscription'])->middleware('throttle:writes')->name('web-subscription.store');
+        Route::delete('/web-subscription', [PushController::class, 'destroyWebSubscription'])->middleware('throttle:writes')->name('web-subscription.destroy');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('nutrition')->name('nutrition.')->group(function () {
+        Route::get('/targets', [NutritionController::class, 'targets'])->name('targets');
+        Route::get('/meals', [NutritionController::class, 'meals'])->name('meals.index');
+        Route::post('/meals', [NutritionController::class, 'logMeal'])->middleware('throttle:writes')->name('meals.store');
+        Route::delete('/meals/{meal}', [NutritionController::class, 'destroyMeal'])->middleware('throttle:writes')->name('meals.destroy');
+        Route::get('/foods', [NutritionController::class, 'searchFoods'])->name('foods.index');
+    });
+
     Route::middleware(['auth:sanctum', 'role:trainer'])->prefix('trainer')->name('trainer.')->group(function () {
         Route::prefix('clients')->name('clients.')->group(function () {
             Route::get('/', [TrainerClientController::class, 'index'])->name('index');
@@ -119,5 +191,36 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::get('/{routine}', [TrainerRoutineController::class, 'show'])->name('show');
             Route::patch('/{routine}', [TrainerRoutineController::class, 'update'])->middleware('throttle:writes')->name('update');
         });
+    });
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:writes')->name('reports.store');
+        Route::get('/news', [NewsController::class, 'index'])->name('news.index');
+    });
+
+    Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+        Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+        Route::patch('/users/{user}/ban', [AdminUserController::class, 'ban'])->middleware('throttle:writes')->name('users.ban');
+        Route::patch('/users/{user}/verify-trainer', [AdminUserController::class, 'verifyTrainer'])->middleware('throttle:writes')->name('users.verify-trainer');
+
+        Route::prefix('exercises')->name('exercises.')->group(function () {
+            Route::get('/', [AdminExerciseController::class, 'index'])->name('index');
+            Route::post('/', [AdminExerciseController::class, 'store'])->middleware('throttle:writes')->name('store');
+            Route::patch('/{exercise}', [AdminExerciseController::class, 'update'])->middleware('throttle:writes')->name('update');
+            Route::delete('/{exercise}', [AdminExerciseController::class, 'destroy'])->middleware('throttle:writes')->name('destroy');
+        });
+
+        Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+        Route::patch('/reports/{report}/resolve', [AdminReportController::class, 'resolve'])->middleware('throttle:writes')->name('reports.resolve');
+
+        Route::prefix('news')->name('news.')->group(function () {
+            Route::get('/', [AdminNewsController::class, 'index'])->name('index');
+            Route::post('/', [AdminNewsController::class, 'store'])->middleware('throttle:writes')->name('store');
+            Route::patch('/{news}', [AdminNewsController::class, 'update'])->middleware('throttle:writes')->name('update');
+            Route::delete('/{news}', [AdminNewsController::class, 'destroy'])->middleware('throttle:writes')->name('destroy');
+        });
+
+        Route::get('/stats', [AdminStatsController::class, 'index'])->name('stats');
+        Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->name('audit-logs.index');
     });
 });

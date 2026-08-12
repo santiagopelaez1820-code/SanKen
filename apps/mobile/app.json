@@ -33,6 +33,19 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#C9A227"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "SanKen usa la cámara para escanear el código de barras de un alimento.",
+          "barcodeScannerEnabled": true
+        }
       ]
     ],
     "experiments": {

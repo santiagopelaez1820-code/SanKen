@@ -1,6 +1,6 @@
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { Routine, TrainerClient, TrainerClientStatus } from "@sanken/core"
+import type { ConversationWithMessages, Routine, TrainerClient, TrainerClientStatus } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 
@@ -29,6 +29,11 @@ export function TrainerClientDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["trainer", "clients", trainerClientId] })
       queryClient.invalidateQueries({ queryKey: ["trainer", "clients"] })
     },
+  })
+
+  const openChat = useMutation({
+    mutationFn: () => api.get<ConversationWithMessages>(`/trainer-clients/${trainerClientId}/conversation`),
+    onSuccess: (conversation) => navigate(`/chat/${conversation.conversation_id}`),
   })
 
   if (isLoading || !data) {
@@ -64,6 +69,11 @@ export function TrainerClientDetailPage() {
               </p>
             </div>
             <div className="flex gap-2">
+              {trainerClient.status === "active" && (
+                <Button size="sm" disabled={openChat.isPending} onClick={() => openChat.mutate()}>
+                  Chat
+                </Button>
+              )}
               {trainerClient.status === "active" && (
                 <Button
                   variant="outline"

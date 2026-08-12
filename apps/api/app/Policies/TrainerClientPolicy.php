@@ -16,4 +16,17 @@ class TrainerClientPolicy
     {
         return $user->is($trainerClient->trainer);
     }
+
+    /**
+     * A diferencia de view/update (solo entrenador), el chat es simétrico:
+     * cualquiera de las dos partes puede abrirlo, pero solo mientras la
+     * relación sigue activa — pausada/finalizada conserva el historial de
+     * lectura (ver ChatController::messages) pero no permite nuevas
+     * conversaciones ni mensajes nuevos.
+     */
+    public function converse(User $user, TrainerClient $trainerClient): bool
+    {
+        return ($user->is($trainerClient->trainer) || $user->is($trainerClient->client))
+            && $trainerClient->status === 'active';
+    }
 }

@@ -128,10 +128,13 @@ class WorkoutSessionController extends Controller
     {
         $this->authorizeOwner($workoutSession);
 
-        $session = $action->execute($workoutSession, $request->validated('duration_minutes'), $request->validated('notes'));
+        ['session' => $session, 'gamification' => $gamification] = $action->execute(
+            $workoutSession, $request->validated('duration_minutes'), $request->validated('notes'),
+        );
 
         return response()->json([
             'data' => new WorkoutSessionResource($session),
+            'meta' => ['gamification' => $gamification],
         ]);
     }
 

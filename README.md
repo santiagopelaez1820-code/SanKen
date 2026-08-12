@@ -46,7 +46,26 @@ php artisan serve                 # http://localhost:8000
 php artisan queue:work            # OBLIGATORIO: sin esto, completar el onboarding
                                    # nunca genera la rutina (queda encolada en Redis
                                    # y nadie la procesa — ver docs/01-arquitectura.md §6)
-php artisan reverb:start          # tiempo real (cuando se necesite)
+php artisan reverb:start          # OBLIGATORIO para el leaderboard en vivo de Retos
+                                   # (Sprint 10) y el chat en vivo (Sprint 11) — sin
+                                   # esto los cambios se guardan pero nunca llegan por
+                                   # websocket a quien tenga la pantalla abierta.
+php artisan challenges:generate   # crea los retos de la semana/mes actual si no
+                                   # existen todavía (igual que rankings:recalculate,
+                                   # no corre solo: no hay cron en este entorno de dev)
+
+# Web push (Sprint 11) — VAPID ya generado en .env de este repo para dev;
+# para generar un par nuevo (otro entorno, rotación):
+#   php -r "require 'vendor/autoload.php'; print_r(Minishlink\WebPush\VAPID::createVapidKeys());"
+# y copiar public/private a VAPID_PUBLIC_KEY/VAPID_PRIVATE_KEY (apps/api/.env)
+# y VITE_VAPID_PUBLIC_KEY (apps/web/.env, mismo valor público).
+#
+# Push a mobile (Expo) NO tiene equivalente autogenerable: Android necesita
+# credenciales FCM V1 propias vía `eas credentials` y iOS necesita una cuenta
+# paga de Apple Developer — son pasos manuales del usuario, no de este repo.
+# El código de registro/envío ya está armado y probado (Http::fake() en los
+# tests); sin esas credenciales, la app simplemente no llega a entregar el
+# push a un dispositivo real, no falla.
 
 # 3. Frontend web
 cd apps/web

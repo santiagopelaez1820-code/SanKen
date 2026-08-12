@@ -96,7 +96,9 @@
 | POST | `/rankings/opt-out` | Sale de rankings públicos |
 | GET | `/challenges` | Retos activos (semanales/mensuales) |
 | POST | `/challenges/{id}/join` | Unirse a un reto |
-| GET | `/challenges/{id}/leaderboard` | Tabla del reto |
+| GET | `/challenges/{id}/leaderboard` | Tabla del reto (foto inicial; ver abajo para las actualizaciones en vivo) |
+
+**Tiempo real (Sprint 10):** el leaderboard de un reto se actualiza en vivo por Reverb — el cliente se suscribe al canal privado `challenges.{id}` (autorizado vía `POST /broadcasting/auth`, mismo Bearer token que el resto de la API) y escucha el evento `progress.updated`, cuyo payload (`{ leaderboard: [...] }`) reemplaza directamente el estado local. Requiere `php artisan reverb:start` corriendo.
 
 ## 8. Gamificación
 
@@ -136,20 +138,52 @@
 | POST | `/trainer/routine-templates` | Crea plantilla reutilizable |
 | POST | `/trainer/routine-templates/{id}/duplicate` | Duplica plantilla hacia un cliente |
 | GET | `/trainer/clients/{id}/stats` | Estadísticas del cliente |
-| POST | `/trainer/clients/{id}/notes` | Nota privada sobre el cliente |
-| POST | `/trainer/notifications` | Envía notificación push/in-app a uno o varios clientes |
-| GET/POST | `/trainer/conversations/{clientId}/messages` | Chat con cliente (persistencia; envío en vivo por Reverb) |
-| POST | `/trainer/media` | Sube video/imagen (S3) para adjuntar a ejercicio o mensaje |
+| POST | `/trainer/clients/{id}/notes` | Nota privada sobre el cliente — **todavía no implementado**, no estaba en el alcance del Sprint 11 |
+| POST | `/trainer/media` | Sube video/imagen (S3) para adjuntar a ejercicio o mensaje — **todavía no implementado** |
 
-## 12. Nutrición (Fase 2)
+Chat y notificaciones (antes sketcheados acá como `/trainer/notifications` y
+`/trainer/conversations/{clientId}/messages`) se implementaron en el Sprint
+11 con nombres distintos, ver §11.1 — no hay un endpoint manual para que el
+entrenador dispare una notificación push suelta; toda notificación sale
+automáticamente al enviar un mensaje de chat.
+
+## 11.1 Chat y centro de notificaciones (Sprint 11)
+
+Simétrico: mismos endpoints para entrenador y cliente, no viven bajo
+`/trainer`. `GET /me/trainers` es la única vía nueva del lado cliente para
+ver con quién puede chatear (antes no existía ninguna vista de "mi
+entrenador").
 
 | Método | Endpoint | Descripción |
 |---|---|---|
-| GET | `/nutrition/targets` | Calorías/macros/agua objetivo (calculados por perfil) |
-| POST | `/nutrition/meals` | Registra comida |
-| GET | `/nutrition/meals?date=` | Comidas del día |
-| GET | `/nutrition/foods?barcode=` | Búsqueda por código de barras |
-| GET | `/nutrition/foods?q=` | Búsqueda de alimento por texto |
+| GET | `/me/trainers` | Cliente: sus relaciones `trainer_clients` activas, con datos del entrenador |
+| GET | `/trainer-clients/{id}/conversation` | Resuelve (o crea) la conversación de esa relación + últimos mensajes |
+| GET | `/conversations` | Inbox: todas mis conversaciones, último mensaje + no leídos |
+| GET | `/conversations/{id}/messages?before=` | Historial paginado — pedir esto marca como leídos los mensajes ajenos |
+| POST | `/conversations/{id}/messages` | Envía un mensaje |
+| GET | `/notifications` | Notificaciones paginadas (`meta.unread_count`) |
+| POST | `/notifications/{id}/read` | Marca una leída |
+| POST | `/notifications/read-all` | Marca todas leídas |
+| POST | `/push/expo-token` / DELETE | Registra/desregistra el token de push Expo del device |
+| POST | `/push/web-subscription` / DELETE | Registra/desregistra una suscripción de web push |
+
+## 12. Nutrición (Sprint 12)
+
+`/nutrition/targets` da 404 si falta algún dato de perfil/onboarding
+necesario (edad, sexo, peso, altura, `frequency_days`, `goals`). `DELETE
+/nutrition/meals/{id}` no estaba en el boceto original — deshacer una
+comida registrada es UX básica, se agregó igual que las bajas de Sprint 10.
+`/nutrition/foods` resuelve contra un caché local (`food_items`) antes de
+pegarle a Open Food Facts (ver docs/02 §3, nota Sprint 12).
+
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/nutrition/targets` | Calorías/proteína/carbos/grasas/agua objetivo (calculados por perfil); 404 si el perfil está incompleto |
+| GET | `/nutrition/meals?date=` | Comidas del día (default hoy), con `meta.summary` = totales del día |
+| POST | `/nutrition/meals` | Registra una comida (`food_item_id`, `meal_type`, `quantity_grams`, `logged_at?`) |
+| DELETE | `/nutrition/meals/{id}` | Elimina una comida registrada (solo el dueño) |
+| GET | `/nutrition/foods?barcode=` | Busca un alimento por código de barras (caché local → Open Food Facts) |
+| GET | `/nutrition/foods?q=` | Busca alimentos por texto (caché local → Open Food Facts) |
 
 ## 13. IA (Fase 3)
 
@@ -159,28 +193,62 @@
 | POST | `/ai/analyze-technique` | Sube video de una serie para análisis de ejecución |
 | GET | `/ai/insights` | Insights proactivos (estancamientos detectados, sugerencias) |
 
-## 14. Panel administrativo
+## 14. Panel administrativo (Sprint 16)
+
+Todo bajo `/admin/*` exige `role:admin` (mismo mecanismo de middleware que
+`role:trainer`, ver §11). Diferencias vs. el boceto original: no hay un
+`GET /admin/trainers` separado — la "verificación" de entrenador es un
+toggle sobre la misma lista de usuarios (`PATCH
+/admin/users/{id}/verify-trainer`); `/admin/exercises` tiene CRUD completo
+(el boceto solo mencionaba GET); `/admin/audit-logs` no tiene tabla propia,
+lee `activity_log` (Spatie) directo — ver docs/02 §3, nota Sprint 16.
+`POST /reports` (fuera de `/admin`, cualquier usuario autenticado) y
+`GET /news` (público, lista solo publicadas) tampoco estaban en el boceto
+original — son el lado no-admin de reportes/noticias, sin el cual
+`/admin/reports` y `/admin/news` no tendrían nada que gestionar.
 
 | Método | Endpoint | Descripción |
 |---|---|---|
-| GET | `/admin/users` | Gestión de usuarios (filtros, búsqueda) |
-| PATCH | `/admin/users/{id}/ban` | Banear/desbanear |
-| GET | `/admin/trainers` | Gestión de entrenadores (verificación) |
-| GET | `/admin/exercises` / POST / PATCH / DELETE | CRUD biblioteca de ejercicios |
-| GET | `/admin/reports` | Reportes pendientes de moderación |
-| PATCH | `/admin/reports/{id}/resolve` | Resuelve un reporte |
-| POST | `/admin/news` | Publica noticia/promoción |
-| GET | `/admin/stats` | Métricas globales de plataforma (DAU, MAU, retención) |
-| GET | `/admin/audit-logs` | Log de auditoría |
+| GET | `/admin/users` | Lista de usuarios (`?role=`, `?is_banned=`, `?q=` nombre/correo), paginado |
+| PATCH | `/admin/users/{id}/ban` | Banea/desbanea; banear revoca todos los tokens Sanctum activos del usuario |
+| PATCH | `/admin/users/{id}/verify-trainer` | Toggle de verificación (solo si `role=trainer`) |
+| GET | `/admin/exercises` | Todos los ejercicios (activos e inactivos), + `meta.muscle_groups` para el formulario |
+| POST | `/admin/exercises` | Crea un ejercicio |
+| PATCH | `/admin/exercises/{id}` | Edita un ejercicio |
+| DELETE | `/admin/exercises/{id}` | Desactiva (`is_active=false`), no borra la fila — hay historial real referenciándola |
+| GET | `/admin/reports` | Reportes (`?status=pending\|resolved\|dismissed\|all`, default `pending`) |
+| PATCH | `/admin/reports/{id}/resolve` | Resuelve/descarta (`status`, `resolution_notes?`) |
+| GET | `/admin/news` | Noticias, incluye borradores |
+| POST | `/admin/news` | Crea noticia (`published?` — `true` publica de inmediato) |
+| PATCH | `/admin/news/{id}` | Edita / publica / despublica |
+| DELETE | `/admin/news/{id}` | Borra |
+| GET | `/admin/stats` | Métricas globales: `total_users`, `new_users_7d`, `trainers_count`, `banned_users_count`, `pending_reports_count`, `dau`, `wau`, `mau`, `retention_pct` |
+| GET | `/admin/audit-logs` | Log de auditoría (paginado, lee `activity_log` de Spatie) |
+| POST | `/reports` | Cualquier usuario reporta contenido (`reportable_type` — solo `chat_message` por ahora — `reportable_id`, `reason`, `details?`) |
+| GET | `/news` | Noticias publicadas, para cualquier usuario autenticado |
 
 ## 15. Tiempo real (Laravel Reverb)
 
-| Canal | Evento | Uso |
+Los nombres de canal/evento reales terminaron distintos a este boceto
+original — documentados acá tal como se implementaron (Sprints 10-11), no
+como se habían planeado:
+
+| Canal (registrado en `routes/channels.php`, sin prefijo `private-`) | Evento | Uso |
 |---|---|---|
-| `private-user.{id}.notifications` | `NotificationSent` | Notificaciones push in-app |
-| `private-conversation.{id}` | `MessageSent` | Chat entrenador-cliente |
-| `private-user.{id}.workout` | `RoutineRecalculated` | Aviso cuando el motor recalcula tras un fallo |
-| `presence-ranking.{category}.{scope}` | `RankingUpdated` | Actualización en vivo de leaderboard (retos) |
+| `App.Models.User.{id}` | `BroadcastNotificationCreated` (evento nativo de Laravel, sin `broadcastAs()` propio — suscribirse con `channel.notification(cb)` de Echo, no `.listen()`) | Notificaciones in-app (Sprint 11): nuevo mensaje de chat por ahora, cualquier `Notification` futura que use el canal `broadcast` la reusa gratis |
+| `conversations.{id}` | `message.sent` | Chat entrenador-cliente (Sprint 11) |
+| `challenges.{id}` | `progress.updated` | Leaderboard en vivo de un reto (Sprint 10) |
+
+`RoutineRecalculated`/`presence-ranking.{category}.{scope}` del boceto
+original no se implementaron — el "próximo día" de rutina se resuelve
+síncrono en `GET /routines/active` (sin necesidad de push), y el ranking usa
+snapshots recalculados por comando (`rankings:recalculate`), no un canal de
+presence en vivo.
+
+Todos los canales privados requieren `POST /broadcasting/auth` (autenticado
+con el mismo Bearer token que el resto de la API, guard `sanctum` — ver nota
+en `config/auth.php` sobre por qué el guard por defecto de la app tuvo que
+cambiar de `web` a `sanctum` para que esto funcionara desde el navegador).
 
 ## 16. Documentación
 

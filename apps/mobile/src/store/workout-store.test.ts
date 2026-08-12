@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { useWorkoutStore } from './workout-store';
 
 jest.mock('@/lib/api', () => ({
-  api: { post: jest.fn(), get: jest.fn(), patch: jest.fn() },
+  api: { post: jest.fn(), postWithMeta: jest.fn(), get: jest.fn(), patch: jest.fn() },
 }));
 
 const mockedApi = api as jest.Mocked<typeof api>;
@@ -42,6 +42,7 @@ beforeEach(() => {
     isSubmitting: false,
     error: null,
     lastSetWasPersonalRecord: false,
+    gamificationResult: null,
   });
 });
 
@@ -83,11 +84,23 @@ describe('complete', () => {
   it('replaces the session with the completed one returned by the API', async () => {
     useWorkoutStore.setState({ session: baseSession });
     const completed: WorkoutSession = { ...baseSession, completed: true, duration_minutes: 45 };
-    mockedApi.post.mockResolvedValueOnce(completed);
+    mockedApi.postWithMeta.mockResolvedValueOnce({ data: completed });
 
     await useWorkoutStore.getState().complete(45);
 
     expect(useWorkoutStore.getState().session).toEqual(completed);
+    expect(useWorkoutStore.getState().gamificationResult).toBeNull();
+  });
+
+  it('stores the gamification result from meta when present', async () => {
+    useWorkoutStore.setState({ session: baseSession });
+    const completed: WorkoutSession = { ...baseSession, completed: true, duration_minutes: 45 };
+    const gamification = { xp_awarded: 20, leveled_up: true, new_level: 2, achievements_unlocked: [] };
+    mockedApi.postWithMeta.mockResolvedValueOnce({ data: completed, meta: { gamification } });
+
+    await useWorkoutStore.getState().complete(45);
+
+    expect(useWorkoutStore.getState().gamificationResult).toEqual(gamification);
   });
 });
 

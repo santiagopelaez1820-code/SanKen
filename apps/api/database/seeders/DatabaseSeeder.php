@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             CountrySeeder::class,
             MuscleGroupSeeder::class,
             ExerciseSeeder::class,
+            AchievementSeeder::class,
         ]);
     }
 }

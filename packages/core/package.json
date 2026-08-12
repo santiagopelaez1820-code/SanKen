@@ -9,6 +9,13 @@
     ".": "./src/index.ts"
   },
   "devDependencies": {
-    "typescript": "~6.0.2"
+    "typescript": "~6.0.2",
+    "pusher-js": "^8.6.0"
+  },
+  "dependencies": {
+    "laravel-echo": "^2.4.0"
+  },
+  "peerDependencies": {
+    "pusher-js": "^8.6.0"
   }
 }

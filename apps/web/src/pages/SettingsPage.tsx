@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -7,6 +7,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { ApiError, type TwoFactorEnableResponse, type TwoFactorConfirmResponse, type User } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
+import { getExistingWebPushSubscription, isWebPushSupported, subscribeToWebPush, unsubscribeFromWebPush } from "@/lib/web-push"
 
 const confirmSchema = z.object({
   code: z.string().length(6, "Ingresa el código de 6 dígitos"),
@@ -51,6 +53,33 @@ export function SettingsPage() {
       disableForm.reset()
       queryClient.invalidateQueries({ queryKey: ["auth", "me"] })
     },
+  })
+
+  const privacyMutation = useMutation({
+    mutationFn: (isPublic: boolean) => api.post(isPublic ? "/rankings/opt-in" : "/rankings/opt-out"),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
+  })
+
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [pushError, setPushError] = useState<string | null>(null)
+  useEffect(() => {
+    getExistingWebPushSubscription().then((sub) => setPushEnabled(sub !== null))
+  }, [])
+
+  const pushMutation = useMutation({
+    mutationFn: async (enable: boolean) => {
+      if (enable) {
+        await subscribeToWebPush(import.meta.env.VITE_VAPID_PUBLIC_KEY ?? "")
+      } else {
+        await unsubscribeFromWebPush()
+      }
+      return enable
+    },
+    onSuccess: (enabled) => {
+      setPushEnabled(enabled)
+      setPushError(null)
+    },
+    onError: (err) => setPushError(err instanceof Error ? err.message : "No se pudo cambiar la preferencia."),
   })
 
   return (
@@ -171,6 +200,44 @@ export function SettingsPage() {
               </Button>
             </form>
           )}
+        </section>
+
+        <section className="rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-heading text-sm font-medium text-foreground">Rankings públicos</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Si activás esto, tu volumen total aparece en los rankings de ciudad, país, gimnasio, edad, sexo y
+                categoría de fuerza.
+              </p>
+            </div>
+            <Switch
+              checked={user?.is_public_profile ?? false}
+              disabled={isLoading || privacyMutation.isPending}
+              onCheckedChange={(checked) => privacyMutation.mutate(checked)}
+            />
+          </div>
+        </section>
+
+        <section className="rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h2 className="font-heading text-sm font-medium text-foreground">Notificaciones push</h2>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Recibí un aviso en el navegador cuando te llegue un mensaje, aunque no tengas SanKen abierto.
+              </p>
+              {pushError && <p className="mt-1 text-xs text-destructive">{pushError}</p>}
+            </div>
+            {isWebPushSupported() ? (
+              <Switch
+                checked={pushEnabled}
+                disabled={pushMutation.isPending}
+                onCheckedChange={(checked) => pushMutation.mutate(checked)}
+              />
+            ) : (
+              <p className="text-xs text-muted-foreground">No soportado en este navegador.</p>
+            )}
+          </div>
         </section>
       </div>
     </main>

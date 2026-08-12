@@ -9,12 +9,14 @@ import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuthStore } from '@/store/auth-store';
+import { useNotificationsStore } from '@/store/notifications-store';
 import { findNextDay, useRoutineStore } from '@/store/routine-store';
 
 export default function HomeScreen() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const { routine, nextDayId, isLoading, hasNoRoutine, error, load } = useRoutineStore();
+  const unreadNotifications = useNotificationsStore((s) => s.unreadCount);
 
   useEffect(() => {
     load();
@@ -67,6 +69,32 @@ export default function HomeScreen() {
 
         {user?.role === 'trainer' && (
           <PrimaryButton label="Mis clientes" variant="ghost" onPress={() => router.push('/trainer')} />
+        )}
+
+        {user?.role !== 'trainer' && (
+          <PrimaryButton label="Mi entrenador" variant="ghost" onPress={() => router.push('/mi-entrenador')} />
+        )}
+
+        <PrimaryButton label="Chat" variant="ghost" onPress={() => router.push('/chat')} />
+
+        <PrimaryButton
+          label={unreadNotifications > 0 ? `Notificaciones (${unreadNotifications})` : 'Notificaciones'}
+          variant="ghost"
+          onPress={() => router.push('/notificaciones')}
+        />
+
+        <PrimaryButton label="Rankings" variant="ghost" onPress={() => router.push('/rankings')} />
+
+        <PrimaryButton label="Retos" variant="ghost" onPress={() => router.push('/retos')} />
+
+        <PrimaryButton label="Calendario" variant="ghost" onPress={() => router.push('/calendario')} />
+
+        <PrimaryButton label="Nutrición" variant="ghost" onPress={() => router.push('/nutricion')} />
+
+        <PrimaryButton label="Novedades" variant="ghost" onPress={() => router.push('/noticias')} />
+
+        {user?.role === 'admin' && (
+          <PrimaryButton label="Panel admin" variant="ghost" onPress={() => router.push('/admin')} />
         )}
 
         <PrimaryButton label="Configuración" variant="ghost" onPress={() => router.push('/settings')} />

@@ -22,6 +22,7 @@ const user: User = {
   role: 'user',
   two_factor_enabled: false,
   is_public_profile: false,
+  trainer_verified_at: null,
   email_verified_at: null,
   onboarding_completed: true,
   created_at: '2024-01-01T00:00:00Z',

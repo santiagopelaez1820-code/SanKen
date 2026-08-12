@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { LevelUpCelebration } from '@/components/gamification/level-up-celebration';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -19,11 +20,13 @@ export default function WorkoutSessionScreen() {
     isSubmitting,
     error,
     lastSetWasPersonalRecord,
+    gamificationResult,
     logSet,
     finishCurrentExercise,
     goToExercise,
     complete,
     submitFeedback,
+    clearGamificationResult,
     reset,
   } = useWorkoutStore();
   const refreshRoutine = useRoutineStore((s) => s.load);
@@ -105,6 +108,7 @@ export default function WorkoutSessionScreen() {
     if (session.completed_as_planned === null) {
       return (
         <ThemedView style={styles.flex}>
+          <LevelUpCelebration result={gamificationResult} onDismiss={clearGamificationResult} />
           <SafeAreaView style={[styles.flex, styles.centered]}>
             <ThemedText type="title" style={styles.title}>
               ¡Entrenamiento completado!

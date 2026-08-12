@@ -15,7 +15,13 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // broadcasting/auth: agregado en Sprint 11 (chat) — el navegador nunca
+    // había necesitado autorizar un canal privado de Reverb hasta ahora, así
+    // que esta ruta quedó afuera de `paths` desde que se instaló Reverb en
+    // Sprint 10 sin que nada lo notara (el POST lleva un header Authorization
+    // custom, que dispara preflight — sin esto, cualquier canal privado
+    // queda roto en el navegador, no solo el de chat).
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'broadcasting/auth'],
 
     'allowed_methods' => ['*'],
 

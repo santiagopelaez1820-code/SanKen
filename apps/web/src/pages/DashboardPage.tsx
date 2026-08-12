@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
-import type { DashboardStats } from "@sanken/core"
+import type { DashboardStats, GamificationSummary } from "@sanken/core"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
@@ -11,6 +11,9 @@ import { ProgressChart } from "@/components/dashboard/ProgressChart"
 import { RecentPRsList } from "@/components/dashboard/RecentPRsList"
 import { WorkoutHistoryList } from "@/components/dashboard/WorkoutHistoryList"
 import { BodyMeasurementsPanel } from "@/components/dashboard/BodyMeasurementsPanel"
+import { XpLevelCard } from "@/components/dashboard/XpLevelCard"
+import { AchievementsList } from "@/components/dashboard/AchievementsList"
+import { NotificationBell } from "@/components/notifications/NotificationBell"
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user)
@@ -19,6 +22,11 @@ export function DashboardPage() {
   const { data: stats, isLoading } = useQuery({
     queryKey: ["stats", "dashboard"],
     queryFn: () => api.get<DashboardStats>("/stats/dashboard"),
+  })
+
+  const { data: gamification, isLoading: isLoadingGamification } = useQuery({
+    queryKey: ["gamification"],
+    queryFn: () => api.get<GamificationSummary>("/gamification"),
   })
 
   return (
@@ -37,9 +45,38 @@ export function DashboardPage() {
                 <Link to="/trainer">Mis clientes</Link>
               </Button>
             )}
+            {user?.role !== "trainer" && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/my-trainer">Mi entrenador</Link>
+              </Button>
+            )}
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/chat">Chat</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/rankings">Rankings</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/challenges">Retos</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/calendar">Calendario</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/nutrition">Nutrición</Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/news">Novedades</Link>
+            </Button>
+            {user?.role === "admin" && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/admin">Panel admin</Link>
+              </Button>
+            )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/settings">Configuración</Link>
             </Button>
+            <NotificationBell />
             <Button variant="outline" size="sm" onClick={clearSession}>
               Cerrar sesión
             </Button>
@@ -47,6 +84,8 @@ export function DashboardPage() {
         </header>
 
         <NextWorkoutCard />
+
+        <XpLevelCard summary={gamification} isLoading={isLoadingGamification} />
 
         <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <StatTile label="Horas entrenadas" value={isLoading ? "…" : `${stats?.total_hours ?? 0} h`} />
@@ -77,6 +116,15 @@ export function DashboardPage() {
           <div className="lg:col-span-1">
             <BodyMeasurementsPanel />
           </div>
+        </section>
+
+        <section>
+          <AchievementsList
+            achievements={[
+              ...(gamification?.unlocked_achievements ?? []),
+              ...(gamification?.locked_achievements ?? []),
+            ]}
+          />
         </section>
       </div>
     </main>

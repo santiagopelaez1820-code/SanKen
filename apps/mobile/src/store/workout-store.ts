@@ -1,5 +1,11 @@
 import { create } from 'zustand';
-import type { LoggedWorkoutSet, RoutineDay, StartWorkoutSessionPayload, WorkoutSession } from '@sanken/core';
+import type {
+  GamificationEventResult,
+  LoggedWorkoutSet,
+  RoutineDay,
+  StartWorkoutSessionPayload,
+  WorkoutSession,
+} from '@sanken/core';
 
 import { api } from '@/lib/api';
 
@@ -10,6 +16,7 @@ interface WorkoutStoreState {
   isSubmitting: boolean;
   error: string | null;
   lastSetWasPersonalRecord: boolean;
+  gamificationResult: GamificationEventResult | null;
 
   start: (routineDay: RoutineDay | null, precheck: StartWorkoutSessionPayload) => Promise<void>;
   logSet: (weightKg: number, reps: number) => Promise<void>;
@@ -17,6 +24,7 @@ interface WorkoutStoreState {
   goToExercise: (index: number) => void;
   complete: (durationMinutes: number) => Promise<void>;
   submitFeedback: (completedAsPlanned: boolean) => Promise<void>;
+  clearGamificationResult: () => void;
   reset: () => void;
 }
 
@@ -27,6 +35,7 @@ export const useWorkoutStore = create<WorkoutStoreState>((set, get) => ({
   isSubmitting: false,
   error: null,
   lastSetWasPersonalRecord: false,
+  gamificationResult: null,
 
   start: async (routineDay, precheck) => {
     set({ isSubmitting: true, error: null });
@@ -97,15 +106,21 @@ export const useWorkoutStore = create<WorkoutStoreState>((set, get) => ({
 
     set({ isSubmitting: true, error: null });
     try {
-      const completed = await api.post<WorkoutSession>(`/workout-sessions/${session.id}/complete`, {
+      const envelope = await api.postWithMeta<WorkoutSession>(`/workout-sessions/${session.id}/complete`, {
         duration_minutes: durationMinutes,
       });
-      set({ session: completed, isSubmitting: false });
+      set({
+        session: envelope.data,
+        isSubmitting: false,
+        gamificationResult: (envelope.meta?.gamification as GamificationEventResult | undefined) ?? null,
+      });
     } catch (err) {
       set({ isSubmitting: false, error: err instanceof Error ? err.message : 'No se pudo cerrar el entrenamiento.' });
       throw err;
     }
   },
+
+  clearGamificationResult: () => set({ gamificationResult: null }),
 
   submitFeedback: async (completedAsPlanned) => {
     const { session } = get();
@@ -123,5 +138,13 @@ export const useWorkoutStore = create<WorkoutStoreState>((set, get) => ({
     }
   },
 
-  reset: () => set({ session: null, routineDay: null, currentIndex: 0, error: null, lastSetWasPersonalRecord: false }),
+  reset: () =>
+    set({
+      session: null,
+      routineDay: null,
+      currentIndex: 0,
+      error: null,
+      lastSetWasPersonalRecord: false,
+      gamificationResult: null,
+    }),
 }));

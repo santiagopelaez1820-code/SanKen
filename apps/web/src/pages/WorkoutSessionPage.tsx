@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
 import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { LoggedWorkoutSet, Routine, WorkoutExercise, WorkoutSession } from "@sanken/core"
+import type { GamificationEventResult, LoggedWorkoutSet, Routine, WorkoutExercise, WorkoutSession } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { RestTimer } from "@/components/workout/RestTimer"
+import { LevelUpModal } from "@/components/workout/LevelUpModal"
 
 function updateExercise(
   session: WorkoutSession,
@@ -40,6 +41,7 @@ export function WorkoutSessionPage() {
   const [weightInput, setWeightInput] = useState("")
   const [repsInput, setRepsInput] = useState("")
   const [rpeInput, setRpeInput] = useState("")
+  const [levelUpResult, setLevelUpResult] = useState<GamificationEventResult | null>(null)
 
   const session = sessionQuery.data
   const routine = routineQuery.data?.data ?? null
@@ -80,10 +82,13 @@ export function WorkoutSessionPage() {
 
   const completeMutation = useMutation({
     mutationFn: (duration_minutes: number) =>
-      api.post<WorkoutSession>(`/workout-sessions/${sessionId}/complete`, { duration_minutes }),
-    onSuccess: (updated) => {
-      queryClient.setQueryData(["workout-sessions", sessionId], updated)
+      api.postWithMeta<WorkoutSession>(`/workout-sessions/${sessionId}/complete`, { duration_minutes }),
+    onSuccess: (envelope) => {
+      queryClient.setQueryData(["workout-sessions", sessionId], envelope.data)
       queryClient.invalidateQueries({ queryKey: ["routines", "active"] })
+      queryClient.invalidateQueries({ queryKey: ["gamification"] })
+      const gamification = envelope.meta?.gamification as GamificationEventResult | undefined
+      if (gamification?.leveled_up) setLevelUpResult(gamification)
     },
   })
 
@@ -118,9 +123,12 @@ export function WorkoutSessionPage() {
     await finishExerciseMutation.mutateAsync(currentExercise.id)
 
     if (isLastExercise) {
-      const durationMinutes = Math.max(
-        1,
-        Math.round((Date.now() - new Date(session.performed_at).getTime()) / 60000),
+      // performed_at es solo fecha (medianoche), no datetime — completar
+      // tarde en el día puede inflar este cálculo muy por encima del
+      // máximo que valida el backend (600 min), así que se acota.
+      const durationMinutes = Math.min(
+        600,
+        Math.max(1, Math.round((Date.now() - new Date(session.performed_at).getTime()) / 60000)),
       )
       await completeMutation.mutateAsync(durationMinutes)
     } else {
@@ -134,6 +142,7 @@ export function WorkoutSessionPage() {
   if (session.completed && session.completed_as_planned === null) {
     return (
       <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+        <LevelUpModal result={levelUpResult} onClose={() => setLevelUpResult(null)} />
         <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
           <h1 className="font-heading text-2xl font-medium tracking-tight">¡Entrenamiento completado!</h1>
           <p className="text-sm text-muted-foreground">

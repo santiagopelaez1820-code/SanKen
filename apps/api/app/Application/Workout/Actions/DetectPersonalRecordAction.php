@@ -2,6 +2,7 @@
 
 namespace App\Application\Workout\Actions;
 
+use App\Events\PRBroken;
 use App\Models\PersonalRecord;
 use App\Models\User;
 use App\Models\WorkoutSet;
@@ -39,6 +40,8 @@ class DetectPersonalRecordAction
         );
 
         Cache::forget(CacheKeys::statsDashboard($user->id));
+
+        PRBroken::dispatch($user);
 
         return $record;
     }

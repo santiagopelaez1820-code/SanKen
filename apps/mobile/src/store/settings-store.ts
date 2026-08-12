@@ -2,17 +2,20 @@ import { create } from 'zustand';
 import type { TwoFactorConfirmResponse, TwoFactorEnableResponse } from '@sanken/core';
 
 import { api } from '@/lib/api';
+import { useAuthStore } from '@/store/auth-store';
 
 interface SettingsStoreState {
   enrollment: TwoFactorEnableResponse | null;
   recoveryCodes: string[] | null;
   isSubmitting: boolean;
   submitError: string | null;
+  isUpdatingPrivacy: boolean;
 
   enableTwoFactor: () => Promise<void>;
   confirmTwoFactor: (code: string) => Promise<boolean>;
   disableTwoFactor: (password: string) => Promise<boolean>;
   dismissRecoveryCodes: () => void;
+  setPublicProfile: (isPublic: boolean) => Promise<void>;
 }
 
 export const useSettingsStore = create<SettingsStoreState>((set) => ({
@@ -20,6 +23,7 @@ export const useSettingsStore = create<SettingsStoreState>((set) => ({
   recoveryCodes: null,
   isSubmitting: false,
   submitError: null,
+  isUpdatingPrivacy: false,
 
   enableTwoFactor: async () => {
     set({ isSubmitting: true, submitError: null });
@@ -56,4 +60,14 @@ export const useSettingsStore = create<SettingsStoreState>((set) => ({
   },
 
   dismissRecoveryCodes: () => set({ recoveryCodes: null }),
+
+  setPublicProfile: async (isPublic) => {
+    set({ isUpdatingPrivacy: true });
+    try {
+      await api.post(isPublic ? '/rankings/opt-in' : '/rankings/opt-out');
+      await useAuthStore.getState().refreshMe();
+    } finally {
+      set({ isUpdatingPrivacy: false });
+    }
+  },
 }));
