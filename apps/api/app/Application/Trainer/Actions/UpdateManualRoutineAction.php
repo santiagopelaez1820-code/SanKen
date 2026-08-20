@@ -2,7 +2,7 @@
 
 namespace App\Application\Trainer\Actions;
 
-use App\Application\Trainer\Actions\Concerns\SyncsRoutineDays;
+use App\Application\Routine\Actions\Concerns\SyncsRoutineDays;
 use App\Models\Routine;
 use App\Support\CacheKeys;
 use Illuminate\Support\Facades\Cache;

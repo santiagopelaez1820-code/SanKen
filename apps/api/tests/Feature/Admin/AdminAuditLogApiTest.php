@@ -19,7 +19,7 @@ class AdminAuditLogApiTest extends TestCase
 
     public function test_admin_sees_activity_already_logged_by_spatie(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $user = User::factory()->create();
 
         // La propia acción de banear (User::update de is_banned) ya queda

@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 class EnsureUserHasRole
 {
     /**
-     * Restringe una ruta a uno o más roles, ej. `role:trainer,admin`.
+     * Restringe una ruta a uno o más roles, ej. `role:trainer,super_admin`.
      */
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {

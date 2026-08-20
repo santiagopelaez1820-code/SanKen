@@ -42,4 +42,28 @@ return [
 
     'water_ml_per_kg' => 35,
     'water_ml_extra_on_training_day' => 500,
+
+    // Plan alimenticio (GenerateNutritionPlanAction): reparte el objetivo
+    // diario (de NutritionTargetCalculator) entre 4 comidas. Mismo % para
+    // calorías y cada macro -- no hay razón nutricional para variar la
+    // proporción de proteína/carbos/grasa entre comidas acá, mantenerlo
+    // simple. Suman 1.0.
+    'meal_split_ratio' => [
+        'breakfast' => 0.25,
+        'lunch' => 0.35,
+        'snack' => 0.10,
+        'dinner' => 0.30,
+    ],
+
+    // Qué categorías de food_items (ver su columna `category`) arman cada
+    // comida -- "protein"/"carb" se dimensionan contra el objetivo de esa
+    // comida, el resto (grasa/vegetal/fruta/lácteo) usa una porción fija
+    // razonable (ver GenerateNutritionPlanAction::FIXED_PORTION_GRAMS)
+    // salvo que la categoría sea justamente 'fat'.
+    'meal_categories' => [
+        'breakfast' => ['protein', 'carb', 'fruit'],
+        'lunch' => ['protein', 'carb', 'vegetable'],
+        'snack' => ['dairy', 'fruit'],
+        'dinner' => ['protein', 'carb', 'vegetable'],
+    ],
 ];

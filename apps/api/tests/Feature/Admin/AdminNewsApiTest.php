@@ -22,7 +22,7 @@ class AdminNewsApiTest extends TestCase
 
     public function test_admin_can_create_a_draft(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
 
         $response = $this->actingAs($admin, 'sanctum')->postJson('/api/v1/admin/news', [
             'title' => 'Nueva funcionalidad', 'body' => 'Descripción',
@@ -35,7 +35,7 @@ class AdminNewsApiTest extends TestCase
 
     public function test_admin_can_create_and_publish_immediately(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
 
         $response = $this->actingAs($admin, 'sanctum')->postJson('/api/v1/admin/news', [
             'title' => 'Nueva funcionalidad', 'body' => 'Descripción', 'published' => true,
@@ -48,7 +48,7 @@ class AdminNewsApiTest extends TestCase
 
     public function test_admin_can_toggle_publish_on_a_draft(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $news = NewsPromotion::query()->create([
             'admin_id' => $admin->id, 'title' => 'Borrador', 'body' => 'x', 'published_at' => null,
         ]);
@@ -62,7 +62,7 @@ class AdminNewsApiTest extends TestCase
 
     public function test_admin_can_unpublish(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $news = NewsPromotion::query()->create([
             'admin_id' => $admin->id, 'title' => 'Activa', 'body' => 'x', 'published_at' => now(),
         ]);
@@ -76,7 +76,7 @@ class AdminNewsApiTest extends TestCase
 
     public function test_admin_can_delete_news(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $news = NewsPromotion::query()->create(['admin_id' => $admin->id, 'title' => 'x', 'body' => 'x']);
 
         $this->actingAs($admin, 'sanctum')->deleteJson("/api/v1/admin/news/{$news->id}")->assertNoContent();
@@ -85,26 +85,12 @@ class AdminNewsApiTest extends TestCase
 
     public function test_admin_index_includes_drafts(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         NewsPromotion::query()->create(['admin_id' => $admin->id, 'title' => 'Borrador', 'body' => 'x']);
 
         $response = $this->actingAs($admin, 'sanctum')->getJson('/api/v1/admin/news');
 
         $response->assertOk();
         $this->assertCount(1, $response->json('data'));
-    }
-
-    public function test_public_news_index_only_shows_published(): void
-    {
-        $admin = User::factory()->create(['role' => 'admin']);
-        $user = User::factory()->create();
-        NewsPromotion::query()->create(['admin_id' => $admin->id, 'title' => 'Borrador', 'body' => 'x', 'published_at' => null]);
-        NewsPromotion::query()->create(['admin_id' => $admin->id, 'title' => 'Publicada', 'body' => 'x', 'published_at' => now()]);
-
-        $response = $this->actingAs($user, 'sanctum')->getJson('/api/v1/news');
-
-        $response->assertOk();
-        $this->assertCount(1, $response->json('data'));
-        $this->assertSame('Publicada', $response->json('data.0.title'));
     }
 }

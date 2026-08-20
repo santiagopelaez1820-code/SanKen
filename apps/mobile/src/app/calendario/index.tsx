@@ -15,7 +15,7 @@ import { useCalendarioStore } from '@/store/calendario-store';
 const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
 const EVENT_COLOR: Record<CalendarEvent['type'], string> = {
-  workout_completed: '#C9A227',
+  workout_completed: '#FF7A3D',
   workout_planned: '#D98E2B',
   reminder: '#4A90D9',
 };
@@ -48,7 +48,7 @@ export default function CalendarioScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <ThemedText type="title" style={styles.pageTitle}>
             Calendario
           </ThemedText>
@@ -131,9 +131,16 @@ export default function CalendarioScreen() {
 
               {selectedEvents?.map((event, i) => (
                 <View key={i} style={styles.eventRow}>
-                  <View style={styles.eventLabel}>
-                    <View style={[styles.dot, { backgroundColor: EVENT_COLOR[event.type] }]} />
-                    <ThemedText type="small">{event.title}</ThemedText>
+                  <View style={styles.eventInfo}>
+                    <View style={styles.eventLabel}>
+                      <View style={[styles.dot, { backgroundColor: EVENT_COLOR[event.type] }]} />
+                      <ThemedText type="small">{event.title}</ThemedText>
+                    </View>
+                    {event.type !== 'reminder' && event.muscle_groups.length > 0 && (
+                      <ThemedText type="small" themeColor="textSecondary" style={styles.muscleGroups}>
+                        {event.muscle_groups.join(' + ')}
+                      </ThemedText>
+                    )}
                   </View>
                   {event.type === 'reminder' && (
                     <Pressable onPress={() => deleteReminder(event.id)}>
@@ -160,7 +167,7 @@ export default function CalendarioScreen() {
                     setReminderTitle('');
                   }}
                   style={[styles.addButton, { backgroundColor: theme.accent }, !reminderTitle.trim() && styles.disabled]}>
-                  <ThemedText type="smallBold" style={{ color: '#0A0A09' }}>
+                  <ThemedText type="smallBold" style={{ color: '#070B14' }}>
                     Agregar
                   </ThemedText>
                 </Pressable>
@@ -178,6 +185,7 @@ export default function CalendarioScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,
@@ -203,7 +211,9 @@ const styles = StyleSheet.create({
   dot: { width: 5, height: 5, borderRadius: 2.5 },
   detailCard: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.two },
   eventRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  eventInfo: { gap: 2 },
   eventLabel: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one },
+  muscleGroups: { paddingLeft: Spacing.two + 5 },
   addReminderRow: { flexDirection: 'row', gap: Spacing.two, alignItems: 'center' },
   input: { flex: 1, borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
   addButton: { borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },

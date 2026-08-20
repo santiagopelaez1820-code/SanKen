@@ -54,6 +54,24 @@ export class ApiClient {
   }
 
   /**
+   * Resuelve una URL de media (video/imagen) devuelta por la API contra
+   * este mismo baseUrl. El backend guarda video_url como ruta relativa
+   * (p. ej. "/storage/exercise-videos/x.mp4") en vez de absoluta a
+   * propósito: "localhost" no significa nada en un celular físico, y
+   * bakear el host de turno (ngrok en dev, dominio en prod) directamente
+   * en la DB rompe apenas ese host cambia. Cada plataforma resuelve la
+   * ruta contra SU PROPIO baseUrl (mismo que usa para /api/v1) — así
+   * mobile y web comparten la única fuente de verdad para media.
+   * Una URL ya absoluta (http/https) se devuelve sin tocar, por si un
+   * admin pegó un link externo directamente en video_url/image_url.
+   */
+  mediaUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (/^https?:\/\//.test(path)) return path;
+    return `${this.baseUrl}${path.startsWith('/') ? '' : '/'}${path}`;
+  }
+
+  /**
    * Pide la cookie XSRF-TOKEN a Sanctum. Debe llamarse (una vez, o antes de
    * cada login) antes de cualquier request mutante desde la SPA web.
    */
@@ -109,17 +127,21 @@ export class ApiClient {
     const token = this.getToken?.();
     const csrfToken = this.withCredentials ? this.getCsrfToken?.() : null;
     const isMutating = method !== 'GET';
+    // FormData (subida de archivos, ej. video de ejercicio) nunca se
+    // serializa a JSON ni lleva Content-Type manual — fetch arma el
+    // boundary multipart/form-data solo si el header se deja sin definir.
+    const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
 
     const res = await fetch(`${this.baseUrl}/api/v1${path}`, {
       method,
       credentials: this.withCredentials ? 'include' : 'same-origin',
       headers: {
         Accept: 'application/json',
-        ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}),
+        ...(body !== undefined && !isFormData ? { 'Content-Type': 'application/json' } : {}),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(isMutating && csrfToken ? { 'X-XSRF-TOKEN': csrfToken } : {}),
       },
-      body: body !== undefined ? JSON.stringify(body) : undefined,
+      body: body === undefined ? undefined : isFormData ? (body as FormData) : JSON.stringify(body),
     });
 
     const json = (await res.json().catch(() => null)) as

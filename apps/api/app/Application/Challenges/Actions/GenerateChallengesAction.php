@@ -4,6 +4,7 @@ namespace App\Application\Challenges\Actions;
 
 use App\Domain\Challenges\Services\ChallengeCatalog;
 use App\Models\Challenge;
+use App\Models\ChallengeTemplate;
 use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -27,8 +28,8 @@ class GenerateChallengesAction implements ShouldQueue
         $now = Carbon::now();
         $created = 0;
 
-        foreach (ChallengeCatalog::templates() as $template) {
-            [$startsAt, $endsAt] = $template['type'] === ChallengeCatalog::TYPE_WEEKLY
+        foreach (ChallengeTemplate::active()->get() as $template) {
+            [$startsAt, $endsAt] = $template->type === ChallengeCatalog::TYPE_WEEKLY
                 ? [$now->clone()->startOfWeek(), $now->clone()->endOfWeek()]
                 : [$now->clone()->startOfMonth(), $now->clone()->endOfMonth()];
 
@@ -39,7 +40,7 @@ class GenerateChallengesAction implements ShouldQueue
             // fila existente — mismo problema, mismo fix, que
             // AggregateDailyStatsAction con user_stats_daily.stat_date.
             $exists = Challenge::query()
-                ->where('code', $template['code'])
+                ->where('code', $template->code)
                 ->whereDate('starts_at', $startsAt->toDateString())
                 ->exists();
 
@@ -48,11 +49,11 @@ class GenerateChallengesAction implements ShouldQueue
             }
 
             Challenge::query()->create([
-                'code' => $template['code'],
-                'title' => $template['title'],
-                'description' => $template['description'],
-                'type' => $template['type'],
-                'criteria' => ['metric' => $template['metric'], 'target' => $template['target']],
+                'code' => $template->code,
+                'title' => $template->title,
+                'description' => $template->description,
+                'type' => $template->type,
+                'criteria' => ['metric' => $template->metric, 'target' => (float) $template->target],
                 'starts_at' => $startsAt->toDateString(),
                 'ends_at' => $endsAt->toDateString(),
             ]);

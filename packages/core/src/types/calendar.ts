@@ -5,6 +5,8 @@ export interface CalendarWorkoutEvent {
   event_date: string;
   title: string;
   duration_minutes: number | null;
+  /** Nombres en español de los grupos musculares (ej. ["Pecho", "Tríceps"]) — de los ejercicios reales de la sesión si type=workout_completed, del objetivo de la rutina si type=workout_planned. */
+  muscle_groups: string[];
 }
 
 export interface CalendarReminderEvent {

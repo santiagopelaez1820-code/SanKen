@@ -222,6 +222,46 @@ class NutritionApiTest extends TestCase
         $this->assertDatabaseHas('food_items', ['name' => 'Banana Chips']);
     }
 
+    public function test_search_and_barcode_lookup_request_spanish_localized_names_from_open_food_facts(): void
+    {
+        Http::fake();
+        $user = User::factory()->create();
+        $client = $this->actingAs($user, 'sanctum');
+
+        $client->getJson('/api/v1/nutrition/foods?q=pollo');
+        $client->getJson('/api/v1/nutrition/foods?barcode=3017620422003');
+
+        Http::assertSent(fn ($request) => str_contains((string) $request->url(), 'search.pl') && $request['lc'] === 'es');
+        Http::assertSent(fn ($request) => str_contains((string) $request->url(), '/product/') && $request['lc'] === 'es');
+    }
+
+    public function test_a_stale_cached_product_gets_its_name_refreshed_on_the_next_search_hit(): void
+    {
+        // Simula un producto cacheado ANTES de que se empezara a pedir
+        // lc=es -- quedó con el nombre genérico en inglés.
+        FoodItem::query()->create([
+            'barcode' => '7501234567890', 'name' => 'Chicken Breast', 'calories_per_100g' => 165,
+            'protein_per_100g' => 31, 'carbs_per_100g' => 0, 'fat_per_100g' => 3.6, 'source' => 'open_food_facts',
+        ]);
+        Http::fake([
+            'world.openfoodfacts.org/cgi/search.pl*' => Http::response([
+                'products' => [[
+                    'product_name' => 'Pechuga de Pollo', 'brands' => 'Marca', 'code' => '7501234567890',
+                    'nutriments' => ['energy-kcal_100g' => 165, 'proteins_100g' => 31, 'carbohydrates_100g' => 0, 'fat_100g' => 3.6],
+                ]],
+            ], 200),
+        ]);
+        $user = User::factory()->create();
+
+        // "pollo" no matchea "Chicken Breast" por LIKE -- cae a buscar en vivo, y el resultado (mismo barcode) debe ACTUALIZAR el registro viejo, no dejarlo como estaba.
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/v1/nutrition/foods?q=pollo');
+
+        $response->assertOk();
+        $response->assertJsonPath('data.0.name', 'Pechuga de Pollo');
+        $this->assertDatabaseHas('food_items', ['barcode' => '7501234567890', 'name' => 'Pechuga de Pollo']);
+        $this->assertDatabaseCount('food_items', 1); // actualizó la fila existente, no creó una duplicada
+    }
+
     public function test_text_search_prefers_the_local_cache_over_open_food_facts(): void
     {
         Http::fake();

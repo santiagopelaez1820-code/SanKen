@@ -7,7 +7,7 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { Image, Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
@@ -32,6 +32,9 @@ export default function AppTabs() {
           </TabTrigger>
           <TabTrigger name="measurements" href="/measurements" asChild>
             <TabButton>Medidas</TabButton>
+          </TabTrigger>
+          <TabTrigger name="prs" href="/prs" asChild>
+            <TabButton>PR</TabButton>
           </TabTrigger>
           <TabTrigger name="explore" href="/explore" asChild>
             <TabButton>Explore</TabButton>
@@ -58,14 +61,17 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 
 export function CustomTabList(props: TabListProps) {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[scheme === 'unspecified' ? 'dark' : scheme];
 
   return (
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <ThemedText type="smallBold" style={styles.brandText}>
-          SanKen
-        </ThemedText>
+        <View style={styles.brand}>
+          <Image source={require('@/assets/images/logo.png')} style={styles.brandLogo} resizeMode="contain" />
+          <ThemedText type="smallBold" style={styles.brandText}>
+            SanKen
+          </ThemedText>
+        </View>
 
         {props.children}
 
@@ -103,9 +109,17 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     maxWidth: MaxContentWidth,
   },
-  brandText: {
+  brand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.one,
     marginRight: 'auto',
   },
+  brandLogo: {
+    width: 22,
+    height: 22,
+  },
+  brandText: {},
   pressed: {
     opacity: 0.7,
   },

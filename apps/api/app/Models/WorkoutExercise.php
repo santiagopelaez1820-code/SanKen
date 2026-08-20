@@ -8,12 +8,26 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkoutExercise extends Model
 {
-    protected $fillable = ['workout_session_id', 'exercise_id', 'order', 'all_sets_completed'];
+    protected $fillable = [
+        'workout_session_id',
+        'exercise_id',
+        'order',
+        'all_sets_completed',
+        'target_sets',
+        'target_reps',
+        'rest_seconds',
+        'target_rpe',
+        'suggested_weight_kg',
+        'suggested_reps_per_set',
+    ];
 
     protected function casts(): array
     {
         return [
             'all_sets_completed' => 'boolean',
+            'target_rpe' => 'decimal:1',
+            'suggested_weight_kg' => 'decimal:2',
+            'suggested_reps_per_set' => 'array',
         ];
     }
 

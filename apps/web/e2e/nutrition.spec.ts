@@ -21,9 +21,8 @@ async function authedPost(ctx: APIRequestContext, token: string, path: string, d
 async function completeOnboarding(ctx: APIRequestContext, token: string) {
   await authedPost(ctx, token, '/onboarding', {
     age: 28, sex: 'male', height_cm: 178, weight_kg: 80, city_id: 1, level: 'intermediate',
-    goals: ['gain_muscle'], frequency_days: 4, session_minutes: 60, place: 'gym',
+    goals: ['gain_muscle'], frequency_days: 4,
     equipment_available: ['barbell', 'dumbbells', 'machines', 'cables', 'pull_up_bar', 'squat_rack'],
-    injuries: [],
   })
   await authedPost(ctx, token, '/onboarding/complete')
 }

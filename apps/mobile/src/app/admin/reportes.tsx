@@ -38,7 +38,7 @@ export default function AdminReportesScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
           <ThemedText type="title" style={styles.pageTitle}>
             Reportes
           </ThemedText>
@@ -131,6 +131,7 @@ export default function AdminReportesScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,

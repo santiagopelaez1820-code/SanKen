@@ -13,11 +13,12 @@ import { WorkoutHistoryList } from "@/components/dashboard/WorkoutHistoryList"
 import { BodyMeasurementsPanel } from "@/components/dashboard/BodyMeasurementsPanel"
 import { XpLevelCard } from "@/components/dashboard/XpLevelCard"
 import { AchievementsList } from "@/components/dashboard/AchievementsList"
-import { NotificationBell } from "@/components/notifications/NotificationBell"
+import { useFeed } from "@/hooks/use-feed"
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user)
   const clearSession = useAuthStore((state) => state.clearSession)
+  const { unreadCount } = useFeed()
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["stats", "dashboard"],
@@ -32,14 +33,17 @@ export function DashboardPage() {
   return (
     <main className="min-h-svh bg-background px-6 py-8 text-foreground">
       <div className="mx-auto flex max-w-5xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-2xl font-medium tracking-tight">
-              San<span className="text-primary">Ken</span>
-            </h1>
-            <p className="text-sm text-muted-foreground">Hola, {user?.name ?? "atleta"}.</p>
+        <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="" className="h-9 w-9" />
+            <div>
+              <h1 className="font-heading text-2xl font-medium tracking-tight">
+                San<span className="text-primary">Ken</span>
+              </h1>
+              <p className="text-sm text-muted-foreground">Hola, {user?.name ?? "atleta"}.</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {user?.role === "trainer" && (
               <Button variant="outline" size="sm" asChild>
                 <Link to="/trainer">Mis clientes</Link>
@@ -54,7 +58,7 @@ export function DashboardPage() {
               <Link to="/chat">Chat</Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/rankings">Rankings</Link>
+              <Link to="/prs">PR y Rankings</Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
               <Link to="/challenges">Retos</Link>
@@ -66,17 +70,16 @@ export function DashboardPage() {
               <Link to="/nutrition">Nutrición</Link>
             </Button>
             <Button variant="outline" size="sm" asChild>
-              <Link to="/news">Novedades</Link>
+              <Link to="/feed">{unreadCount > 0 ? `Novedades (${unreadCount})` : "Novedades"}</Link>
             </Button>
-            {user?.role === "admin" && (
+            {user?.role === "super_admin" && (
               <Button variant="outline" size="sm" asChild>
-                <Link to="/admin">Panel admin</Link>
+                <Link to="/admin">Super Admin</Link>
               </Button>
             )}
             <Button variant="outline" size="sm" asChild>
               <Link to="/settings">Configuración</Link>
             </Button>
-            <NotificationBell />
             <Button variant="outline" size="sm" onClick={clearSession}>
               Cerrar sesión
             </Button>

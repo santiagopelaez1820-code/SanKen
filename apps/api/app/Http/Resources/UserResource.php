@@ -24,6 +24,7 @@ class UserResource extends JsonResource
             'trainer_verified_at' => $this->trainer_verified_at?->toIso8601String(),
             'email_verified_at' => $this->email_verified_at?->toIso8601String(),
             'onboarding_completed' => (bool) $this->onboardingResponse?->completed,
+            'has_location' => (bool) $this->profile?->city_id,
             'created_at' => $this->created_at?->toIso8601String(),
         ];
     }

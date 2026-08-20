@@ -1,21 +1,3 @@
-/** Forma genérica — vale para cualquier tipo de Notification futuro, no solo chat. */
-export interface AppNotification {
-  id: string;
-  type: string;
-  data: Record<string, unknown>;
-  read_at: string | null;
-  created_at: string;
-}
-
-export interface NotificationsResponse {
-  data: AppNotification[];
-  meta: {
-    unread_count: number;
-    current_page: number;
-    last_page: number;
-  };
-}
-
 /** data shape específico de NewChatMessageNotification (App\Notifications\NewChatMessageNotification::toArray). */
 export interface NewChatMessageNotificationData {
   conversation_id: number;

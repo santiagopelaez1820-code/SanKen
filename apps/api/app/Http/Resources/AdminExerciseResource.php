@@ -31,6 +31,10 @@ class AdminExerciseResource extends JsonResource
             'video_url' => $this->video_url,
             'image_url' => $this->image_url,
             'is_active' => $this->is_active,
+            'alternatives' => $this->whenLoaded(
+                'alternatives',
+                fn () => $this->alternatives->map(fn ($alt) => ['id' => $alt->id, 'name' => $alt->name]),
+            ),
         ];
     }
 }

@@ -105,7 +105,7 @@ export default function RetosScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <ThemedText type="title" style={styles.pageTitle}>
             Retos
           </ThemedText>
@@ -142,6 +142,7 @@ export default function RetosScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,

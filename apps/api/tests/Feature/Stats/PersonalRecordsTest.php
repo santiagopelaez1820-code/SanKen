@@ -4,6 +4,7 @@ namespace Tests\Feature\Stats;
 
 use App\Models\Exercise;
 use App\Models\User;
+use App\Models\WorkoutSession;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,5 +51,46 @@ class PersonalRecordsTest extends TestCase
 
         $response->assertOk();
         $response->assertJsonCount(0, 'data');
+    }
+
+    public function test_manual_pr_is_created_and_never_touches_workout_sessions(): void
+    {
+        $user = User::factory()->create();
+        $exerciseId = Exercise::query()->where('name', 'Press banca con barra')->value('id');
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/stats/personal-records', [
+            'exercise_id' => $exerciseId,
+            'weight_kg' => 180,
+            'reps' => 1,
+        ]);
+
+        $response->assertCreated();
+        $response->assertJsonPath('meta.is_new_best', true);
+        $response->assertJsonPath('data.record_type', '1rm');
+        $this->assertSame(0, WorkoutSession::query()->count());
+    }
+
+    public function test_manual_pr_replaces_only_when_it_is_a_genuine_improvement(): void
+    {
+        $user = User::factory()->create();
+        $client = $this->actingAs($user, 'sanctum');
+        $exerciseId = Exercise::query()->where('name', 'Press banca con barra')->value('id');
+
+        $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 180, 'reps' => 1]);
+        $first = $client->getJson('/api/v1/stats/personal-records')->json('data.0.value');
+
+        $better = $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 200, 'reps' => 1]);
+        $better->assertCreated();
+        $better->assertJsonPath('meta.is_new_best', true);
+        $improved = $client->getJson('/api/v1/stats/personal-records')->json('data.0.value');
+        $this->assertGreaterThan($first, $improved);
+
+        $worse = $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 190, 'reps' => 1]);
+        $worse->assertOk();
+        $worse->assertJsonPath('meta.is_new_best', false);
+        $unchanged = $client->getJson('/api/v1/stats/personal-records')->json('data.0.value');
+        $this->assertSame($improved, $unchanged);
+
+        $this->assertSame(0, WorkoutSession::query()->count());
     }
 }

@@ -13,9 +13,23 @@ async function registerUser(ctx: APIRequestContext, name: string, email: string)
   return ((await res.json()) as { data: { token: string } }).data.token
 }
 
+// El admin necesita llegar a /dashboard (y de ahí a /admin) tras loguearse;
+// sin onboarding completo, RequireAuth lo manda a /onboarding en su lugar.
+async function completeOnboarding(ctx: APIRequestContext, token: string) {
+  const headers = { Authorization: `Bearer ${token}` }
+  await ctx.post(`${API_URL}/onboarding`, {
+    data: {
+      age: 30, sex: 'male', height_cm: 180, weight_kg: 80, level: 'beginner',
+      goals: ['gain_muscle'], frequency_days: 3,
+    },
+    headers,
+  })
+  await ctx.post(`${API_URL}/onboarding/complete`, { headers })
+}
+
 function promoteToAdmin(email: string) {
   execSync(
-    `php artisan tinker --execute="App\\\\Models\\\\User::where('email','${email}')->update(['role'=>'admin']);"`,
+    `php artisan tinker --execute="App\\\\Models\\\\User::where('email','${email}')->update(['role'=>'super_admin']);"`,
     { cwd: '../api' },
   )
 }
@@ -35,14 +49,15 @@ test('un admin banea a un usuario, y ese usuario ya no puede volver a loguearse'
   const adminEmail = `e2e-ban-admin-${RUN_ID}@sanken.app`
 
   await registerUser(ctx, targetName, targetEmail)
-  await registerUser(ctx, `Admin ${RUN_ID}`, adminEmail)
+  const adminToken = await registerUser(ctx, `Admin ${RUN_ID}`, adminEmail)
+  await completeOnboarding(ctx, adminToken)
   promoteToAdmin(adminEmail)
   await ctx.dispose()
 
   await login(page, adminEmail)
   await expect(page).toHaveURL(/\/dashboard$/)
 
-  await page.getByRole('link', { name: 'Panel admin' }).click()
+  await page.getByRole('link', { name: 'Super Admin' }).click()
   await expect(page).toHaveURL(/\/admin$/)
   await page.getByRole('link', { name: 'Usuarios' }).click()
   await expect(page).toHaveURL(/\/admin\/users$/)

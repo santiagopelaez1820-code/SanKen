@@ -15,6 +15,7 @@ class Routine extends Model
     protected $fillable = [
         'user_id',
         'created_by_trainer_id',
+        'created_by_admin_id',
         'source',
         'goal',
         'split_type',
@@ -44,6 +45,11 @@ class Routine extends Model
         return $this->belongsTo(User::class, 'created_by_trainer_id');
     }
 
+    public function createdByAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by_admin_id');
+    }
+
     public function days(): HasMany
     {
         return $this->hasMany(RoutineDay::class)->orderBy('day_order');
@@ -54,7 +60,7 @@ class Routine extends Model
         return LogOptions::defaults()
             ->useLogName('routine')
             ->logOnly([
-                'user_id', 'created_by_trainer_id', 'source', 'goal',
+                'user_id', 'created_by_trainer_id', 'created_by_admin_id', 'source', 'goal',
                 'split_type', 'frequency_days', 'duration_weeks',
                 'is_active', 'starts_at', 'ends_at',
             ])

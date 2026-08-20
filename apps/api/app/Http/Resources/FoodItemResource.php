@@ -19,6 +19,7 @@ class FoodItemResource extends JsonResource
             'barcode' => $this->barcode,
             'name' => $this->name,
             'brand' => $this->brand,
+            'category' => $this->category,
             'calories_per_100g' => (float) $this->calories_per_100g,
             'protein_per_100g' => (float) $this->protein_per_100g,
             'carbs_per_100g' => (float) $this->carbs_per_100g,

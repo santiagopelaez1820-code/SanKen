@@ -1,4 +1,4 @@
-export type UserRole = 'user' | 'trainer' | 'admin';
+export type UserRole = 'user' | 'trainer' | 'super_admin';
 
 export interface User {
   id: number;
@@ -10,5 +10,7 @@ export interface User {
   trainer_verified_at: string | null;
   email_verified_at: string | null;
   onboarding_completed: boolean;
+  /** true si el perfil ya tiene city_id — gate independiente de onboarding_completed, ver RequireAuth. */
+  has_location: boolean;
   created_at: string;
 }

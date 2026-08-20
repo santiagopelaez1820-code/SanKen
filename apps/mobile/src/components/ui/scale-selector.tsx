@@ -12,7 +12,7 @@ interface ScaleSelectorProps {
 
 export function ScaleSelector({ label, value, onChange, max = 5 }: ScaleSelectorProps) {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : (scheme ?? 'light')];
+  const colors = Colors[scheme === 'unspecified' ? 'dark' : (scheme ?? 'dark')];
   const options = Array.from({ length: max }, (_, i) => i + 1);
 
   return (

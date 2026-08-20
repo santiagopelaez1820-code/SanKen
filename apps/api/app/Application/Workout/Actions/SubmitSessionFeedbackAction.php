@@ -10,8 +10,9 @@ use App\Models\WorkoutSession;
 /**
  * "¿Pudiste completar el entrenamiento tal como estaba planeado?" — la
  * respuesta dispara la sobrecarga progresiva para cada ejercicio de la
- * sesión, actualizando routine_exercises.suggested_weight_kg para la
- * próxima vez que aparezca ese día en la rutina.
+ * sesión, actualizando routine_exercises.suggested_weight_kg/
+ * suggested_reps_per_set para la próxima vez que aparezca ese día en la
+ * rutina.
  *
  * Si la sesión no vino de un día de rutina (entrenamiento libre) no hay
  * routine_exercises que actualizar: solo se guarda la respuesta.
@@ -46,7 +47,13 @@ class SubmitSessionFeedbackAction
                 continue;
             }
 
-            $workingSets = $workoutExercise->sets->where('is_warmup', false)->where('completed', true);
+            // Orden real de ejecución (set_number), solo series de trabajo —
+            // el índice posicional (0, 1, 2...) es "serie 1, serie 2..." a
+            // los efectos de la rampa, no el set_number crudo.
+            $workingSets = $workoutExercise->sets
+                ->where('is_warmup', false)
+                ->where('completed', true)
+                ->values();
 
             if ($workingSets->isEmpty()) {
                 continue;
@@ -54,10 +61,9 @@ class SubmitSessionFeedbackAction
 
             $performance = new PerformanceSummary(
                 targetSets: $routineExercise->target_sets,
-                targetRepsMin: $this->parseMinReps($routineExercise->target_reps),
-                actualSets: $workingSets->count(),
-                averageReps: (float) $workingSets->avg('reps'),
-                topWeightUsed: (float) $workingSets->max('weight_kg'),
+                actualRepsPerSet: $workingSets->pluck('reps')->all(),
+                actualWeightPerSet: $workingSets->pluck('weight_kg')->map(fn ($w) => (float) $w)->all(),
+                targetRepsPerSet: $routineExercise->suggested_reps_per_set,
                 completedAsPlanned: $completedAsPlanned,
             );
 
@@ -65,10 +71,12 @@ class SubmitSessionFeedbackAction
                 $performance,
                 $routineExercise->exercise->equipment,
                 $routineExercise->consecutive_failures,
+                $this->parseMinReps($routineExercise->target_reps),
             );
 
             $routineExercise->update([
                 'suggested_weight_kg' => $suggestion->suggestedWeightKg,
+                'suggested_reps_per_set' => $suggestion->suggestedRepsPerSet,
                 'consecutive_failures' => $suggestion->consecutiveFailures,
             ]);
         }

@@ -23,16 +23,16 @@ class OnboardingResource extends JsonResource
             'height_cm' => $profile?->height_cm,
             'weight_kg' => $profile?->weight_kg,
             'city_id' => $profile?->city_id,
+            // Derivados, no columnas propias — igual que en RankingScopeResolver: el
+            // perfil solo guarda city_id, país/depto se resuelven hacia arriba.
+            'state_id' => $profile?->city?->state_id,
+            'country_id' => $profile?->city?->country_id,
             'gym_id' => $profile?->gym_id,
 
             'level' => $onboarding?->level,
             'goals' => $onboarding?->goals ?? [],
             'frequency_days' => $onboarding?->frequency_days,
-            'session_minutes' => $onboarding?->session_minutes,
-            'place' => $onboarding?->place,
             'equipment_available' => $onboarding?->equipment_available ?? [],
-            'injuries' => $onboarding?->injuries ?? [],
-            'experience_notes' => $onboarding?->experience_notes,
 
             'completed' => (bool) $onboarding?->completed,
             'completed_at' => $onboarding?->completed_at?->toIso8601String(),

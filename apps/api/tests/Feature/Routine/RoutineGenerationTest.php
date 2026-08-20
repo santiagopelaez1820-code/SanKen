@@ -2,15 +2,14 @@
 
 namespace Tests\Feature\Routine;
 
-use App\Application\Routine\Actions\GenerateRoutineAction;
 use App\Events\OnboardingCompleted;
 use App\Models\Routine;
 use App\Models\User;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
+use Database\Seeders\RoutineTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 
 class RoutineGenerationTest extends TestCase
@@ -21,6 +20,10 @@ class RoutineGenerationTest extends TestCase
     {
         $this->seed(MuscleGroupSeeder::class);
         $this->seed(ExerciseSeeder::class);
+        // El motor activo es TemplateRoutineGenerator (ver AppServiceProvider) —
+        // sin las plantillas, generar una rutina para male/4d (fixture de este
+        // archivo) no encuentra combinacion sexo+frecuencia y tira excepcion.
+        $this->seed(RoutineTemplateSeeder::class);
     }
 
     private function completeOnboardingFor(User $user): void
@@ -41,16 +44,22 @@ class RoutineGenerationTest extends TestCase
         ]);
     }
 
-    public function test_completing_onboarding_dispatches_routine_generation(): void
+    /**
+     * GenerateRoutineOnOnboardingCompleted usa dispatchSync (no dispatch) a
+     * proposito — con el motor de plantillas, generar es una sola query, ya
+     * no hace falta cola. Por eso esto ya no se puede probar con Queue::fake()
+     * + assertPushed (dispatchSync nunca pasa por la cola): se verifica el
+     * efecto real, que la rutina exista apenas termina de dispararse el evento.
+     */
+    public function test_completing_onboarding_generates_a_routine_synchronously(): void
     {
-        Queue::fake();
         $this->seedCatalog();
         $user = User::factory()->create();
         $this->completeOnboardingFor($user);
 
         event(new OnboardingCompleted($user->fresh()));
 
-        Queue::assertPushed(GenerateRoutineAction::class, fn ($job) => $job->user->is($user));
+        $this->assertDatabaseHas('routines', ['user_id' => $user->id, 'source' => 'engine', 'is_active' => true]);
     }
 
     public function test_active_routine_returns_404_when_none_exists(): void

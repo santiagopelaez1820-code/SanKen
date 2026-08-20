@@ -3,15 +3,18 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Application\Workout\Actions\AddExerciseToSessionAction;
+use App\Application\Workout\Actions\CancelWorkoutSessionAction;
 use App\Application\Workout\Actions\CompleteWorkoutSessionAction;
 use App\Application\Workout\Actions\DetectPersonalRecordAction;
 use App\Application\Workout\Actions\LogSetAction;
+use App\Application\Workout\Actions\SkipWorkoutSessionAction;
 use App\Application\Workout\Actions\StartWorkoutSessionAction;
 use App\Application\Workout\Actions\SubmitSessionFeedbackAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Workout\AddSessionExerciseRequest;
 use App\Http\Requests\Workout\CompleteWorkoutSessionRequest;
 use App\Http\Requests\Workout\LogSetRequest;
+use App\Http\Requests\Workout\SkipWorkoutSessionRequest;
 use App\Http\Requests\Workout\StartWorkoutSessionRequest;
 use App\Http\Requests\Workout\SubmitFeedbackRequest;
 use App\Http\Requests\Workout\UpdateSessionExerciseRequest;
@@ -25,10 +28,16 @@ use App\Models\WorkoutSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\ValidationException;
 
 class WorkoutSessionController extends Controller
 {
-    private const EAGER = ['exercises.exercise.primaryMuscle', 'exercises.sets', 'routineDay'];
+    private const EAGER = [
+        'exercises.exercise.primaryMuscle',
+        'exercises.exercise.alternatives.primaryMuscle',
+        'exercises.sets',
+        'routineDay',
+    ];
 
     public function index(Request $request): JsonResponse
     {
@@ -58,6 +67,23 @@ class WorkoutSessionController extends Controller
         }
 
         $session = $action->execute($request->user(), $routineDay, $request->validated());
+
+        return response()->json([
+            'data' => new WorkoutSessionResource($session->load(self::EAGER)),
+        ], 201);
+    }
+
+    public function skip(SkipWorkoutSessionRequest $request, SkipWorkoutSessionAction $action): JsonResponse
+    {
+        $routineDay = null;
+
+        if ($routineDayId = $request->validated('routine_day_id')) {
+            $routineDay = RoutineDay::query()->findOrFail($routineDayId);
+
+            Gate::authorize('view', $routineDay->routine);
+        }
+
+        $session = $action->execute($request->user(), $routineDay);
 
         return response()->json([
             'data' => new WorkoutSessionResource($session->load(self::EAGER)),
@@ -103,6 +129,45 @@ class WorkoutSessionController extends Controller
         return response()->json(['data' => new WorkoutExerciseResource($workoutExercise->load('exercise.primaryMuscle', 'sets'))]);
     }
 
+    /**
+     * Sustituye el ejercicio de esta fila de la SESION en curso por su
+     * alternativa A/B (no toca routine_exercises — la rutina en si queda
+     * intacta, ver seccion 32 del pedido; la proxima vez que el usuario
+     * repita este dia, vuelve a ver el ejercicio original de la plantilla).
+     *
+     * Solo se permite si todavia no se registro ninguna serie: una vez que
+     * hay sets logueados, el exercise_id de esta fila ya es parte del
+     * historial/sobrecarga progresiva (ver DetectPersonalRecordAction) y
+     * cambiarlo retroactivamente lo corromperia.
+     */
+    public function swapExercise(Request $request, WorkoutSession $workoutSession, WorkoutExercise $workoutExercise): JsonResponse
+    {
+        $this->authorizeOwner($workoutSession);
+        $this->authorizeExerciseBelongsToSession($workoutSession, $workoutExercise);
+
+        if ($workoutExercise->sets()->exists()) {
+            throw ValidationException::withMessages([
+                'exercise' => ['Ya registraste series para este ejercicio en esta sesión — no se puede cambiar.'],
+            ]);
+        }
+
+        $workoutExercise->load('exercise.alternatives');
+        $alternative = $workoutExercise->exercise->alternatives->first();
+
+        if (! $alternative) {
+            throw ValidationException::withMessages([
+                'exercise' => ['Este ejercicio no tiene una alternativa configurada.'],
+            ]);
+        }
+
+        $workoutExercise->update(['exercise_id' => $alternative->id]);
+        $workoutExercise->load(['exercise.primaryMuscle', 'exercise.alternatives.primaryMuscle', 'sets']);
+
+        return response()->json([
+            'data' => new WorkoutExerciseResource($workoutExercise),
+        ]);
+    }
+
     public function logSet(
         LogSetRequest $request,
         WorkoutSession $workoutSession,
@@ -135,6 +200,17 @@ class WorkoutSessionController extends Controller
         return response()->json([
             'data' => new WorkoutSessionResource($session),
             'meta' => ['gamification' => $gamification],
+        ]);
+    }
+
+    public function cancel(Request $request, WorkoutSession $workoutSession, CancelWorkoutSessionAction $action): JsonResponse
+    {
+        $this->authorizeOwner($workoutSession);
+
+        $session = $action->execute($workoutSession);
+
+        return response()->json([
+            'data' => new WorkoutSessionResource($session),
         ]);
     }
 

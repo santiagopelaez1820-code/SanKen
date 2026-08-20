@@ -18,6 +18,8 @@ const baseSession: WorkoutSession = {
   duration_minutes: null,
   completed: false,
   completed_as_planned: null,
+  skipped: false,
+  cancelled: false,
   sleep_quality: null,
   energy_level: null,
   muscle_soreness: null,
@@ -27,7 +29,14 @@ const baseSession: WorkoutSession = {
       id: 10,
       order: 1,
       all_sets_completed: false,
+      target_sets: 3,
+      target_reps: '10',
+      rest_seconds: 90,
+      target_rpe: null,
+      suggested_weight_kg: null,
+      suggested_reps_per_set: null,
       exercise: { id: 1, name: 'Sentadilla', primary_muscle: 'quads', equipment: 'barbell', video_url: null, image_url: null },
+      alternative: null,
       sets: [],
     },
   ],
@@ -121,6 +130,29 @@ describe('submitFeedback', () => {
 
     await expect(useWorkoutStore.getState().submitFeedback(true)).rejects.toThrow();
 
+    expect(useWorkoutStore.getState().error).toBe('network down');
+  });
+});
+
+describe('cancel', () => {
+  it('clears the session on success, without ever calling complete', async () => {
+    useWorkoutStore.setState({ session: baseSession });
+    mockedApi.post.mockResolvedValueOnce(undefined);
+
+    await useWorkoutStore.getState().cancel();
+
+    expect(mockedApi.post).toHaveBeenCalledWith(`/workout-sessions/${baseSession.id}/cancel`);
+    expect(useWorkoutStore.getState().session).toBeNull();
+    expect(useWorkoutStore.getState().isSubmitting).toBe(false);
+  });
+
+  it('sets an error and keeps the session on failure', async () => {
+    useWorkoutStore.setState({ session: baseSession });
+    mockedApi.post.mockRejectedValueOnce(new Error('network down'));
+
+    await expect(useWorkoutStore.getState().cancel()).rejects.toThrow();
+
+    expect(useWorkoutStore.getState().session).toEqual(baseSession);
     expect(useWorkoutStore.getState().error).toBe('network down');
   });
 });

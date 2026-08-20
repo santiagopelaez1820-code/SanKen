@@ -3,10 +3,7 @@
 namespace App\Providers;
 
 use App\Domain\Routine\Contracts\RoutineGeneratorInterface;
-use App\Domain\Routine\RoutineGenerator;
-use App\Domain\Routine\Services\ExerciseSelector;
-use App\Domain\Routine\Services\SetRepRestAssigner;
-use App\Domain\Routine\Services\SplitSelector;
+use App\Domain\Routine\TemplateRoutineGenerator;
 use App\Events\OnboardingCompleted;
 use App\Events\PRBroken;
 use App\Events\StreakMilestone;
@@ -36,16 +33,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(RoutineGeneratorInterface::class, function () {
-            return new RoutineGenerator(
-                splitSelector: new SplitSelector(config('routine_engine.splits')),
-                exerciseSelector: new ExerciseSelector,
-                assigner: new SetRepRestAssigner,
-                goalParametersConfig: config('routine_engine.goal_parameters'),
-                exercisesPerMuscleByLevel: config('routine_engine.exercises_per_muscle_by_level'),
-                maxExercisesBySessionMinutes: config('routine_engine.max_exercises_by_session_minutes'),
-            );
-        });
+        // TemplateRoutineGenerator (plantillas curadas por sexo+frecuencia) es
+        // el motor activo. El algoritmico original (RoutineGenerator, en
+        // Domain/Routine/RoutineGenerator.php) queda intacto y con tests
+        // propios pasando, pero ya no esta bindeado a la interfaz.
+        $this->app->bind(RoutineGeneratorInterface::class, TemplateRoutineGenerator::class);
     }
 
     /**

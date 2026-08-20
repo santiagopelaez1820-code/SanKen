@@ -5,6 +5,7 @@ namespace App\Application\Workout\Actions;
 use App\Application\Stats\Actions\AggregateDailyStatsAction;
 use App\Events\WorkoutCompleted;
 use App\Models\WorkoutSession;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Cierra la sesión de entrenamiento, dispara el recálculo de estadísticas
@@ -17,6 +18,15 @@ class CompleteWorkoutSessionAction
      */
     public function execute(WorkoutSession $session, ?int $durationMinutes, ?string $notes): array
     {
+        // Guarda defensiva contra un replay/carrera del cliente: una vez
+        // cancelada (ver CancelWorkoutSessionAction), una sesión nunca debe
+        // poder terminar completándose de todas formas.
+        if ($session->cancelled_at) {
+            throw ValidationException::withMessages([
+                'session' => ['Este entrenamiento fue cancelado, no se puede completar.'],
+            ]);
+        }
+
         $session->update([
             'completed' => true,
             'duration_minutes' => $durationMinutes ?? $session->duration_minutes,

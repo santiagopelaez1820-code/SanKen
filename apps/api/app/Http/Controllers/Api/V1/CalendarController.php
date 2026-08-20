@@ -9,6 +9,7 @@ use App\Http\Requests\Calendar\CalendarMonthRequest;
 use App\Http\Requests\Calendar\StoreCalendarReminderRequest;
 use App\Http\Resources\CalendarReminderResource;
 use App\Models\CalendarReminder;
+use App\Models\MuscleGroup;
 use App\Models\WorkoutSession;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -43,13 +44,23 @@ class CalendarController extends Controller
             ->where('completed', true)
             ->whereDate('performed_at', '>=', $monthStart->toDateString())
             ->whereDate('performed_at', '<=', $monthEnd->toDateString())
-            ->with('routineDay')
+            ->with('routineDay', 'exercises.exercise.primaryMuscle')
             ->get()
             ->map(fn (WorkoutSession $session) => [
                 'type' => 'workout_completed',
                 'event_date' => $session->performed_at->toDateString(),
                 'title' => $session->routineDay?->label ?? 'Entrenamiento',
                 'duration_minutes' => $session->duration_minutes,
+                // Grupos musculares REALMENTE trabajados (de los ejercicios
+                // efectivamente cargados en esta sesión), no lo que la rutina
+                // planeaba — un ejercicio agregado/cambiado a mitad de sesión
+                // ya queda reflejado acá.
+                'muscle_groups' => $session->exercises
+                    ->pluck('exercise.primaryMuscle.name')
+                    ->filter()
+                    ->unique()
+                    ->values()
+                    ->all(),
             ])
             ->values();
 
@@ -59,11 +70,18 @@ class CalendarController extends Controller
             $day = $routine ? $nextDay->execute($routine->loadMissing('days')) : null;
 
             if ($day !== null) {
+                // target_muscle_groups guarda slugs (ver TemplateRoutineGenerator),
+                // no el nombre en español que se muestra acá.
+                $muscleNames = MuscleGroup::query()
+                    ->whereIn('slug', $day->target_muscle_groups ?? [])
+                    ->pluck('name');
+
                 $events->push([
                     'type' => 'workout_planned',
                     'event_date' => $today->toDateString(),
                     'title' => $day->label,
                     'duration_minutes' => null,
+                    'muscle_groups' => $muscleNames->values()->all(),
                 ]);
             }
         }

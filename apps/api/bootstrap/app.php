@@ -15,17 +15,13 @@ return Application::configure(basePath: dirname(__DIR__))
     // uno corría por separado). Esta app siempre wirea a mano, así que se
     // desactiva el discovery para que quede una sola fuente de verdad.
     ->withEvents(discover: false)
-    // Primer uso de Schedule:: en la app (Sprint 9, rankings). Esta
-    // registración por sí sola NO alcanza para que corra en este entorno
-    // WSL de dev: no hay cron ni un contenedor de scheduler en
-    // docker-compose.yml, así que nada invoca `schedule:run` en el tiempo.
-    // Para dev/testing hay que correr `php artisan rankings:recalculate`
-    // a mano; esta registración sirve para un despliegue real con cron.
+    // Primer uso de Schedule:: en la app (Sprint 9). Esta registración por
+    // sí sola NO alcanza para que corra en este entorno WSL de dev: no hay
+    // cron ni un contenedor de scheduler en docker-compose.yml, así que
+    // nada invoca `schedule:run` en el tiempo. Para dev/testing hay que
+    // correr `php artisan challenges:generate` a mano; esta registración
+    // sirve para un despliegue real con cron.
     ->withSchedule(function (Schedule $schedule): void {
-        $schedule->command('rankings:recalculate')->daily();
-        // Igual salvedad que rankings:recalculate arriba: no corre solo en
-        // este entorno WSL de dev, hay que invocarlo a mano
-        // (`php artisan challenges:generate`).
         $schedule->command('challenges:generate')->weekly();
     })
     ->withRouting(

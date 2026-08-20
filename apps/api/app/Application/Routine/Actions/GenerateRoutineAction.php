@@ -36,10 +36,8 @@ class GenerateRoutineAction implements ShouldQueue
             level: $this->user->onboardingResponse->level,
             goals: $this->user->onboardingResponse->goals ?? [],
             frequencyDays: $this->user->onboardingResponse->frequency_days,
-            sessionMinutes: $this->user->onboardingResponse->session_minutes,
-            place: $this->user->onboardingResponse->place,
             equipmentAvailable: $this->user->onboardingResponse->equipment_available ?? [],
-            injuries: $this->user->onboardingResponse->injuries ?? [],
+            sex: $this->user->profile->sex,
         );
 
         $pool = Exercise::query()

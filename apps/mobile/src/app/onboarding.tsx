@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Redirect, router } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { FitnessGoal, FitnessLevel, FrequencyDays, SessionMinutes, TrainingPlace } from '@sanken/core';
+import type { FitnessGoal, FitnessLevel, FrequencyDays } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -31,34 +31,18 @@ const GOAL_LABELS: Record<FitnessGoal, string> = {
   cardio: 'Cardio',
 };
 
-const PLACE_LABELS: Record<TrainingPlace, string> = {
-  home: 'Casa',
-  gym: 'Gimnasio',
-};
+type StepId = 'age' | 'sex' | 'height' | 'weight' | 'level' | 'goals' | 'frequency';
 
-const EQUIPMENT_LABELS: Record<string, string> = {
-  barbell: 'Barra',
-  dumbbells: 'Mancuernas',
-  bench: 'Banco',
-  squat_rack: 'Rack de sentadillas',
-  pull_up_bar: 'Barra de dominadas',
-  cables: 'Poleas',
-  machines: 'Máquinas',
-  kettlebells: 'Kettlebells',
-  resistance_bands: 'Bandas de resistencia',
-  bodyweight_only: 'Solo peso corporal',
-};
-
-type StepId =
-  | 'age' | 'sex' | 'height' | 'weight' | 'country' | 'city'
-  | 'level' | 'goals' | 'frequency' | 'session' | 'place'
-  | 'equipment' | 'injuries' | 'experience';
-
-const STEP_ORDER: StepId[] = [
-  'age', 'sex', 'height', 'weight', 'country', 'city',
-  'level', 'goals', 'frequency', 'session', 'place',
-  'equipment', 'injuries', 'experience',
-];
+/**
+ * La ubicación (país/departamento/ciudad) se pide en una pantalla separada
+ * después de completar este wizard (ver /ubicacion) — no acá. Antes este
+ * wizard también tenía esos pasos y terminaba pidiendo la ubicación dos
+ * veces (una en el wizard, otra en /ubicacion).
+ *
+ * Tampoco pregunta por equipamiento disponible: el generador de rutinas
+ * activo (TemplateRoutineGenerator) no usa esa respuesta.
+ */
+const STEP_ORDER: StepId[] = ['age', 'sex', 'height', 'weight', 'level', 'goals', 'frequency'];
 
 export default function OnboardingScreen() {
   const user = useAuthStore((s) => s.user);
@@ -67,26 +51,18 @@ export default function OnboardingScreen() {
     useOnboardingStore();
 
   const [stepIndex, setStepIndex] = useState(0);
-  const [countryId, setCountryId] = useState<number | null>(null);
   const [ageInput, setAgeInput] = useState('');
   const [heightInput, setHeightInput] = useState('');
   const [weightInput, setWeightInput] = useState('');
-  const [injuriesInput, setInjuriesInput] = useState('');
-  const [experienceInput, setExperienceInput] = useState('');
 
   useEffect(() => {
     loadQuestions();
   }, [loadQuestions]);
 
-  const selectedCountry = useMemo(
-    () => questions?.countries.find((c) => c.id === countryId) ?? null,
-    [questions, countryId],
-  );
+  const step = STEP_ORDER[stepIndex];
 
   if (!user) return <Redirect href="/login" />;
   if (user.onboarding_completed) return <Redirect href="/" />;
-
-  const step = STEP_ORDER[stepIndex];
 
   const goNext = async () => {
     const isLast = stepIndex === STEP_ORDER.length - 1;
@@ -117,21 +93,16 @@ export default function OnboardingScreen() {
       case 'sex': return !!answers.sex;
       case 'height': return heightInput.trim().length > 0;
       case 'weight': return weightInput.trim().length > 0;
-      case 'country': return countryId !== null;
-      case 'city': return !!answers.city_id;
       case 'level': return !!answers.level;
       case 'goals': return (answers.goals?.length ?? 0) > 0;
       case 'frequency': return !!answers.frequency_days;
-      case 'session': return !!answers.session_minutes;
-      case 'place': return !!answers.place;
-      default: return true; // equipment / injuries / experience son opcionales
     }
   };
 
-  const toggleMulti = (key: 'goals' | 'equipment_available', value: string) => {
-    const current = (answers[key] as string[] | undefined) ?? [];
+  const toggleGoal = (value: FitnessGoal) => {
+    const current = answers.goals ?? [];
     const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value];
-    setAnswer(key, next as never);
+    setAnswer('goals', next);
   };
 
   if (isLoading || !questions) {
@@ -204,35 +175,6 @@ export default function OnboardingScreen() {
               </Question>
             )}
 
-            {step === 'country' && (
-              <Question title="¿En qué país estás?">
-                {questions.countries.map((c) => (
-                  <OptionCard
-                    key={c.id}
-                    label={c.name}
-                    selected={countryId === c.id}
-                    onPress={() => {
-                      setCountryId(c.id);
-                      setAnswer('city_id', undefined);
-                    }}
-                  />
-                ))}
-              </Question>
-            )}
-
-            {step === 'city' && (
-              <Question title="¿En qué ciudad?">
-                {(selectedCountry?.cities ?? []).map((c) => (
-                  <OptionCard
-                    key={c.id}
-                    label={c.name}
-                    selected={answers.city_id === c.id}
-                    onPress={() => setAnswer('city_id', c.id)}
-                  />
-                ))}
-              </Question>
-            )}
-
             {step === 'level' && (
               <Question title="¿Cuál es tu nivel?">
                 {questions.levels.map((value) => (
@@ -253,7 +195,7 @@ export default function OnboardingScreen() {
                     key={value}
                     label={GOAL_LABELS[value]}
                     selected={(answers.goals ?? []).includes(value)}
-                    onPress={() => toggleMulti('goals', value)}
+                    onPress={() => toggleGoal(value)}
                   />
                 ))}
               </Question>
@@ -269,77 +211,6 @@ export default function OnboardingScreen() {
                     onPress={() => setAnswer('frequency_days', value as FrequencyDays)}
                   />
                 ))}
-              </Question>
-            )}
-
-            {step === 'session' && (
-              <Question title="¿Cuánto tiempo tienes por sesión?">
-                {questions.session_minutes.map((value) => (
-                  <OptionCard
-                    key={value}
-                    label={`${value} minutos`}
-                    selected={answers.session_minutes === value}
-                    onPress={() => setAnswer('session_minutes', value as SessionMinutes)}
-                  />
-                ))}
-              </Question>
-            )}
-
-            {step === 'place' && (
-              <Question title="¿Dónde entrenarás?">
-                {questions.places.map((value) => (
-                  <OptionCard
-                    key={value}
-                    label={PLACE_LABELS[value]}
-                    selected={answers.place === value}
-                    onPress={() => setAnswer('place', value)}
-                  />
-                ))}
-              </Question>
-            )}
-
-            {step === 'equipment' && (
-              <Question title="¿Qué equipo tienes disponible?" subtitle="Opcional — puedes elegir varios">
-                {questions.equipment.map((value) => (
-                  <OptionCard
-                    key={value}
-                    label={EQUIPMENT_LABELS[value] ?? value}
-                    selected={(answers.equipment_available ?? []).includes(value)}
-                    onPress={() => toggleMulti('equipment_available', value)}
-                  />
-                ))}
-              </Question>
-            )}
-
-            {step === 'injuries' && (
-              <Question title="¿Tienes alguna lesión?" subtitle="Opcional — sepáralas por coma">
-                <TextField
-                  label="Lesiones"
-                  value={injuriesInput}
-                  onChangeText={(v) => {
-                    setInjuriesInput(v);
-                    setAnswer(
-                      'injuries',
-                      v.split(',').map((s) => s.trim()).filter(Boolean),
-                    );
-                  }}
-                  placeholder="Ej. hombro, rodilla derecha"
-                />
-              </Question>
-            )}
-
-            {step === 'experience' && (
-              <Question title="Cuéntanos tu experiencia" subtitle="Opcional">
-                <TextField
-                  label="Experiencia"
-                  value={experienceInput}
-                  onChangeText={(v) => {
-                    setExperienceInput(v);
-                    setAnswer('experience_notes', v || null);
-                  }}
-                  multiline
-                  numberOfLines={4}
-                />
               </Question>
             )}
 

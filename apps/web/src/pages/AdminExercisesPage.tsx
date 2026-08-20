@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { AdminExercise, MuscleGroupOption } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { ExerciseVideoControls } from "@/components/admin/ExerciseVideoControls"
 
 interface ExerciseFormState {
   name: string
@@ -12,6 +13,8 @@ interface ExerciseFormState {
   level: string
   type: string
   instructions: string
+  video_url: string
+  alternative_exercise_id: string
 }
 
 const EMPTY_FORM: ExerciseFormState = {
@@ -21,6 +24,8 @@ const EMPTY_FORM: ExerciseFormState = {
   level: "beginner",
   type: "compound",
   instructions: "",
+  video_url: "",
+  alternative_exercise_id: "",
 }
 
 const EQUIPMENT_OPTIONS = [
@@ -43,9 +48,15 @@ export function AdminExercisesPage() {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ["admin", "exercises"] })
 
+  const buildPayload = () => ({
+    ...form,
+    primary_muscle_id: Number(form.primary_muscle_id),
+    video_url: form.video_url.trim() || null,
+    alternative_exercise_id: form.alternative_exercise_id ? Number(form.alternative_exercise_id) : null,
+  })
+
   const createMutation = useMutation({
-    mutationFn: () =>
-      api.post("/admin/exercises", { ...form, primary_muscle_id: Number(form.primary_muscle_id) }),
+    mutationFn: () => api.post("/admin/exercises", buildPayload()),
     onSuccess: () => {
       setForm(EMPTY_FORM)
       invalidate()
@@ -53,8 +64,7 @@ export function AdminExercisesPage() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: (id: number) =>
-      api.patch(`/admin/exercises/${id}`, { ...form, primary_muscle_id: Number(form.primary_muscle_id) }),
+    mutationFn: (id: number) => api.patch(`/admin/exercises/${id}`, buildPayload()),
     onSuccess: () => {
       setEditingId(null)
       setForm(EMPTY_FORM)
@@ -76,6 +86,8 @@ export function AdminExercisesPage() {
       level: exercise.level,
       type: exercise.type,
       instructions: exercise.instructions ?? "",
+      video_url: exercise.video_url ?? "",
+      alternative_exercise_id: exercise.alternatives[0] ? String(exercise.alternatives[0].id) : "",
     })
   }
 
@@ -154,6 +166,26 @@ export function AdminExercisesPage() {
               onChange={(e) => setForm({ ...form, instructions: e.target.value })}
               className="col-span-2 rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
             />
+            <input
+              placeholder="URL del video (opcional)"
+              value={form.video_url}
+              onChange={(e) => setForm({ ...form, video_url: e.target.value })}
+              className="col-span-2 rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+            />
+            <select
+              value={form.alternative_exercise_id}
+              onChange={(e) => setForm({ ...form, alternative_exercise_id: e.target.value })}
+              className="col-span-2 rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="">Sin ejercicio alternativo (A/B)</option>
+              {(response?.data ?? [])
+                .filter((exercise) => exercise.id !== editingId)
+                .map((exercise) => (
+                  <option key={exercise.id} value={exercise.id}>
+                    {exercise.name}
+                  </option>
+                ))}
+            </select>
           </div>
           <div className="mt-3 flex gap-2">
             {editingId ? (
@@ -186,27 +218,31 @@ export function AdminExercisesPage() {
           {!isLoading && response && (
             <ul className="divide-y divide-border">
               {response.data.map((exercise) => (
-                <li key={exercise.id} className="flex items-center justify-between gap-3 py-2.5">
-                  <button
-                    onClick={() => startEdit(exercise)}
-                    className={`flex-1 text-left text-sm ${exercise.is_active ? "" : "opacity-50"}`}
-                  >
-                    {exercise.name}
-                    <span className="ml-1 text-xs text-muted-foreground">
-                      · {exercise.primary_muscle.name} · {exercise.equipment} · {exercise.level}
-                      {!exercise.is_active && " · inactivo"}
-                    </span>
-                  </button>
-                  {exercise.is_active && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deactivateMutation.mutate(exercise.id)}
-                      disabled={deactivateMutation.isPending}
+                <li key={exercise.id} className="flex flex-col gap-2 py-2.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <button
+                      onClick={() => startEdit(exercise)}
+                      className={`flex-1 text-left text-sm ${exercise.is_active ? "" : "opacity-50"}`}
                     >
-                      Desactivar
-                    </Button>
-                  )}
+                      {exercise.name}
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        · {exercise.primary_muscle.name} · {exercise.equipment} · {exercise.level}
+                        {exercise.alternatives[0] && ` · alt: ${exercise.alternatives[0].name}`}
+                        {!exercise.is_active && " · inactivo"}
+                      </span>
+                    </button>
+                    {exercise.is_active && (
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deactivateMutation.mutate(exercise.id)}
+                        disabled={deactivateMutation.isPending}
+                      >
+                        Desactivar
+                      </Button>
+                    )}
+                  </div>
+                  <ExerciseVideoControls exercise={exercise} />
                 </li>
               ))}
             </ul>

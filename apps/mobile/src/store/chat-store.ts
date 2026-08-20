@@ -58,12 +58,19 @@ export const useChatStore = create<ChatStoreState>((set, get) => ({
     if (get().activeConversationId !== conversationId) return; // se cerró mientras cargaba
     set({ messages, isLoadingThread: false });
 
-    const echo = getEcho();
-    const channel = echo.private(`conversations.${conversationId}`);
-    channel.listen('.message.sent', (payload: MessageSentBroadcast) => {
-      set((state) => ({ messages: [...state.messages, { ...payload, is_mine: false }] }));
-    });
-    leaveChannel = () => echo.leave(`conversations.${conversationId}`);
+    try {
+      const echo = getEcho();
+      const channel = echo.private(`conversations.${conversationId}`);
+      channel.listen('.message.sent', (payload: MessageSentBroadcast) => {
+        set((state) => ({ messages: [...state.messages, { ...payload, is_mine: false }] }));
+      });
+      leaveChannel = () => echo.leave(`conversations.${conversationId}`);
+    } catch (err) {
+      // Ver el comentario en notifications-store.ts: si el websocket no
+      // conecta, el hilo se queda usable sin mensajes en vivo en vez de
+      // romper toda la pantalla.
+      console.warn('No se pudo suscribir al chat en vivo:', err);
+    }
   },
 
   closeThread: () => {

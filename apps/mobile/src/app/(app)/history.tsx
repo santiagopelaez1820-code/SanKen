@@ -48,6 +48,7 @@ export default function HistoryScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <FlatList
+          style={styles.list}
           data={sessions}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => <SessionRow session={item} />}
@@ -83,6 +84,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  list: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,

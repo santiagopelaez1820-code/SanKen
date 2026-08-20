@@ -6,25 +6,28 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { LevelUpCelebration } from '@/components/gamification/level-up-celebration';
+import { ExerciseVideoPlayer } from '@/components/workout/exercise-video-player';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useRoutineStore } from '@/store/routine-store';
 import { useWorkoutStore } from '@/store/workout-store';
 
+const ADVANCE_DELAY_MS = 900;
+
 export default function WorkoutSessionScreen() {
   const {
     session,
-    routineDay,
     currentIndex,
     isSubmitting,
     error,
     lastSetWasPersonalRecord,
     gamificationResult,
     logSet,
-    finishCurrentExercise,
-    goToExercise,
+    swapCurrentExercise,
     complete,
+    cancel,
     submitFeedback,
     clearGamificationResult,
     reset,
@@ -34,23 +37,50 @@ export default function WorkoutSessionScreen() {
   const [weightInput, setWeightInput] = useState('');
   const [repsInput, setRepsInput] = useState('');
   const [restRemaining, setRestRemaining] = useState<number | null>(null);
+  const [justSwapped, setJustSwapped] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
   const startedAt = useRef(Date.now());
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const workoutExercise = session?.exercises[currentIndex];
-  const targetExercise = routineDay?.exercises[currentIndex];
   const isLastExercise = session ? currentIndex === session.exercises.length - 1 : false;
+  const allExercisesCompleted = session ? session.exercises.every((e) => e.all_sets_completed) : false
+  const exerciseJustCompleted = workoutExercise ? workoutExercise.sets.length >= workoutExercise.target_sets : false
 
   const targetSetsLabel = useMemo(() => {
-    if (!targetExercise) return null;
-    return `${targetExercise.target_sets}×${targetExercise.target_reps} · RIR ${(10 - (targetExercise.target_rpe ?? 8)).toFixed(1)} · ${targetExercise.rest_seconds}s`;
-  }, [targetExercise]);
+    if (!workoutExercise) return null;
+    const rir = workoutExercise.target_rpe !== null ? (10 - workoutExercise.target_rpe).toFixed(1) : null;
+    return `${workoutExercise.target_sets}×${workoutExercise.target_reps ?? '—'}${rir ? ` · RIR ${rir}` : ''}${workoutExercise.rest_seconds ? ` · ${workoutExercise.rest_seconds}s` : ''}`;
+  }, [workoutExercise]);
+
+  // Reps recomendadas para la PRÓXIMA serie de este ejercicio (índice =
+  // cuántas ya se registraron) — cada serie puede tener un objetivo
+  // distinto (ver ProgressiveOverloadCalculator, rampa por serie).
+  const nextSetIndex = workoutExercise?.sets.length ?? 0;
+  const suggestedRepsForNextSet = workoutExercise?.suggested_reps_per_set?.[nextSetIndex] ?? null;
 
   useEffect(() => {
-    const suggested = targetExercise?.suggested_weight_kg;
-    setWeightInput(suggested ? String(suggested) : '');
+    setWeightInput(workoutExercise?.suggested_weight_kg ? String(workoutExercise.suggested_weight_kg) : '');
+    setJustSwapped(false);
+    setRestRemaining(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentIndex]);
+  }, [workoutExercise?.id]);
+
+  useEffect(() => {
+    setRepsInput(suggestedRepsForNextSet !== null ? String(suggestedRepsForNextSet) : '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [workoutExercise?.id, nextSetIndex]);
+
+  const handleSwap = async () => {
+    await swapCurrentExercise();
+    setJustSwapped((prev) => !prev);
+  };
+
+  const handleExit = async () => {
+    setShowExitConfirm(false);
+    await cancel();
+    router.replace('/');
+  };
 
   useEffect(() => {
     return () => {
@@ -72,6 +102,23 @@ export default function WorkoutSessionScreen() {
     }, 1000);
   };
 
+  // Avance automático de sesión completa (sección 3 del pedido): cuando el
+  // último ejercicio llega a sus 3 series, cierra la sesión solo — sin
+  // esperar un "Finalizar entrenamiento" manual.
+  useEffect(() => {
+    if (!session || session.completed || !allExercisesCompleted || isSubmitting) return;
+    const timeout = setTimeout(async () => {
+      const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
+      // OJO: no refrescar routine-store acá — el peso sugerido de la
+      // próxima sesión recién se calcula al responder el feedback (ver
+      // SubmitSessionFeedbackAction), no al completar. Refrescar antes de
+      // tiempo deja el store con el peso viejo (ver handleFeedback).
+      await complete(durationMinutes);
+    }, ADVANCE_DELAY_MS);
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allExercisesCompleted, session?.completed]);
+
   if (!session || !workoutExercise) {
     return <Redirect href="/" />;
   }
@@ -82,26 +129,15 @@ export default function WorkoutSessionScreen() {
     if (!weight || !reps) return;
 
     await logSet(weight, reps);
-    setRepsInput('');
-    startRestTimer(targetExercise?.rest_seconds ?? 90);
-  };
-
-  const handleNextExercise = async () => {
-    await finishCurrentExercise();
-    setRestRemaining(null);
-    setRepsInput('');
-    goToExercise(currentIndex + 1);
-  };
-
-  const handleFinish = async () => {
-    await finishCurrentExercise();
-    const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
-    await complete(durationMinutes);
-    refreshRoutine();
+    // repsInput se re-precarga solo con la sugerencia de la próxima serie
+    // (ver el useEffect de nextSetIndex más arriba) — no hace falta limpiarlo acá.
+    startRestTimer(workoutExercise?.rest_seconds ?? 90);
   };
 
   const handleFeedback = async (completedAsPlanned: boolean) => {
     await submitFeedback(completedAsPlanned);
+    // Recién acá el peso sugerido de la próxima sesión ya está calculado.
+    refreshRoutine();
   };
 
   if (session.completed) {
@@ -156,14 +192,52 @@ export default function WorkoutSessionScreen() {
     <ThemedView style={styles.flex}>
       <SafeAreaView style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scroll}>
-          <ThemedText type="small" themeColor="textSecondary">
-            {currentIndex + 1}/{session.exercises.length}
-          </ThemedText>
+          <ThemedView style={styles.header}>
+            <ThemedText type="small" themeColor="textSecondary">
+              {currentIndex + 1}/{session.exercises.length}
+            </ThemedText>
+            <PrimaryButton label="Salir" variant="ghost" onPress={() => setShowExitConfirm(true)} />
+          </ThemedView>
           <ThemedText type="subtitle">{workoutExercise.exercise.name}</ThemedText>
           {targetSetsLabel && (
             <ThemedText type="small" themeColor="textSecondary">
               Objetivo: {targetSetsLabel}
             </ThemedText>
+          )}
+          {workoutExercise.suggested_weight_kg !== null && (
+            <ThemedText type="small">
+              Peso recomendado:{' '}
+              <ThemedText type="smallBold" style={styles.suggested}>
+                {workoutExercise.suggested_weight_kg} kg
+              </ThemedText>
+            </ThemedText>
+          )}
+          {suggestedRepsForNextSet !== null && (
+            <ThemedText type="small">
+              Repeticiones recomendadas:{' '}
+              <ThemedText type="smallBold" style={styles.suggested}>
+                {suggestedRepsForNextSet}
+              </ThemedText>
+            </ThemedText>
+          )}
+
+          <ExerciseVideoPlayer videoUrl={workoutExercise.exercise.video_url} />
+
+          {workoutExercise.alternative && (
+            <ThemedView style={styles.swapBlock}>
+              <PrimaryButton
+                label={justSwapped ? '↩️ Volver al anterior' : '🔄 Cambiar ejercicio'}
+                variant="ghost"
+                loading={isSubmitting}
+                disabled={workoutExercise.sets.length > 0}
+                onPress={handleSwap}
+              />
+              {workoutExercise.sets.length > 0 && (
+                <ThemedText type="small" themeColor="textSecondary">
+                  Ya registraste series — no se puede cambiar el ejercicio en esta sesión.
+                </ThemedText>
+              )}
+            </ThemedView>
           )}
 
           <ThemedView type="backgroundElement" style={styles.setsCard}>
@@ -190,27 +264,37 @@ export default function WorkoutSessionScreen() {
             </ThemedView>
           )}
 
-          <ThemedView style={styles.inputsRow}>
-            <ThemedView style={styles.inputHalf}>
-              <TextField label="Peso (kg)" keyboardType="decimal-pad" value={weightInput} onChangeText={setWeightInput} />
+          {exerciseJustCompleted ? (
+            <ThemedView style={styles.doneBanner}>
+              <ThemedText type="smallBold" style={styles.doneText}>
+                ✅ Ejercicio completado — {isLastExercise ? 'cerrando entrenamiento…' : 'pasando al siguiente…'}
+              </ThemedText>
             </ThemedView>
-            <ThemedView style={styles.inputHalf}>
-              <TextField label="Repeticiones" keyboardType="number-pad" value={repsInput} onChangeText={setRepsInput} />
-            </ThemedView>
-          </ThemedView>
+          ) : (
+            <>
+              <ThemedView style={styles.inputsRow}>
+                <ThemedView style={styles.inputHalf}>
+                  <TextField label="Peso realizado (kg)" keyboardType="decimal-pad" value={weightInput} onChangeText={setWeightInput} />
+                </ThemedView>
+                <ThemedView style={styles.inputHalf}>
+                  <TextField label="Repeticiones" keyboardType="number-pad" value={repsInput} onChangeText={setRepsInput} />
+                </ThemedView>
+              </ThemedView>
 
-          {error && (
-            <ThemedText type="small" style={styles.error}>
-              {error}
-            </ThemedText>
+              {error && (
+                <ThemedText type="small" style={styles.error}>
+                  {error}
+                </ThemedText>
+              )}
+
+              <PrimaryButton
+                label={`Registrar serie ${workoutExercise.sets.length + 1} de ${workoutExercise.target_sets}`}
+                loading={isSubmitting}
+                disabled={!weightInput || !repsInput}
+                onPress={handleLogSet}
+              />
+            </>
           )}
-
-          <PrimaryButton
-            label="Completar serie"
-            loading={isSubmitting}
-            disabled={!weightInput || !repsInput}
-            onPress={handleLogSet}
-          />
 
           {restRemaining !== null && (
             <ThemedView style={styles.restCard}>
@@ -223,16 +307,19 @@ export default function WorkoutSessionScreen() {
               <PrimaryButton label="Saltar descanso" variant="ghost" onPress={() => setRestRemaining(null)} />
             </ThemedView>
           )}
-
-          <ThemedView style={styles.navRow}>
-            {isLastExercise ? (
-              <PrimaryButton label="Finalizar entrenamiento" loading={isSubmitting} onPress={handleFinish} />
-            ) : (
-              <PrimaryButton label="Siguiente ejercicio" variant="ghost" loading={isSubmitting} onPress={handleNextExercise} />
-            )}
-          </ThemedView>
         </ScrollView>
       </SafeAreaView>
+
+      <ConfirmDialog
+        visible={showExitConfirm}
+        title="¿Salir del entrenamiento?"
+        description="Las series que ya registraste se conservan, pero esta sesión no contará como completada."
+        confirmLabel="Salir"
+        cancelLabel="Seguir entrenando"
+        isLoading={isSubmitting}
+        onConfirm={handleExit}
+        onCancel={() => setShowExitConfirm(false)}
+      />
     </ThemedView>
   );
 }
@@ -247,25 +334,36 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '100%',
   },
+  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { textAlign: 'center' },
   subtitle: { textAlign: 'center' },
+  suggested: { color: '#FF7A3D' },
   setsCard: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
+  swapBlock: { gap: Spacing.one },
   setRow: { flexDirection: 'row', justifyContent: 'space-between' },
   prBanner: {
     borderRadius: Spacing.three,
     paddingVertical: Spacing.two,
     alignItems: 'center',
-    backgroundColor: 'rgba(201,162,39,0.14)',
+    backgroundColor: 'rgba(255,122,61,0.14)',
     borderWidth: 1,
-    borderColor: 'rgba(201,162,39,0.35)',
+    borderColor: 'rgba(255,122,61,0.35)',
   },
-  prText: { color: '#C9A227' },
+  prText: { color: '#FF7A3D' },
+  doneBanner: {
+    borderRadius: Spacing.three,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255,122,61,0.14)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,122,61,0.35)',
+  },
+  doneText: { color: '#FF7A3D', textAlign: 'center' },
   inputsRow: { flexDirection: 'row', gap: Spacing.three },
   inputHalf: { flex: 1 },
   error: { color: '#C9564A', textAlign: 'center' },
   restCard: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.four },
   restNumber: { fontVariant: ['tabular-nums'] },
-  navRow: { marginTop: Spacing.two },
   feedbackRow: { flexDirection: 'row', gap: Spacing.three, alignSelf: 'stretch' },
   feedbackHalf: { flex: 1 },
 });

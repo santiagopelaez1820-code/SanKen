@@ -16,9 +16,13 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             CountrySeeder::class,
+            StateSeeder::class,
             MuscleGroupSeeder::class,
             ExerciseSeeder::class,
+            RoutineTemplateSeeder::class,
             AchievementSeeder::class,
+            ChallengeTemplateSeeder::class,
+            FoodItemSeeder::class,
         ]);
     }
 }

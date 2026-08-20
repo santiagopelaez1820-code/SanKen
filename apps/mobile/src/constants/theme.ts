@@ -7,23 +7,23 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// Paleta de marca SanKen — negro, blanco, dorado. Ver docs/04-ux-ui-wireframes.md.
+// Paleta de marca SanKen — navy + naranja (logo "SANKEN GIMNASIO & FITNESS"). Ver docs/04-ux-ui-wireframes.md.
 export const Colors = {
   light: {
-    text: '#14120F',
-    background: '#FAFAF8',
-    backgroundElement: '#F2F0EC',
-    backgroundSelected: '#E7E3DA',
-    textSecondary: '#6B6459',
-    accent: '#9A7A1E',
+    text: '#0B1220',
+    background: '#F7F9FC',
+    backgroundElement: '#EAF0F6',
+    backgroundSelected: '#D7E4F0',
+    textSecondary: '#5B6B7C',
+    accent: '#F06020',
   },
   dark: {
-    text: '#F6F4EF',
-    background: '#0A0A09',
-    backgroundElement: '#151412',
-    backgroundSelected: '#1C1B18',
-    textSecondary: '#9B9388',
-    accent: '#C9A227',
+    text: '#F4F7FB',
+    background: '#070B14',
+    backgroundElement: '#101D30',
+    backgroundSelected: '#16233A',
+    textSecondary: '#8A99AD',
+    accent: '#FF7A3D',
   },
 } as const;
 

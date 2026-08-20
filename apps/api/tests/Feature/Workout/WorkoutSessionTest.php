@@ -7,6 +7,7 @@ use App\Models\Routine;
 use App\Models\RoutineDay;
 use App\Models\RoutineExercise;
 use App\Models\User;
+use App\Models\WorkoutSession;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -213,5 +214,158 @@ class WorkoutSessionTest extends TestCase
 
         $active = $client->getJson('/api/v1/routines/active')->json();
         $this->assertSame($dayB->id, $active['meta']['next_day_id']);
+    }
+
+    public function test_a_fourth_set_is_rejected_and_the_exercise_auto_completes_at_three(): void
+    {
+        $user = User::factory()->create();
+        $day = $this->makeActiveRoutineWithOneDay($user);
+        $client = $this->actingAs($user, 'sanctum');
+        $session = $client->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
+        $exerciseId = $session['exercises'][0]['id'];
+
+        $this->assertSame(3, $session['exercises'][0]['target_sets']);
+
+        foreach ([1, 2, 3] as $setNumber) {
+            $response = $client->postJson("/api/v1/workout-sessions/{$session['id']}/exercises/{$exerciseId}/sets", [
+                'weight_kg' => 100, 'reps' => 10,
+            ]);
+            $response->assertCreated()->assertJsonPath('data.set_number', $setNumber);
+        }
+
+        $this->assertDatabaseHas('workout_exercises', ['id' => $exerciseId, 'all_sets_completed' => true]);
+
+        $fourth = $client->postJson("/api/v1/workout-sessions/{$session['id']}/exercises/{$exerciseId}/sets", [
+            'weight_kg' => 100, 'reps' => 10,
+        ]);
+
+        $fourth->assertStatus(422);
+        $fourth->assertJsonPath('errors.sets.0', 'Ya completaste las 3 series de este ejercicio.');
+        $this->assertDatabaseCount('workout_sets', 3);
+    }
+
+    public function test_skipping_a_workout_creates_no_exercises_or_sets_and_still_rotates_the_next_day(): void
+    {
+        $user = User::factory()->create();
+        $routine = Routine::query()->create([
+            'user_id' => $user->id, 'source' => 'engine', 'goal' => 'gain_muscle',
+            'split_type' => 'full_body', 'frequency_days' => 2, 'duration_weeks' => 6, 'is_active' => true,
+        ]);
+        $dayA = $routine->days()->create(['day_order' => 1, 'label' => 'A', 'target_muscle_groups' => []]);
+        $dayB = $routine->days()->create(['day_order' => 2, 'label' => 'B', 'target_muscle_groups' => []]);
+        $exerciseId = Exercise::query()->where('name', 'Press banca con barra')->value('id');
+        $routineExercise = RoutineExercise::query()->create([
+            'routine_day_id' => $dayA->id, 'exercise_id' => $exerciseId, 'order' => 1,
+            'target_sets' => 3, 'target_reps' => '8-10', 'rest_seconds' => 90, 'target_rpe' => 8.0,
+            'suggested_weight_kg' => 100,
+        ]);
+        $client = $this->actingAs($user, 'sanctum');
+
+        $response = $client->postJson('/api/v1/workout-sessions/skip', ['routine_day_id' => $dayA->id]);
+
+        $response->assertCreated();
+        $response->assertJsonPath('data.skipped', true);
+        $response->assertJsonPath('data.completed', false);
+        $this->assertSame(0, count($response->json('data.exercises')));
+
+        $sessionId = $response->json('data.id');
+        $this->assertDatabaseCount('workout_exercises', 0);
+        $this->assertDatabaseCount('workout_sets', 0);
+        $this->assertNotNull(WorkoutSession::query()->find($sessionId)->skipped_at);
+
+        // No debe tocar la progresión: suggested_weight_kg queda intacto.
+        $this->assertEquals(100.0, (float) $routineExercise->fresh()->suggested_weight_kg);
+
+        $active = $client->getJson('/api/v1/routines/active')->json();
+        $this->assertSame($dayB->id, $active['meta']['next_day_id']);
+    }
+
+    public function test_user_can_cancel_an_in_progress_session_without_marking_it_completed(): void
+    {
+        $user = User::factory()->create();
+        $day = $this->makeActiveRoutineWithOneDay($user);
+        $client = $this->actingAs($user, 'sanctum');
+
+        $session = $client->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
+        $exerciseId = $session['exercises'][0]['id'];
+        $client->postJson("/api/v1/workout-sessions/{$session['id']}/exercises/{$exerciseId}/sets", [
+            'weight_kg' => 100, 'reps' => 10,
+        ]);
+
+        $response = $client->postJson("/api/v1/workout-sessions/{$session['id']}/cancel");
+
+        $response->assertOk()
+            ->assertJsonPath('data.cancelled', true)
+            ->assertJsonPath('data.completed', false);
+
+        // Las series ya registradas se conservan, no se borran al cancelar.
+        $this->assertDatabaseCount('workout_sets', 1);
+        $this->assertNotNull(WorkoutSession::query()->find($session['id'])->cancelled_at);
+    }
+
+    public function test_cancelling_a_session_does_not_affect_progressive_overload(): void
+    {
+        $user = User::factory()->create();
+        $day = $this->makeActiveRoutineWithOneDay($user);
+        $routineExercise = $day->exercises->first();
+        $routineExercise->update(['suggested_weight_kg' => 100]);
+        $client = $this->actingAs($user, 'sanctum');
+
+        $session = $client->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
+        $exerciseId = $session['exercises'][0]['id'];
+        $client->postJson("/api/v1/workout-sessions/{$session['id']}/exercises/{$exerciseId}/sets", [
+            'weight_kg' => 100, 'reps' => 10,
+        ]);
+
+        $client->postJson("/api/v1/workout-sessions/{$session['id']}/cancel")->assertOk();
+
+        // Cancelar nunca pasa por SubmitSessionFeedbackAction: la sugerencia
+        // de peso queda exactamente igual que antes de la sesión cancelada.
+        $this->assertEquals(100.0, (float) $routineExercise->fresh()->suggested_weight_kg);
+        $this->assertEquals(0, $routineExercise->fresh()->consecutive_failures);
+    }
+
+    public function test_a_cancelled_session_cannot_later_be_completed(): void
+    {
+        $user = User::factory()->create();
+        $day = $this->makeActiveRoutineWithOneDay($user);
+        $client = $this->actingAs($user, 'sanctum');
+
+        $session = $client->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
+        $client->postJson("/api/v1/workout-sessions/{$session['id']}/cancel")->assertOk();
+
+        $client->postJson("/api/v1/workout-sessions/{$session['id']}/complete")
+            ->assertUnprocessable();
+
+        $this->assertFalse(WorkoutSession::query()->find($session['id'])->completed);
+    }
+
+    public function test_a_completed_session_cannot_be_cancelled(): void
+    {
+        $user = User::factory()->create();
+        $day = $this->makeActiveRoutineWithOneDay($user);
+        $client = $this->actingAs($user, 'sanctum');
+
+        $session = $client->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
+        $client->postJson("/api/v1/workout-sessions/{$session['id']}/complete")->assertOk();
+
+        $client->postJson("/api/v1/workout-sessions/{$session['id']}/cancel")
+            ->assertUnprocessable();
+
+        $this->assertNull(WorkoutSession::query()->find($session['id'])->cancelled_at);
+    }
+
+    public function test_another_users_session_cannot_be_cancelled(): void
+    {
+        $owner = User::factory()->create();
+        $intruder = User::factory()->create();
+        $day = $this->makeActiveRoutineWithOneDay($owner);
+
+        $session = $this->actingAs($owner, 'sanctum')
+            ->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
+
+        $this->actingAs($intruder, 'sanctum')
+            ->postJson("/api/v1/workout-sessions/{$session['id']}/cancel")
+            ->assertForbidden();
     }
 }

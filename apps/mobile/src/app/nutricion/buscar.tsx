@@ -31,7 +31,7 @@ export default function BuscarAlimentoScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
           <ThemedText type="title" style={styles.pageTitle}>
             Buscar alimento
           </ThemedText>
@@ -49,7 +49,7 @@ export default function BuscarAlimentoScreen() {
               disabled={!query.trim() || isSearching}
               onPress={runSearch}
               style={[styles.searchButton, { backgroundColor: theme.accent }, (!query.trim() || isSearching) && styles.disabled]}>
-              <ThemedText type="smallBold" style={{ color: '#0A0A09' }}>
+              <ThemedText type="smallBold" style={{ color: '#070B14' }}>
                 Buscar
               </ThemedText>
             </Pressable>
@@ -99,6 +99,7 @@ export default function BuscarAlimentoScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,

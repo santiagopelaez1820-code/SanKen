@@ -21,7 +21,18 @@ export interface WorkoutExercise {
   id: number;
   order: number;
   all_sets_completed: boolean;
+  /** Siempre 3 — snapshot tomado al iniciar la sesión, ver StartWorkoutSessionAction. */
+  target_sets: number;
+  target_reps: string | null;
+  rest_seconds: number | null;
+  target_rpe: number | null;
+  /** Peso recomendado por la sobrecarga progresiva — no confundir con el peso que el usuario realmente cargó (weight_kg en cada WorkoutSet). */
+  suggested_weight_kg: number | null;
+  /** Reps recomendadas por serie (índice 0 = serie 1) — null hasta la primera vez que se completa este ejercicio. Largo = target_sets. */
+  suggested_reps_per_set: number[] | null;
   exercise: WorkoutExerciseSummary;
+  /** Ejercicio alternativo (A/B) — null si este ejercicio no tiene uno configurado. */
+  alternative: WorkoutExerciseSummary | null;
   sets: WorkoutSet[];
 }
 
@@ -33,6 +44,8 @@ export interface WorkoutSession {
   duration_minutes: number | null;
   completed: boolean;
   completed_as_planned: boolean | null;
+  skipped: boolean;
+  cancelled: boolean;
   sleep_quality: number | null;
   energy_level: number | null;
   muscle_soreness: number | null;

@@ -211,7 +211,7 @@ function RoutineEditorFields({ mode, trainerClientId, routineId, initialRoutine 
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
           <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
             ← Volver
           </ThemedText>
@@ -294,6 +294,7 @@ function RoutineEditorFields({ mode, trainerClientId, routineId, initialRoutine 
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,

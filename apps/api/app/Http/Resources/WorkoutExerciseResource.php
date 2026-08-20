@@ -18,6 +18,12 @@ class WorkoutExerciseResource extends JsonResource
             'id' => $this->id,
             'order' => $this->order,
             'all_sets_completed' => $this->all_sets_completed,
+            'target_sets' => $this->target_sets,
+            'target_reps' => $this->target_reps,
+            'rest_seconds' => $this->rest_seconds,
+            'target_rpe' => $this->target_rpe,
+            'suggested_weight_kg' => $this->suggested_weight_kg,
+            'suggested_reps_per_set' => $this->suggested_reps_per_set,
             'exercise' => [
                 'id' => $this->exercise->id,
                 'name' => $this->exercise->name,
@@ -26,6 +32,9 @@ class WorkoutExerciseResource extends JsonResource
                 'video_url' => $this->exercise->video_url,
                 'image_url' => $this->exercise->image_url,
             ],
+            'alternative' => $this->exercise->relationLoaded('alternatives')
+                ? RoutineExerciseResource::summarize($this->exercise->alternatives->first())
+                : null,
             'sets' => WorkoutSetResource::collection($this->whenLoaded('sets')),
         ];
     }

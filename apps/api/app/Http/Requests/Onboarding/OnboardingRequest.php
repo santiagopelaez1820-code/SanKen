@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Onboarding;
 
+use App\Models\RoutineTemplate;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -35,14 +36,9 @@ class OnboardingRequest extends FormRequest
             'level' => ['sometimes', Rule::in(config('onboarding.levels'))],
             'goals' => ['sometimes', 'array', 'min:1'],
             'goals.*' => [Rule::in(config('onboarding.goals'))],
-            'frequency_days' => ['sometimes', Rule::in(config('onboarding.frequency_days'))],
-            'session_minutes' => ['sometimes', Rule::in(config('onboarding.session_minutes'))],
-            'place' => ['sometimes', Rule::in(config('onboarding.places'))],
+            'frequency_days' => ['sometimes', Rule::in(RoutineTemplate::activeFrequencyDays())],
             'equipment_available' => ['sometimes', 'array'],
             'equipment_available.*' => [Rule::in(config('onboarding.equipment'))],
-            'injuries' => ['sometimes', 'array'],
-            'injuries.*' => ['string', 'max:120'],
-            'experience_notes' => ['sometimes', 'nullable', 'string', 'max:1000'],
         ];
     }
 }

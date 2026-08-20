@@ -25,8 +25,7 @@ class SubmitOnboardingAction
         }
 
         $onboardingFields = array_intersect_key($data, array_flip([
-            'level', 'goals', 'frequency_days', 'session_minutes',
-            'place', 'equipment_available', 'injuries', 'experience_notes',
+            'level', 'goals', 'frequency_days', 'equipment_available',
         ]));
 
         /** @var OnboardingResponse $response */

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useNavigate, useParams } from "react-router-dom"
+import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import {
   ApiError,
@@ -104,11 +104,21 @@ function toPayload(values: RoutineFormValues): ManualRoutinePayload {
   }
 }
 
-export function RoutineEditorPage() {
-  const { trainerClientId, routineId } = useParams<{ trainerClientId?: string; routineId?: string }>()
+interface RoutineEditorPageProps {
+  /** "admin" apunta a /admin/users/{userId}/routine — rutina personalizada asignada por Super Admin, aislada al usuario objetivo. Por defecto "trainer" (comportamiento existente, sin cambios). */
+  scope?: "trainer" | "admin"
+}
+
+export function RoutineEditorPage({ scope = "trainer" }: RoutineEditorPageProps) {
+  const { trainerClientId, userId, routineId } = useParams<{
+    trainerClientId?: string
+    userId?: string
+    routineId?: string
+  }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
-  const isEditing = Boolean(routineId)
+  const isEditing = scope === "admin" ? location.pathname.endsWith("/edit") : Boolean(routineId)
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { data: exerciseCatalog } = useQuery({
@@ -117,8 +127,11 @@ export function RoutineEditorPage() {
   })
 
   const { data: existingRoutine } = useQuery({
-    queryKey: ["trainer", "routines", routineId],
-    queryFn: () => api.get<Routine>(`/trainer/routines/${routineId}`),
+    queryKey: scope === "admin" ? ["admin", "users", userId, "routine"] : ["trainer", "routines", routineId],
+    queryFn: () =>
+      scope === "admin"
+        ? api.get<Routine | null>(`/admin/users/${userId}/routine`)
+        : api.get<Routine>(`/trainer/routines/${routineId}`),
     enabled: isEditing,
   })
 
@@ -142,12 +155,23 @@ export function RoutineEditorPage() {
   const { fields: dayFields, append: appendDay, remove: removeDay } = useFieldArray({ control, name: "days" })
 
   const mutation = useMutation({
-    mutationFn: (values: RoutineFormValues) =>
-      isEditing
+    mutationFn: (values: RoutineFormValues) => {
+      if (scope === "admin") {
+        return isEditing && existingRoutine
+          ? api.patch<Routine>(`/admin/routines/${existingRoutine.id}`, toPayload(values))
+          : api.post<Routine>(`/admin/users/${userId}/routine`, toPayload(values))
+      }
+      return isEditing
         ? api.patch<Routine>(`/trainer/routines/${routineId}`, toPayload(values))
-        : api.post<Routine>(`/trainer/clients/${trainerClientId}/routines`, toPayload(values)),
+        : api.post<Routine>(`/trainer/clients/${trainerClientId}/routines`, toPayload(values))
+    },
     onSuccess: () => {
       setServerError(null)
+      if (scope === "admin") {
+        queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+        navigate(`/admin/users/${userId}`)
+        return
+      }
       queryClient.invalidateQueries({ queryKey: ["trainer", "clients"] })
       queryClient.invalidateQueries({ queryKey: ["trainer", "routines"] })
       if (isEditing) {
@@ -173,7 +197,13 @@ export function RoutineEditorPage() {
             ← Volver
           </button>
           <h1 className="mt-1 font-heading text-2xl font-medium tracking-tight">
-            {isEditing ? "Editar rutina" : "Nueva rutina manual"}
+            {scope === "admin"
+              ? isEditing
+                ? "Editar rutina personalizada"
+                : "Asignar rutina personalizada"
+              : isEditing
+                ? "Editar rutina"
+                : "Nueva rutina manual"}
           </h1>
         </header>
 

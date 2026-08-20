@@ -52,6 +52,7 @@ export default function TrainerClientsScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <FlatList
+          style={styles.list}
           data={clients}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => <ClientRow trainerClient={item} />}
@@ -102,6 +103,7 @@ export default function TrainerClientsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  list: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,

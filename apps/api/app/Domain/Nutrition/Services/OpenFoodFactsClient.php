@@ -27,6 +27,11 @@ final class OpenFoodFactsClient
         $response = Http::withHeaders(['User-Agent' => self::USER_AGENT])
             ->get(self::BARCODE_URL.'/'.$barcode.'.json', [
                 'fields' => 'product_name,brands,nutriments,code',
+                // lc=es: OFF devuelve el nombre localizado en español cuando
+                // el producto lo tiene (product_name pasa a ser ese valor).
+                // No manda `cc` (país): la app no está limitada a un solo
+                // país, forzarlo angostaría la base de productos sin razón.
+                'lc' => 'es',
             ]);
 
         if (! $response->successful() || $response->json('status') !== 1) {
@@ -46,6 +51,7 @@ final class OpenFoodFactsClient
                 'search_terms' => $query,
                 'json' => 1,
                 'page_size' => 15,
+                'lc' => 'es',
             ]);
 
         if (! $response->successful()) {

@@ -8,6 +8,7 @@ use App\Models\TrainerClient;
 use App\Models\User;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
+use Database\Seeders\RoutineTemplateSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -19,6 +20,11 @@ class ManualRoutineTest extends TestCase
     {
         $this->seed(MuscleGroupSeeder::class);
         $this->seed(ExerciseSeeder::class);
+        // test_engine_never_overwrites_a_manually_assigned_routine llama a
+        // /routines/generate — sin esto, TemplateRoutineGenerator (motor
+        // activo) tira excepcion antes de llegar a la logica que el test
+        // realmente quiere probar (que no pisa la rutina del entrenador).
+        $this->seed(RoutineTemplateSeeder::class);
     }
 
     /**

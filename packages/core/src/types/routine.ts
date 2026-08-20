@@ -1,7 +1,7 @@
 import type { FitnessGoal } from './onboarding';
 
 export type RoutineSource = 'engine' | 'trainer';
-export type SplitType = 'full_body' | 'upper_lower' | 'push_pull_legs' | 'bro_split';
+export type SplitType = 'full_body' | 'upper_lower' | 'push_pull_legs' | 'bro_split' | 'ppl_upper_lower';
 
 export interface RoutineExerciseSummary {
   id: number;
@@ -16,11 +16,14 @@ export interface RoutineExercise {
   id: number;
   order: number;
   exercise: RoutineExerciseSummary;
+  /** Ejercicio alternativo (A/B) — null si este ejercicio no tiene uno configurado. */
+  alternative: RoutineExerciseSummary | null;
   target_sets: number;
   target_reps: string;
   rest_seconds: number;
   target_rpe: number | null;
   suggested_weight_kg: number | null;
+  suggested_reps_per_set: number[] | null;
 }
 
 export interface RoutineDay {

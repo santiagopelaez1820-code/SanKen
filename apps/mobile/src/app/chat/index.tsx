@@ -21,7 +21,7 @@ export default function ChatInboxScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={styles.content}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <ThemedText type="title" style={styles.pageTitle}>
             Chat
           </ThemedText>
@@ -74,6 +74,7 @@ export default function ChatInboxScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,
@@ -92,6 +93,6 @@ const styles = StyleSheet.create({
   },
   rowInfo: { flex: 1, gap: 2, marginRight: Spacing.two },
   badge: { minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  badgeLabel: { color: '#0A0A09' },
+  badgeLabel: { color: '#070B14' },
   error: { color: '#C9564A' },
 });

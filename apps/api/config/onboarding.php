@@ -2,8 +2,10 @@
 
 /**
  * Catálogo estático del cuestionario de onboarding. Ver docs/02-modelo-datos-bd.md
- * (domain_config) — en fases posteriores esto migra a una tabla editable sin deploy;
- * por ahora vive en config porque el catálogo todavía no cambia con frecuencia.
+ * (domain_config) — por ahora vive en config porque el catálogo todavía no
+ * cambia con frecuencia. `frequency_days` ya NO vive acá — ahora es
+ * dinámico, ver RoutineTemplate::activeFrequencyDays() (Super Admin agrega
+ * una plantilla nueva y esa frecuencia queda disponible sin deploy).
  */
 return [
     'levels' => ['beginner', 'intermediate', 'advanced'],
@@ -18,12 +20,6 @@ return [
         'health',
         'cardio',
     ],
-
-    'frequency_days' => [3, 4, 5, 6],
-
-    'session_minutes' => [30, 45, 60, 90],
-
-    'places' => ['home', 'gym'],
 
     'equipment' => [
         'barbell', 'dumbbells', 'bench', 'squat_rack', 'pull_up_bar',

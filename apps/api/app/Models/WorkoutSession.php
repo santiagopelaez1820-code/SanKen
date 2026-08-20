@@ -15,6 +15,8 @@ class WorkoutSession extends Model
         'duration_minutes',
         'completed',
         'completed_as_planned',
+        'skipped_at',
+        'cancelled_at',
         'sleep_quality',
         'energy_level',
         'muscle_soreness',
@@ -27,6 +29,8 @@ class WorkoutSession extends Model
             'performed_at' => 'date',
             'completed' => 'boolean',
             'completed_as_planned' => 'boolean',
+            'skipped_at' => 'datetime',
+            'cancelled_at' => 'datetime',
         ];
     }
 

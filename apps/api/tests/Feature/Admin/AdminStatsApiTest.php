@@ -19,7 +19,7 @@ class AdminStatsApiTest extends TestCase
 
     public function test_admin_gets_global_metrics_shape(): void
     {
-        $admin = User::factory()->create(['role' => 'admin', 'last_active_at' => now()]);
+        $admin = User::factory()->create(['role' => 'super_admin', 'last_active_at' => now()]);
         User::factory()->create(['role' => 'trainer', 'last_active_at' => now()]);
         User::factory()->create(['is_banned' => true]);
 

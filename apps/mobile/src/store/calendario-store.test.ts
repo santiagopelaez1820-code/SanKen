@@ -12,7 +12,9 @@ const mockedApi = api as jest.Mocked<typeof api>;
 
 const response: CalendarResponse = {
   month: '2026-08',
-  events: [{ type: 'workout_completed', event_date: '2026-08-05', title: 'Full Body A', duration_minutes: 40 }],
+  events: [
+    { type: 'workout_completed', event_date: '2026-08-05', title: 'Full Body A', duration_minutes: 40, muscle_groups: ['Pecho', 'Tríceps'] },
+  ],
 };
 
 beforeEach(() => {

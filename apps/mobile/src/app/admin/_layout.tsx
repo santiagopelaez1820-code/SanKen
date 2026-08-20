@@ -14,7 +14,7 @@ export default function AdminLayout() {
     return <Redirect href="/onboarding" />;
   }
 
-  if (user.role !== 'admin') {
+  if (user.role !== 'super_admin') {
     return <Redirect href="/" />;
   }
 

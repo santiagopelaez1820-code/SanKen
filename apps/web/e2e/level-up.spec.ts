@@ -80,6 +80,21 @@ test.beforeAll(async () => {
   if (!res.ok()) {
     throw new Error(`fixture setup failed: ${res.status()} ${await res.text()}`)
   }
+
+  // Completar onboarding acá (no via UI) porque, sin onboarding_completed,
+  // RequireAuth manda al login posterior a /onboarding en vez de /dashboard
+  // — este spec asume que el primer login ya entra directo.
+  const { data } = (await res.json()) as { data: { token: string } }
+  const headers = { Authorization: `Bearer ${data.token}` }
+  await ctx.post(`${API_URL}/onboarding`, {
+    data: {
+      age: 28, sex: 'male', height_cm: 178, weight_kg: 80, level: 'intermediate',
+      goals: ['gain_muscle'], frequency_days: 4,
+      equipment_available: ['barbell', 'dumbbells', 'machines', 'cables', 'pull_up_bar', 'squat_rack'],
+    },
+    headers,
+  })
+  await ctx.post(`${API_URL}/onboarding/complete`, { headers })
   await ctx.dispose()
 })
 
@@ -90,21 +105,6 @@ test('completar un entrenamiento que cruza un nivel muestra el modal de subida d
   await page.click('button[type=submit]')
   await expect(page).toHaveURL(/\/dashboard$/)
 
-  const onboardingPayload = {
-    age: 28,
-    sex: 'male',
-    height_cm: 178,
-    weight_kg: 80,
-    level: 'intermediate',
-    goals: ['gain_muscle'],
-    frequency_days: 4,
-    session_minutes: 60,
-    place: 'gym',
-    equipment_available: ['barbell', 'dumbbells', 'machines', 'cables', 'pull_up_bar', 'squat_rack'],
-    injuries: [],
-  }
-  await authedPost(page, '/onboarding', onboardingPayload)
-  await authedPost(page, '/onboarding/complete', {})
   await authedPost(page, '/routines/generate', {})
 
   // Dos sesiones completas de calentamiento vía API (20 XP base c/u + 50 del

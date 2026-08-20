@@ -46,6 +46,7 @@ export default function MeasurementsScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <FlatList
+          style={styles.list}
           data={measurements}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => <MeasurementRow measurement={item} />}
@@ -95,6 +96,7 @@ export default function MeasurementsScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  list: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,

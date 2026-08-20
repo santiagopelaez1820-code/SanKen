@@ -38,7 +38,7 @@ class UserPolicyTest extends TestCase
 
     public function test_admin_can_view_and_update_any_profile(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $other = User::factory()->create();
 
         $this->assertTrue($this->policy->view($admin, $other));
@@ -47,7 +47,7 @@ class UserPolicyTest extends TestCase
 
     public function test_only_admin_can_ban_and_never_themselves(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $user = User::factory()->create();
 
         $this->assertTrue($this->policy->ban($admin, $user));

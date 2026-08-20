@@ -31,7 +31,7 @@ class AdminReportApiTest extends TestCase
 
     public function test_index_defaults_to_pending_only(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $reporter = User::factory()->create();
         $this->makeReport($reporter, 'pending');
         $this->makeReport($reporter, 'resolved');
@@ -45,7 +45,7 @@ class AdminReportApiTest extends TestCase
 
     public function test_index_with_status_all_returns_everything(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $reporter = User::factory()->create();
         $this->makeReport($reporter, 'pending');
         $this->makeReport($reporter, 'resolved');
@@ -57,7 +57,7 @@ class AdminReportApiTest extends TestCase
 
     public function test_admin_can_resolve_a_report(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $reporter = User::factory()->create();
         $report = $this->makeReport($reporter);
 
@@ -75,7 +75,7 @@ class AdminReportApiTest extends TestCase
 
     public function test_resolve_rejects_an_invalid_status(): void
     {
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'super_admin']);
         $reporter = User::factory()->create();
         $report = $this->makeReport($reporter);
 

@@ -15,6 +15,7 @@ class AddExerciseToSessionAction
             'exercise_id' => $exerciseId,
             'order' => $nextOrder,
             'all_sets_completed' => false,
+            'target_sets' => 3,
         ])->load('exercise');
     }
 }

@@ -49,78 +49,78 @@
 }
 
 /*
- * SanKen brand tokens — negro, blanco, dorado.
+ * SanKen brand tokens — navy + naranja (logo "SANKEN GIMNASIO & FITNESS").
  * Ver docs/04-ux-ui-wireframes.md para la referencia completa del design system.
  * Dark mode es la experiencia por defecto de la marca; light mode invierte
- * los mismos tokens manteniendo el dorado como único acento.
+ * los mismos tokens manteniendo el naranja como único acento.
  */
 :root {
-    --background: #FAFAF8;
-    --foreground: #14120F;
+    --background: #F7F9FC;
+    --foreground: #0B1220;
     --card: #FFFFFF;
-    --card-foreground: #14120F;
+    --card-foreground: #0B1220;
     --popover: #FFFFFF;
-    --popover-foreground: #14120F;
-    --primary: #9A7A1E;
+    --popover-foreground: #0B1220;
+    --primary: #F06020;
     --primary-foreground: #FFFFFF;
-    --secondary: #F2F0EC;
-    --secondary-foreground: #14120F;
-    --muted: #F2F0EC;
-    --muted-foreground: #6B6459;
-    --accent: rgba(154, 122, 30, 0.12);
-    --accent-foreground: #7A6118;
+    --secondary: #EAF0F6;
+    --secondary-foreground: #0B1220;
+    --muted: #EAF0F6;
+    --muted-foreground: #5B6B7C;
+    --accent: rgba(240, 96, 32, 0.12);
+    --accent-foreground: #B8480F;
     --destructive: #A13A2E;
-    --border: rgba(20, 18, 15, 0.10);
-    --input: rgba(20, 18, 15, 0.14);
-    --ring: #9A7A1E;
-    --chart-1: #9A7A1E;
-    --chart-2: #6B6459;
-    --chart-3: #14120F;
-    --chart-4: #C9A227;
+    --border: rgba(11, 18, 32, 0.10);
+    --input: rgba(11, 18, 32, 0.14);
+    --ring: #F06020;
+    --chart-1: #F06020;
+    --chart-2: #003C74;
+    --chart-3: #0B1220;
+    --chart-4: #F5A356;
     --chart-5: #2E6B39;
     --radius: 0.75rem;
     --sidebar: #FFFFFF;
-    --sidebar-foreground: #14120F;
-    --sidebar-primary: #9A7A1E;
+    --sidebar-foreground: #0B1220;
+    --sidebar-primary: #F06020;
     --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F2F0EC;
-    --sidebar-accent-foreground: #14120F;
-    --sidebar-border: rgba(20, 18, 15, 0.10);
-    --sidebar-ring: #9A7A1E;
+    --sidebar-accent: #EAF0F6;
+    --sidebar-accent-foreground: #0B1220;
+    --sidebar-border: rgba(11, 18, 32, 0.10);
+    --sidebar-ring: #F06020;
 }
 
 .dark {
-    --background: #0A0A09;
-    --foreground: #F6F4EF;
-    --card: #151412;
-    --card-foreground: #F6F4EF;
-    --popover: #151412;
-    --popover-foreground: #F6F4EF;
-    --primary: #C9A227;
-    --primary-foreground: #0A0A09;
-    --secondary: #1C1B18;
-    --secondary-foreground: #F6F4EF;
-    --muted: #1C1B18;
-    --muted-foreground: #9B9388;
-    --accent: rgba(201, 162, 39, 0.14);
-    --accent-foreground: #E4C874;
+    --background: #070B14;
+    --foreground: #F4F7FB;
+    --card: #0F1B2E;
+    --card-foreground: #F4F7FB;
+    --popover: #0F1B2E;
+    --popover-foreground: #F4F7FB;
+    --primary: #FF7A3D;
+    --primary-foreground: #0A0F1A;
+    --secondary: #16233A;
+    --secondary-foreground: #F4F7FB;
+    --muted: #16233A;
+    --muted-foreground: #8A99AD;
+    --accent: rgba(255, 122, 61, 0.14);
+    --accent-foreground: #FFB088;
     --destructive: #C9564A;
-    --border: rgba(255, 255, 255, 0.08);
-    --input: rgba(255, 255, 255, 0.12);
-    --ring: #C9A227;
-    --chart-1: #C9A227;
-    --chart-2: #9B9388;
-    --chart-3: #F6F4EF;
-    --chart-4: #E4C874;
+    --border: rgba(255, 255, 255, 0.12);
+    --input: rgba(255, 255, 255, 0.16);
+    --ring: #FF7A3D;
+    --chart-1: #FF7A3D;
+    --chart-2: #5FA8E0;
+    --chart-3: #F4F7FB;
+    --chart-4: #FFB088;
     --chart-5: #4E9A5C;
-    --sidebar: #151412;
-    --sidebar-foreground: #F6F4EF;
-    --sidebar-primary: #C9A227;
-    --sidebar-primary-foreground: #0A0A09;
-    --sidebar-accent: #1C1B18;
-    --sidebar-accent-foreground: #F6F4EF;
+    --sidebar: #0F1B2E;
+    --sidebar-foreground: #F4F7FB;
+    --sidebar-primary: #FF7A3D;
+    --sidebar-primary-foreground: #0A0F1A;
+    --sidebar-accent: #16233A;
+    --sidebar-accent-foreground: #F4F7FB;
     --sidebar-border: rgba(255, 255, 255, 0.08);
-    --sidebar-ring: #C9A227;
+    --sidebar-ring: #FF7A3D;
 }
 
 @layer base {
@@ -135,5 +135,14 @@
     }
   html {
     @apply font-sans;
+    }
+  /*
+   * Tarjetas más "premium": las ~36 pantallas que usan bg-card (el
+   * contenedor estándar de la app) pasan de borde-plano-de-1px a una sombra
+   * real de una sola vez, sin tocar cada archivo — parte del pedido de
+   * rediseño "más premium, sombras sutiles".
+   */
+  .bg-card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -12px rgba(0, 0, 0, 0.45);
     }
 }

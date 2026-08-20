@@ -22,6 +22,8 @@ class WorkoutSessionResource extends JsonResource
             'duration_minutes' => $this->duration_minutes,
             'completed' => $this->completed,
             'completed_as_planned' => $this->completed_as_planned,
+            'skipped' => $this->skipped_at !== null,
+            'cancelled' => $this->cancelled_at !== null,
             'sleep_quality' => $this->sleep_quality,
             'energy_level' => $this->energy_level,
             'muscle_soreness' => $this->muscle_soreness,

@@ -38,3 +38,29 @@ export interface ChallengeLeaderboardResponse {
 export interface ChallengeProgressBroadcast {
   leaderboard: ChallengeLeaderboardEntry[];
 }
+
+/**
+ * Plantilla editable desde admin (reemplaza el catálogo fijo que existía
+ * antes) — GenerateChallengesAction crea una instancia de Challenge por
+ * cada plantilla activa, cada semana/mes según `type`.
+ */
+export interface ChallengeTemplate {
+  id: number;
+  code: string;
+  title: string;
+  description: string;
+  type: ChallengeType;
+  metric: ChallengeMetric;
+  target: number;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface ChallengeTemplatePayload {
+  code: string;
+  title: string;
+  description: string;
+  type: ChallengeType;
+  metric: ChallengeMetric;
+  target: number;
+}

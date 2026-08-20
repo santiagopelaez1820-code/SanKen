@@ -20,6 +20,7 @@ const clientUser: User = {
   trainer_verified_at: null,
   email_verified_at: null,
   onboarding_completed: true,
+  has_location: true,
   created_at: '2024-01-01T00:00:00Z',
 };
 

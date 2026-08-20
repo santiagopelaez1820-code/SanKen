@@ -5,7 +5,7 @@ import { Colors } from '@/constants/theme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[scheme === 'unspecified' ? 'dark' : scheme];
 
   return (
     <NativeTabs
@@ -33,6 +33,11 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="measurements">
         <NativeTabs.Trigger.Label>Medidas</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="ruler.fill" md="straighten" />
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="prs">
+        <NativeTabs.Trigger.Label>PR</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="trophy.fill" md="emoji_events" />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="explore">

@@ -137,11 +137,18 @@ export function CalendarPage() {
             <ul className="mt-2 flex flex-col gap-2">
               {selectedEvents.map((event, i) => (
                 <li key={i} className="flex items-center justify-between text-sm">
-                  <span className="flex items-center gap-2">
-                    <span className={cn("h-1.5 w-1.5 rounded-full", EVENT_DOT[event.type])} />
-                    {event.title}
-                    {event.type === "workout_planned" && (
-                      <span className="text-xs text-muted-foreground">(sugerido para hoy)</span>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="flex items-center gap-2">
+                      <span className={cn("h-1.5 w-1.5 rounded-full", EVENT_DOT[event.type])} />
+                      {event.title}
+                      {event.type === "workout_planned" && (
+                        <span className="text-xs text-muted-foreground">(sugerido para hoy)</span>
+                      )}
+                    </span>
+                    {event.type !== "reminder" && event.muscle_groups.length > 0 && (
+                      <span className="pl-3.5 text-xs text-muted-foreground">
+                        {event.muscle_groups.join(" + ")}
+                      </span>
                     )}
                   </span>
                   {event.type === "reminder" && (

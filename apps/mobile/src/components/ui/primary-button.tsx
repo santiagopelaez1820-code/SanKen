@@ -23,7 +23,7 @@ export function PrimaryButton({ label, loading, variant = 'primary', style, disa
       ]}
       {...props}>
       {loading ? (
-        <ActivityIndicator color={isGhost ? '#C9A227' : '#0A0A09'} />
+        <ActivityIndicator color={isGhost ? '#FF7A3D' : '#070B14'} />
       ) : (
         <ThemedText type="smallBold" style={isGhost ? styles.ghostLabel : styles.primaryLabel}>
           {label}
@@ -42,18 +42,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   primary: {
-    backgroundColor: '#C9A227',
+    backgroundColor: '#FF7A3D',
+    shadowColor: '#FF7A3D',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.45,
+    shadowRadius: 12,
+    elevation: 6,
   },
   primaryLabel: {
-    color: '#0A0A09',
+    color: '#070B14',
   },
   ghost: {
     borderWidth: 1,
-    borderColor: '#C9A227',
+    borderColor: '#FF7A3D',
     backgroundColor: 'transparent',
   },
   ghostLabel: {
-    color: '#C9A227',
+    color: '#FF7A3D',
   },
   disabled: {
     opacity: 0.5,

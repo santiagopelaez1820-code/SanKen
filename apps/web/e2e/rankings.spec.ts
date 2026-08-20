@@ -44,10 +44,7 @@ async function completeOnboardingAndLogVolume(
     level: 'intermediate',
     goals: ['gain_muscle'],
     frequency_days: 4,
-    session_minutes: 60,
-    place: 'gym',
     equipment_available: ['barbell', 'dumbbells', 'machines', 'cables', 'pull_up_bar', 'squat_rack'],
-    injuries: [],
   })
   await authedPost(ctx, token, '/onboarding/complete')
   await authedPost(ctx, token, '/rankings/opt-in')

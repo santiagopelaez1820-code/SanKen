@@ -1,12 +1,12 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import type { FoodItem, MealLog, NutritionTargets } from '@sanken/core';
+import type { FoodItem, MealLog, NutritionPlan, NutritionTargets } from '@sanken/core';
 import { ApiError } from '@sanken/core';
 
 import { api } from '@/lib/api';
 import { useNutritionStore } from './nutrition-store';
 
 jest.mock('@/lib/api', () => ({
-  api: { get: jest.fn(), post: jest.fn(), delete: jest.fn(), getWithMeta: jest.fn() },
+  api: { get: jest.fn(), post: jest.fn(), patch: jest.fn(), delete: jest.fn(), getWithMeta: jest.fn() },
 }));
 
 const mockedApi = api as jest.Mocked<typeof api>;
@@ -18,10 +18,46 @@ const food: FoodItem = {
   barcode: '3017620422003',
   name: 'Nutella',
   brand: 'Ferrero',
+  category: null,
   calories_per_100g: 539,
   protein_per_100g: 6.3,
   carbs_per_100g: 57.5,
   fat_per_100g: 30.9,
+};
+
+const proteinFood: FoodItem = {
+  id: 2,
+  barcode: null,
+  name: 'Pechuga de pollo',
+  brand: null,
+  category: 'protein',
+  calories_per_100g: 165,
+  protein_per_100g: 31,
+  carbs_per_100g: 0,
+  fat_per_100g: 3.6,
+};
+
+const plan: NutritionPlan = {
+  id: 1,
+  calories: 2500,
+  protein_g: 180,
+  carbs_g: 250,
+  fat_g: 70,
+  generated_at: '2026-08-19T00:00:00Z',
+  meals: [
+    {
+      id: 1,
+      meal_type: 'lunch',
+      order: 1,
+      target_calories: 700,
+      target_protein_g: 50,
+      target_carbs_g: 70,
+      target_fat_g: 20,
+      items: [
+        { id: 10, food_item: proteinFood, quantity_grams: 200, calories: 330, protein_g: 62, carbs_g: 0, fat_g: 7.2 },
+      ],
+    },
+  ],
 };
 
 const meal: MealLog = {
@@ -49,6 +85,14 @@ beforeEach(() => {
     searchResults: [],
     isSearching: false,
     searchError: null,
+    plan: null,
+    planMissing: false,
+    isLoadingPlan: false,
+    isGeneratingPlan: false,
+    substituteResults: [],
+    isSearchingSubstitutes: false,
+    isSubstituting: false,
+    substituteError: null,
   });
 });
 
@@ -149,5 +193,80 @@ describe('logMeal / deleteMeal', () => {
 
     expect(mockedApi.delete).toHaveBeenCalledWith(`/nutrition/meals/${meal.id}`);
     expect(mockedApi.getWithMeta).toHaveBeenCalledWith('/nutrition/meals');
+  });
+});
+
+describe('loadPlan', () => {
+  it('stores the fetched plan', async () => {
+    mockedApi.get.mockResolvedValueOnce(plan);
+
+    await useNutritionStore.getState().loadPlan();
+
+    expect(mockedApi.get).toHaveBeenCalledWith('/nutrition/plan');
+    expect(useNutritionStore.getState().plan).toEqual(plan);
+    expect(useNutritionStore.getState().planMissing).toBe(false);
+  });
+
+  it('flags a missing plan on 404 without throwing', async () => {
+    mockedApi.get.mockRejectedValueOnce(new ApiError(404, { message: 'Todavía no generaste tu plan.' }));
+
+    await useNutritionStore.getState().loadPlan();
+
+    expect(useNutritionStore.getState().plan).toBeNull();
+    expect(useNutritionStore.getState().planMissing).toBe(true);
+  });
+});
+
+describe('generatePlan', () => {
+  it('stores the generated plan and clears planMissing', async () => {
+    useNutritionStore.setState({ planMissing: true });
+    mockedApi.post.mockResolvedValueOnce(plan);
+
+    await useNutritionStore.getState().generatePlan();
+
+    expect(mockedApi.post).toHaveBeenCalledWith('/nutrition/plan');
+    expect(useNutritionStore.getState().plan).toEqual(plan);
+    expect(useNutritionStore.getState().planMissing).toBe(false);
+  });
+
+  it('propagates the error (e.g. incomplete profile) without silently swallowing it', async () => {
+    mockedApi.post.mockRejectedValueOnce(new ApiError(422, { message: 'Completá tu perfil.' }));
+
+    await expect(useNutritionStore.getState().generatePlan()).rejects.toBeInstanceOf(ApiError);
+    expect(useNutritionStore.getState().isGeneratingPlan).toBe(false);
+  });
+});
+
+describe('searchSubstitutes', () => {
+  it('keeps only results matching the requested category', async () => {
+    const vegetable: FoodItem = { ...food, id: 3, name: 'Brócoli', category: 'vegetable' };
+    mockedApi.get.mockResolvedValueOnce([proteinFood, vegetable]);
+
+    await useNutritionStore.getState().searchSubstitutes('pollo', 'protein');
+
+    expect(mockedApi.get).toHaveBeenCalledWith('/nutrition/foods?q=pollo');
+    expect(useNutritionStore.getState().substituteResults).toEqual([proteinFood]);
+  });
+
+  it('clears results without calling the API for a blank query', async () => {
+    useNutritionStore.setState({ substituteResults: [proteinFood] });
+
+    await useNutritionStore.getState().searchSubstitutes('   ', 'protein');
+
+    expect(mockedApi.get).not.toHaveBeenCalled();
+    expect(useNutritionStore.getState().substituteResults).toEqual([]);
+  });
+});
+
+describe('substituteItem', () => {
+  it('patches the item and reloads the plan', async () => {
+    mockedApi.patch.mockResolvedValueOnce(undefined);
+    mockedApi.get.mockResolvedValueOnce(plan);
+
+    await useNutritionStore.getState().substituteItem(10, proteinFood.id);
+
+    expect(mockedApi.patch).toHaveBeenCalledWith('/nutrition/plan/items/10', { food_item_id: proteinFood.id });
+    expect(mockedApi.get).toHaveBeenCalledWith('/nutrition/plan');
+    expect(useNutritionStore.getState().plan).toEqual(plan);
   });
 });

@@ -1,0 +1,38 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+/**
+ * Retira el ranking general por volumen de entrenamiento (Bloque 5, Fase
+ * 3) — el único ranking hoy es por ejercicio y en vivo (sin snapshot),
+ * basado en PrSubmission aprobadas (ver GetExerciseRankingAction). Esta
+ * tabla era pura caché derivada (recalculada por completo cada corrida,
+ * nunca datos ingresados por el usuario), así que borrarla no pierde
+ * ningún historial real.
+ */
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::dropIfExists('ranking_snapshots');
+    }
+
+    public function down(): void
+    {
+        Schema::create('ranking_snapshots', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->string('scope_type', 20);
+            $table->string('scope_value')->nullable();
+            $table->decimal('metric_value', 12, 2);
+            $table->unsignedInteger('rank_position');
+            $table->date('snapshot_date');
+            $table->timestamps();
+
+            $table->unique(['user_id', 'scope_type', 'scope_value'], 'uniq_ranking_user_scope');
+            $table->index(['scope_type', 'scope_value', 'rank_position'], 'idx_ranking_scope_lookup');
+        });
+    }
+};

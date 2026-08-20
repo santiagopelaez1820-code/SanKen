@@ -53,7 +53,14 @@ class FindOrCacheFoodItemAction
                     return FoodItem::query()->create($data);
                 }
 
-                return FoodItem::query()->firstOrCreate(['barcode' => $data['barcode']], $data);
+                // updateOrCreate, no firstOrCreate: si este producto ya
+                // estaba cacheado de ANTES de que OpenFoodFactsClient
+                // empezara a pedir lc=es, se había guardado con el nombre
+                // genérico/inglés — firstOrCreate devolvería ese registro
+                // viejo tal cual, sin actualizar el nombre nunca, así que
+                // una búsqueda futura en español seguiría sin poder
+                // encontrarlo por el `where('name','like',...)` de arriba.
+                return FoodItem::query()->updateOrCreate(['barcode' => $data['barcode']], $data);
             });
     }
 }

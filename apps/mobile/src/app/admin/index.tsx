@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { StyleSheet } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,13 +11,17 @@ export default function AdminScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
+        <Image source={require('@/assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
         <ThemedText type="title" style={styles.title}>
-          Panel admin
+          Super Admin
         </ThemedText>
 
         <PrimaryButton label="Usuarios" variant="ghost" onPress={() => router.push('/admin/usuarios')} />
         <PrimaryButton label="Ejercicios" variant="ghost" onPress={() => router.push('/admin/ejercicios')} />
+        <PrimaryButton label="Rutinas generales" variant="ghost" onPress={() => router.push('/admin/rutinas')} />
         <PrimaryButton label="Reportes" variant="ghost" onPress={() => router.push('/admin/reportes')} />
+        <PrimaryButton label="PR pendientes" variant="ghost" onPress={() => router.push('/admin/pr-submissions')} />
+        <PrimaryButton label="Retos" variant="ghost" onPress={() => router.push('/admin/retos')} />
         <PrimaryButton label="Noticias" variant="ghost" onPress={() => router.push('/admin/noticias')} />
         <PrimaryButton label="Métricas" variant="ghost" onPress={() => router.push('/admin/stats')} />
         <PrimaryButton label="Auditoría" variant="ghost" onPress={() => router.push('/admin/auditoria')} />
@@ -39,5 +43,6 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     width: '100%',
   },
+  logo: { width: 56, height: 56, alignSelf: 'center', marginBottom: -Spacing.two },
   title: { textAlign: 'center', marginBottom: Spacing.two },
 });

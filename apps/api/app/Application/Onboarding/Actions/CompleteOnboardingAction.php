@@ -14,7 +14,7 @@ class CompleteOnboardingAction
     private const REQUIRED_PROFILE_FIELDS = ['age', 'sex', 'height_cm', 'weight_kg'];
 
     private const REQUIRED_ONBOARDING_FIELDS = [
-        'level', 'goals', 'frequency_days', 'session_minutes', 'place',
+        'level', 'goals', 'frequency_days',
     ];
 
     public function execute(User $user): User

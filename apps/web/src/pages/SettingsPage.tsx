@@ -4,7 +4,16 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { ApiError, type TwoFactorEnableResponse, type TwoFactorConfirmResponse, type User } from "@sanken/core"
+import {
+  ApiError,
+  type OnboardingCity,
+  type OnboardingQuestions,
+  type OnboardingState,
+  type OnboardingStateOption,
+  type TwoFactorEnableResponse,
+  type TwoFactorConfirmResponse,
+  type User,
+} from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
@@ -60,6 +69,58 @@ export function SettingsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["auth", "me"] }),
   })
 
+  const { data: onboardingState } = useQuery({
+    queryKey: ["onboarding", "state"],
+    queryFn: () => api.get<OnboardingState>("/onboarding"),
+  })
+
+  const { data: questions } = useQuery({
+    queryKey: ["onboarding", "questions"],
+    queryFn: () => api.get<OnboardingQuestions>("/onboarding/questions"),
+  })
+
+  const [locationEditing, setLocationEditing] = useState(false)
+  const [countryId, setCountryId] = useState<number | null>(null)
+  const [stateId, setStateId] = useState<number | null>(null)
+  const [cityId, setCityId] = useState<number | null>(null)
+  const [locationError, setLocationError] = useState<string | null>(null)
+
+  // Se sincroniza con lo que ya está guardado apenas carga — sirve tanto
+  // para mostrar el nombre de país/depto/ciudad actuales como para
+  // pre-seleccionar el formulario cuando el usuario entra a editar.
+  useEffect(() => {
+    if (!onboardingState || locationEditing) return
+    setCountryId(onboardingState.country_id)
+    setStateId(onboardingState.state_id)
+    setCityId(onboardingState.city_id)
+  }, [onboardingState, locationEditing])
+
+  const { data: locationStates, isLoading: isLoadingLocationStates } = useQuery({
+    queryKey: ["onboarding", "states", countryId],
+    queryFn: () => api.get<OnboardingStateOption[]>(`/onboarding/countries/${countryId}/states`),
+    enabled: countryId !== null,
+  })
+
+  const { data: locationCities, isLoading: isLoadingLocationCities } = useQuery({
+    queryKey: ["onboarding", "cities", stateId],
+    queryFn: () => api.get<OnboardingCity[]>(`/onboarding/states/${stateId}/cities`),
+    enabled: stateId !== null,
+  })
+
+  const currentCountryName = questions?.countries.find((c) => c.id === onboardingState?.country_id)?.name
+  const currentStateName = locationStates?.find((s) => s.id === onboardingState?.state_id)?.name
+  const currentCityName = locationCities?.find((c) => c.id === onboardingState?.city_id)?.name
+
+  const locationMutation = useMutation({
+    mutationFn: () => api.patch("/onboarding", { city_id: cityId }),
+    onSuccess: () => {
+      setLocationEditing(false)
+      queryClient.invalidateQueries({ queryKey: ["onboarding", "state"] })
+    },
+    onError: (err) =>
+      setLocationError(err instanceof ApiError ? err.body.message : "No se pudo guardar tu ubicación."),
+  })
+
   const [pushEnabled, setPushEnabled] = useState(false)
   const [pushError, setPushError] = useState<string | null>(null)
   useEffect(() => {
@@ -91,6 +152,112 @@ export function SettingsPage() {
             <Link to="/dashboard">Volver</Link>
           </Button>
         </header>
+
+        <section className="rounded-xl border border-border bg-card p-5">
+          <h2 className="font-heading text-sm font-medium text-foreground">Ubicación</h2>
+          <p className="mt-1 text-xs text-muted-foreground">Se usa para tus rankings por país, departamento y ciudad.</p>
+
+          {!locationEditing && (
+            <div className="mt-4 flex items-center justify-between gap-4">
+              <p className="text-sm text-foreground">
+                {onboardingState?.city_id ? (
+                  <>
+                    {currentCityName ?? "…"}, {currentStateName ?? "…"}, {currentCountryName ?? "…"}
+                  </>
+                ) : (
+                  <span className="text-muted-foreground">Sin configurar</span>
+                )}
+              </p>
+              <Button variant="outline" size="sm" onClick={() => setLocationEditing(true)}>
+                Editar ubicación
+              </Button>
+            </div>
+          )}
+
+          {locationEditing && (
+            <div className="mt-4 space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">País</label>
+                <select
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                  value={countryId ?? ""}
+                  onChange={(e) => {
+                    const id = e.target.value ? Number(e.target.value) : null
+                    setCountryId(id)
+                    setStateId(null)
+                    setCityId(null)
+                  }}
+                >
+                  <option value="" disabled>
+                    Selecciona un país
+                  </option>
+                  {questions?.countries.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Departamento</label>
+                <select
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                  value={stateId ?? ""}
+                  disabled={!countryId || isLoadingLocationStates}
+                  onChange={(e) => {
+                    const id = e.target.value ? Number(e.target.value) : null
+                    setStateId(id)
+                    setCityId(null)
+                  }}
+                >
+                  <option value="" disabled>
+                    Selecciona un departamento
+                  </option>
+                  {locationStates?.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Ciudad / Municipio</label>
+                <select
+                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                  value={cityId ?? ""}
+                  disabled={!stateId || isLoadingLocationCities}
+                  onChange={(e) => setCityId(e.target.value ? Number(e.target.value) : null)}
+                >
+                  <option value="" disabled>
+                    Selecciona una ciudad
+                  </option>
+                  {locationCities?.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {locationError && <p className="text-xs text-destructive">{locationError}</p>}
+
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  disabled={!cityId || locationMutation.isPending}
+                  onClick={() => locationMutation.mutate()}
+                >
+                  Guardar
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => setLocationEditing(false)}>
+                  Cancelar
+                </Button>
+              </div>
+            </div>
+          )}
+        </section>
 
         <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium text-foreground">Autenticación de dos factores</h2>

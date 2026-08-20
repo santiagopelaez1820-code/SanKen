@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Application\Stats\Actions\RegisterManualPersonalRecordAction;
 use App\Domain\Stats\Services\StreakCalculator;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Stats\ProgressQueryRequest;
+use App\Http\Requests\Stats\RegisterPersonalRecordRequest;
 use App\Http\Requests\Stats\VolumeQueryRequest;
 use App\Http\Resources\PersonalRecordResource;
 use App\Models\BodyMeasurement;
@@ -102,6 +104,29 @@ class StatsController extends Controller
         return response()->json([
             'data' => PersonalRecordResource::collection($records),
         ]);
+    }
+
+    public function storePersonalRecord(RegisterPersonalRecordRequest $request, RegisterManualPersonalRecordAction $action): JsonResponse
+    {
+        $record = $action->execute(
+            $request->user(),
+            (int) $request->validated('exercise_id'),
+            (float) $request->validated('weight_kg'),
+            (int) $request->validated('reps'),
+        );
+
+        $isNewBest = $record !== null;
+
+        $record ??= PersonalRecord::query()
+            ->where('user_id', $request->user()->id)
+            ->where('exercise_id', $request->validated('exercise_id'))
+            ->where('record_type', '1rm')
+            ->firstOrFail();
+
+        return response()->json([
+            'data' => (new PersonalRecordResource($record))->resolve(),
+            'meta' => ['is_new_best' => $isNewBest],
+        ], $isNewBest ? 201 : 200);
     }
 
     public function progress(ProgressQueryRequest $request): JsonResponse

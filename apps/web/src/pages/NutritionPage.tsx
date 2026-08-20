@@ -1,7 +1,14 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { DailyNutritionSummary, FoodItem, MealLog, MealType, NutritionTargets } from "@sanken/core"
+import type {
+  DailyNutritionSummary,
+  FoodItem,
+  MealLog,
+  MealType,
+  NutritionPlan,
+  NutritionTargets,
+} from "@sanken/core"
 import { ApiError } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
@@ -27,6 +34,52 @@ export function NutritionPage() {
     queryKey: ["nutrition", "meals"],
     queryFn: () => api.getWithMeta<MealLog[]>("/nutrition/meals"),
   })
+
+  const { data: plan, error: planError } = useQuery({
+    queryKey: ["nutrition", "plan"],
+    queryFn: () => api.get<NutritionPlan>("/nutrition/plan"),
+    retry: false,
+    enabled: !(targetsError instanceof ApiError && targetsError.status === 404),
+  })
+  const planMissing = planError instanceof ApiError && planError.status === 404
+
+  const generatePlanMutation = useMutation({
+    mutationFn: () => api.post<NutritionPlan>("/nutrition/plan"),
+    onSuccess: (data) => queryClient.setQueryData(["nutrition", "plan"], data),
+  })
+
+  const [substitutingItemId, setSubstitutingItemId] = useState<number | null>(null)
+  const [substituteQuery, setSubstituteQuery] = useState("")
+  const [substituteResults, setSubstituteResults] = useState<FoodItem[] | null>(null)
+  const [isSearchingSubstitutes, setIsSearchingSubstitutes] = useState(false)
+
+  const substituteMutation = useMutation({
+    mutationFn: ({ itemId, foodItemId }: { itemId: number; foodItemId: number }) =>
+      api.patch(`/nutrition/plan/items/${itemId}`, { food_item_id: foodItemId }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["nutrition", "plan"] })
+      setSubstitutingItemId(null)
+      setSubstituteResults(null)
+      setSubstituteQuery("")
+    },
+  })
+
+  const searchSubstitutes = async (category: string | null) => {
+    if (!substituteQuery.trim()) return
+    setIsSearchingSubstitutes(true)
+    try {
+      const results = await api.get<FoodItem[]>(`/nutrition/foods?q=${encodeURIComponent(substituteQuery.trim())}`)
+      setSubstituteResults(results.filter((food) => food.category === category))
+    } finally {
+      setIsSearchingSubstitutes(false)
+    }
+  }
+
+  const startSubstituting = (itemId: number) => {
+    setSubstitutingItemId(itemId)
+    setSubstituteQuery("")
+    setSubstituteResults(null)
+  }
 
   const logMutation = useMutation({
     mutationFn: () =>
@@ -94,6 +147,113 @@ export function NutritionPage() {
             Hoy llevás <span className="font-medium text-foreground">{summary.calories} kcal</span> ·{" "}
             {summary.protein_g}g proteína · {summary.carbs_g}g carbos · {summary.fat_g}g grasas
           </p>
+        )}
+
+        {!profileIncomplete && (
+          <section className="rounded-xl border border-border bg-card p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-sm font-medium">Plan alimenticio personalizado</h2>
+              {plan && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => generatePlanMutation.mutate()}
+                  disabled={generatePlanMutation.isPending}
+                >
+                  Regenerar
+                </Button>
+              )}
+            </div>
+
+            {planMissing && !plan && (
+              <div className="mt-2 flex flex-col items-start gap-2">
+                <p className="text-sm text-muted-foreground">
+                  ¿Querés que armemos un plan de comidas para tus objetivos de hoy?
+                </p>
+                <Button size="sm" onClick={() => generatePlanMutation.mutate()} disabled={generatePlanMutation.isPending}>
+                  {generatePlanMutation.isPending ? "Generando…" : "Sí, generar mi plan"}
+                </Button>
+              </div>
+            )}
+
+            {plan && (
+              <div className="mt-3 flex flex-col gap-4">
+                {plan.meals.map((meal) => (
+                  <div key={meal.id}>
+                    <h3 className="text-xs font-medium uppercase text-muted-foreground">
+                      {MEAL_TYPE_LABELS[meal.meal_type]} · {meal.target_calories} kcal
+                    </h3>
+                    <ul className="mt-1 flex flex-col gap-1">
+                      {meal.items.map((item) => (
+                        <li key={item.id} className="text-sm">
+                          <div className="flex items-center justify-between">
+                            <span>
+                              {item.food_item.name} · {item.quantity_grams}g · {item.calories} kcal
+                            </span>
+                            <button
+                              onClick={() => startSubstituting(item.id)}
+                              className="text-xs text-muted-foreground hover:text-foreground"
+                            >
+                              Sustituir
+                            </button>
+                          </div>
+
+                          {substitutingItemId === item.id && (
+                            <div className="mt-1 rounded-lg border border-dashed border-border p-2">
+                              <div className="flex gap-2">
+                                <input
+                                  value={substituteQuery}
+                                  onChange={(e) => setSubstituteQuery(e.target.value)}
+                                  onKeyDown={(e) => e.key === "Enter" && searchSubstitutes(item.food_item.category)}
+                                  placeholder={`Buscar alternativa a ${item.food_item.name}…`}
+                                  className="w-full rounded-lg border border-input bg-background px-2 py-1 text-xs outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => searchSubstitutes(item.food_item.category)}
+                                  disabled={isSearchingSubstitutes || !substituteQuery.trim()}
+                                >
+                                  Buscar
+                                </Button>
+                                <Button size="sm" variant="outline" onClick={() => setSubstitutingItemId(null)}>
+                                  Cancelar
+                                </Button>
+                              </div>
+
+                              {substituteResults && substituteResults.length === 0 && (
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                  Sin alternativas de la misma categoría.
+                                </p>
+                              )}
+
+                              {substituteResults && substituteResults.length > 0 && (
+                                <ul className="mt-1 flex flex-col gap-1">
+                                  {substituteResults.map((food) => (
+                                    <li key={food.id}>
+                                      <button
+                                        onClick={() =>
+                                          substituteMutation.mutate({ itemId: item.id, foodItemId: food.id })
+                                        }
+                                        disabled={substituteMutation.isPending}
+                                        className="w-full rounded-lg p-1 text-left text-xs hover:bg-muted"
+                                      >
+                                        {food.name} · {food.calories_per_100g} kcal/100g
+                                      </button>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
         )}
 
         <section className="rounded-xl border border-border bg-card p-5">

@@ -27,6 +27,20 @@ test.beforeAll(async () => {
   if (!res.ok()) {
     throw new Error(`fixture setup failed: ${res.status()} ${await res.text()}`)
   }
+
+  // Sin onboarding completo, RequireAuth manda al usuario a /onboarding en
+  // vez de /dashboard tras el login — este spec asume que entra directo.
+  const { data } = (await res.json()) as { data: { token: string } }
+  const headers = { Authorization: `Bearer ${data.token}` }
+  await ctx.post(`${API_URL}/onboarding`, {
+    data: {
+      age: 30, sex: 'male', height_cm: 180, weight_kg: 80, level: 'beginner',
+      goals: ['gain_muscle'], frequency_days: 3,
+    },
+    headers,
+  })
+  await ctx.post(`${API_URL}/onboarding/complete`, { headers })
+
   await ctx.dispose()
 })
 

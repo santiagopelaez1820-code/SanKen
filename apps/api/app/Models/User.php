@@ -33,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'role',
         'is_public_profile',
         'is_banned',
+        'deactivated_at',
         'two_factor_enabled',
         'last_active_at',
         'trainer_verified_at',
@@ -65,6 +66,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
             'two_factor_recovery_codes' => 'array',
             'is_public_profile' => 'boolean',
             'is_banned' => 'boolean',
+            'deactivated_at' => 'datetime',
             'last_active_at' => 'datetime',
             'trainer_verified_at' => 'datetime',
         ];
@@ -140,7 +142,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'super_admin';
     }
 
     public function isTrainer(): bool
@@ -152,7 +154,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
     {
         return LogOptions::defaults()
             ->useLogName('user')
-            ->logOnly(['role', 'is_banned', 'two_factor_enabled', 'trainer_verified_at'])
+            ->logOnly(['role', 'is_banned', 'deactivated_at', 'two_factor_enabled', 'trainer_verified_at'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }

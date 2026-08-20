@@ -52,12 +52,19 @@ export const useRetosStore = create<RetosStoreState>((set, get) => ({
     if (get().activeChallengeId !== challengeId) return; // se cerró mientras cargaba
     set({ leaderboard: res.entries });
 
-    const echo = getEcho();
-    const channel = echo.private(`challenges.${challengeId}`);
-    channel.listen('.progress.updated', (payload: ChallengeProgressBroadcast) => {
-      set({ leaderboard: payload.leaderboard });
-    });
-    leaveChannel = () => echo.leave(`challenges.${challengeId}`);
+    try {
+      const echo = getEcho();
+      const channel = echo.private(`challenges.${challengeId}`);
+      channel.listen('.progress.updated', (payload: ChallengeProgressBroadcast) => {
+        set({ leaderboard: payload.leaderboard });
+      });
+      leaveChannel = () => echo.leave(`challenges.${challengeId}`);
+    } catch (err) {
+      // Ver el comentario en notifications-store.ts: si el websocket no
+      // conecta, el leaderboard se queda usable sin actualizaciones en
+      // vivo en vez de romper toda la pantalla.
+      console.warn('No se pudo suscribir al leaderboard en vivo:', err);
+    }
   },
 
   closeLeaderboard: () => {

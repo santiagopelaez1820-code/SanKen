@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import * as DocumentPicker from 'expo-document-picker';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +8,7 @@ import type { AdminExercise } from '@sanken/core';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminStore } from '@/store/admin-store';
@@ -53,6 +55,78 @@ function ChipRow({
 
 const EMPTY_FORM = { name: '', primary_muscle_id: '', equipment: 'barbell', level: 'beginner', type: 'compound' };
 
+/**
+ * El admin elige el archivo desde su dispositivo (expo-document-picker) —
+ * sin búsqueda automática, sin YouTube, sin APIs externas. El backend
+ * garantiza el reemplazo seguro (sube y confirma antes de borrar el
+ * anterior), ver AdminExerciseController::uploadVideo.
+ */
+function ExerciseVideoRow({ exercise }: { exercise: AdminExercise }) {
+  const { uploadExerciseVideo, deleteExerciseVideo } = useAdminStore();
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handlePick = async () => {
+    setError(null);
+    const result = await DocumentPicker.getDocumentAsync({ type: 'video/*' });
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    setIsUploading(true);
+    try {
+      await uploadExerciseVideo(exercise.id, { uri: asset.uri, name: asset.name, mimeType: asset.mimeType ?? null });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo subir el video.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await deleteExerciseVideo(exercise.id);
+      setConfirmingDelete(false);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <ThemedView style={styles.videoRow}>
+      <ThemedText type="small" themeColor="textSecondary">
+        {exercise.video_url ? '✅ Disponible' : '❌ Sin video'}
+      </ThemedText>
+      <PrimaryButton
+        label={isUploading ? 'Subiendo…' : exercise.video_url ? 'Reemplazar' : 'Subir'}
+        variant="ghost"
+        loading={isUploading}
+        onPress={handlePick}
+      />
+      {exercise.video_url && (
+        <PrimaryButton label="Eliminar" variant="ghost" onPress={() => setConfirmingDelete(true)} />
+      )}
+      {error && (
+        <ThemedText type="small" style={styles.error}>
+          {error}
+        </ThemedText>
+      )}
+
+      <ConfirmDialog
+        visible={confirmingDelete}
+        title={`¿Eliminar el video de ${exercise.name}?`}
+        description="El ejercicio se queda sin video pero sigue funcionando normalmente."
+        confirmLabel="Sí, eliminar"
+        isLoading={isDeleting}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmingDelete(false)}
+      />
+    </ThemedView>
+  );
+}
+
 export default function AdminEjerciciosScreen() {
   const theme = useTheme();
   const { exercises, muscleGroups, isLoadingExercises, loadExercises, createExercise, updateExercise, deactivateExercise } =
@@ -89,7 +163,7 @@ export default function AdminEjerciciosScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
           <ThemedText type="title" style={styles.pageTitle}>
             Ejercicios
           </ThemedText>
@@ -137,20 +211,23 @@ export default function AdminEjerciciosScreen() {
           )}
 
           {exercises.map((exercise) => (
-            <ThemedView key={exercise.id} type="backgroundElement" style={styles.exerciseRow}>
-              <Pressable onPress={() => startEdit(exercise)} style={styles.exerciseInfo}>
-                <ThemedText type="small" themeColor={exercise.is_active ? 'text' : 'textSecondary'}>
-                  {exercise.name} · {exercise.primary_muscle.name} · {exercise.equipment}
-                  {!exercise.is_active && ' · inactivo'}
-                </ThemedText>
-              </Pressable>
-              {exercise.is_active && (
-                <Pressable onPress={() => deactivateExercise(exercise.id)}>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Desactivar
+            <ThemedView key={exercise.id} type="backgroundElement" style={styles.exerciseCard}>
+              <View style={styles.exerciseRow}>
+                <Pressable onPress={() => startEdit(exercise)} style={styles.exerciseInfo}>
+                  <ThemedText type="small" themeColor={exercise.is_active ? 'text' : 'textSecondary'}>
+                    {exercise.name} · {exercise.primary_muscle.name} · {exercise.equipment}
+                    {!exercise.is_active && ' · inactivo'}
                   </ThemedText>
                 </Pressable>
-              )}
+                {exercise.is_active && (
+                  <Pressable onPress={() => deactivateExercise(exercise.id)}>
+                    <ThemedText type="small" themeColor="textSecondary">
+                      Desactivar
+                    </ThemedText>
+                  </Pressable>
+                )}
+              </View>
+              <ExerciseVideoRow exercise={exercise} />
             </ThemedView>
           ))}
 
@@ -164,6 +241,7 @@ export default function AdminEjerciciosScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,
@@ -177,12 +255,17 @@ const styles = StyleSheet.create({
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.one },
   chip: { borderWidth: 1, borderRadius: Spacing.two, paddingVertical: Spacing.half, paddingHorizontal: Spacing.two },
   actionsRow: { flexDirection: 'row', gap: Spacing.two },
+  exerciseCard: {
+    borderRadius: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.two,
+  },
   exerciseRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: Spacing.three,
-    padding: Spacing.three,
   },
   exerciseInfo: { flex: 1 },
+  videoRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two },
+  error: { color: '#C9564A' },
 });

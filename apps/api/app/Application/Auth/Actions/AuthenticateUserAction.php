@@ -30,6 +30,12 @@ class AuthenticateUserAction
             ]);
         }
 
+        if ($user->deactivated_at) {
+            throw ValidationException::withMessages([
+                'email' => ['Esta cuenta está desactivada.'],
+            ]);
+        }
+
         if ($user->two_factor_enabled) {
             $challengeToken = bin2hex(random_bytes(32));
             Cache::put("2fa_challenge:{$challengeToken}", $user->id, now()->addMinutes(5));

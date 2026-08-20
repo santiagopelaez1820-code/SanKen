@@ -7,6 +7,7 @@ const food: FoodItem = {
   barcode: null,
   name: 'Manzana',
   brand: null,
+  category: 'fruit',
   calories_per_100g: 52,
   protein_per_100g: 0.3,
   carbs_per_100g: 14,

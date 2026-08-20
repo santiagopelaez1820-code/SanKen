@@ -31,6 +31,12 @@ class ExerciseRequest extends FormRequest
             'video_url' => ['nullable', 'string', 'max:500'],
             'image_url' => ['nullable', 'string', 'max:500'],
             'is_active' => ['sometimes', 'boolean'],
+            // No es columna de exercises — el controller la extrae aparte
+            // para sincronizar exercise_alternatives en ambas direcciones.
+            'alternative_exercise_id' => [
+                'sometimes', 'nullable', 'integer', 'exists:exercises,id',
+                Rule::notIn([$this->route('exercise')?->id]),
+            ],
         ];
     }
 }

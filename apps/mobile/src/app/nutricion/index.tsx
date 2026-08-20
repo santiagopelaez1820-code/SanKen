@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -8,10 +8,12 @@ import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatTile } from '@/components/ui/stat-tile';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER, groupMealsByType } from '@/lib/nutrition-grouping';
 import { useNutritionStore } from '@/store/nutrition-store';
 
 export default function NutricionScreen() {
+  const theme = useTheme();
   const {
     targets,
     isLoadingTargets,
@@ -22,19 +24,39 @@ export default function NutricionScreen() {
     loadTargets,
     loadMeals,
     deleteMeal,
+    plan,
+    planMissing,
+    isGeneratingPlan,
+    loadPlan,
+    generatePlan,
+    substituteResults,
+    isSearchingSubstitutes,
+    searchSubstitutes,
+    substituteItem,
+    clearSubstitutes,
   } = useNutritionStore();
+
+  const [substitutingItemId, setSubstitutingItemId] = useState<number | null>(null);
+  const [substituteQuery, setSubstituteQuery] = useState('');
 
   useEffect(() => {
     loadTargets();
     loadMeals();
-  }, [loadTargets, loadMeals]);
+    loadPlan();
+  }, [loadTargets, loadMeals, loadPlan]);
 
   const groups = groupMealsByType(meals);
+
+  const startSubstituting = (itemId: number) => {
+    setSubstitutingItemId(itemId);
+    setSubstituteQuery('');
+    clearSubstitutes();
+  };
 
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ScrollView contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
+        <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
           <ThemedText type="title" style={styles.pageTitle}>
             Nutrición
           </ThemedText>
@@ -62,6 +84,101 @@ export default function NutricionScreen() {
               Hoy llevás {summary.calories} kcal · {summary.protein_g}g proteína · {summary.carbs_g}g carbos ·{' '}
               {summary.fat_g}g grasas
             </ThemedText>
+          )}
+
+          {!profileIncomplete && (
+            <ThemedView type="backgroundElement" style={styles.card}>
+              <View style={styles.planHeaderRow}>
+                <ThemedText type="smallBold">Plan alimenticio personalizado</ThemedText>
+                {plan && (
+                  <Pressable onPress={() => generatePlan()} disabled={isGeneratingPlan}>
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {isGeneratingPlan ? 'Generando…' : 'Regenerar'}
+                    </ThemedText>
+                  </Pressable>
+                )}
+              </View>
+
+              {planMissing && !plan && (
+                <>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    ¿Querés que armemos un plan de comidas para tus objetivos de hoy?
+                  </ThemedText>
+                  <PrimaryButton
+                    label={isGeneratingPlan ? 'Generando…' : 'Sí, generar mi plan'}
+                    onPress={() => generatePlan()}
+                  />
+                </>
+              )}
+
+              {plan?.meals.map((meal) => (
+                <ThemedView key={meal.id} style={styles.planMealBlock}>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {MEAL_TYPE_LABELS[meal.meal_type]} · {meal.target_calories} kcal
+                  </ThemedText>
+                  {meal.items.map((item) => (
+                    <ThemedView key={item.id} style={styles.planItemBlock}>
+                      <ThemedView style={styles.mealRow}>
+                        <ThemedText type="small">
+                          {item.food_item.name} · {item.quantity_grams}g · {item.calories} kcal
+                        </ThemedText>
+                        <Pressable onPress={() => startSubstituting(item.id)}>
+                          <ThemedText type="small" themeColor="textSecondary">
+                            Sustituir
+                          </ThemedText>
+                        </Pressable>
+                      </ThemedView>
+
+                      {substitutingItemId === item.id && (
+                        <View style={styles.substituteBox}>
+                          <View style={styles.searchRow}>
+                            <TextInput
+                              value={substituteQuery}
+                              onChangeText={setSubstituteQuery}
+                              onSubmitEditing={() => searchSubstitutes(substituteQuery, item.food_item.category)}
+                              placeholder={`Alternativa a ${item.food_item.name}…`}
+                              placeholderTextColor={theme.textSecondary}
+                              style={[styles.input, { borderColor: theme.backgroundSelected, color: theme.text }]}
+                            />
+                            <Pressable
+                              disabled={!substituteQuery.trim() || isSearchingSubstitutes}
+                              onPress={() => searchSubstitutes(substituteQuery, item.food_item.category)}
+                              style={[
+                                styles.searchButton,
+                                { backgroundColor: theme.accent },
+                                (!substituteQuery.trim() || isSearchingSubstitutes) && styles.disabled,
+                              ]}>
+                              <ThemedText type="smallBold" style={{ color: '#070B14' }}>
+                                Buscar
+                              </ThemedText>
+                            </Pressable>
+                          </View>
+
+                          {substituteResults.length === 0 && substituteQuery.trim() !== '' && !isSearchingSubstitutes && (
+                            <ThemedText type="small" themeColor="textSecondary">
+                              Sin alternativas de la misma categoría.
+                            </ThemedText>
+                          )}
+
+                          {substituteResults.map((food) => (
+                            <Pressable
+                              key={food.id}
+                              onPress={() => {
+                                substituteItem(item.id, food.id);
+                                setSubstitutingItemId(null);
+                              }}>
+                              <ThemedText type="small">
+                                {food.name} · {food.calories_per_100g} kcal/100g
+                              </ThemedText>
+                            </Pressable>
+                          ))}
+                        </View>
+                      )}
+                    </ThemedView>
+                  ))}
+                </ThemedView>
+              ))}
+            </ThemedView>
           )}
 
           <View style={styles.actionsRow}>
@@ -116,6 +233,7 @@ export default function NutricionScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
+  scrollView: { alignSelf: 'stretch' },
   content: {
     width: '100%',
     maxWidth: MaxContentWidth,
@@ -146,4 +264,29 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: 'transparent',
   },
+  planHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
+  },
+  planMealBlock: {
+    gap: Spacing.one,
+    backgroundColor: 'transparent',
+  },
+  planItemBlock: {
+    gap: Spacing.one,
+    backgroundColor: 'transparent',
+  },
+  substituteBox: {
+    gap: Spacing.one,
+    borderRadius: Spacing.two,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    paddingLeft: Spacing.two,
+  },
+  searchRow: { flexDirection: 'row', gap: Spacing.two },
+  input: { flex: 1, borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
+  searchButton: { borderRadius: Spacing.two, paddingHorizontal: Spacing.three, justifyContent: 'center' },
+  disabled: { opacity: 0.5 },
 });

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { ApiError, isTwoFactorChallenge, type AuthPayload, type TwoFactorChallengeResponse } from "@sanken/core"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
@@ -51,6 +51,7 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background px-6 text-foreground">
+      <img src="/logo.png" alt="" className="h-16 w-16" />
       <h1 className="font-heading text-3xl font-medium tracking-tight">
         San<span className="text-primary">Ken</span>
       </h1>
@@ -92,6 +93,13 @@ export function LoginPage() {
         <Button type="submit" disabled={isSubmitting} className="w-full">
           {isSubmitting ? "Ingresando…" : "Ingresar"}
         </Button>
+
+        <p className="text-center text-sm text-muted-foreground">
+          ¿No tenés cuenta?{" "}
+          <Link to="/register" className="font-medium text-primary underline-offset-4 hover:underline">
+            Registrate
+          </Link>
+        </p>
       </form>
     </main>
   )

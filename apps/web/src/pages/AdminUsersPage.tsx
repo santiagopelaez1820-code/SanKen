@@ -1,14 +1,14 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { AdminUser } from "@sanken/core"
+import type { AdminUser, OnboardingCity, OnboardingQuestions } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 
 const ROLE_LABELS: Record<AdminUser["role"], string> = {
   user: "Usuario",
   trainer: "Entrenador",
-  admin: "Admin",
+  super_admin: "Super Admin",
 }
 
 export function AdminUsersPage() {
@@ -16,14 +16,29 @@ export function AdminUsersPage() {
   const [role, setRole] = useState("")
   const [bannedOnly, setBannedOnly] = useState(false)
   const [q, setQ] = useState("")
+  const [countryId, setCountryId] = useState("")
+  const [cityId, setCityId] = useState("")
+
+  const { data: questions } = useQuery({
+    queryKey: ["onboarding", "questions"],
+    queryFn: () => api.get<OnboardingQuestions>("/onboarding/questions"),
+  })
+
+  const { data: cities } = useQuery({
+    queryKey: ["onboarding", "cities", countryId],
+    queryFn: () => api.get<OnboardingCity[]>(`/onboarding/countries/${countryId}/cities`),
+    enabled: Boolean(countryId),
+  })
 
   const params = new URLSearchParams()
   if (role) params.set("role", role)
   if (bannedOnly) params.set("is_banned", "1")
   if (q.trim()) params.set("q", q.trim())
+  if (countryId) params.set("country_id", countryId)
+  if (cityId) params.set("city_id", cityId)
 
   const { data: users, isLoading } = useQuery({
-    queryKey: ["admin", "users", role, bannedOnly, q],
+    queryKey: ["admin", "users", role, bannedOnly, q, countryId, cityId],
     queryFn: () => api.get<AdminUser[]>(`/admin/users?${params.toString()}`),
   })
 
@@ -63,14 +78,54 @@ export function AdminUsersPage() {
               <option value="">Todos</option>
               <option value="user">Usuario</option>
               <option value="trainer">Entrenador</option>
-              <option value="admin">Admin</option>
+              <option value="super_admin">Super Admin</option>
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="country-filter" className="text-xs font-medium text-muted-foreground">
+              País
+            </label>
+            <select
+              id="country-filter"
+              value={countryId}
+              onChange={(e) => {
+                setCountryId(e.target.value)
+                setCityId("")
+              }}
+              className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="">Todos</option>
+              {questions?.countries.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="space-y-1.5">
+            <label htmlFor="city-filter" className="text-xs font-medium text-muted-foreground">
+              Ciudad
+            </label>
+            <select
+              id="city-filter"
+              value={cityId}
+              onChange={(e) => setCityId(e.target.value)}
+              disabled={!countryId}
+              className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="">Todas</option>
+              {cities?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
             </select>
           </div>
           <label className="flex items-center gap-1.5 text-sm">
             <input type="checkbox" checked={bannedOnly} onChange={(e) => setBannedOnly(e.target.checked)} />
             Solo baneados
           </label>
-          <div className="flex-1 space-y-1.5">
+          <div className="w-full space-y-1.5 sm:w-auto sm:flex-1">
             <label htmlFor="q" className="text-xs font-medium text-muted-foreground">
               Buscar (nombre o correo)
             </label>
@@ -92,15 +147,21 @@ export function AdminUsersPage() {
             <ul className="divide-y divide-border">
               {users.map((user) => (
                 <li key={user.id} className="flex items-center justify-between gap-3 py-2.5">
-                  <div>
+                  <Link to={`/admin/users/${user.id}`} className="min-w-0">
                     <p className="text-sm text-foreground">
                       {user.name} <span className="text-xs text-muted-foreground">· {ROLE_LABELS[user.role]}</span>
                       {user.role === "trainer" && user.trainer_verified_at && (
                         <span className="ml-1 text-xs text-primary">✓ Verificado</span>
                       )}
+                      {user.is_deactivated && <span className="ml-1 text-xs text-destructive">Desactivado</span>}
                     </p>
-                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                  </div>
+                    <p className="text-xs text-muted-foreground">
+                      {user.email}
+                      {(user.country || user.city) && (
+                        <> · {[user.city, user.country].filter(Boolean).join(", ")}</>
+                      )}
+                    </p>
+                  </Link>
                   <div className="flex items-center gap-2">
                     {user.role === "trainer" && (
                       <Button

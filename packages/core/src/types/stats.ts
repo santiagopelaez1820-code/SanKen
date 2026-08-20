@@ -7,6 +7,18 @@ export interface PersonalRecordSummary {
   achieved_at: string;
 }
 
+/** Registro voluntario de PR — independiente del flujo de entrenamiento, ver sección "PR" del pedido. */
+export interface RegisterPersonalRecordPayload {
+  exercise_id: number;
+  weight_kg: number;
+  reps: number;
+}
+
+/** meta.is_new_best es false cuando el valor enviado no superó el récord existente — el PR mostrado sigue siendo el anterior. */
+export interface RegisterPersonalRecordMeta {
+  is_new_best: boolean;
+}
+
 export interface DashboardStats {
   total_hours: number;
   total_sets: number;

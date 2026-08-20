@@ -10,7 +10,7 @@ interface TextFieldProps extends TextInputProps {
 
 export function TextField({ label, style, ...props }: TextFieldProps) {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : (scheme ?? 'light')];
+  const colors = Colors[scheme === 'unspecified' ? 'dark' : (scheme ?? 'dark')];
 
   return (
     <ThemedView style={styles.container}>

@@ -25,8 +25,8 @@ class EloquentRoutineRepository implements RoutineRepositoryInterface
         $routine = DB::transaction(function () use ($user, $generated) {
             $existingActive = $this->findActiveForUser($user);
 
-            // El motor nunca sobrescribe una rutina asignada manualmente por un entrenador.
-            if ($existingActive && $existingActive->source === 'trainer') {
+            // El motor nunca sobrescribe una rutina asignada manualmente por un entrenador o por Super Admin.
+            if ($existingActive && in_array($existingActive->source, ['trainer', 'admin'], true)) {
                 return $existingActive;
             }
 

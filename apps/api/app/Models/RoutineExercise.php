@@ -16,6 +16,7 @@ class RoutineExercise extends Model
         'rest_seconds',
         'target_rpe',
         'suggested_weight_kg',
+        'suggested_reps_per_set',
         'consecutive_failures',
     ];
 
@@ -24,6 +25,7 @@ class RoutineExercise extends Model
         return [
             'target_rpe' => 'decimal:1',
             'suggested_weight_kg' => 'decimal:2',
+            'suggested_reps_per_set' => 'array',
         ];
     }
 

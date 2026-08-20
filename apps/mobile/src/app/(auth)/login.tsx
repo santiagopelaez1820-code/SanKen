@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, router } from 'expo-router';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -31,6 +31,7 @@ export default function LoginScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <SafeAreaView style={styles.flex}>
           <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
+            <Image source={require('@/assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
             <ThemedText type="title" style={styles.title}>
               San<ThemedText type="title" style={styles.accent}>Ken</ThemedText>
             </ThemedText>
@@ -85,8 +86,9 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     gap: Spacing.four,
   },
+  logo: { width: 72, height: 72, marginBottom: -Spacing.two },
   title: { textAlign: 'center' },
-  accent: { color: '#C9A227' },
+  accent: { color: '#FF7A3D' },
   subtitle: { textAlign: 'center', marginBottom: Spacing.two },
   form: {
     alignSelf: 'stretch',

@@ -11,7 +11,7 @@ interface OptionCardProps {
 
 export function OptionCard({ label, selected, onPress }: OptionCardProps) {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : (scheme ?? 'light')];
+  const colors = Colors[scheme === 'unspecified' ? 'dark' : (scheme ?? 'dark')];
 
   return (
     <Pressable

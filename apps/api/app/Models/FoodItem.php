@@ -11,6 +11,7 @@ class FoodItem extends Model
         'barcode',
         'name',
         'brand',
+        'category',
         'calories_per_100g',
         'protein_per_100g',
         'carbs_per_100g',

@@ -3,6 +3,7 @@
 namespace Tests\Feature\Calendar;
 
 use App\Models\CalendarReminder;
+use App\Models\Exercise;
 use App\Models\Routine;
 use App\Models\User;
 use App\Models\WorkoutSession;
@@ -68,6 +69,46 @@ class CalendarApiTest extends TestCase
         $this->assertSame('2026-08-05', $completed['event_date']);
         $this->assertSame('Full Body A', $completed['title']);
         $this->assertSame(1, $events->where('type', 'workout_completed')->count());
+    }
+
+    public function test_completed_session_reports_the_real_muscle_groups_worked(): void
+    {
+        $user = User::factory()->create();
+        $chestExerciseId = Exercise::query()->where('name', 'Press banca con barra')->value('id');
+        $tricepsExerciseId = Exercise::query()->where('name', 'Press francés')->value('id');
+
+        $session = WorkoutSession::query()->create([
+            'user_id' => $user->id, 'performed_at' => '2026-08-05', 'completed' => true,
+        ]);
+        $session->exercises()->create(['exercise_id' => $chestExerciseId, 'order' => 1, 'target_sets' => 3]);
+        $session->exercises()->create(['exercise_id' => $tricepsExerciseId, 'order' => 2, 'target_sets' => 3]);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/v1/calendar?month=2026-08');
+
+        $response->assertOk();
+        $completed = collect($response->json('data.events'))->firstWhere('type', 'workout_completed');
+        $this->assertNotNull($completed);
+        $this->assertEqualsCanonicalizing(['Pecho', 'Tríceps'], $completed['muscle_groups']);
+    }
+
+    public function test_planned_workout_reports_the_routine_days_target_muscle_groups(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-08-12'));
+        $user = User::factory()->create();
+        $routine = Routine::query()->create([
+            'user_id' => $user->id, 'source' => 'engine', 'goal' => 'gain_muscle',
+            'split_type' => 'full_body', 'frequency_days' => 3, 'duration_weeks' => 6, 'is_active' => true,
+        ]);
+        $routine->days()->create(['day_order' => 1, 'label' => 'Push', 'target_muscle_groups' => ['chest', 'triceps']]);
+
+        $response = $this->actingAs($user, 'sanctum')->getJson('/api/v1/calendar?month=2026-08');
+
+        $response->assertOk();
+        $planned = collect($response->json('data.events'))->firstWhere('type', 'workout_planned');
+        $this->assertNotNull($planned);
+        $this->assertEqualsCanonicalizing(['Pecho', 'Tríceps'], $planned['muscle_groups']);
+
+        Carbon::setTestNow();
     }
 
     public function test_a_session_performed_on_the_last_day_of_the_month_is_included(): void

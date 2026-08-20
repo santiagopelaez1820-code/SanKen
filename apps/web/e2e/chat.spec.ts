@@ -13,6 +13,20 @@ async function registerUser(ctx: APIRequestContext, name: string, email: string)
   return ((await res.json()) as { data: { token: string } }).data.token
 }
 
+// Sin esto, RequireAuth manda al login posterior a /onboarding en vez de
+// /dashboard o /trainer — este spec asume que el login entra directo.
+async function completeOnboarding(ctx: APIRequestContext, token: string) {
+  const headers = { Authorization: `Bearer ${token}` }
+  await ctx.post(`${API_URL}/onboarding`, {
+    data: {
+      age: 28, sex: 'male', height_cm: 178, weight_kg: 78, level: 'intermediate',
+      goals: ['gain_muscle'], frequency_days: 3,
+    },
+    headers,
+  })
+  await ctx.post(`${API_URL}/onboarding/complete`, { headers })
+}
+
 async function login(page: Page, email: string) {
   await page.goto('/login')
   await page.fill('#email', email)
@@ -31,7 +45,9 @@ test('un mensaje enviado por el entrenador llega en vivo al cliente, que lo ve d
   const trainerName = `Coach Chat ${RUN_ID}`
 
   const trainerToken = await registerUser(ctx, trainerName, trainerEmail)
-  await registerUser(ctx, `Cliente Chat ${RUN_ID}`, clientEmail)
+  const clientToken = await registerUser(ctx, `Cliente Chat ${RUN_ID}`, clientEmail)
+  await completeOnboarding(ctx, trainerToken)
+  await completeOnboarding(ctx, clientToken)
 
   // No hay forma de registrarse como entrenador vía API (RegisterUserAction
   // fuerza role=user) — se promueve directo en la DB, como hacen otros

@@ -14,6 +14,8 @@ interface AuthState {
   clearSession: () => void
   setPendingChallenge: (challengeToken: string) => void
   clearPendingChallenge: () => void
+  setOnboardingCompleted: () => void
+  setHasLocation: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -26,6 +28,10 @@ export const useAuthStore = create<AuthState>()(
       clearSession: () => set({ token: null, user: null }),
       setPendingChallenge: (challengeToken) => set({ pendingChallenge: { challengeToken } }),
       clearPendingChallenge: () => set({ pendingChallenge: null }),
+      setOnboardingCompleted: () =>
+        set((state) => (state.user ? { user: { ...state.user, onboarding_completed: true } } : state)),
+      setHasLocation: () =>
+        set((state) => (state.user ? { user: { ...state.user, has_location: true } } : state)),
     }),
     {
       name: "sanken-auth",

@@ -21,8 +21,12 @@ class DetermineNextRoutineDayAction
             return null;
         }
 
+        // Una sesión saltada (skipped_at) no completó nada, pero igual
+        // "gastó" el turno de ese día — sin esto, saltar un entrenamiento
+        // dejaría al usuario viendo el mismo día de nuevo en vez de avanzar
+        // al siguiente (sección 4 del pedido).
         $completedCount = WorkoutSession::query()
-            ->where('completed', true)
+            ->where(fn ($q) => $q->where('completed', true)->orWhereNotNull('skipped_at'))
             ->whereHas('routineDay', fn ($q) => $q->where('routine_id', $routine->id))
             ->count();
 

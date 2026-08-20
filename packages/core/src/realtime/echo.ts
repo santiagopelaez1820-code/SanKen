@@ -1,5 +1,17 @@
 import Echo from 'laravel-echo';
 
+/**
+ * Bajo Metro (mobile), con `resolver.unstable_enablePackageExports = false`
+ * en `apps/mobile/metro.config.js` (necesario desde Sprint 12 por el bug de
+ * `barcode-detector`), el default import de `laravel-echo` no se interopera
+ * bien — `Echo` llega como el objeto módulo completo en vez de la clase, y
+ * `new Echo(...)` explota con "Object cannot be used as a constructor". En
+ * web (Vite) el import ya llega correctamente interoperado. Este fallback
+ * cubre ambos casos sin depender de cuál bundler lo está cargando.
+ */
+const EchoCtor: typeof Echo =
+  typeof Echo === 'function' ? Echo : (Echo as unknown as { default: typeof Echo }).default;
+
 export interface CreateEchoConfig {
   /** REVERB_APP_KEY (VITE_REVERB_APP_KEY / EXPO_PUBLIC_REVERB_APP_KEY). */
   key: string;
@@ -40,7 +52,7 @@ export function createEcho(config: CreateEchoConfig): Echo<'reverb'> {
   // `options.client` explícito.
   (globalThis as unknown as { Pusher: unknown }).Pusher = config.pusherClient;
 
-  return new Echo<'reverb'>({
+  return new EchoCtor<'reverb'>({
     broadcaster: 'reverb',
     key: config.key,
     wsHost: config.host,

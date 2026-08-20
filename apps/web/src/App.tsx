@@ -3,10 +3,13 @@ import { RequireAuth } from "@/components/RequireAuth"
 import { RequireTrainer } from "@/components/RequireTrainer"
 import { RequireAdmin } from "@/components/RequireAdmin"
 import { LoginPage } from "@/pages/LoginPage"
+import { RegisterPage } from "@/pages/RegisterPage"
 import { LoginVerifyPage } from "@/pages/LoginVerifyPage"
+import { OnboardingPage } from "@/pages/OnboardingPage"
+import { LocationSurveyPage } from "@/pages/LocationSurveyPage"
 import { DashboardPage } from "@/pages/DashboardPage"
 import { SettingsPage } from "@/pages/SettingsPage"
-import { RankingsPage } from "@/pages/RankingsPage"
+import { PersonalRecordsPage } from "@/pages/PersonalRecordsPage"
 import { ChallengesPage } from "@/pages/ChallengesPage"
 import { CalendarPage } from "@/pages/CalendarPage"
 import { TrainerClientsPage } from "@/pages/TrainerClientsPage"
@@ -18,10 +21,14 @@ import { MyTrainerPage } from "@/pages/MyTrainerPage"
 import { ChatInboxPage } from "@/pages/ChatInboxPage"
 import { ChatThreadPage } from "@/pages/ChatThreadPage"
 import { NutritionPage } from "@/pages/NutritionPage"
-import { NewsPage } from "@/pages/NewsPage"
+import { FeedPage } from "@/pages/FeedPage"
 import { AdminPage } from "@/pages/AdminPage"
 import { AdminUsersPage } from "@/pages/AdminUsersPage"
+import { AdminUserDetailPage } from "@/pages/AdminUserDetailPage"
 import { AdminExercisesPage } from "@/pages/AdminExercisesPage"
+import { AdminRoutineTemplatesPage } from "@/pages/AdminRoutineTemplatesPage"
+import { AdminChallengeTemplatesPage } from "@/pages/AdminChallengeTemplatesPage"
+import { AdminPrSubmissionsPage } from "@/pages/AdminPrSubmissionsPage"
 import { AdminReportsPage } from "@/pages/AdminReportsPage"
 import { AdminNewsPage } from "@/pages/AdminNewsPage"
 import { AdminStatsPage } from "@/pages/AdminStatsPage"
@@ -31,7 +38,24 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       <Route path="/login/verify" element={<LoginVerifyPage />} />
+      <Route
+        path="/onboarding"
+        element={
+          <RequireAuth>
+            <OnboardingPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/ubicacion"
+        element={
+          <RequireAuth>
+            <LocationSurveyPage />
+          </RequireAuth>
+        }
+      />
       <Route
         path="/dashboard"
         element={
@@ -49,10 +73,10 @@ function App() {
         }
       />
       <Route
-        path="/rankings"
+        path="/prs"
         element={
           <RequireAuth>
-            <RankingsPage />
+            <PersonalRecordsPage />
           </RequireAuth>
         }
       />
@@ -161,10 +185,10 @@ function App() {
         }
       />
       <Route
-        path="/news"
+        path="/feed"
         element={
           <RequireAuth>
-            <NewsPage />
+            <FeedPage />
           </RequireAuth>
         }
       />
@@ -189,6 +213,16 @@ function App() {
         }
       />
       <Route
+        path="/admin/users/:userId"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminUserDetailPage />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
+      <Route
         path="/admin/exercises"
         element={
           <RequireAuth>
@@ -199,11 +233,61 @@ function App() {
         }
       />
       <Route
+        path="/admin/routine-templates"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminRoutineTemplatesPage />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin/users/:userId/routine/new"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <RoutineEditorPage scope="admin" />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin/users/:userId/routine/edit"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <RoutineEditorPage scope="admin" />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
+      <Route
         path="/admin/reports"
         element={
           <RequireAuth>
             <RequireAdmin>
               <AdminReportsPage />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin/pr-submissions"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminPrSubmissionsPage />
+            </RequireAdmin>
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/admin/challenge-templates"
+        element={
+          <RequireAuth>
+            <RequireAdmin>
+              <AdminChallengeTemplatesPage />
             </RequireAdmin>
           </RequireAuth>
         }
