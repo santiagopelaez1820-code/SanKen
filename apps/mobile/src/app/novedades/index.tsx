@@ -49,7 +49,7 @@ function FeedRow({ item, onPress }: { item: FeedItem; onPress: (item: FeedItem) 
 
 export default function NovedadesScreen() {
   const theme = useTheme();
-  const { items, unreadCount, isLoading, load, markRead, markAllRead } = useFeedStore();
+  const { items, unreadCount, isLoading, error, load, markRead, markAllRead } = useFeedStore();
 
   useEffect(() => {
     load();
@@ -83,7 +83,17 @@ export default function NovedadesScreen() {
               Cargando…
             </ThemedText>
           )}
-          {!isLoading && items.length === 0 && (
+
+          {!isLoading && error && (
+            <ThemedView style={styles.errorBlock}>
+              <ThemedText type="small" style={styles.error}>
+                {error}
+              </ThemedText>
+              <PrimaryButton label="Reintentar" variant="ghost" onPress={() => load()} />
+            </ThemedView>
+          )}
+
+          {!isLoading && !error && items.length === 0 && (
             <ThemedText type="small" themeColor="textSecondary">
               No hay novedades ni notificaciones por ahora.
             </ThemedText>
@@ -114,4 +124,6 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   pageTitle: { fontSize: 28, lineHeight: 34 },
   card: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
+  errorBlock: { gap: Spacing.two, alignItems: 'flex-start', backgroundColor: 'transparent' },
+  error: { color: '#C9564A' },
 });

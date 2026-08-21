@@ -13,7 +13,7 @@
     "android": {
       "package": "com.sanken.mobile",
       "adaptiveIcon": {
-        "backgroundColor": "#003C74",
+        "backgroundColor": "#050505",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -29,7 +29,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#070B14",
+          "backgroundColor": "#050505",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
@@ -37,7 +37,7 @@
       [
         "expo-notifications",
         {
-          "color": "#F06020"
+          "color": "#CFFF36"
         }
       ],
       [

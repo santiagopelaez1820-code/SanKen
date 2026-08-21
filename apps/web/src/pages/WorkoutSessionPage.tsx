@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { TrendingUp, Trophy } from "lucide-react"
 import type { GamificationEventResult, LoggedWorkoutSet, WorkoutExercise, WorkoutSession } from "@sanken/core"
 import { ApiError } from "@sanken/core"
 import { api } from "@/lib/api"
@@ -74,6 +75,7 @@ export function WorkoutSessionPage() {
     setSwapError(null)
     setLastSetWasPersonalRecord(false)
     setRestingUntil(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset solo al cambiar de ejercicio, no en cada recalculo de suggested_weight_kg del mismo ejercicio
   }, [currentExercise?.id])
 
   useEffect(() => {
@@ -240,10 +242,10 @@ export function WorkoutSessionPage() {
       <div className="mx-auto flex max-w-lg flex-col gap-4">
         <header className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
               Ejercicio {currentIndex + 1} de {session.exercises.length}
             </p>
-            <h1 className="font-heading text-xl font-medium tracking-tight">{currentExercise.exercise.name}</h1>
+            <h1 className="font-heading text-2xl font-bold tracking-tight">{currentExercise.exercise.name}</h1>
           </div>
           <button
             type="button"
@@ -254,24 +256,40 @@ export function WorkoutSessionPage() {
           </button>
         </header>
 
-        <p className="text-sm text-muted-foreground">
-          Meta: {currentExercise.target_sets}×{currentExercise.target_reps}
-          {currentExercise.target_rpe ? ` · RPE ${currentExercise.target_rpe}` : ""}
-          {currentExercise.rest_seconds ? ` · descanso ${currentExercise.rest_seconds}s` : ""}
+        <p className="text-sm font-bold tracking-wide text-primary">
+          SERIE {currentExercise.sets.length + 1} DE {currentExercise.target_sets}
         </p>
 
-        {currentExercise.suggested_weight_kg !== null && (
-          <p className="text-sm">
-            <span className="text-muted-foreground">Peso recomendado: </span>
-            <span className="font-medium text-primary">{currentExercise.suggested_weight_kg} kg</span>
-          </p>
-        )}
+        <p className="text-sm text-muted-foreground">
+          {currentExercise.target_rpe ? `RPE ${currentExercise.target_rpe} · ` : ""}
+          {currentExercise.rest_seconds ? `descanso ${currentExercise.rest_seconds}s` : ""}
+        </p>
 
-        {suggestedRepsForNextSet !== null && (
-          <p className="text-sm">
-            <span className="text-muted-foreground">Repeticiones recomendadas: </span>
-            <span className="font-medium text-primary">{suggestedRepsForNextSet}</span>
-          </p>
+        {(currentExercise.suggested_weight_kg !== null || suggestedRepsForNextSet !== null) && (
+          <div className="grid grid-cols-2 gap-3">
+            {currentExercise.suggested_weight_kg !== null && (
+              <div className="rounded-xl border border-border bg-card p-4">
+                <p className="flex items-center gap-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  <TrendingUp className="size-3.5 text-primary" />
+                  Peso recomendado
+                </p>
+                <p className="mt-1 font-heading text-4xl font-bold text-primary tabular-nums">
+                  {currentExercise.suggested_weight_kg} kg
+                </p>
+              </div>
+            )}
+            {suggestedRepsForNextSet !== null && (
+              <div className="rounded-xl border border-border bg-card p-4">
+                <p className="flex items-center gap-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                  <TrendingUp className="size-3.5 text-primary" />
+                  Reps recomendadas
+                </p>
+                <p className="mt-1 font-heading text-4xl font-bold text-primary tabular-nums">
+                  {suggestedRepsForNextSet}
+                </p>
+              </div>
+            )}
+          </div>
         )}
 
         <ExerciseVideoPlayer videoUrl={currentExercise.exercise.video_url} />
@@ -297,13 +315,14 @@ export function WorkoutSessionPage() {
         )}
 
         {lastSetWasPersonalRecord && (
-          <div className="rounded-lg border border-primary/25 bg-primary/8 px-4 py-2 text-sm font-medium text-primary">
-            🏆 ¡Nuevo récord personal!
+          <div className="flex items-center justify-center gap-2 rounded-lg border border-primary/25 bg-primary/8 px-4 py-2 text-sm font-bold tracking-wide text-primary uppercase">
+            <Trophy className="size-4" />
+            Récord personal
           </div>
         )}
 
         {exerciseJustCompleted ? (
-          <div className="rounded-lg border border-primary/25 bg-primary/8 px-4 py-3 text-center text-sm font-medium text-primary">
+          <div className="rounded-lg border border-secondary-accent/25 bg-secondary-accent/8 px-4 py-3 text-center text-sm font-bold text-secondary-accent">
             ✅ Ejercicio completado — {isLastExercise ? "cerrando entrenamiento…" : "pasando al siguiente…"}
           </div>
         ) : (

@@ -7,6 +7,7 @@ import type { PrSubmissionStatus } from '@sanken/core';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ExerciseVideoPlayer } from '@/components/workout/exercise-video-player';
+import { Badge } from '@/components/ui/badge';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -127,10 +128,16 @@ export default function AdminPrSubmissionsScreen() {
                   </View>
                 </>
               ) : (
-                <ThemedText type="small" themeColor="textSecondary">
-                  {submission.status === 'approved' ? 'Aprobado' : 'Rechazado'} por {submission.reviewed_by?.name}
-                  {submission.rejection_reason && ` — "${submission.rejection_reason}"`}
-                </ThemedText>
+                <View style={styles.reviewedRow}>
+                  <Badge
+                    label={submission.status === 'approved' ? 'Aprobado' : 'Rechazado'}
+                    variant={submission.status === 'approved' ? 'default' : 'error'}
+                  />
+                  <ThemedText type="small" themeColor="textSecondary">
+                    por {submission.reviewed_by?.name}
+                    {submission.rejection_reason && ` — "${submission.rejection_reason}"`}
+                  </ThemedText>
+                </View>
               )}
             </ThemedView>
           ))}
@@ -144,6 +151,7 @@ export default function AdminPrSubmissionsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
+  reviewedRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
   scrollView: { alignSelf: 'stretch' },
   content: {

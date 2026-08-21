@@ -51,10 +51,7 @@ export function LoginPage() {
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background px-6 text-foreground">
-      <img src="/logo.png" alt="" className="h-16 w-16" />
-      <h1 className="font-heading text-3xl font-medium tracking-tight">
-        San<span className="text-primary">Ken</span>
-      </h1>
+      <img src="/logo-full.png" alt="SANKEN" className="h-auto w-64" />
 
       <form
         onSubmit={handleSubmit(onSubmit)}

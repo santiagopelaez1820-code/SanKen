@@ -14,11 +14,17 @@ import { useCalendarioStore } from '@/store/calendario-store';
 
 const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
-const EVENT_COLOR: Record<CalendarEvent['type'], string> = {
-  workout_completed: '#FF7A3D',
-  workout_planned: '#D98E2B',
-  reminder: '#4A90D9',
-};
+// workout_completed usa el acento de marca; workout_planned usa un gris
+// neutro (todavía no pasó, no amerita color de marca) y reminder reusa el
+// token de warning (es, conceptualmente, un aviso pendiente) — así los 3
+// colores salen del sistema de tokens en vez de hex sueltos ajenos a la
+// paleta negro+naranja+blanco.
+function eventColor(
+  type: CalendarEvent['type'],
+  theme: { accent: string; textSecondary: string; warning: string },
+): string {
+  return { workout_completed: theme.accent, workout_planned: theme.textSecondary, reminder: theme.warning }[type];
+}
 
 export default function CalendarioScreen() {
   const theme = useTheme();
@@ -99,7 +105,7 @@ export default function CalendarioScreen() {
                   {dayEvents.length > 0 && (
                     <View style={styles.dotsRow}>
                       {dayEvents.slice(0, 3).map((event, i) => (
-                        <View key={i} style={[styles.dot, { backgroundColor: EVENT_COLOR[event.type] }]} />
+                        <View key={i} style={[styles.dot, { backgroundColor: eventColor(event.type, theme) }]} />
                       ))}
                     </View>
                   )}
@@ -133,7 +139,7 @@ export default function CalendarioScreen() {
                 <View key={i} style={styles.eventRow}>
                   <View style={styles.eventInfo}>
                     <View style={styles.eventLabel}>
-                      <View style={[styles.dot, { backgroundColor: EVENT_COLOR[event.type] }]} />
+                      <View style={[styles.dot, { backgroundColor: eventColor(event.type, theme) }]} />
                       <ThemedText type="small">{event.title}</ThemedText>
                     </View>
                     {event.type !== 'reminder' && event.muscle_groups.length > 0 && (
@@ -167,7 +173,7 @@ export default function CalendarioScreen() {
                     setReminderTitle('');
                   }}
                   style={[styles.addButton, { backgroundColor: theme.accent }, !reminderTitle.trim() && styles.disabled]}>
-                  <ThemedText type="smallBold" style={{ color: '#070B14' }}>
+                  <ThemedText type="smallBold" style={{ color: '#050505' }}>
                     Agregar
                   </ThemedText>
                 </Pressable>

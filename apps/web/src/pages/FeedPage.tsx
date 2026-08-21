@@ -46,7 +46,7 @@ function FeedItemRow({ item, onRead }: { item: FeedItem; onRead: (item: FeedItem
 
 export function FeedPage() {
   const queryClient = useQueryClient()
-  const { items, unreadCount, isLoading } = useFeed()
+  const { items, unreadCount, isLoading, isError, refetch } = useFeed()
 
   const markReadMutation = useMutation({
     mutationFn: (item: FeedItem) => api.post(`/feed/${item.feed_type}/${item.id}/read`),
@@ -78,7 +78,17 @@ export function FeedPage() {
         )}
 
         {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
-        {!isLoading && items.length === 0 && (
+
+        {isError && (
+          <div className="flex flex-col items-start gap-2">
+            <p className="text-sm text-destructive">No se pudieron cargar tus novedades.</p>
+            <Button size="sm" variant="outline" onClick={() => refetch()}>
+              Reintentar
+            </Button>
+          </div>
+        )}
+
+        {!isLoading && !isError && items.length === 0 && (
           <p className="text-sm text-muted-foreground">No hay novedades ni notificaciones por ahora.</p>
         )}
 

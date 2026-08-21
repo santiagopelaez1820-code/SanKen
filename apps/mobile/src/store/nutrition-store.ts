@@ -30,6 +30,7 @@ interface NutritionStoreState {
   planMissing: boolean;
   isLoadingPlan: boolean;
   isGeneratingPlan: boolean;
+  planError: string | null;
   substituteResults: FoodItem[];
   isSearchingSubstitutes: boolean;
   isSubstituting: boolean;
@@ -68,6 +69,7 @@ export const useNutritionStore = create<NutritionStoreState>((set, get) => ({
   planMissing: false,
   isLoadingPlan: false,
   isGeneratingPlan: false,
+  planError: null,
   substituteResults: [],
   isSearchingSubstitutes: false,
   isSubstituting: false,
@@ -137,7 +139,7 @@ export const useNutritionStore = create<NutritionStoreState>((set, get) => ({
   clearSearch: () => set({ searchResults: [], searchError: null }),
 
   loadPlan: async () => {
-    set({ isLoadingPlan: true, planMissing: false });
+    set({ isLoadingPlan: true, planMissing: false, planError: null });
     try {
       const plan = await api.get<NutritionPlan>('/nutrition/plan');
       set({ plan, isLoadingPlan: false });
@@ -146,18 +148,23 @@ export const useNutritionStore = create<NutritionStoreState>((set, get) => ({
         set({ plan: null, planMissing: true, isLoadingPlan: false });
         return;
       }
-      set({ isLoadingPlan: false });
+      set({
+        isLoadingPlan: false,
+        planError: err instanceof Error ? err.message : 'No se pudo cargar tu plan alimenticio.',
+      });
     }
   },
 
   generatePlan: async () => {
-    set({ isGeneratingPlan: true });
+    set({ isGeneratingPlan: true, planError: null });
     try {
       const plan = await api.post<NutritionPlan>('/nutrition/plan');
       set({ plan, planMissing: false, isGeneratingPlan: false });
     } catch (err) {
-      set({ isGeneratingPlan: false });
-      throw err;
+      set({
+        isGeneratingPlan: false,
+        planError: err instanceof Error ? err.message : 'No se pudo generar tu plan alimenticio.',
+      });
     }
   },
 

@@ -10,7 +10,7 @@ export function AdminPage() {
             <img src="/logo.png" alt="" className="h-9 w-9" />
             <div>
               <p className="text-xs font-semibold tracking-widest text-primary">SUPER ADMIN</p>
-              <h1 className="font-heading text-2xl font-medium tracking-tight">SanKen</h1>
+              <h1 className="font-heading text-2xl font-bold tracking-tight">SANKEN</h1>
             </div>
           </div>
           <Button variant="outline" size="sm" asChild>

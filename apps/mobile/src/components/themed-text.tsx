@@ -4,7 +4,7 @@ import { Fonts, ThemeColor } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code';
+  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code' | 'stat';
   themeColor?: ThemeColor;
 };
 
@@ -23,6 +23,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
         type === 'link' && styles.link,
         type === 'linkPrimary' && styles.linkPrimary,
         type === 'code' && styles.code,
+        type === 'stat' && styles.stat,
         style,
       ]}
       {...rest}
@@ -63,11 +64,20 @@ const styles = StyleSheet.create({
   linkPrimary: {
     lineHeight: 30,
     fontSize: 14,
-    color: '#FF7A3D',
+    color: '#CFFF36',
   },
   code: {
     fontFamily: Fonts.mono,
     fontWeight: Platform.select({ android: 700 }) ?? 500,
     fontSize: 12,
+  },
+  // Números hero (peso/reps/series/volumen) — mucho más grandes y pesados
+  // que subtitle, con tabular-nums para que no "salten" de ancho al cambiar
+  // de valor mientras se entrena.
+  stat: {
+    fontSize: 48,
+    lineHeight: 52,
+    fontWeight: 800,
+    fontVariant: ['tabular-nums'],
   },
 });

@@ -9,6 +9,7 @@ import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
 import { useFeedStore } from '@/store/feed-store';
@@ -16,6 +17,7 @@ import { findNextDay, useRoutineStore } from '@/store/routine-store';
 import { useWorkoutStore } from '@/store/workout-store';
 
 export default function HomeScreen() {
+  const theme = useTheme();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const { routine, nextDayId, isLoading, hasNoRoutine, error, load } = useRoutineStore();
@@ -82,8 +84,12 @@ export default function HomeScreen() {
         )}
 
         {day && (
-          <ThemedView style={styles.todayCard}>
-            <ThemedText type="small" style={styles.eyebrow}>
+          <ThemedView
+            style={[
+              styles.todayCard,
+              { backgroundColor: `${theme.accentSecondary}14`, borderColor: `${theme.accentSecondary}40` },
+            ]}>
+            <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accentSecondary }]}>
               ENTRENAMIENTO DE HOY
             </ThemedText>
             <ThemedText type="subtitle">{day.label}</ThemedText>
@@ -182,12 +188,9 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.four,
-    backgroundColor: 'rgba(255,122,61,0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(255,122,61,0.25)',
   },
   eyebrow: {
-    color: '#FF7A3D',
     letterSpacing: 1,
     marginBottom: Spacing.one,
   },

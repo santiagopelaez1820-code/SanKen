@@ -89,6 +89,7 @@ beforeEach(() => {
     planMissing: false,
     isLoadingPlan: false,
     isGeneratingPlan: false,
+    planError: null,
     substituteResults: [],
     isSearchingSubstitutes: false,
     isSubstituting: false,
@@ -215,6 +216,15 @@ describe('loadPlan', () => {
     expect(useNutritionStore.getState().plan).toBeNull();
     expect(useNutritionStore.getState().planMissing).toBe(true);
   });
+
+  it('stores an error message on a non-404 failure instead of leaving the plan card blank', async () => {
+    mockedApi.get.mockRejectedValueOnce(new Error('Network request failed'));
+
+    await useNutritionStore.getState().loadPlan();
+
+    expect(useNutritionStore.getState().planMissing).toBe(false);
+    expect(useNutritionStore.getState().planError).toBe('Network request failed');
+  });
 });
 
 describe('generatePlan', () => {
@@ -229,11 +239,13 @@ describe('generatePlan', () => {
     expect(useNutritionStore.getState().planMissing).toBe(false);
   });
 
-  it('propagates the error (e.g. incomplete profile) without silently swallowing it', async () => {
+  it('stores the error (e.g. incomplete profile) instead of leaving an unhandled rejection', async () => {
     mockedApi.post.mockRejectedValueOnce(new ApiError(422, { message: 'Completá tu perfil.' }));
 
-    await expect(useNutritionStore.getState().generatePlan()).rejects.toBeInstanceOf(ApiError);
+    await useNutritionStore.getState().generatePlan();
+
     expect(useNutritionStore.getState().isGeneratingPlan).toBe(false);
+    expect(useNutritionStore.getState().planError).toBe('Completá tu perfil.');
   });
 });
 

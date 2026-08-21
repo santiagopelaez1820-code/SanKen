@@ -31,10 +31,7 @@ export default function LoginScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <SafeAreaView style={styles.flex}>
           <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-            <Image source={require('@/assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
-            <ThemedText type="title" style={styles.title}>
-              San<ThemedText type="title" style={styles.accent}>Ken</ThemedText>
-            </ThemedText>
+            <Image source={require('@/assets/images/logo-full.png')} style={styles.logo} resizeMode="contain" />
             <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
               Inicia sesión para continuar tu entrenamiento.
             </ThemedText>
@@ -86,9 +83,7 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     gap: Spacing.four,
   },
-  logo: { width: 72, height: 72, marginBottom: -Spacing.two },
-  title: { textAlign: 'center' },
-  accent: { color: '#FF7A3D' },
+  logo: { width: 240, height: 162 },
   subtitle: { textAlign: 'center', marginBottom: Spacing.two },
   form: {
     alignSelf: 'stretch',

@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   bubbleRowMine: { alignSelf: 'flex-end', alignItems: 'flex-end' },
   bubbleRowTheirs: { alignSelf: 'flex-start', alignItems: 'flex-start' },
   bubble: { borderRadius: Spacing.three, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
-  bubbleTextMine: { color: '#070B14' },
+  bubbleTextMine: { color: '#050505' },
   meta: { fontSize: 10 },
   reportBox: { borderWidth: 1, borderRadius: Spacing.two, padding: Spacing.two, gap: Spacing.half, maxWidth: '80%' },
   reasonRow: { paddingVertical: 2 },

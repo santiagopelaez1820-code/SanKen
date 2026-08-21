@@ -16,12 +16,14 @@ const summary: GamificationSummary = {
 describe("XpLevelCard", () => {
   it("shows a loading placeholder while fetching", () => {
     render(<XpLevelCard summary={undefined} isLoading={true} />)
-    expect(screen.getByText("Nivel…")).toBeInTheDocument()
+    expect(screen.getByText("Nivel")).toBeInTheDocument()
+    expect(screen.getByText("…")).toBeInTheDocument()
   })
 
   it("shows the level and xp progress once loaded", () => {
     render(<XpLevelCard summary={summary} isLoading={false} />)
-    expect(screen.getByText("Nivel 2")).toBeInTheDocument()
+    expect(screen.getByText("Nivel")).toBeInTheDocument()
+    expect(screen.getByText("2")).toBeInTheDocument()
     expect(screen.getByText("150 / 400 XP")).toBeInTheDocument()
   })
 })

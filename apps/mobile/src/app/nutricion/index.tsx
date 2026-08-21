@@ -26,7 +26,9 @@ export default function NutricionScreen() {
     deleteMeal,
     plan,
     planMissing,
+    isLoadingPlan,
     isGeneratingPlan,
+    planError,
     loadPlan,
     generatePlan,
     substituteResults,
@@ -99,7 +101,28 @@ export default function NutricionScreen() {
                 )}
               </View>
 
-              {planMissing && !plan && (
+              {isLoadingPlan && (
+                <ThemedText type="small" themeColor="textSecondary">
+                  Cargando…
+                </ThemedText>
+              )}
+
+              {!isLoadingPlan && planError && (
+                <View style={styles.planErrorBlock}>
+                  <ThemedText type="small" style={styles.error}>
+                    {planError}
+                  </ThemedText>
+                  <PrimaryButton label="Reintentar" variant="ghost" onPress={() => loadPlan()} />
+                </View>
+              )}
+
+              {plan && planError && (
+                <ThemedText type="small" style={styles.error}>
+                  {planError}
+                </ThemedText>
+              )}
+
+              {!isLoadingPlan && !planError && planMissing && !plan && (
                 <>
                   <ThemedText type="small" themeColor="textSecondary">
                     ¿Querés que armemos un plan de comidas para tus objetivos de hoy?
@@ -148,7 +171,7 @@ export default function NutricionScreen() {
                                 { backgroundColor: theme.accent },
                                 (!substituteQuery.trim() || isSearchingSubstitutes) && styles.disabled,
                               ]}>
-                              <ThemedText type="smallBold" style={{ color: '#070B14' }}>
+                              <ThemedText type="smallBold" style={{ color: '#050505' }}>
                                 Buscar
                               </ThemedText>
                             </Pressable>
@@ -289,4 +312,6 @@ const styles = StyleSheet.create({
   input: { flex: 1, borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
   searchButton: { borderRadius: Spacing.two, paddingHorizontal: Spacing.three, justifyContent: 'center' },
   disabled: { opacity: 0.5 },
+  planErrorBlock: { gap: Spacing.two, alignItems: 'flex-start', backgroundColor: 'transparent' },
+  error: { color: '#C9564A' },
 });

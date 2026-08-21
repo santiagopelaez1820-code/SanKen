@@ -35,13 +35,18 @@ export function NutritionPage() {
     queryFn: () => api.getWithMeta<MealLog[]>("/nutrition/meals"),
   })
 
-  const { data: plan, error: planError } = useQuery({
+  const {
+    data: plan,
+    error: planError,
+    refetch: refetchPlan,
+  } = useQuery({
     queryKey: ["nutrition", "plan"],
     queryFn: () => api.get<NutritionPlan>("/nutrition/plan"),
     retry: false,
     enabled: !(targetsError instanceof ApiError && targetsError.status === 404),
   })
   const planMissing = planError instanceof ApiError && planError.status === 404
+  const planLoadFailed = Boolean(planError) && !planMissing
 
   const generatePlanMutation = useMutation({
     mutationFn: () => api.post<NutritionPlan>("/nutrition/plan"),
@@ -176,6 +181,19 @@ export function NutritionPage() {
               </div>
             )}
 
+            {planLoadFailed && (
+              <div className="mt-2 flex flex-col items-start gap-2">
+                <p className="text-sm text-destructive">No se pudo cargar tu plan alimenticio.</p>
+                <Button size="sm" variant="outline" onClick={() => refetchPlan()}>
+                  Reintentar
+                </Button>
+              </div>
+            )}
+
+            {generatePlanMutation.isError && (
+              <p className="mt-2 text-sm text-destructive">{generatePlanMutation.error.message}</p>
+            )}
+
             {plan && (
               <div className="mt-3 flex flex-col gap-4">
                 {plan.meals.map((meal) => (
@@ -220,6 +238,10 @@ export function NutritionPage() {
                                   Cancelar
                                 </Button>
                               </div>
+
+                              {substituteMutation.isError && (
+                                <p className="mt-1 text-xs text-destructive">{substituteMutation.error.message}</p>
+                              )}
 
                               {substituteResults && substituteResults.length === 0 && (
                                 <p className="mt-1 text-xs text-muted-foreground">

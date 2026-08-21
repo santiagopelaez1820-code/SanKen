@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Trophy } from "lucide-react"
 import {
   ApiError,
   type ExerciseCatalogItem,
@@ -16,6 +17,8 @@ import {
 } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { Badge, type badgeVariants } from "@/components/ui/badge"
+import type { VariantProps } from "class-variance-authority"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ExerciseRankingList } from "@/components/rankings/ExerciseRankingList"
 
@@ -25,10 +28,10 @@ const STATUS_LABEL: Record<PrSubmission["status"], string> = {
   rejected: "Rechazado",
 }
 
-const STATUS_CLASS: Record<PrSubmission["status"], string> = {
-  pending: "bg-muted text-muted-foreground",
-  approved: "bg-primary/15 text-primary",
-  rejected: "bg-destructive/15 text-destructive",
+const STATUS_VARIANT: Record<PrSubmission["status"], VariantProps<typeof badgeVariants>["variant"]> = {
+  pending: "neutral",
+  approved: "default",
+  rejected: "error",
 }
 
 function PrSubmissionVideoUpload({ submission }: { submission: PrSubmission }) {
@@ -97,13 +100,24 @@ function ExerciseRankingPanel({
   scope: ExerciseRankingScope
   sex: ExerciseRankingSex
 }) {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["exercises", exerciseId, "rankings", scope, sex],
     queryFn: () => api.get<ExerciseRankingResponse>(`/exercises/${exerciseId}/rankings?scope=${scope}&sex=${sex}`),
   })
 
   if (isLoading) {
     return <p className="text-sm text-muted-foreground">Cargando…</p>
+  }
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-start gap-2">
+        <p className="text-sm text-destructive">No se pudo cargar el ranking.</p>
+        <Button size="sm" variant="outline" onClick={() => refetch()}>
+          Reintentar
+        </Button>
+      </div>
+    )
   }
 
   return (
@@ -127,6 +141,7 @@ export function PersonalRecordsPage() {
   const queryClient = useQueryClient()
   const [serverError, setServerError] = useState<string | null>(null)
   const [confirmation, setConfirmation] = useState<string | null>(null)
+  const [confirmationIsNewBest, setConfirmationIsNewBest] = useState(false)
   const [rankingExerciseId, setRankingExerciseId] = useState<number | null>(null)
   const [rankingSex, setRankingSex] = useState<ExerciseRankingSex>("male")
 
@@ -152,9 +167,10 @@ export function PersonalRecordsPage() {
       api.postWithMeta<PersonalRecordSummary>("/stats/personal-records", values),
     onSuccess: (envelope) => {
       const meta = envelope.meta as RegisterPersonalRecordMeta | undefined
+      setConfirmationIsNewBest(Boolean(meta?.is_new_best))
       setConfirmation(
         meta?.is_new_best
-          ? "¡Nuevo récord registrado!"
+          ? "¡Nuevo récord personal!"
           : "Registrado — pero no supera tu récord actual en este ejercicio, así que se conserva el anterior."
       )
       queryClient.invalidateQueries({ queryKey: ["stats", "personal-records"] })
@@ -221,7 +237,7 @@ export function PersonalRecordsPage() {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="w-full space-y-4 rounded-xl border border-primary/25 bg-primary/8 p-6"
+          className="w-full space-y-4 rounded-xl border border-border bg-card p-6"
         >
           <div className="space-y-1.5">
             <label htmlFor="exercise_id" className="text-sm font-medium">
@@ -273,7 +289,13 @@ export function PersonalRecordsPage() {
           </div>
 
           {serverError && <p className="text-sm text-destructive">{serverError}</p>}
-          {confirmation && <p className="text-sm text-primary">{confirmation}</p>}
+          {confirmation && confirmationIsNewBest && (
+            <p className="flex items-center gap-1.5 text-sm font-bold tracking-wide text-primary uppercase">
+              <Trophy className="size-4" />
+              {confirmation}
+            </p>
+          )}
+          {confirmation && !confirmationIsNewBest && <p className="text-sm text-muted-foreground">{confirmation}</p>}
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
             {isSubmitting ? "Registrando…" : "Registrar PR"}
@@ -295,7 +317,10 @@ export function PersonalRecordsPage() {
                 <li key={record.id} className="flex items-center justify-between py-2.5 text-sm">
                   <span className="text-foreground">{record.exercise_name}</span>
                   <span className="flex items-center gap-2">
-                    <span className="font-medium text-primary">{record.value} kg</span>
+                    <span className="flex items-center gap-1 font-medium text-primary">
+                      <Trophy className="size-3.5" />
+                      {record.value} kg
+                    </span>
                     <span className="text-xs text-muted-foreground">{record.achieved_at}</span>
                   </span>
                 </li>
@@ -382,9 +407,7 @@ export function PersonalRecordsPage() {
                     <span className="text-foreground">
                       {submission.exercise.name} — {submission.weight_kg} kg × {submission.reps}
                     </span>
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_CLASS[submission.status]}`}>
-                      {STATUS_LABEL[submission.status]}
-                    </span>
+                    <Badge variant={STATUS_VARIANT[submission.status]}>{STATUS_LABEL[submission.status]}</Badge>
                   </div>
                   {submission.status === "rejected" && submission.rejection_reason && (
                     <p className="text-xs text-destructive">Motivo: {submission.rejection_reason}</p>

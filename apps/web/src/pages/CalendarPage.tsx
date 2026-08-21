@@ -11,8 +11,8 @@ const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 
 const EVENT_DOT: Record<CalendarEvent["type"], string> = {
   workout_completed: "bg-primary",
-  workout_planned: "bg-amber-500",
-  reminder: "bg-sky-500",
+  workout_planned: "bg-muted-foreground",
+  reminder: "bg-warning",
 }
 
 export function CalendarPage() {

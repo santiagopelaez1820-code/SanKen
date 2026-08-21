@@ -13,10 +13,10 @@ interface StatTileProps {
 export function StatTile({ label, value, hint }: StatTileProps) {
   return (
     <ThemedView type="backgroundElement" style={styles.tile}>
-      <ThemedText type="small" themeColor="textSecondary">
+      <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
         {label}
       </ThemedText>
-      <ThemedText type="subtitle" style={styles.value}>
+      <ThemedText type="stat" style={styles.value}>
         {value}
       </ThemedText>
       {hint && (
@@ -37,8 +37,12 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.half,
   },
+  label: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   value: {
-    fontSize: 28,
-    lineHeight: 32,
+    fontSize: 34,
+    lineHeight: 38,
   },
 });

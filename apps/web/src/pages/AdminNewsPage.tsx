@@ -10,7 +10,12 @@ export function AdminNewsPage() {
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
 
-  const { data: news, isLoading } = useQuery({
+  const {
+    data: news,
+    isLoading,
+    isError: isLoadError,
+    refetch,
+  } = useQuery({
     queryKey: ["admin", "news"],
     queryFn: () => api.get<NewsPromotion[]>("/admin/news"),
   })
@@ -70,11 +75,30 @@ export function AdminNewsPage() {
             >
               Crear borrador
             </Button>
+            {createMutation.isError && (
+              <p className="text-xs text-destructive">{createMutation.error.message}</p>
+            )}
           </div>
         </section>
 
         <section className="rounded-xl border border-border bg-card p-5">
           {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+
+          {isLoadError && (
+            <div className="flex flex-col items-start gap-2">
+              <p className="text-sm text-destructive">No se pudieron cargar las noticias.</p>
+              <Button size="sm" variant="outline" onClick={() => refetch()}>
+                Reintentar
+              </Button>
+            </div>
+          )}
+
+          {(togglePublishMutation.isError || deleteMutation.isError) && (
+            <p className="mb-2 text-xs text-destructive">
+              {(togglePublishMutation.error ?? deleteMutation.error)?.message}
+            </p>
+          )}
+
           <ul className="flex flex-col gap-3">
             {news?.map((item) => (
               <li key={item.id} className="rounded-lg border border-border p-3">

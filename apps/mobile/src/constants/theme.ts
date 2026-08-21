@@ -7,23 +7,34 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// Paleta de marca SanKen — navy + naranja (logo "SANKEN GIMNASIO & FITNESS"). Ver docs/04-ux-ui-wireframes.md.
+// Paleta de marca SANKEN — "Power Ascend": negro + lima + cyan.
+// accent (lima) = progreso/positivo/CTAs; accentSecondary (cyan) = entrenamiento/actividad.
 export const Colors = {
   light: {
-    text: '#0B1220',
-    background: '#F7F9FC',
-    backgroundElement: '#EAF0F6',
-    backgroundSelected: '#D7E4F0',
-    textSecondary: '#5B6B7C',
-    accent: '#F06020',
+    text: '#0A0A0A',
+    background: '#FAFAFA',
+    backgroundElement: '#F0F0F0',
+    backgroundSelected: '#E5E5E5',
+    textSecondary: '#6B6B6B',
+    accent: '#CFFF36',
+    accentSecondary: '#0EA5C4',
+    border: 'rgba(0, 0, 0, 0.10)',
+    success: '#16A34A',
+    warning: '#D97706',
+    error: '#DC2626',
   },
   dark: {
-    text: '#F4F7FB',
-    background: '#070B14',
-    backgroundElement: '#101D30',
-    backgroundSelected: '#16233A',
-    textSecondary: '#8A99AD',
-    accent: '#FF7A3D',
+    text: '#FAFAFA',
+    background: '#0A0A0A',
+    backgroundElement: '#161616',
+    backgroundSelected: '#242424',
+    textSecondary: '#A3A3A3',
+    accent: '#CFFF36',
+    accentSecondary: '#20EAFF',
+    border: 'rgba(255, 255, 255, 0.10)',
+    success: '#22C55E',
+    warning: '#F59E0B',
+    error: '#EF4444',
   },
 } as const;
 

@@ -32,7 +32,7 @@ export default function RegisterScreen() {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <SafeAreaView style={styles.flex}>
           <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
-            <Image source={require('@/assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+            <Image source={require('@/assets/images/logo-full.png')} style={styles.logo} resizeMode="contain" />
             <ThemedText type="title" style={styles.title}>
               Crea tu cuenta
             </ThemedText>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     gap: Spacing.four,
   },
-  logo: { width: 64, height: 64, marginBottom: -Spacing.two },
+  logo: { width: 200, height: 135 },
   title: { textAlign: 'center' },
   subtitle: { textAlign: 'center', marginBottom: Spacing.two },
   form: {

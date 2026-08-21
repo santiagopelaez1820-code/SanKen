@@ -137,6 +137,7 @@ export function RoutineDayFieldset({
                   size="icon-sm"
                   onClick={() => remove(exIndex)}
                   disabled={fields.length <= 1}
+                  aria-label={`Eliminar ejercicio ${exIndex + 1}`}
                 >
                   ✕
                 </Button>

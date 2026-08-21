@@ -34,5 +34,7 @@ export function useFeed() {
     items: query.data?.data ?? [],
     unreadCount: (query.data?.meta?.unread_count as number | undefined) ?? 0,
     isLoading: query.isLoading,
+    isError: query.isError,
+    refetch: query.refetch,
   }
 }

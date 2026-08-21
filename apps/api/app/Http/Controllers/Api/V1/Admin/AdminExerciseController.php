@@ -10,6 +10,7 @@ use App\Models\Exercise;
 use App\Models\MuscleGroup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class AdminExerciseController extends Controller
@@ -67,15 +68,17 @@ class AdminExerciseController extends Controller
      */
     private function syncAlternative(Exercise $exercise, ?int $alternativeId): void
     {
-        foreach ($exercise->alternatives()->get() as $previous) {
-            $previous->alternatives()->detach($exercise->id);
-        }
+        DB::transaction(function () use ($exercise, $alternativeId) {
+            foreach ($exercise->alternatives()->get() as $previous) {
+                $previous->alternatives()->detach($exercise->id);
+            }
 
-        $exercise->alternatives()->sync($alternativeId ? [$alternativeId] : []);
+            $exercise->alternatives()->sync($alternativeId ? [$alternativeId] : []);
 
-        if ($alternativeId) {
-            Exercise::query()->find($alternativeId)?->alternatives()->syncWithoutDetaching([$exercise->id]);
-        }
+            if ($alternativeId) {
+                Exercise::query()->find($alternativeId)?->alternatives()->syncWithoutDetaching([$exercise->id]);
+            }
+        });
     }
 
     /**

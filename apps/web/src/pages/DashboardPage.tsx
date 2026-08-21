@@ -37,9 +37,7 @@ export function DashboardPage() {
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="" className="h-9 w-9" />
             <div>
-              <h1 className="font-heading text-2xl font-medium tracking-tight">
-                San<span className="text-primary">Ken</span>
-              </h1>
+              <h1 className="font-heading text-2xl font-bold tracking-tight">SANKEN</h1>
               <p className="text-sm text-muted-foreground">Hola, {user?.name ?? "atleta"}.</p>
             </div>
           </div>

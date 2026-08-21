@@ -87,7 +87,7 @@ export function MuscleVolumeChart() {
                 width={56}
               />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--muted)" }} />
-              <Bar dataKey="volume_kg" fill="var(--chart-1)" radius={[4, 4, 0, 0]} maxBarSize={48} />
+              <Bar dataKey="volume_kg" fill="var(--chart-2)" radius={[4, 4, 0, 0]} maxBarSize={48} />
             </BarChart>
           </ResponsiveContainer>
         )}

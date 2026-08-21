@@ -43,7 +43,7 @@ const notificationItem: FeedItem = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useFeedStore.setState({ items: [], unreadCount: 0, isLoading: false });
+  useFeedStore.setState({ items: [], unreadCount: 0, isLoading: false, error: null });
 });
 
 describe('load', () => {
@@ -55,6 +55,15 @@ describe('load', () => {
     expect(mockedApi.getWithMeta).toHaveBeenCalledWith('/feed');
     expect(useFeedStore.getState().items).toEqual([newsItem, notificationItem]);
     expect(useFeedStore.getState().unreadCount).toBe(2);
+  });
+
+  it('stores an error message on failure instead of silently showing an empty feed', async () => {
+    mockedApi.getWithMeta.mockRejectedValueOnce(new Error('Network request failed'));
+
+    await useFeedStore.getState().load();
+
+    expect(useFeedStore.getState().isLoading).toBe(false);
+    expect(useFeedStore.getState().error).toBe('Network request failed');
   });
 });
 

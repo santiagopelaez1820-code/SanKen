@@ -1,16 +1,19 @@
 import { useEffect, useState } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
+import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { ExerciseCatalogItem, ExerciseRankingScope, ExerciseRankingSex, PersonalRecordSummary, PrSubmission } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { ExercisePickerModal } from '@/components/trainer/exercise-picker-modal';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { api } from '@/lib/api';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
 import { useExerciseRankingsStore } from '@/store/exercise-rankings-store';
 import { usePersonalRecordsStore } from '@/store/personal-records-store';
@@ -22,7 +25,14 @@ const SUBMISSION_STATUS_LABEL: Record<PrSubmission['status'], string> = {
   rejected: 'Rechazado',
 };
 
+const SUBMISSION_STATUS_VARIANT: Record<PrSubmission['status'], BadgeVariant> = {
+  pending: 'neutral',
+  approved: 'default',
+  rejected: 'error',
+};
+
 function PrSubmissionRow({ submission }: { submission: PrSubmission }) {
+  const theme = useTheme();
   const { uploadVideo, uploadingId, uploadError } = usePrSubmissionsStore();
   const isUploading = uploadingId === submission.id;
 
@@ -43,9 +53,7 @@ function PrSubmissionRow({ submission }: { submission: PrSubmission }) {
         <ThemedText type="small">
           {submission.exercise.name} — {submission.weight_kg} kg × {submission.reps}
         </ThemedText>
-        <ThemedText type="smallBold" style={submission.status === 'rejected' ? styles.error : undefined}>
-          {SUBMISSION_STATUS_LABEL[submission.status]}
-        </ThemedText>
+        <Badge label={SUBMISSION_STATUS_LABEL[submission.status]} variant={SUBMISSION_STATUS_VARIANT[submission.status]} />
       </ThemedView>
       {submission.status === 'rejected' && submission.rejection_reason && (
         <ThemedText type="small" style={styles.error}>
@@ -64,6 +72,18 @@ function PrSubmissionRow({ submission }: { submission: PrSubmission }) {
         <ThemedText type="small" style={styles.error}>
           {uploadError}
         </ThemedText>
+      )}
+      {submission.video_url && (
+        <Pressable
+          onPress={() => {
+            const url = api.mediaUrl(submission.video_url) ?? (submission.video_url as string);
+            openBrowserAsync(url, { presentationStyle: WebBrowserPresentationStyle.AUTOMATIC });
+          }}
+          style={styles.videoLink}>
+          <ThemedText type="small" style={{ color: theme.accent }}>
+            Ver video
+          </ThemedText>
+        </Pressable>
       )}
     </ThemedView>
   );
@@ -87,7 +107,9 @@ function RecordRow({ record }: { record: PersonalRecordSummary }) {
     <ThemedView type="backgroundElement" style={styles.row}>
       <ThemedText type="small">{record.exercise_name}</ThemedText>
       <ThemedView style={styles.rowValue}>
-        <ThemedText type="smallBold">{record.value} kg</ThemedText>
+        <ThemedText type="smallBold" themeColor="accent">
+          🏆 {record.value} kg
+        </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           {record.achieved_at}
         </ThemedText>
@@ -117,6 +139,7 @@ export default function PersonalRecordsScreen() {
   const [repsInput, setRepsInput] = useState('1');
   const [formError, setFormError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<string | null>(null);
+  const [confirmationIsNewBest, setConfirmationIsNewBest] = useState(false);
 
   const [rankingPickerVisible, setRankingPickerVisible] = useState(false);
   const [rankingExercise, setRankingExerciseItem] = useState<ExerciseCatalogItem | null>(null);
@@ -187,9 +210,11 @@ export default function PersonalRecordsScreen() {
     setFormError(null);
     const ok = await registerRecord({ exercise_id: selectedExercise.id, weight_kg: weight, reps });
     if (ok) {
+      const isNewBest = Boolean(usePersonalRecordsStore.getState().lastIsNewBest);
+      setConfirmationIsNewBest(isNewBest);
       setConfirmation(
-        usePersonalRecordsStore.getState().lastIsNewBest
-          ? '¡Nuevo récord registrado!'
+        isNewBest
+          ? '🏆 ¡Nuevo récord personal!'
           : 'Registrado — no supera tu récord actual, se conserva el anterior.'
       );
       setWeightInput('');
@@ -248,7 +273,9 @@ export default function PersonalRecordsScreen() {
                   </ThemedText>
                 )}
                 {confirmation && (
-                  <ThemedText type="small" style={styles.confirmation}>
+                  <ThemedText
+                    type={confirmationIsNewBest ? 'smallBold' : 'small'}
+                    themeColor={confirmationIsNewBest ? 'accent' : 'textSecondary'}>
                     {confirmation}
                   </ThemedText>
                 )}
@@ -502,8 +529,8 @@ const styles = StyleSheet.create({
   },
   rowValue: { alignItems: 'flex-end' },
   submissionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.one },
+  videoLink: { alignSelf: 'flex-end' },
   error: { color: '#C9564A' },
-  confirmation: { color: '#FF7A3D' },
   rankingCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,

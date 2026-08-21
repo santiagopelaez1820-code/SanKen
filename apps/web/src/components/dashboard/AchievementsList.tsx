@@ -2,9 +2,18 @@ import { Lock, Trophy } from "lucide-react"
 import type { Achievement } from "@sanken/core"
 
 export function AchievementsList({ achievements }: { achievements: Achievement[] }) {
+  const unlockedCount = achievements.filter((a) => a.unlocked).length
+
   return (
     <div className="rounded-xl border border-border bg-card p-5">
-      <h2 className="font-heading text-sm font-medium text-foreground">Logros</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="font-heading text-sm font-medium text-foreground">Logros</h2>
+        {achievements.length > 0 && (
+          <span className="font-heading text-sm font-bold tabular-nums text-primary">
+            {unlockedCount}/{achievements.length}
+          </span>
+        )}
+      </div>
 
       {achievements.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">Todavía no hay logros disponibles.</p>

@@ -31,8 +31,8 @@ export function NextWorkoutCard() {
   })
 
   return (
-    <div className="rounded-xl border border-primary/25 bg-primary/8 p-5">
-      <p className="text-xs font-medium tracking-wide text-primary">ENTRENAMIENTO DE HOY</p>
+    <div className="rounded-xl border border-secondary-accent/25 bg-secondary-accent/8 p-5">
+      <p className="text-xs font-semibold tracking-widest text-secondary-accent">ENTRENAMIENTO DE HOY</p>
 
       {isLoading && <p className="mt-2 text-sm text-muted-foreground">Cargando tu plan…</p>}
 
@@ -46,7 +46,7 @@ export function NextWorkoutCard() {
 
       {day && (
         <>
-          <h2 className="mt-1 font-heading text-lg font-medium text-foreground">{day.label}</h2>
+          <h2 className="mt-1 font-heading text-lg font-bold text-foreground">{day.label}</h2>
           <p className="text-sm text-muted-foreground">
             {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
           </p>

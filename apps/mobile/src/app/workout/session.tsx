@@ -11,12 +11,14 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useRoutineStore } from '@/store/routine-store';
 import { useWorkoutStore } from '@/store/workout-store';
 
 const ADVANCE_DELAY_MS = 900;
 
 export default function WorkoutSessionScreen() {
+  const theme = useTheme();
   const {
     session,
     currentIndex,
@@ -193,32 +195,46 @@ export default function WorkoutSessionScreen() {
       <SafeAreaView style={styles.flex}>
         <ScrollView contentContainerStyle={styles.scroll}>
           <ThemedView style={styles.header}>
-            <ThemedText type="small" themeColor="textSecondary">
-              {currentIndex + 1}/{session.exercises.length}
+            <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
+              EJERCICIO {currentIndex + 1} DE {session.exercises.length}
             </ThemedText>
             <PrimaryButton label="Salir" variant="ghost" onPress={() => setShowExitConfirm(true)} />
           </ThemedView>
-          <ThemedText type="subtitle">{workoutExercise.exercise.name}</ThemedText>
+          <ThemedText type="title" style={styles.exerciseName}>
+            {workoutExercise.exercise.name}
+          </ThemedText>
+          <ThemedText type="smallBold" style={{ color: theme.accent }}>
+            SERIE {workoutExercise.sets.length + 1} DE {workoutExercise.target_sets}
+          </ThemedText>
           {targetSetsLabel && (
             <ThemedText type="small" themeColor="textSecondary">
-              Objetivo: {targetSetsLabel}
+              {targetSetsLabel}
             </ThemedText>
           )}
-          {workoutExercise.suggested_weight_kg !== null && (
-            <ThemedText type="small">
-              Peso recomendado:{' '}
-              <ThemedText type="smallBold" style={styles.suggested}>
-                {workoutExercise.suggested_weight_kg} kg
-              </ThemedText>
-            </ThemedText>
-          )}
-          {suggestedRepsForNextSet !== null && (
-            <ThemedText type="small">
-              Repeticiones recomendadas:{' '}
-              <ThemedText type="smallBold" style={styles.suggested}>
-                {suggestedRepsForNextSet}
-              </ThemedText>
-            </ThemedText>
+
+          {(workoutExercise.suggested_weight_kg !== null || suggestedRepsForNextSet !== null) && (
+            <ThemedView style={styles.heroRow}>
+              {workoutExercise.suggested_weight_kg !== null && (
+                <ThemedView type="backgroundElement" style={styles.heroTile}>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
+                    ▲ PESO RECOMENDADO
+                  </ThemedText>
+                  <ThemedText type="stat" style={[styles.heroValue, { color: theme.accent }]}>
+                    {workoutExercise.suggested_weight_kg} kg
+                  </ThemedText>
+                </ThemedView>
+              )}
+              {suggestedRepsForNextSet !== null && (
+                <ThemedView type="backgroundElement" style={styles.heroTile}>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
+                    ▲ REPS RECOMENDADAS
+                  </ThemedText>
+                  <ThemedText type="stat" style={[styles.heroValue, { color: theme.accent }]}>
+                    {suggestedRepsForNextSet}
+                  </ThemedText>
+                </ThemedView>
+              )}
+            </ThemedView>
           )}
 
           <ExerciseVideoPlayer videoUrl={workoutExercise.exercise.video_url} />
@@ -257,16 +273,24 @@ export default function WorkoutSessionScreen() {
           </ThemedView>
 
           {lastSetWasPersonalRecord && (
-            <ThemedView style={styles.prBanner}>
-              <ThemedText type="smallBold" style={styles.prText}>
-                🏆 ¡Nuevo récord personal!
+            <ThemedView
+              style={[
+                styles.prBanner,
+                { backgroundColor: `${theme.accent}24`, borderColor: `${theme.accent}59` },
+              ]}>
+              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accent }]}>
+                🏆 RÉCORD PERSONAL
               </ThemedText>
             </ThemedView>
           )}
 
           {exerciseJustCompleted ? (
-            <ThemedView style={styles.doneBanner}>
-              <ThemedText type="smallBold" style={styles.doneText}>
+            <ThemedView
+              style={[
+                styles.doneBanner,
+                { backgroundColor: `${theme.accentSecondary}24`, borderColor: `${theme.accentSecondary}59` },
+              ]}>
+              <ThemedText type="smallBold" style={[styles.doneText, { color: theme.accentSecondary }]}>
                 ✅ Ejercicio completado — {isLastExercise ? 'cerrando entrenamiento…' : 'pasando al siguiente…'}
               </ThemedText>
             </ThemedView>
@@ -286,13 +310,6 @@ export default function WorkoutSessionScreen() {
                   {error}
                 </ThemedText>
               )}
-
-              <PrimaryButton
-                label={`Registrar serie ${workoutExercise.sets.length + 1} de ${workoutExercise.target_sets}`}
-                loading={isSubmitting}
-                disabled={!weightInput || !repsInput}
-                onPress={handleLogSet}
-              />
             </>
           )}
 
@@ -308,6 +325,20 @@ export default function WorkoutSessionScreen() {
             </ThemedView>
           )}
         </ScrollView>
+
+        {/* Fijo abajo (no scrollea con el resto) -- durante el entreno el
+            usuario tiene que poder tocar "Registrar serie" sin buscarlo,
+            sea cual sea la altura del contenido de arriba (video, banners). */}
+        {!exerciseJustCompleted && (
+          <ThemedView style={[styles.stickyFooter, { borderTopColor: theme.border, backgroundColor: theme.background }]}>
+            <PrimaryButton
+              label={`Registrar serie ${workoutExercise.sets.length + 1} de ${workoutExercise.target_sets}`}
+              loading={isSubmitting}
+              disabled={!weightInput || !repsInput}
+              onPress={handleLogSet}
+            />
+          </ThemedView>
+        )}
       </SafeAreaView>
 
       <ConfirmDialog
@@ -337,7 +368,12 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   title: { textAlign: 'center' },
   subtitle: { textAlign: 'center' },
-  suggested: { color: '#FF7A3D' },
+  eyebrow: { textTransform: 'uppercase', letterSpacing: 0.5 },
+  exerciseName: { fontSize: 30, lineHeight: 36 },
+  heroRow: { flexDirection: 'row', gap: Spacing.two, backgroundColor: 'transparent' },
+  heroTile: { flex: 1, borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.half },
+  heroValue: { fontSize: 32, lineHeight: 36 },
+  stickyFooter: { borderTopWidth: 1, padding: Spacing.four, paddingTop: Spacing.three },
   setsCard: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
   swapBlock: { gap: Spacing.one },
   setRow: { flexDirection: 'row', justifyContent: 'space-between' },
@@ -345,20 +381,15 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
     paddingVertical: Spacing.two,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,122,61,0.14)',
     borderWidth: 1,
-    borderColor: 'rgba(255,122,61,0.35)',
   },
-  prText: { color: '#FF7A3D' },
   doneBanner: {
     borderRadius: Spacing.three,
     paddingVertical: Spacing.three,
     alignItems: 'center',
-    backgroundColor: 'rgba(255,122,61,0.14)',
     borderWidth: 1,
-    borderColor: 'rgba(255,122,61,0.35)',
   },
-  doneText: { color: '#FF7A3D', textAlign: 'center' },
+  doneText: { textAlign: 'center' },
   inputsRow: { flexDirection: 'row', gap: Spacing.three },
   inputHalf: { flex: 1 },
   error: { color: '#C9564A', textAlign: 'center' },

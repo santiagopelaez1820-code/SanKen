@@ -63,9 +63,7 @@ export function TrainerClientsPage() {
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <header className="flex items-center justify-between">
           <div>
-            <h1 className="font-heading text-2xl font-medium tracking-tight">
-              San<span className="text-primary">Ken</span> · Entrenador
-            </h1>
+            <h1 className="font-heading text-2xl font-bold tracking-tight">SANKEN · Entrenador</h1>
             <p className="text-sm text-muted-foreground">Hola, {user?.name ?? "coach"}.</p>
           </div>
           <div className="flex items-center gap-2">

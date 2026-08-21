@@ -49,7 +49,7 @@ export default function BuscarAlimentoScreen() {
               disabled={!query.trim() || isSearching}
               onPress={runSearch}
               style={[styles.searchButton, { backgroundColor: theme.accent }, (!query.trim() || isSearching) && styles.disabled]}>
-              <ThemedText type="smallBold" style={{ color: '#070B14' }}>
+              <ThemedText type="smallBold" style={{ color: '#050505' }}>
                 Buscar
               </ThemedText>
             </Pressable>

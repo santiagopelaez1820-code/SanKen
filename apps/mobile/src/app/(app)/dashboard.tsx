@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
-import { Animated, Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { useEffect } from 'react';
+import { Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import type { ProgressMetric, VolumeRange } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ProgressRing } from '@/components/ui/progress-ring';
 import { StatTile } from '@/components/ui/stat-tile';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -60,7 +61,6 @@ export default function DashboardScreen() {
     loadProgress,
   } = useDashboardStore();
   const { summary, isLoading: isLoadingGamification, loadSummary } = useGamificationStore();
-  const [xpProgressAnim] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     loadStats();
@@ -69,21 +69,12 @@ export default function DashboardScreen() {
     loadSummary();
   }, [loadStats, loadVolume, loadProgress, loadSummary]);
 
-  useEffect(() => {
-    Animated.spring(xpProgressAnim, {
-      toValue: summary?.progress_pct ?? 0,
-      useNativeDriver: false,
-      damping: 20,
-      stiffness: 80,
-    }).start();
-  }, [summary?.progress_pct, xpProgressAnim]);
-
   const chartWidth = Math.min(width, MaxContentWidth) - Spacing.four * 2 - Spacing.three * 2;
 
   const barData = volume.map((v) => ({
     value: v.volume_kg,
     label: v.muscle_group.slice(0, 4),
-    frontColor: theme.accent,
+    frontColor: theme.accentSecondary,
   }));
 
   const lineData = progress.map((p) => ({
@@ -119,25 +110,25 @@ export default function DashboardScreen() {
             />
           </ThemedView>
 
-          <ThemedView type="backgroundElement" style={styles.card}>
-            <ThemedView style={styles.cardHeader}>
-              <ThemedText type="smallBold">
-                {isLoadingGamification ? 'Nivel…' : `Nivel ${summary?.level ?? 1}`}
+          <ThemedView type="backgroundElement" style={[styles.card, styles.xpCard]}>
+            <ProgressRing
+              value={summary?.progress_pct ?? 0}
+              max={1}
+              size={76}
+              strokeWidth={7}
+              color="accent"
+              label="Nivel"
+              valueLabel={isLoadingGamification ? '…' : `${summary?.level ?? 1}`}
+            />
+            <ThemedView style={styles.xpInfo}>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
+                PROGRESO DE NIVEL
               </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {isLoadingGamification ? '' : `${summary?.total_xp ?? 0} / ${summary?.xp_for_next_level ?? 100} XP`}
-              </ThemedText>
-            </ThemedView>
-            <ThemedView style={styles.progressTrack}>
-              <Animated.View
-                style={[
-                  styles.progressFill,
-                  {
-                    backgroundColor: theme.accent,
-                    width: xpProgressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
-                  },
-                ]}
-              />
+              {!isLoadingGamification && (
+                <ThemedText type="small" themeColor="textSecondary">
+                  {`${summary?.total_xp ?? 0} / ${summary?.xp_for_next_level ?? 100} XP`}
+                </ThemedText>
+              )}
             </ThemedView>
           </ThemedView>
 
@@ -241,7 +232,16 @@ export default function DashboardScreen() {
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.card}>
-            <ThemedText type="smallBold">Logros</ThemedText>
+            <ThemedView style={styles.cardHeader}>
+              <ThemedText type="smallBold">Logros</ThemedText>
+              {(summary?.unlocked_achievements.length ?? 0) + (summary?.locked_achievements.length ?? 0) > 0 && (
+                <ThemedText type="smallBold" style={{ color: theme.accent }}>
+                  {`${summary?.unlocked_achievements.length ?? 0}/${
+                    (summary?.unlocked_achievements.length ?? 0) + (summary?.locked_achievements.length ?? 0)
+                  }`}
+                </ThemedText>
+              )}
+            </ThemedView>
             <ThemedView style={styles.achievementsGrid}>
               {[...(summary?.unlocked_achievements ?? []), ...(summary?.locked_achievements ?? [])].map(
                 (achievement) => (
@@ -318,15 +318,20 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.one,
     backgroundColor: 'transparent',
   },
-  progressTrack: {
-    height: 8,
-    borderRadius: Spacing.two,
-    backgroundColor: 'rgba(128,128,128,0.2)',
-    overflow: 'hidden',
+  xpCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
   },
-  progressFill: {
-    height: '100%',
-    borderRadius: Spacing.two,
+  xpInfo: {
+    flex: 1,
+    gap: Spacing.half,
+    backgroundColor: 'transparent',
+  },
+  eyebrow: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    fontWeight: '600',
   },
   achievementsGrid: {
     flexDirection: 'row',

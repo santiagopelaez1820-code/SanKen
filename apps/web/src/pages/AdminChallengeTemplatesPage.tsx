@@ -27,7 +27,12 @@ export function AdminChallengeTemplatesPage() {
   const [target, setTarget] = useState("")
   const [formError, setFormError] = useState<string | null>(null)
 
-  const { data: templates, isLoading } = useQuery({
+  const {
+    data: templates,
+    isLoading,
+    isError: isLoadError,
+    refetch,
+  } = useQuery({
     queryKey: ["admin", "challenge-templates"],
     queryFn: () => api.get<ChallengeTemplate[]>("/admin/challenge-templates"),
   })
@@ -128,6 +133,20 @@ export function AdminChallengeTemplatesPage() {
 
         <section className="rounded-xl border border-border bg-card p-5">
           {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+
+          {isLoadError && (
+            <div className="flex flex-col items-start gap-2">
+              <p className="text-sm text-destructive">No se pudieron cargar las plantillas.</p>
+              <Button size="sm" variant="outline" onClick={() => refetch()}>
+                Reintentar
+              </Button>
+            </div>
+          )}
+
+          {toggleActiveMutation.isError && (
+            <p className="mb-2 text-xs text-destructive">{toggleActiveMutation.error.message}</p>
+          )}
+
           <ul className="flex flex-col gap-3">
             {templates?.map((template) => (
               <li key={template.id} className="rounded-lg border border-border p-3">
