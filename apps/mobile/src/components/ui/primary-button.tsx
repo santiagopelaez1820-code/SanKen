@@ -1,12 +1,14 @@
 import { ActivityIndicator, Pressable, StyleSheet, type PressableProps } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
+import { Icon, type LucideIcon } from '@/components/ui/icon';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 interface PrimaryButtonProps extends PressableProps {
   label: string;
   loading?: boolean;
+  icon?: LucideIcon;
   /**
    * `primary` (lima sólido) es la ÚNICA acción principal de cada
    * pantalla — no todo botón debe ser lima. `accent2` (cyan sólido) es
@@ -18,7 +20,7 @@ interface PrimaryButtonProps extends PressableProps {
   variant?: 'primary' | 'accent2' | 'neutral' | 'ghost';
 }
 
-export function PrimaryButton({ label, loading, variant = 'primary', style, disabled, ...props }: PrimaryButtonProps) {
+export function PrimaryButton({ label, loading, icon, variant = 'primary', style, disabled, ...props }: PrimaryButtonProps) {
   const theme = useTheme();
   const isGhost = variant === 'ghost';
   const isNeutral = variant === 'neutral';
@@ -46,9 +48,12 @@ export function PrimaryButton({ label, loading, variant = 'primary', style, disa
       {loading ? (
         <ActivityIndicator color={labelColor} />
       ) : (
-        <ThemedText type="smallBold" style={{ color: labelColor }}>
-          {label}
-        </ThemedText>
+        <>
+          {icon && <Icon icon={icon} size={16} color={labelColor} />}
+          <ThemedText type="smallBold" style={{ color: labelColor }}>
+            {label}
+          </ThemedText>
+        </>
       )}
     </Pressable>
   );
@@ -56,6 +61,8 @@ export function PrimaryButton({ label, loading, variant = 'primary', style, disa
 
 const styles = StyleSheet.create({
   base: {
+    flexDirection: 'row',
+    gap: Spacing.one,
     alignSelf: 'stretch',
     borderRadius: Spacing.three,
     paddingVertical: Spacing.three,

@@ -1,34 +1,45 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dumbbell, Menu } from 'lucide-react-native';
 import { estimateWorkoutMinutes } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { PerformanceHero } from '@/components/dashboard/performance-hero';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import { MoreMenu } from '@/components/layout/more-menu';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
+import { useDashboardStore } from '@/store/dashboard-store';
 import { useFeedStore } from '@/store/feed-store';
+import { useGamificationStore } from '@/store/gamification-store';
 import { findNextDay, useRoutineStore } from '@/store/routine-store';
 import { useWorkoutStore } from '@/store/workout-store';
 
 export default function HomeScreen() {
   const theme = useTheme();
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
   const { routine, nextDayId, isLoading, hasNoRoutine, error, load } = useRoutineStore();
   const unreadFeedCount = useFeedStore((s) => s.unreadCount);
   const resumeWorkout = useWorkoutStore((s) => s.resume);
+  const { stats, isLoadingStats, loadStats } = useDashboardStore();
+  const { summary, isLoading: isLoadingGamification, loadSummary } = useGamificationStore();
   const [confirmingSkip, setConfirmingSkip] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
+  const [moreMenuVisible, setMoreMenuVisible] = useState(false);
 
   useEffect(() => {
     load();
-  }, [load]);
+    loadStats();
+    loadSummary();
+  }, [load, loadStats, loadSummary]);
 
   useEffect(() => {
     // Si la app se cerró a mitad de un entrenamiento, retoma esa sesión en
@@ -57,17 +68,21 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <ThemedView style={styles.heroSection}>
+        <ThemedView style={styles.header}>
           <ThemedText type="title" style={styles.title}>
             Hola, {user?.name.split(' ')[0]}
           </ThemedText>
+          <Pressable
+            onPress={() => setMoreMenuVisible(true)}
+            style={[styles.menuButton, { backgroundColor: theme.backgroundElement }]}>
+            <Menu size={20} color={theme.text} />
+            {unreadFeedCount > 0 && (
+              <ThemedView style={[styles.menuBadge, { backgroundColor: theme.accent, borderColor: theme.background }]} />
+            )}
+          </Pressable>
         </ThemedView>
 
-        {isLoading && (
-          <ThemedText type="small" themeColor="textSecondary">
-            Cargando tu plan…
-          </ThemedText>
-        )}
+        <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
 
         {error && (
           <ThemedText type="small" style={styles.error}>
@@ -75,11 +90,15 @@ export default function HomeScreen() {
           </ThemedText>
         )}
 
+        {isLoading && <Skeleton height={140} borderRadius={Spacing.four} />}
+
         {hasNoRoutine && !isLoading && (
           <ThemedView type="backgroundElement" style={styles.card}>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.centerText}>
-              Todavía estamos generando tu plan. Vuelve en un momento.
-            </ThemedText>
+            <EmptyState
+              icon={Dumbbell}
+              title="Generando tu plan"
+              description="Todavía estamos armando tu rutina. Vuelve en un momento."
+            />
           </ThemedView>
         )}
 
@@ -117,37 +136,14 @@ export default function HomeScreen() {
           onCancel={() => setConfirmingSkip(false)}
         />
 
-        {user?.role === 'trainer' && (
-          <PrimaryButton label="Mis clientes" variant="ghost" onPress={() => router.push('/trainer')} />
-        )}
-
-        {user?.role !== 'trainer' && (
-          <PrimaryButton label="Mi entrenador" variant="ghost" onPress={() => router.push('/mi-entrenador')} />
-        )}
-
-        <PrimaryButton label="Chat" variant="ghost" onPress={() => router.push('/chat')} />
-
-        <PrimaryButton
-          label={unreadFeedCount > 0 ? `Novedades (${unreadFeedCount})` : 'Novedades'}
-          variant="ghost"
-          onPress={() => router.push('/novedades')}
-        />
-
-        <PrimaryButton label="Retos" variant="ghost" onPress={() => router.push('/retos')} />
-
-        <PrimaryButton label="Calendario" variant="ghost" onPress={() => router.push('/calendario')} />
-
-        <PrimaryButton label="Nutrición" variant="ghost" onPress={() => router.push('/nutricion')} />
-
-        {user?.role === 'super_admin' && (
-          <PrimaryButton label="Super Admin" variant="ghost" onPress={() => router.push('/admin')} />
-        )}
-
-        <PrimaryButton label="Configuración" variant="ghost" onPress={() => router.push('/settings')} />
-
-        <PrimaryButton label="Cerrar sesión" variant="ghost" onPress={() => logout()} />
         </ScrollView>
       </SafeAreaView>
+
+      <MoreMenu
+        visible={moreMenuVisible}
+        onClose={() => setMoreMenuVisible(false)}
+        unreadFeedCount={unreadFeedCount}
+      />
     </ThemedView>
   );
 }
@@ -170,11 +166,31 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     paddingBottom: BottomTabInset + Spacing.three,
   },
-  heroSection: {
+  header: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'transparent',
   },
   title: {
-    textAlign: 'center',
+    fontSize: 30,
+    lineHeight: 36,
+  },
+  menuButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 2,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    borderWidth: 1.5,
   },
   centerText: { textAlign: 'center' },
   error: { color: '#C9564A', textAlign: 'center' },

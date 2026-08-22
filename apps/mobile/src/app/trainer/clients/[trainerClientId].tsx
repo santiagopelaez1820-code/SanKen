@@ -7,6 +7,7 @@ import type { TrainerClientStatus } from '@sanken/core';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useChatStore } from '@/store/chat-store';
 import { useTrainerClientsStore } from '@/store/trainer-clients-store';
@@ -39,9 +40,13 @@ export default function TrainerClientDetailScreen() {
     return (
       <ThemedView style={styles.root}>
         <SafeAreaView style={styles.safeArea}>
-          <ThemedText type="small" themeColor="textSecondary">
-            {detailError ?? 'Cargando…'}
-          </ThemedText>
+          {detailError ? (
+            <ThemedText type="small" themeColor="textSecondary">
+              {detailError}
+            </ThemedText>
+          ) : (
+            <Skeleton height={56} borderRadius={Spacing.three} />
+          )}
         </SafeAreaView>
       </ThemedView>
     );

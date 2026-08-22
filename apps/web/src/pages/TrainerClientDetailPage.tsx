@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { ConversationWithMessages, Routine, TrainerClient, TrainerClientStatus } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const STATUS_LABELS: Record<TrainerClientStatus, string> = {
   pending: "Pendiente",
@@ -38,8 +39,8 @@ export function TrainerClientDetailPage() {
 
   if (isLoading || !data) {
     return (
-      <main className="min-h-svh bg-background px-6 py-8 text-foreground">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+      <main className="px-6 py-8">
+        <Skeleton className="h-20 w-full" />
       </main>
     )
   }
@@ -49,7 +50,7 @@ export function TrainerClientDetailPage() {
   const ownsActiveRoutine = activeRoutine?.source === "trainer"
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <header>
           <Link to="/trainer" className="text-xs text-muted-foreground hover:underline">

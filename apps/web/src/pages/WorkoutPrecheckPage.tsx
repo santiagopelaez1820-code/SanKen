@@ -7,6 +7,7 @@ import { ApiError, findNextDay, type Routine, type StartWorkoutSessionPayload, t
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { ScaleSelector } from "@/components/workout/ScaleSelector"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const precheckSchema = z.object({
   sleep_quality: z.number().min(1).max(5).nullable(),
@@ -44,14 +45,14 @@ export function WorkoutPrecheckPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-svh bg-background px-6 py-8 text-foreground">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+      <main className="px-6 py-8">
+        <Skeleton className="h-20 w-full" />
       </main>
     )
   }
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
         <header>
           <button

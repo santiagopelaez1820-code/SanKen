@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
+import { MetricRing } from "@/components/ui/metric-ring"
 
-interface RestTimerProps {
+interface RestTimerRingProps {
   /** Timestamp (ms) hasta el que se descansa, o null si no hay descanso activo. */
   restingUntil: number | null
+  /** Duración total del descanso en segundos — define el 100% del ring. */
+  totalSeconds: number
   onSkip: () => void
 }
 
-export function RestTimer({ restingUntil, onSkip }: RestTimerProps) {
+export function RestTimerRing({ restingUntil, totalSeconds, onSkip }: RestTimerRingProps) {
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
@@ -23,13 +26,16 @@ export function RestTimer({ restingUntil, onSkip }: RestTimerProps) {
   const seconds = remaining % 60
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-primary/25 bg-primary/8 px-4 py-3">
-      <div>
-        <p className="text-xs font-medium text-muted-foreground">Descanso</p>
-        <p className="font-heading text-xl font-medium tabular-nums text-foreground">
-          {minutes}:{seconds.toString().padStart(2, "0")}
-        </p>
-      </div>
+    <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-6">
+      <MetricRing
+        value={remaining}
+        max={totalSeconds}
+        color="secondary-accent"
+        size={140}
+        strokeWidth={10}
+        label="Descanso"
+        valueLabel={`${minutes}:${seconds.toString().padStart(2, "0")}`}
+      />
       <Button type="button" variant="outline" size="sm" onClick={onSkip}>
         Saltar descanso
       </Button>

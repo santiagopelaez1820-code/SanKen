@@ -11,6 +11,7 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { monthGrid, toDateKey } from '@/lib/calendar-grid';
 import { useCalendarioStore } from '@/store/calendario-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const WEEKDAY_LABELS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
@@ -115,9 +116,7 @@ export default function CalendarioScreen() {
           </View>
 
           {isLoading && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={72} borderRadius={Spacing.three} />
           )}
           {error && (
             <ThemedText type="small" style={styles.error}>

@@ -13,6 +13,7 @@ import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useAdminStore } from '@/store/admin-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ROLE_OPTIONS: { label: string; value: string }[] = [
   { label: 'Todos', value: '' },
@@ -146,9 +147,7 @@ export default function AdminUsuariosScreen() {
           </View>
 
           {isLoadingUsers && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
 
           {users.map((user) => (

@@ -1,51 +1,50 @@
 import { Link } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+import {
+  ClipboardList,
+  Dumbbell,
+  FileClock,
+  FileText,
+  Flag,
+  Newspaper,
+  ScrollText,
+  Trophy,
+  Users,
+} from "lucide-react"
+import { Card } from "@/components/ui/card"
+
+const TILES = [
+  { label: "Usuarios", to: "/admin/users", icon: Users },
+  { label: "Ejercicios", to: "/admin/exercises", icon: Dumbbell },
+  { label: "Rutinas generales", to: "/admin/routine-templates", icon: ClipboardList },
+  { label: "Reportes", to: "/admin/reports", icon: FileText },
+  { label: "PR pendientes", to: "/admin/pr-submissions", icon: Trophy },
+  { label: "Retos", to: "/admin/challenge-templates", icon: Flag },
+  { label: "Noticias", to: "/admin/news", icon: Newspaper },
+  { label: "Métricas", to: "/admin/stats", icon: ScrollText },
+  { label: "Auditoría", to: "/admin/audit-logs", icon: FileClock },
+]
 
 export function AdminPage() {
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="" className="h-9 w-9" />
-            <div>
-              <p className="text-xs font-semibold tracking-widest text-primary">SUPER ADMIN</p>
-              <h1 className="font-heading text-2xl font-bold tracking-tight">SANKEN</h1>
-            </div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="" className="h-9 w-9" />
+          <div>
+            <p className="text-xs font-semibold tracking-widest text-primary uppercase">Super Admin</p>
+            <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">SANKEN</h1>
           </div>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">Volver</Link>
-          </Button>
-        </header>
+        </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <Button variant="outline" asChild>
-            <Link to="/admin/users">Usuarios</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/exercises">Ejercicios</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/routine-templates">Rutinas generales</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/reports">Reportes</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/pr-submissions">PR pendientes</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/challenge-templates">Retos</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/news">Noticias</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/stats">Métricas</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <Link to="/admin/audit-logs">Auditoría</Link>
-          </Button>
+          {TILES.map((tile) => (
+            <Link key={tile.to} to={tile.to}>
+              <Card className="flex flex-col items-center gap-2 py-6 text-center transition-colors hover:border-primary/40">
+                <tile.icon className="size-6 text-primary" />
+                <span className="text-sm font-medium text-foreground">{tile.label}</span>
+              </Card>
+            </Link>
+          ))}
         </div>
       </div>
     </main>

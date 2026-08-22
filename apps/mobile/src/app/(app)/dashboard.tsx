@@ -2,11 +2,15 @@ import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
+import { BarChart3, Clock, Flame, ListChecks, Lock, Trophy, Weight } from 'lucide-react-native';
 import type { ProgressMetric, VolumeRange } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Icon } from '@/components/ui/icon';
 import { ProgressRing } from '@/components/ui/progress-ring';
+import { Skeleton } from '@/components/ui/skeleton';
 import { StatTile } from '@/components/ui/stat-tile';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -87,7 +91,7 @@ export default function DashboardScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
           <ThemedText type="title" style={styles.pageTitle}>
-            Dashboard
+            Progreso
           </ThemedText>
 
           {statsError && (
@@ -97,13 +101,19 @@ export default function DashboardScreen() {
           )}
 
           <ThemedView style={styles.tileGrid}>
-            <StatTile label="Horas entrenadas" value={isLoadingStats ? '…' : `${stats?.total_hours ?? 0} h`} />
-            <StatTile label="Series totales" value={isLoadingStats ? '…' : `${stats?.total_sets ?? 0}`} />
             <StatTile
+              icon={Clock}
+              label="Horas entrenadas"
+              value={isLoadingStats ? '…' : `${stats?.total_hours ?? 0} h`}
+            />
+            <StatTile icon={ListChecks} label="Series totales" value={isLoadingStats ? '…' : `${stats?.total_sets ?? 0}`} />
+            <StatTile
+              icon={Weight}
               label="Toneladas movidas"
               value={isLoadingStats ? '…' : `${((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t`}
             />
             <StatTile
+              icon={Flame}
               label="Racha actual"
               value={isLoadingStats ? '…' : `${stats?.current_streak_days ?? 0} días`}
               hint={stats && stats.current_streak_days > 0 ? '¡Sigue así!' : undefined}
@@ -145,15 +155,9 @@ export default function DashboardScreen() {
               />
             </ThemedView>
 
-            {isLoadingVolume && (
-              <ThemedText type="small" themeColor="textSecondary">
-                Cargando…
-              </ThemedText>
-            )}
+            {isLoadingVolume && <Skeleton height={180} borderRadius={Spacing.three} />}
             {!isLoadingVolume && barData.length === 0 && (
-              <ThemedText type="small" themeColor="textSecondary">
-                Todavía no hay datos de volumen.
-              </ThemedText>
+              <EmptyState icon={BarChart3} title="Sin datos de volumen" description="Todavía no hay entrenamientos registrados en este rango." />
             )}
             {!isLoadingVolume && barData.length > 0 && (
               <BarChart
@@ -186,15 +190,9 @@ export default function DashboardScreen() {
               />
             </ThemedView>
 
-            {isLoadingProgress && (
-              <ThemedText type="small" themeColor="textSecondary">
-                Cargando…
-              </ThemedText>
-            )}
+            {isLoadingProgress && <Skeleton height={180} borderRadius={Spacing.three} />}
             {!isLoadingProgress && lineData.length === 0 && (
-              <ThemedText type="small" themeColor="textSecondary">
-                Todavía no hay datos de progreso.
-              </ThemedText>
+              <EmptyState icon={BarChart3} title="Sin datos de progreso" description="Todavía no hay suficientes registros para esta métrica." />
             )}
             {!isLoadingProgress && lineData.length > 0 && (
               <LineChart
@@ -217,9 +215,7 @@ export default function DashboardScreen() {
           <ThemedView type="backgroundElement" style={styles.card}>
             <ThemedText type="smallBold">Récords recientes</ThemedText>
             {(stats?.recent_personal_records.length ?? 0) === 0 && !isLoadingStats && (
-              <ThemedText type="small" themeColor="textSecondary">
-                Todavía no tienes récords personales.
-              </ThemedText>
+              <EmptyState icon={Trophy} title="Sin récords todavía" description="Registra tu primer PR desde la pestaña PR." />
             )}
             {stats?.recent_personal_records.map((pr) => (
               <ThemedView key={pr.id} style={styles.listRow}>
@@ -252,9 +248,11 @@ export default function DashboardScreen() {
                       { borderColor: achievement.unlocked ? theme.accent : theme.backgroundSelected },
                       !achievement.unlocked && styles.achievementLocked,
                     ]}>
-                    <ThemedText type="small" themeColor={achievement.unlocked ? 'accent' : 'textSecondary'}>
-                      {achievement.unlocked ? '🏆' : '🔒'}
-                    </ThemedText>
+                    <Icon
+                      icon={achievement.unlocked ? Trophy : Lock}
+                      size={20}
+                      color={achievement.unlocked ? theme.accent : theme.textSecondary}
+                    />
                     <ThemedText type="small" style={styles.achievementName}>
                       {achievement.name}
                     </ThemedText>

@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react"
-import { Link } from "react-router-dom"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { CalendarEvent, CalendarResponse } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { monthGrid, toDateKey, toMonthKey } from "@/lib/calendar-grid"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 
@@ -59,14 +59,9 @@ export function CalendarPage() {
   const selectedEvents = selectedDate ? (eventsByDate.get(selectedDate) ?? []) : []
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Calendario</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Calendario</h1>
 
         <div className="flex items-center justify-between">
           <Button
@@ -124,7 +119,7 @@ export function CalendarPage() {
           })}
         </div>
 
-        {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+        {isLoading && <Skeleton className="h-20 w-full" />}
 
         {selectedDate && (
           <div className="rounded-xl border border-border bg-card p-5">

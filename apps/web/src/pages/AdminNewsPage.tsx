@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { NewsPromotion } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function AdminNewsPage() {
   const queryClient = useQueryClient()
@@ -43,14 +43,9 @@ export function AdminNewsPage() {
   })
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Noticias</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/admin">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Noticias</h1>
 
         <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium">Nueva noticia</h2>
@@ -82,7 +77,7 @@ export function AdminNewsPage() {
         </section>
 
         <section className="rounded-xl border border-border bg-card p-5">
-          {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+          {isLoading && <Skeleton className="h-20 w-full" />}
 
           {isLoadError && (
             <div className="flex flex-col items-start gap-2">

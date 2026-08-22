@@ -10,6 +10,7 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useChatStore } from '@/store/chat-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   abuse: 'Abuso',
@@ -66,9 +67,7 @@ export default function ChatThreadScreen() {
 
             <ScrollView ref={scrollRef} style={styles.messagesList} contentContainerStyle={styles.messagesContent}>
               {isLoadingThread && (
-                <ThemedText type="small" themeColor="textSecondary">
-                  Cargando…
-                </ThemedText>
+                <Skeleton height={72} borderRadius={Spacing.three} />
               )}
 
               {messages.map((message) => (

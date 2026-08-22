@@ -1,11 +1,11 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { AdminRoutineTemplate, ExerciseCatalogItem, RoutineSplitType, RoutineTemplatePayload } from "@sanken/core"
 import { ApiError } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ExerciseFormRow {
   exercise_id: string
@@ -228,14 +228,9 @@ export function AdminRoutineTemplatesPage() {
   }
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Rutinas generales</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/admin">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Rutinas generales</h1>
 
         <p className="text-sm text-muted-foreground">
           Estas son las plantillas que el motor asigna automáticamente a cada usuario según su sexo y la frecuencia
@@ -411,7 +406,7 @@ export function AdminRoutineTemplatesPage() {
         </section>
 
         <section className="rounded-xl border border-border bg-card p-5">
-          {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+          {isLoading && <Skeleton className="h-20 w-full" />}
 
           {!isLoading &&
             Array.from(grouped.entries()).map(([key, group]) => (

@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen, act } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { RestTimer } from "./RestTimer"
+import { RestTimerRing } from "./rest-timer-ring"
 
-describe("RestTimer", () => {
+describe("RestTimerRing", () => {
   beforeEach(() => {
     vi.useFakeTimers()
   })
@@ -13,19 +13,19 @@ describe("RestTimer", () => {
   })
 
   it("renders nothing when there is no active rest", () => {
-    const { container } = render(<RestTimer restingUntil={null} onSkip={() => {}} />)
+    const { container } = render(<RestTimerRing restingUntil={null} totalSeconds={90} onSkip={() => {}} />)
     expect(container).toBeEmptyDOMElement()
   })
 
   it("shows the remaining time as mm:ss", () => {
     const restingUntil = Date.now() + 65_000
-    render(<RestTimer restingUntil={restingUntil} onSkip={() => {}} />)
+    render(<RestTimerRing restingUntil={restingUntil} totalSeconds={90} onSkip={() => {}} />)
     expect(screen.getByText("1:05")).toBeInTheDocument()
   })
 
   it("counts down as time passes", () => {
     const restingUntil = Date.now() + 5_000
-    render(<RestTimer restingUntil={restingUntil} onSkip={() => {}} />)
+    render(<RestTimerRing restingUntil={restingUntil} totalSeconds={90} onSkip={() => {}} />)
     expect(screen.getByText("0:05")).toBeInTheDocument()
 
     act(() => {
@@ -40,7 +40,7 @@ describe("RestTimer", () => {
     const user = userEvent.setup()
     const onSkip = vi.fn()
 
-    render(<RestTimer restingUntil={Date.now() + 10_000} onSkip={onSkip} />)
+    render(<RestTimerRing restingUntil={Date.now() + 10_000} totalSeconds={90} onSkip={onSkip} />)
     await user.click(screen.getByRole("button", { name: /saltar descanso/i }))
 
     expect(onSkip).toHaveBeenCalledOnce()

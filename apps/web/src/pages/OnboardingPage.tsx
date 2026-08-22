@@ -14,6 +14,7 @@ import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const LEVEL_LABELS: Record<FitnessLevel, string> = {
   beginner: "Principiante",
@@ -85,7 +86,7 @@ export function OnboardingPage() {
   if (isLoading || !questions) {
     return (
       <main className="flex min-h-svh items-center justify-center bg-background text-foreground">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+        <Skeleton className="h-20 w-full" />
       </main>
     )
   }

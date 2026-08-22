@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useChatStore } from '@/store/chat-store';
 import { useMyTrainerStore } from '@/store/my-trainer-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MiEntrenadorScreen() {
   const { trainers, isLoading, error, load } = useMyTrainerStore();
@@ -38,9 +39,7 @@ export default function MiEntrenadorScreen() {
           </ThemedText>
 
           {isLoading && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
           {error && (
             <ThemedText type="small" style={styles.error}>

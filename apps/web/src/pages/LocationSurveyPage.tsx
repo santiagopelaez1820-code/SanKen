@@ -5,6 +5,7 @@ import { ApiError, type OnboardingCity, type OnboardingQuestions, type Onboardin
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const selectClass =
   "w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
@@ -96,7 +97,7 @@ export function LocationSurveyPage() {
         </p>
 
         {isLoading || !questions ? (
-          <p className="mt-6 text-sm text-muted-foreground">Cargando…</p>
+          <Skeleton className="mt-6 h-40 w-full" />
         ) : (
           <div className="mt-6 space-y-4">
             <div className="space-y-1.5">

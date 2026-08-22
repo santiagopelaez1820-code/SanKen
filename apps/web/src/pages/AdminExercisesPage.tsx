@@ -1,10 +1,10 @@
 import { useState } from "react"
-import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { AdminExercise, MuscleGroupOption } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { ExerciseVideoControls } from "@/components/admin/ExerciseVideoControls"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface ExerciseFormState {
   name: string
@@ -97,14 +97,9 @@ export function AdminExercisesPage() {
   }
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Ejercicios</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/admin">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Ejercicios</h1>
 
         <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium">{editingId ? "Editar ejercicio" : "Nuevo ejercicio"}</h2>
@@ -214,7 +209,7 @@ export function AdminExercisesPage() {
         </section>
 
         <section className="rounded-xl border border-border bg-card p-5">
-          {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+          {isLoading && <Skeleton className="h-20 w-full" />}
           {!isLoading && response && (
             <ul className="divide-y divide-border">
               {response.data.map((exercise) => (

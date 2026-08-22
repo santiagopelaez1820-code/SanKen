@@ -13,6 +13,7 @@ import { TextField } from '@/components/ui/text-field';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAuthStore } from '@/store/auth-store';
 import { useOnboardingStore } from '@/store/onboarding-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const LEVEL_LABELS: Record<FitnessLevel, string> = {
   beginner: 'Principiante',
@@ -108,7 +109,7 @@ export default function OnboardingScreen() {
   if (isLoading || !questions) {
     return (
       <ThemedView style={styles.centered}>
-        <ThemedText type="small" themeColor="textSecondary">Cargando…</ThemedText>
+        <Skeleton height={56} borderRadius={Spacing.three} />
       </ThemedView>
     );
   }

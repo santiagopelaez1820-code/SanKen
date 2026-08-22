@@ -3,11 +3,13 @@ import * as DocumentPicker from 'expo-document-picker';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Medal, Trophy } from 'lucide-react-native';
 import type { ExerciseCatalogItem, ExerciseRankingScope, ExerciseRankingSex, PersonalRecordSummary, PrSubmission } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
+import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { ExercisePickerModal } from '@/components/trainer/exercise-picker-modal';
@@ -18,6 +20,7 @@ import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
 import { useExerciseRankingsStore } from '@/store/exercise-rankings-store';
 import { usePersonalRecordsStore } from '@/store/personal-records-store';
 import { usePrSubmissionsStore } from '@/store/pr-submissions-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const SUBMISSION_STATUS_LABEL: Record<PrSubmission['status'], string> = {
   pending: 'En revisión',
@@ -100,16 +103,20 @@ const RANKING_SEXES: { value: ExerciseRankingSex; label: string }[] = [
   { value: 'female', label: 'Mujeres' },
 ];
 
-const MEDALS: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' };
+const MEDAL_COLORS: Record<number, string> = { 1: '#D4AF37', 2: '#A8A9AD', 3: '#B08D57' };
 
 function RecordRow({ record }: { record: PersonalRecordSummary }) {
+  const theme = useTheme();
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
       <ThemedText type="small">{record.exercise_name}</ThemedText>
       <ThemedView style={styles.rowValue}>
-        <ThemedText type="smallBold" themeColor="accent">
-          🏆 {record.value} kg
-        </ThemedText>
+        <ThemedView style={styles.trophyRow}>
+          <Icon icon={Trophy} size={14} color={theme.accent} />
+          <ThemedText type="smallBold" themeColor="accent">
+            {record.value} kg
+          </ThemedText>
+        </ThemedView>
         <ThemedText type="small" themeColor="textSecondary">
           {record.achieved_at}
         </ThemedText>
@@ -214,7 +221,7 @@ export default function PersonalRecordsScreen() {
       setConfirmationIsNewBest(isNewBest);
       setConfirmation(
         isNewBest
-          ? '🏆 ¡Nuevo récord personal!'
+          ? '¡Nuevo récord personal!'
           : 'Registrado — no supera tu récord actual, se conserva el anterior.'
       );
       setWeightInput('');
@@ -415,9 +422,7 @@ export default function PersonalRecordsScreen() {
                   )}
 
                   {isLoadingRanking && (
-                    <ThemedText type="small" themeColor="textSecondary">
-                      Cargando…
-                    </ThemedText>
+                    <Skeleton height={72} borderRadius={Spacing.three} />
                   )}
 
                   {!isLoadingRanking && rankingData?.scope_label && (
@@ -438,9 +443,16 @@ export default function PersonalRecordsScreen() {
                         key={entry.user_id}
                         style={[styles.listRow, entry.is_viewer && { backgroundColor: theme.backgroundSelected }]}
                       >
-                        <ThemedText type="small">
-                          {MEDALS[entry.rank] ?? entry.rank}. {entry.user_name}
-                        </ThemedText>
+                        <ThemedView style={styles.rankRow}>
+                          {MEDAL_COLORS[entry.rank] ? (
+                            <Icon icon={Medal} size={16} color={MEDAL_COLORS[entry.rank]} />
+                          ) : (
+                            <ThemedText type="small" themeColor="textSecondary" style={styles.rankNumber}>
+                              {entry.rank}
+                            </ThemedText>
+                          )}
+                          <ThemedText type="small">{entry.user_name}</ThemedText>
+                        </ThemedView>
                         <ThemedText type="smallBold" style={{ color: theme.accent }}>
                           {entry.metric_value.toLocaleString('es-AR')} kg
                         </ThemedText>
@@ -528,6 +540,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   rowValue: { alignItems: 'flex-end' },
+  trophyRow: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'transparent' },
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
+  rankNumber: { width: 16, textAlign: 'center' },
   submissionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.one },
   videoLink: { alignSelf: 'flex-end' },
   error: { color: '#C9564A' },

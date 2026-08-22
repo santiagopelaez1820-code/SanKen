@@ -33,7 +33,7 @@ interface WorkoutStoreState {
   start: (routineDay: RoutineDay | null, precheck: StartWorkoutSessionPayload) => Promise<void>;
   /** Si había una sesión sin terminar (app cerrada a mitad de entrenamiento), la recupera desde el servidor. */
   resume: () => Promise<boolean>;
-  logSet: (weightKg: number, reps: number) => Promise<void>;
+  logSet: (weightKg: number, reps: number, rpe?: number) => Promise<void>;
   swapCurrentExercise: () => Promise<void>;
   complete: (durationMinutes: number) => Promise<void>;
   /** "Salir del entrenamiento" — nunca marca la sesión como completada. */
@@ -90,7 +90,7 @@ export const useWorkoutStore = create<WorkoutStoreState>((set, get) => ({
     }
   },
 
-  logSet: async (weightKg, reps) => {
+  logSet: async (weightKg, reps, rpe) => {
     const { session, currentIndex } = get();
     if (!session) return;
     const workoutExercise = session.exercises[currentIndex];
@@ -100,7 +100,7 @@ export const useWorkoutStore = create<WorkoutStoreState>((set, get) => ({
     try {
       const loggedSet = await api.post<LoggedWorkoutSet>(
         `/workout-sessions/${session.id}/exercises/${workoutExercise.id}/sets`,
-        { weight_kg: weightKg, reps },
+        { weight_kg: weightKg, reps, rpe },
       );
 
       set((state) => {

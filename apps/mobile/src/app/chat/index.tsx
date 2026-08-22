@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useChatStore } from '@/store/chat-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ChatInboxScreen() {
   const theme = useTheme();
@@ -27,9 +28,7 @@ export default function ChatInboxScreen() {
           </ThemedText>
 
           {isLoadingInbox && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={72} borderRadius={Spacing.three} />
           )}
           {inboxError && (
             <ThemedText type="small" style={styles.error}>

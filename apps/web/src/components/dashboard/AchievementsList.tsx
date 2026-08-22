@@ -18,12 +18,12 @@ export function AchievementsList({ achievements }: { achievements: Achievement[]
       {achievements.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">Todavía no hay logros disponibles.</p>
       ) : (
-        <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
           {achievements.map((achievement) => (
             <div
               key={achievement.code}
               title={achievement.description}
-              className={`flex flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-center ${
+              className={`flex min-w-24 shrink-0 flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-center ${
                 achievement.unlocked
                   ? "border-primary/25 bg-primary/8"
                   : "border-border bg-background opacity-50"

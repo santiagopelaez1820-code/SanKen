@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from "react"
 import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { TrendingUp, Trophy } from "lucide-react"
+import { CheckCircle2, Dumbbell, RefreshCw, TrendingUp, Trophy } from "lucide-react"
 import type { GamificationEventResult, LoggedWorkoutSet, WorkoutExercise, WorkoutSession } from "@sanken/core"
 import { ApiError } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
-import { RestTimer } from "@/components/workout/RestTimer"
 import { LevelUpModal } from "@/components/workout/LevelUpModal"
 import { ExerciseVideoPlayer } from "@/components/workout/ExerciseVideoPlayer"
+import { RestTimerRing } from "@/components/ui/rest-timer-ring"
+import { SetTrackerTable } from "@/components/ui/set-tracker-table"
+import { Stepper } from "@/components/ui/stepper"
+import { CelebrationOverlay } from "@/components/ui/celebration-overlay"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const ADVANCE_DELAY_MS = 900
 
@@ -38,9 +42,9 @@ export function WorkoutSessionPage() {
 
   const [restingUntil, setRestingUntil] = useState<number | null>(null)
   const [lastSetWasPersonalRecord, setLastSetWasPersonalRecord] = useState(false)
-  const [weightInput, setWeightInput] = useState("")
-  const [repsInput, setRepsInput] = useState("")
-  const [rpeInput, setRpeInput] = useState("")
+  const [weightInput, setWeightInput] = useState<number | null>(null)
+  const [repsInput, setRepsInput] = useState<number | null>(null)
+  const [rpeInput, setRpeInput] = useState<number | null>(null)
   const [levelUpResult, setLevelUpResult] = useState<GamificationEventResult | null>(null)
   const [justSwapped, setJustSwapped] = useState(false)
   const [swapError, setSwapError] = useState<string | null>(null)
@@ -69,8 +73,8 @@ export function WorkoutSessionPage() {
   const suggestedRepsForNextSet = currentExercise?.suggested_reps_per_set?.[nextSetIndex] ?? null
 
   useEffect(() => {
-    setWeightInput(currentExercise?.suggested_weight_kg?.toString() ?? "")
-    setRpeInput("")
+    setWeightInput(currentExercise?.suggested_weight_kg ?? null)
+    setRpeInput(null)
     setJustSwapped(false)
     setSwapError(null)
     setLastSetWasPersonalRecord(false)
@@ -79,7 +83,7 @@ export function WorkoutSessionPage() {
   }, [currentExercise?.id])
 
   useEffect(() => {
-    setRepsInput(suggestedRepsForNextSet !== null ? String(suggestedRepsForNextSet) : "")
+    setRepsInput(suggestedRepsForNextSet)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentExercise?.id, nextSetIndex])
 
@@ -109,7 +113,7 @@ export function WorkoutSessionPage() {
       setRestingUntil(Date.now() + (currentExercise?.rest_seconds ?? 90) * 1000)
       // repsInput se re-precarga solo con la sugerencia de la próxima serie
       // (ver el useEffect de nextSetIndex más arriba) — no hace falta limpiarlo acá.
-      setRpeInput("")
+      setRpeInput(null)
 
       const setsSoFar = (currentExercise?.sets.length ?? 0) + 1
       if (setsSoFar >= (currentExercise?.target_sets ?? 3)) {
@@ -173,24 +177,25 @@ export function WorkoutSessionPage() {
 
   if (sessionQuery.isLoading || !session) {
     return (
-      <main className="min-h-svh bg-background px-6 py-8 text-foreground">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+      <main className="px-6 py-8">
+        <div className="mx-auto flex max-w-lg flex-col gap-4">
+          <Skeleton className="h-8 w-2/3" />
+          <Skeleton className="h-48 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
       </main>
     )
   }
 
   async function handleLogSet() {
-    const weight = Number(weightInput)
-    const reps = Number(repsInput)
-    if (!Number.isFinite(weight) || weight < 0 || !Number.isFinite(reps) || reps < 1) return
-    const rpe = rpeInput.trim() === "" ? undefined : Number(rpeInput)
-    await logSetMutation.mutateAsync({ weight_kg: weight, reps, rpe })
+    if (weightInput === null || weightInput < 0 || repsInput === null || repsInput < 1) return
+    await logSetMutation.mutateAsync({ weight_kg: weightInput, reps: repsInput, rpe: rpeInput ?? undefined })
   }
 
   // Feedback post-sesión: máquina de estados derivada de `session`, sin estado propio.
   if (session.completed && session.completed_as_planned === null) {
     return (
-      <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+      <main className="px-6 py-8">
         <LevelUpModal result={levelUpResult} onClose={() => setLevelUpResult(null)} />
         <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
           <h1 className="font-heading text-2xl font-medium tracking-tight">¡Entrenamiento completado!</h1>
@@ -216,7 +221,7 @@ export function WorkoutSessionPage() {
 
   if (session.completed && session.completed_as_planned !== null) {
     return (
-      <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+      <main className="px-6 py-8">
         <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
           <h1 className="font-heading text-2xl font-medium tracking-tight">Buen trabajo</h1>
           <p className="text-sm text-muted-foreground">
@@ -238,15 +243,10 @@ export function WorkoutSessionPage() {
   const exerciseJustCompleted = currentExercise.sets.length >= currentExercise.target_sets
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-4">
         <header className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-              Ejercicio {currentIndex + 1} de {session.exercises.length}
-            </p>
-            <h1 className="font-heading text-2xl font-bold tracking-tight">{currentExercise.exercise.name}</h1>
-          </div>
+          <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Entrenamiento</p>
           <button
             type="button"
             onClick={() => setShowExitConfirm(true)}
@@ -256,14 +256,41 @@ export function WorkoutSessionPage() {
           </button>
         </header>
 
-        <p className="text-sm font-bold tracking-wide text-primary">
-          SERIE {currentExercise.sets.length + 1} DE {currentExercise.target_sets}
-        </p>
+        <div className="flex gap-1.5">
+          {session.exercises.map((exercise, i) => (
+            <div
+              key={exercise.id}
+              className={`h-1.5 flex-1 rounded-full ${
+                exercise.all_sets_completed ? "bg-primary" : i === currentIndex ? "bg-secondary-accent" : "bg-muted"
+              }`}
+            />
+          ))}
+        </div>
 
-        <p className="text-sm text-muted-foreground">
-          {currentExercise.target_rpe ? `RPE ${currentExercise.target_rpe} · ` : ""}
-          {currentExercise.rest_seconds ? `descanso ${currentExercise.rest_seconds}s` : ""}
-        </p>
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-secondary-accent/10 via-card to-primary/8 p-6">
+          <div className="pointer-events-none absolute -top-14 -right-14 size-40 rounded-full bg-primary/12 blur-3xl" />
+          <div className="relative">
+            <p className="text-xs font-semibold tracking-widest text-secondary-accent uppercase">
+              Ejercicio {currentIndex + 1} de {session.exercises.length}
+            </p>
+            <h1 className="mt-1 font-heading text-3xl font-bold tracking-tight text-foreground">
+              {currentExercise.exercise.name}
+            </h1>
+            {currentExercise.exercise.primary_muscle && (
+              <p className="mt-0.5 flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Dumbbell className="size-3.5" />
+                {currentExercise.exercise.primary_muscle}
+              </p>
+            )}
+            <p className="mt-2 text-sm font-bold tracking-wide text-primary uppercase">
+              Serie {currentExercise.sets.length + 1} de {currentExercise.target_sets}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {currentExercise.target_rpe ? `RPE objetivo ${currentExercise.target_rpe} · ` : ""}
+              {currentExercise.rest_seconds ? `descanso ${currentExercise.rest_seconds}s` : ""}
+            </p>
+          </div>
+        </div>
 
         {(currentExercise.suggested_weight_kg !== null || suggestedRepsForNextSet !== null) && (
           <div className="grid grid-cols-2 gap-3">
@@ -303,7 +330,8 @@ export function WorkoutSessionPage() {
               disabled={swapExerciseMutation.isPending || currentExercise.sets.length > 0}
               onClick={() => swapExerciseMutation.mutate()}
             >
-              {justSwapped ? "↩️ Volver al anterior" : "🔄 Cambiar ejercicio"}
+              <RefreshCw className="size-3.5" />
+              {justSwapped ? "Volver al anterior" : "Cambiar ejercicio"}
             </Button>
             {currentExercise.sets.length > 0 && (
               <p className="text-xs text-muted-foreground">
@@ -314,72 +342,58 @@ export function WorkoutSessionPage() {
           </div>
         )}
 
-        {lastSetWasPersonalRecord && (
+        <CelebrationOverlay show={lastSetWasPersonalRecord}>
           <div className="flex items-center justify-center gap-2 rounded-lg border border-primary/25 bg-primary/8 px-4 py-2 text-sm font-bold tracking-wide text-primary uppercase">
             <Trophy className="size-4" />
             Récord personal
           </div>
-        )}
+        </CelebrationOverlay>
 
         {exerciseJustCompleted ? (
-          <div className="rounded-lg border border-secondary-accent/25 bg-secondary-accent/8 px-4 py-3 text-center text-sm font-bold text-secondary-accent">
-            ✅ Ejercicio completado — {isLastExercise ? "cerrando entrenamiento…" : "pasando al siguiente…"}
-          </div>
+          <CelebrationOverlay show>
+            <div className="flex items-center justify-center gap-2 rounded-lg border border-secondary-accent/25 bg-secondary-accent/8 px-4 py-3 text-center text-sm font-bold text-secondary-accent">
+              <CheckCircle2 className="size-4" />
+              Ejercicio completado — {isLastExercise ? "cerrando entrenamiento…" : "pasando al siguiente…"}
+            </div>
+          </CelebrationOverlay>
         ) : (
-          <RestTimer restingUntil={restingUntil} onSkip={() => setRestingUntil(null)} />
+          <RestTimerRing
+            restingUntil={restingUntil}
+            totalSeconds={currentExercise.rest_seconds ?? 90}
+            onSkip={() => setRestingUntil(null)}
+          />
         )}
 
         {currentExercise.sets.length > 0 && (
-          <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-            {currentExercise.sets.map((set) => (
-              <li key={set.id} className="flex items-center justify-between px-4 py-2 text-sm">
-                <span className="text-muted-foreground">Serie {set.set_number}</span>
-                <span className="text-foreground">
-                  {set.weight_kg} kg × {set.reps}
-                  {set.rpe !== null ? ` · RPE ${set.rpe}` : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <SetTrackerTable
+            sets={currentExercise.sets}
+            targetSets={currentExercise.target_sets}
+            suggestedWeightKg={null}
+            suggestedRepsForNextSet={null}
+          />
         )}
 
         {!exerciseJustCompleted && (
-          <div className="grid grid-cols-3 gap-2 rounded-xl border border-border bg-card p-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Peso realizado (kg)</label>
-              <input
-                type="number"
-                step="0.5"
-                value={weightInput}
-                onChange={(e) => setWeightInput(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              />
+          <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-muted-foreground">Peso (kg)</p>
+                <Stepper value={weightInput} onChange={setWeightInput} step={2.5} unit="kg" />
+              </div>
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-muted-foreground">Repeticiones</p>
+                <Stepper value={repsInput} onChange={setRepsInput} step={1} unit="reps" />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Reps</label>
-              <input
-                type="number"
-                value={repsInput}
-                onChange={(e) => setRepsInput(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">RPE</label>
-              <input
-                type="number"
-                step="0.5"
-                min="0"
-                max="10"
-                value={rpeInput}
-                onChange={(e) => setRpeInput(e.target.value)}
-                className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-              />
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">RPE (opcional)</p>
+              <Stepper value={rpeInput} onChange={setRpeInput} step={0.5} max={10} unit="RPE" />
             </div>
             <Button
               type="button"
-              className="col-span-3"
-              disabled={logSetMutation.isPending}
+              variant="emphasis"
+              size="lg"
+              disabled={logSetMutation.isPending || weightInput === null || repsInput === null}
               onClick={handleLogSet}
             >
               Registrar serie {currentExercise.sets.length + 1} de {currentExercise.target_sets}

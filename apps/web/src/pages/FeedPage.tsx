@@ -1,10 +1,11 @@
-import { Link, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import type { FeedItem, NewChatMessageNotificationData } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useFeed } from "@/hooks/use-feed"
+import { Skeleton } from "@/components/ui/skeleton"
 
 function FeedItemRow({ item, onRead }: { item: FeedItem; onRead: (item: FeedItem) => void }) {
   const navigate = useNavigate()
@@ -59,14 +60,9 @@ export function FeedPage() {
   })
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Novedades</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Novedades</h1>
 
         {unreadCount > 0 && (
           <button
@@ -77,7 +73,7 @@ export function FeedPage() {
           </button>
         )}
 
-        {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+        {isLoading && <Skeleton className="h-20 w-full" />}
 
         {isError && (
           <div className="flex flex-col items-start gap-2">

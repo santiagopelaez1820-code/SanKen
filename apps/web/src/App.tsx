@@ -2,12 +2,14 @@ import { Navigate, Route, Routes } from "react-router-dom"
 import { RequireAuth } from "@/components/RequireAuth"
 import { RequireTrainer } from "@/components/RequireTrainer"
 import { RequireAdmin } from "@/components/RequireAdmin"
+import { AppShell } from "@/components/layout/AppShell"
 import { LoginPage } from "@/pages/LoginPage"
 import { RegisterPage } from "@/pages/RegisterPage"
 import { LoginVerifyPage } from "@/pages/LoginVerifyPage"
 import { OnboardingPage } from "@/pages/OnboardingPage"
 import { LocationSurveyPage } from "@/pages/LocationSurveyPage"
 import { DashboardPage } from "@/pages/DashboardPage"
+import { ProgressPage } from "@/pages/ProgressPage"
 import { SettingsPage } from "@/pages/SettingsPage"
 import { PersonalRecordsPage } from "@/pages/PersonalRecordsPage"
 import { ChallengesPage } from "@/pages/ChallengesPage"
@@ -56,272 +58,167 @@ function App() {
           </RequireAuth>
         }
       />
+
       <Route
-        path="/dashboard"
         element={
           <RequireAuth>
-            <DashboardPage />
+            <AppShell />
           </RequireAuth>
         }
-      />
-      <Route
-        path="/settings"
-        element={
-          <RequireAuth>
-            <SettingsPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/prs"
-        element={
-          <RequireAuth>
-            <PersonalRecordsPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/challenges"
-        element={
-          <RequireAuth>
-            <ChallengesPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/calendar"
-        element={
-          <RequireAuth>
-            <CalendarPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/my-trainer"
-        element={
-          <RequireAuth>
-            <MyTrainerPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/chat"
-        element={
-          <RequireAuth>
-            <ChatInboxPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/chat/:conversationId"
-        element={
-          <RequireAuth>
-            <ChatThreadPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/nutrition"
-        element={
-          <RequireAuth>
-            <NutritionPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/workout/precheck"
-        element={
-          <RequireAuth>
-            <WorkoutPrecheckPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/workout/session/:sessionId"
-        element={
-          <RequireAuth>
-            <WorkoutSessionPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/trainer"
-        element={
-          <RequireAuth>
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/progress" element={<ProgressPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/prs" element={<PersonalRecordsPage />} />
+        <Route path="/challenges" element={<ChallengesPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/my-trainer" element={<MyTrainerPage />} />
+        <Route path="/chat" element={<ChatInboxPage />} />
+        <Route path="/chat/:conversationId" element={<ChatThreadPage />} />
+        <Route path="/nutrition" element={<NutritionPage />} />
+        <Route path="/workout/precheck" element={<WorkoutPrecheckPage />} />
+        <Route path="/workout/session/:sessionId" element={<WorkoutSessionPage />} />
+        <Route path="/feed" element={<FeedPage />} />
+
+        <Route
+          path="/trainer"
+          element={
             <RequireTrainer>
               <TrainerClientsPage />
             </RequireTrainer>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/trainer/clients/:trainerClientId"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/trainer/clients/:trainerClientId"
+          element={
             <RequireTrainer>
               <TrainerClientDetailPage />
             </RequireTrainer>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/trainer/clients/:trainerClientId/routine/new"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/trainer/clients/:trainerClientId/routine/new"
+          element={
             <RequireTrainer>
               <RoutineEditorPage />
             </RequireTrainer>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/trainer/routines/:routineId/edit"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/trainer/routines/:routineId/edit"
+          element={
             <RequireTrainer>
               <RoutineEditorPage />
             </RequireTrainer>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/feed"
-        element={
-          <RequireAuth>
-            <FeedPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin"
-        element={
-          <RequireAuth>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
             <RequireAdmin>
               <AdminPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/users"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
             <RequireAdmin>
               <AdminUsersPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/users/:userId"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/users/:userId"
+          element={
             <RequireAdmin>
               <AdminUserDetailPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/exercises"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/exercises"
+          element={
             <RequireAdmin>
               <AdminExercisesPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/routine-templates"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/routine-templates"
+          element={
             <RequireAdmin>
               <AdminRoutineTemplatesPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/users/:userId/routine/new"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/users/:userId/routine/new"
+          element={
             <RequireAdmin>
               <RoutineEditorPage scope="admin" />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/users/:userId/routine/edit"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/users/:userId/routine/edit"
+          element={
             <RequireAdmin>
               <RoutineEditorPage scope="admin" />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/reports"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
             <RequireAdmin>
               <AdminReportsPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/pr-submissions"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/pr-submissions"
+          element={
             <RequireAdmin>
               <AdminPrSubmissionsPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/challenge-templates"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/challenge-templates"
+          element={
             <RequireAdmin>
               <AdminChallengeTemplatesPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/news"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/news"
+          element={
             <RequireAdmin>
               <AdminNewsPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/stats"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/stats"
+          element={
             <RequireAdmin>
               <AdminStatsPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/admin/audit-logs"
-        element={
-          <RequireAuth>
+          }
+        />
+        <Route
+          path="/admin/audit-logs"
+          element={
             <RequireAdmin>
               <AdminAuditLogPage />
             </RequireAdmin>
-          </RequireAuth>
-        }
-      />
+          }
+        />
+      </Route>
+
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )

@@ -8,6 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAdminStore } from '@/store/admin-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminAuditoriaScreen() {
   const { auditLog, isLoadingAuditLog, loadAuditLog } = useAdminStore();
@@ -25,9 +26,7 @@ export default function AdminAuditoriaScreen() {
           </ThemedText>
 
           {isLoadingAuditLog && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
           {!isLoadingAuditLog && auditLog.length === 0 && (
             <ThemedText type="small" themeColor="textSecondary">

@@ -10,6 +10,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useFeedStore } from '@/store/feed-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function FeedRow({ item, onPress }: { item: FeedItem; onPress: (item: FeedItem) => void }) {
   const theme = useTheme();
@@ -79,9 +80,7 @@ export default function NovedadesScreen() {
           </ThemedView>
 
           {isLoading && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={72} borderRadius={Spacing.three} />
           )}
 
           {!isLoading && error && (

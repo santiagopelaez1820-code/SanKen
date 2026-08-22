@@ -3,6 +3,7 @@ import type { ChallengeLeaderboardEntry, ChallengeLeaderboardResponse, Challenge
 import { api } from "@/lib/api"
 import { getEcho } from "@/lib/echo"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * Carga inicial por HTTP (GET .../leaderboard) y después se suscribe al
@@ -38,7 +39,7 @@ export function ChallengeLeaderboard({ challengeId }: { challengeId: number }) {
   }, [challengeId])
 
   if (entries === null) {
-    return <p className="text-sm text-muted-foreground">Cargando…</p>
+    return <Skeleton className="h-20 w-full" />
   }
 
   if (entries.length === 0) {

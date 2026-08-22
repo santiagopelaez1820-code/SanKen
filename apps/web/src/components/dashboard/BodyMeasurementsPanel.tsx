@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { BodyMeasurement } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const measurementSchema = z.object({
   weight_kg: z.number().min(1, "Ingresa un peso válido").max(999),
@@ -64,7 +65,7 @@ export function BodyMeasurementsPanel() {
       </form>
       {errors.weight_kg && <p className="mt-1 text-xs text-destructive">{errors.weight_kg.message}</p>}
 
-      {isLoading && <p className="mt-4 text-sm text-muted-foreground">Cargando…</p>}
+      {isLoading && <Skeleton className="mt-4 h-20 w-full" />}
 
       {!isLoading && measurements.length === 0 && (
         <p className="mt-4 text-sm text-muted-foreground">Todavía no hay medidas registradas.</p>

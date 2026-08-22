@@ -2,8 +2,8 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Bell, Eye, MapPin, ShieldCheck, UserCircle } from "lucide-react"
 import {
   ApiError,
   type OnboardingCity,
@@ -16,8 +16,16 @@ import {
 } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
+import { Card } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { getExistingWebPushSubscription, isWebPushSupported, subscribeToWebPush, unsubscribeFromWebPush } from "@/lib/web-push"
+
+const ROLE_LABEL: Record<User["role"], string> = {
+  user: "Atleta",
+  trainer: "Entrenador",
+  super_admin: "Super Admin",
+}
 
 const confirmSchema = z.object({
   code: z.string().length(6, "Ingresa el código de 6 dígitos"),
@@ -144,17 +152,28 @@ export function SettingsPage() {
   })
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Configuración</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">Volver</Link>
-          </Button>
-        </header>
+        <div>
+          <p className="text-xs font-semibold tracking-widest text-primary uppercase">Configuración</p>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Tu cuenta</h1>
+        </div>
 
-        <section className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-heading text-sm font-medium text-foreground">Ubicación</h2>
+        <Card className="flex items-center gap-3">
+          <div className="flex size-12 items-center justify-center rounded-full bg-muted">
+            <UserCircle className="size-6 text-muted-foreground" />
+          </div>
+          <div>
+            <p className="font-heading text-base font-bold text-foreground">{user?.name ?? "…"}</p>
+            <p className="text-xs text-muted-foreground">{user ? ROLE_LABEL[user.role] : ""}</p>
+          </div>
+        </Card>
+
+        <Card>
+          <div className="flex items-center gap-2">
+            <MapPin className="size-4 text-primary" />
+            <h2 className="font-heading text-sm font-medium text-foreground">Ubicación</h2>
+          </div>
           <p className="mt-1 text-xs text-muted-foreground">Se usa para tus rankings por país, departamento y ciudad.</p>
 
           {!locationEditing && (
@@ -257,15 +276,18 @@ export function SettingsPage() {
               </div>
             </div>
           )}
-        </section>
+        </Card>
 
-        <section className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-heading text-sm font-medium text-foreground">Autenticación de dos factores</h2>
+        <Card>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="size-4 text-primary" />
+            <h2 className="font-heading text-sm font-medium text-foreground">Autenticación de dos factores</h2>
+          </div>
           <p className="mt-1 text-xs text-muted-foreground">
             Agrega una capa extra de seguridad pidiendo un código de tu app autenticadora al iniciar sesión.
           </p>
 
-          {isLoading && <p className="mt-4 text-sm text-muted-foreground">Cargando…</p>}
+          {isLoading && <Skeleton className="mt-4 h-9 w-32" />}
 
           {!isLoading && recoveryCodes && (
             <div className="mt-4 space-y-3 rounded-lg border border-border bg-background p-4">
@@ -367,12 +389,15 @@ export function SettingsPage() {
               </Button>
             </form>
           )}
-        </section>
+        </Card>
 
-        <section className="rounded-xl border border-border bg-card p-5">
+        <Card>
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="font-heading text-sm font-medium text-foreground">Rankings públicos</h2>
+              <div className="flex items-center gap-2">
+                <Eye className="size-4 text-primary" />
+                <h2 className="font-heading text-sm font-medium text-foreground">Rankings públicos</h2>
+              </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 Si activás esto, tu volumen total aparece en los rankings de ciudad, país, gimnasio, edad, sexo y
                 categoría de fuerza.
@@ -384,12 +409,15 @@ export function SettingsPage() {
               onCheckedChange={(checked) => privacyMutation.mutate(checked)}
             />
           </div>
-        </section>
+        </Card>
 
-        <section className="rounded-xl border border-border bg-card p-5">
+        <Card>
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="font-heading text-sm font-medium text-foreground">Notificaciones push</h2>
+              <div className="flex items-center gap-2">
+                <Bell className="size-4 text-primary" />
+                <h2 className="font-heading text-sm font-medium text-foreground">Notificaciones push</h2>
+              </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 Recibí un aviso en el navegador cuando te llegue un mensaje, aunque no tengas SanKen abierto.
               </p>
@@ -405,7 +433,7 @@ export function SettingsPage() {
               <p className="text-xs text-muted-foreground">No soportado en este navegador.</p>
             )}
           </div>
-        </section>
+        </Card>
       </div>
     </main>
   )

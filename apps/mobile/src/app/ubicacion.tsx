@@ -12,6 +12,7 @@ import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
 import { useOnboardingStore } from '@/store/onboarding-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
  * Encuesta corta, separada del wizard de 10 pasos de onboarding a propósito
@@ -138,7 +139,7 @@ export default function LocationSurveyScreen() {
                 autoCorrect={false}
               />
               {isLoadingStates && (
-                <ThemedText type="small" themeColor="textSecondary">Cargando…</ThemedText>
+                <Skeleton height={56} borderRadius={Spacing.three} />
               )}
               <ThemedView style={styles.optionsList}>
                 {filteredStates.map((s) => (
@@ -168,7 +169,7 @@ export default function LocationSurveyScreen() {
                 autoCorrect={false}
               />
               {isLoadingCities && (
-                <ThemedText type="small" themeColor="textSecondary">Cargando…</ThemedText>
+                <Skeleton height={56} borderRadius={Spacing.three} />
               )}
               {!isLoadingCities && cities.length === 0 && (
                 <ThemedText type="small" themeColor="textSecondary">Sin resultados.</ThemedText>

@@ -9,6 +9,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatTile } from '@/components/ui/stat-tile';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAdminStore } from '@/store/admin-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function AdminStatsScreen() {
   const { stats, isLoadingStats, loadStats } = useAdminStore();
@@ -26,9 +27,7 @@ export default function AdminStatsScreen() {
           </ThemedText>
 
           {isLoadingStats && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
 
           {stats && (

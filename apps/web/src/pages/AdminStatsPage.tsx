@@ -1,9 +1,8 @@
-import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import type { AdminStats } from "@sanken/core"
 import { api } from "@/lib/api"
-import { Button } from "@/components/ui/button"
 import { StatTile } from "@/components/dashboard/StatTile"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function AdminStatsPage() {
   const { data: stats, isLoading } = useQuery({
@@ -12,16 +11,11 @@ export function AdminStatsPage() {
   })
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Métricas globales</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/admin">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Métricas globales</h1>
 
-        {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+        {isLoading && <Skeleton className="h-20 w-full" />}
 
         {stats && (
           <section className="grid grid-cols-2 gap-4 sm:grid-cols-3">

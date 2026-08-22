@@ -186,7 +186,7 @@ export function RoutineEditorPage({ scope = "trainer" }: RoutineEditorPageProps)
   })
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <header>
           <button

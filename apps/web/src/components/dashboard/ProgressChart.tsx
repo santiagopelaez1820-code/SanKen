@@ -4,6 +4,7 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import type { ProgressMetric, ProgressPoint } from "@sanken/core"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const METRICS: { value: ProgressMetric; label: string; unit: string }[] = [
   { value: "weight", label: "Peso corporal", unit: "kg" },
@@ -73,7 +74,7 @@ export function ProgressChart() {
       </div>
 
       <div className="mt-4">
-        {isLoading && <p className="py-10 text-center text-sm text-muted-foreground">Cargando…</p>}
+        {isLoading && <Skeleton className="py-10 text-center h-20 w-full" />}
 
         {!isLoading && data?.length === 0 && (
           <p className="py-10 text-center text-sm text-muted-foreground">

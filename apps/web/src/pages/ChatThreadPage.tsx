@@ -6,6 +6,7 @@ import { api } from "@/lib/api"
 import { getEcho } from "@/lib/echo"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   abuse: "Abuso",
@@ -78,7 +79,7 @@ export function ChatThreadPage() {
   })
 
   return (
-    <main className="flex min-h-svh flex-col bg-background px-6 py-8 text-foreground">
+    <main className="flex flex-col px-6 py-8">
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-4">
         <header className="flex items-center justify-between">
           <h1 className="font-heading text-2xl font-medium tracking-tight">Chat</h1>
@@ -88,7 +89,7 @@ export function ChatThreadPage() {
         </header>
 
         <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-border bg-card p-4">
-          {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+          {isLoading && <Skeleton className="h-20 w-full" />}
 
           {!isLoading &&
             messages.map((message) => (

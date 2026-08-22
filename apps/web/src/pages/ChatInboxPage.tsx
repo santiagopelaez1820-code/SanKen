@@ -2,7 +2,7 @@ import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import type { ConversationSummary } from "@sanken/core"
 import { api } from "@/lib/api"
-import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function ChatInboxPage() {
   const { data: conversations, isLoading } = useQuery({
@@ -11,16 +11,11 @@ export function ChatInboxPage() {
   })
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Chat</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Chat</h1>
 
-        {isLoading && <p className="text-sm text-muted-foreground">Cargando…</p>}
+        {isLoading && <Skeleton className="h-20 w-full" />}
 
         {!isLoading && conversations?.length === 0 && (
           <p className="text-sm text-muted-foreground">Todavía no tenés conversaciones.</p>

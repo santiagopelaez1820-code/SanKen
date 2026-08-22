@@ -11,6 +11,7 @@ import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER, groupMealsByType } from '@/lib/nutrition-grouping';
 import { useNutritionStore } from '@/store/nutrition-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function NutricionScreen() {
   const theme = useTheme();
@@ -102,9 +103,7 @@ export default function NutricionScreen() {
               </View>
 
               {isLoadingPlan && (
-                <ThemedText type="small" themeColor="textSecondary">
-                  Cargando…
-                </ThemedText>
+                <Skeleton height={72} borderRadius={Spacing.three} />
               )}
 
               {!isLoadingPlan && planError && (
@@ -218,9 +217,7 @@ export default function NutricionScreen() {
           </View>
 
           {isLoadingMeals && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={72} borderRadius={Spacing.three} />
           )}
 
           {MEAL_TYPE_ORDER.map((type) => (

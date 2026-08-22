@@ -12,6 +12,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminStore } from '@/store/admin-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const STATUS_TABS: { label: string; value: PrSubmissionStatus | 'all' }[] = [
   { label: 'Pendientes', value: 'pending' },
@@ -72,9 +73,7 @@ export default function AdminPrSubmissionsScreen() {
           </View>
 
           {isLoadingPrSubmissions && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
           {!isLoadingPrSubmissions && prSubmissions.length === 0 && (
             <ThemedText type="small" themeColor="textSecondary">

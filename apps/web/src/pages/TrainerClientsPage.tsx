@@ -7,6 +7,7 @@ import { ApiError, type TrainerClient, type TrainerClientStatus } from "@sanken/
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const addClientSchema = z.object({
   email: z.string().email("Ingresa un correo válido"),
@@ -30,7 +31,6 @@ const STATUS_CLASSES: Record<TrainerClientStatus, string> = {
 
 export function TrainerClientsPage() {
   const user = useAuthStore((state) => state.user)
-  const clearSession = useAuthStore((state) => state.clearSession)
   const queryClient = useQueryClient()
 
   const { data: clients, isLoading } = useQuery({
@@ -59,22 +59,14 @@ export function TrainerClientsPage() {
   })
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-2xl font-bold tracking-tight">SANKEN · Entrenador</h1>
-            <p className="text-sm text-muted-foreground">Hola, {user?.name ?? "coach"}.</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/dashboard">Mi progreso</Link>
-            </Button>
-            <Button variant="outline" size="sm" onClick={clearSession}>
-              Cerrar sesión
-            </Button>
-          </div>
-        </header>
+        <div>
+          <p className="text-xs font-semibold tracking-widest text-primary uppercase">Entrenador</p>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
+            Hola, {user?.name?.split(" ")[0] ?? "coach"}
+          </h1>
+        </div>
 
         <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium text-foreground">Agregar cliente</h2>
@@ -107,7 +99,7 @@ export function TrainerClientsPage() {
         <section className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium text-foreground">Mis clientes</h2>
 
-          {isLoading && <p className="mt-4 text-sm text-muted-foreground">Cargando…</p>}
+          {isLoading && <Skeleton className="mt-4 h-20 w-full" />}
 
           {!isLoading && clients?.length === 0 && (
             <p className="mt-4 text-sm text-muted-foreground">Todavía no tienes clientes vinculados.</p>

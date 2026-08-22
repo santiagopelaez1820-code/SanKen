@@ -2,7 +2,6 @@ import { useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { Link } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Trophy } from "lucide-react"
 import {
@@ -21,6 +20,7 @@ import { Badge, type badgeVariants } from "@/components/ui/badge"
 import type { VariantProps } from "class-variance-authority"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ExerciseRankingList } from "@/components/rankings/ExerciseRankingList"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const STATUS_LABEL: Record<PrSubmission["status"], string> = {
   pending: "En revisión",
@@ -106,7 +106,7 @@ function ExerciseRankingPanel({
   })
 
   if (isLoading) {
-    return <p className="text-sm text-muted-foreground">Cargando…</p>
+    return <Skeleton className="h-20 w-full" />
   }
 
   if (isError) {
@@ -221,14 +221,9 @@ export function PersonalRecordsPage() {
   }
 
   return (
-    <main className="min-h-svh bg-background px-6 py-8 text-foreground">
+    <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">PR</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">Volver</Link>
-          </Button>
-        </header>
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">PR</h1>
 
         <p className="text-sm text-muted-foreground">
           Registra tu mejor levantamiento por ejercicio. Esto es completamente independiente de tu entrenamiento —
@@ -305,7 +300,7 @@ export function PersonalRecordsPage() {
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium text-foreground">Tus récords</h2>
 
-          {isLoading && <p className="mt-3 text-sm text-muted-foreground">Cargando…</p>}
+          {isLoading && <Skeleton className="mt-3 h-20 w-full" />}
 
           {!isLoading && (records?.length ?? 0) === 0 && (
             <p className="mt-3 text-sm text-muted-foreground">Todavía no tienes récords registrados.</p>
@@ -397,7 +392,7 @@ export function PersonalRecordsPage() {
             </Button>
           </form>
 
-          {isLoadingSubmissions && <p className="mt-4 text-sm text-muted-foreground">Cargando…</p>}
+          {isLoadingSubmissions && <Skeleton className="mt-4 h-20 w-full" />}
 
           {!isLoadingSubmissions && (submissions?.length ?? 0) > 0 && (
             <ul className="mt-4 divide-y divide-border">

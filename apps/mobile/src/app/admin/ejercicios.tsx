@@ -12,6 +12,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminStore } from '@/store/admin-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const EQUIPMENT_OPTIONS = [
   'barbell', 'dumbbells', 'bench', 'squat_rack', 'pull_up_bar',
@@ -205,9 +206,7 @@ export default function AdminEjerciciosScreen() {
           </ThemedView>
 
           {isLoadingExercises && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
 
           {exercises.map((exercise) => (

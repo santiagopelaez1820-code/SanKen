@@ -23,6 +23,7 @@ import { TextField } from '@/components/ui/text-field';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useAdminStore } from '@/store/admin-store';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const EMPTY_FORM = { name: '', sex: 'male' as 'male' | 'female', frequencyDays: '3', splitType: 'full_body' as const };
 
@@ -262,9 +263,7 @@ export default function AdminRutinasScreen() {
           </ThemedView>
 
           {isLoadingRoutineTemplates && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
 
           {routineTemplates.map((template) => (

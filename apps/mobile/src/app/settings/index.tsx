@@ -3,21 +3,32 @@ import { router } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
-import type { OnboardingState } from '@sanken/core';
+import { Eye, MapPin, ShieldCheck, UserCircle2 } from 'lucide-react-native';
+import type { OnboardingState, User } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { OptionCard } from '@/components/ui/option-card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { TextField } from '@/components/ui/text-field';
 import { ToggleRow } from '@/components/ui/toggle-row';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
 import { useOnboardingStore } from '@/store/onboarding-store';
 import { useSettingsStore } from '@/store/settings-store';
 
+const ROLE_LABEL: Record<User['role'], string> = {
+  user: 'Atleta',
+  trainer: 'Entrenador',
+  super_admin: 'Super Admin',
+};
+
 export default function SettingsScreen() {
+  const theme = useTheme();
   const { user, refreshMe } = useAuthStore();
   const { questions, loadQuestions, states, isLoadingStates, loadStates, cities, isLoadingCities, loadCities } =
     useOnboardingStore();
@@ -114,8 +125,23 @@ export default function SettingsScreen() {
             Configuración
           </ThemedText>
 
+          <ThemedView type="backgroundElement" style={[styles.card, styles.identityCard]}>
+            <ThemedView style={[styles.avatarCircle, { backgroundColor: theme.backgroundSelected }]}>
+              <Icon icon={UserCircle2} size={28} color={theme.textSecondary} />
+            </ThemedView>
+            <ThemedView style={styles.identityInfo}>
+              <ThemedText type="smallBold">{user?.name ?? '…'}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {user ? ROLE_LABEL[user.role] : ''}
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+
           <ThemedView type="backgroundElement" style={styles.card}>
-            <ThemedText type="default">Ubicación</ThemedText>
+            <ThemedView style={styles.cardHeading}>
+              <Icon icon={MapPin} size={16} color={theme.accent} />
+              <ThemedText type="default">Ubicación</ThemedText>
+            </ThemedView>
             <ThemedText type="small" themeColor="textSecondary">
               Se usa para tus rankings por país, departamento y ciudad.
             </ThemedText>
@@ -151,9 +177,7 @@ export default function SettingsScreen() {
                 {countryId !== null && (
                   <>
                     <ThemedText type="smallBold">Departamento</ThemedText>
-                    {isLoadingStates && (
-                      <ThemedText type="small" themeColor="textSecondary">Cargando…</ThemedText>
-                    )}
+                    {isLoadingStates && <Skeleton height={40} borderRadius={Spacing.two} />}
                     {states.map((s) => (
                       <OptionCard
                         key={s.id}
@@ -172,9 +196,7 @@ export default function SettingsScreen() {
                 {stateId !== null && (
                   <>
                     <ThemedText type="smallBold">Ciudad / Municipio</ThemedText>
-                    {isLoadingCities && (
-                      <ThemedText type="small" themeColor="textSecondary">Cargando…</ThemedText>
-                    )}
+                    {isLoadingCities && <Skeleton height={40} borderRadius={Spacing.two} />}
                     {cities.map((c) => (
                       <OptionCard key={c.id} label={c.name} selected={cityId === c.id} onPress={() => setCityId(c.id)} />
                     ))}
@@ -201,7 +223,10 @@ export default function SettingsScreen() {
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.card}>
-            <ThemedText type="default">Autenticación de dos factores</ThemedText>
+            <ThemedView style={styles.cardHeading}>
+              <Icon icon={ShieldCheck} size={16} color={theme.accent} />
+              <ThemedText type="default">Autenticación de dos factores</ThemedText>
+            </ThemedView>
             <ThemedText type="small" themeColor="textSecondary">
               Agrega una capa extra de seguridad pidiendo un código de tu app autenticadora al iniciar sesión.
             </ThemedText>
@@ -278,6 +303,7 @@ export default function SettingsScreen() {
 
           <ThemedView type="backgroundElement" style={styles.card}>
             <ToggleRow
+              icon={Eye}
               label="Rankings públicos"
               description="Si activás esto, tu volumen total aparece en los rankings de ciudad, país, gimnasio, edad, sexo y categoría de fuerza."
               value={user?.is_public_profile ?? false}
@@ -310,6 +336,10 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     gap: Spacing.two,
   },
+  identityCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
+  avatarCircle: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
+  identityInfo: { gap: 2, backgroundColor: 'transparent' },
+  cardHeading: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: 'transparent' },
   enrollBox: { gap: Spacing.two, marginTop: Spacing.two },
   locationRow: { gap: Spacing.two, marginTop: Spacing.two },
   locationActions: { gap: Spacing.two, marginTop: Spacing.two },

@@ -10,6 +10,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useRetosStore } from '@/store/retos-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const METRIC_LABEL: Record<Challenge['criteria']['metric'], string> = {
   workouts_count: 'entrenamientos',
@@ -65,9 +66,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
       {expanded && (
         <ThemedView style={styles.leaderboard}>
           {leaderboard === null && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={72} borderRadius={Spacing.three} />
           )}
           {leaderboard?.length === 0 && (
             <ThemedText type="small" themeColor="textSecondary">
@@ -117,9 +116,7 @@ export default function RetosScreen() {
           )}
 
           {isLoading && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={72} borderRadius={Spacing.three} />
           )}
 
           {!isLoading && challenges.length === 0 && (

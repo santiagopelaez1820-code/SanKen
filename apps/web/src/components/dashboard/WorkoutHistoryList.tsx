@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import type { WorkoutSession } from "@sanken/core"
 import { api } from "@/lib/api"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function WorkoutHistoryList() {
   const { data, isLoading } = useQuery({
@@ -14,7 +15,7 @@ export function WorkoutHistoryList() {
     <div className="rounded-xl border border-border bg-card p-5">
       <h2 className="font-heading text-sm font-medium text-foreground">Historial de entrenamientos</h2>
 
-      {isLoading && <p className="mt-4 text-sm text-muted-foreground">Cargando…</p>}
+      {isLoading && <Skeleton className="mt-4 h-20 w-full" />}
 
       {!isLoading && sessions.length === 0 && (
         <p className="mt-4 text-sm text-muted-foreground">Todavía no hay entrenamientos registrados.</p>

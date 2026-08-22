@@ -10,6 +10,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminStore } from '@/store/admin-store';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const REASON_LABELS: Record<string, string> = {
   abuse: 'Abuso',
@@ -64,9 +65,7 @@ export default function AdminReportesScreen() {
           </View>
 
           {isLoadingReports && (
-            <ThemedText type="small" themeColor="textSecondary">
-              Cargando…
-            </ThemedText>
+            <Skeleton height={56} borderRadius={Spacing.three} />
           )}
           {!isLoadingReports && reports.length === 0 && (
             <ThemedText type="small" themeColor="textSecondary">
