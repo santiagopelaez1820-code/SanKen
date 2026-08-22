@@ -49,15 +49,21 @@ export function PerformanceHero({ stats, gamification, isLoading }: PerformanceH
 
         <ThemedView style={styles.statsRow}>
           <ThemedView style={styles.statItem}>
-            <Flame size={14} color={theme.accent} />
-            <ThemedText type="smallBold">{stats?.current_streak_days ?? 0}</ThemedText>
+            <Flame size={16} color={theme.accent} />
+            <ThemedText type="smallBold" style={styles.statValue}>
+              {stats?.current_streak_days ?? 0}
+            </ThemedText>
           </ThemedView>
-          <ThemedText type="small" themeColor="textSecondary">
-            {stats?.total_hours ?? 0} h
-          </ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            {((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t
-          </ThemedText>
+          <ThemedView style={styles.statItem}>
+            <ThemedText type="smallBold" style={styles.statValue}>
+              {stats?.total_hours ?? 0} h
+            </ThemedText>
+          </ThemedView>
+          <ThemedView style={styles.statItem}>
+            <ThemedText type="smallBold" style={styles.statValue}>
+              {((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t
+            </ThemedText>
+          </ThemedView>
         </ThemedView>
       </ThemedView>
     </ThemedView>
@@ -82,8 +88,9 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   percent: {
-    fontSize: 26,
-    lineHeight: 30,
+    fontSize: 32,
+    lineHeight: 36,
+    fontWeight: '800',
   },
   statsRow: {
     flexDirection: 'row',
@@ -97,5 +104,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     backgroundColor: 'transparent',
+  },
+  statValue: {
+    fontSize: 17,
   },
 });

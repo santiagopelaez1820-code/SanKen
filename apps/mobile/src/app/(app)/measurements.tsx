@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { FlatList, StyleSheet } from 'react-native';
+import { FlatList, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LineChart } from 'react-native-gifted-charts';
 import type { BodyMeasurement } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
@@ -8,7 +9,10 @@ import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import { useBodyMeasurementsStore } from '@/store/body-measurements-store';
+
+const MIN_POINTS_FOR_CHART = 3;
 
 function MeasurementRow({ measurement }: { measurement: BodyMeasurement }) {
   return (
@@ -22,6 +26,8 @@ function MeasurementRow({ measurement }: { measurement: BodyMeasurement }) {
 }
 
 export default function MeasurementsScreen() {
+  const theme = useTheme();
+  const { width } = useWindowDimensions();
   const { measurements, isLoading, error, isSubmitting, submitError, load, addMeasurement } =
     useBodyMeasurementsStore();
   const [weightInput, setWeightInput] = useState('');
@@ -42,6 +48,13 @@ export default function MeasurementsScreen() {
     if (ok) setWeightInput('');
   };
 
+  const current = measurements[0] ?? null;
+  const chartWidth = Math.min(width, MaxContentWidth) - Spacing.four * 2 - Spacing.three * 2;
+  const chartPoints = [...measurements]
+    .filter((m) => m.weight_kg !== null)
+    .reverse()
+    .map((m) => ({ value: m.weight_kg as number, label: m.measured_at.slice(5) }));
+
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
@@ -56,6 +69,40 @@ export default function MeasurementsScreen() {
               <ThemedText type="title" style={styles.pageTitle}>
                 Medidas corporales
               </ThemedText>
+
+              {current && !isLoading && (
+                <ThemedView type="backgroundElement" style={styles.heroCard}>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
+                    PESO ACTUAL
+                  </ThemedText>
+                  <ThemedText type="stat" style={styles.heroValue}>
+                    {current.weight_kg !== null ? `${current.weight_kg} kg` : '—'}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Última medición: {current.measured_at}
+                  </ThemedText>
+                </ThemedView>
+              )}
+
+              {chartPoints.length >= MIN_POINTS_FOR_CHART && (
+                <ThemedView type="backgroundElement" style={styles.chartCard}>
+                  <ThemedText type="smallBold">Evolución</ThemedText>
+                  <LineChart
+                    data={chartPoints}
+                    width={chartWidth}
+                    height={160}
+                    thickness={2}
+                    color={theme.accent}
+                    dataPointsColor={theme.accent}
+                    yAxisTextStyle={{ color: theme.textSecondary, fontSize: 10 }}
+                    xAxisLabelTextStyle={{ color: theme.textSecondary, fontSize: 10 }}
+                    yAxisColor={theme.backgroundSelected}
+                    xAxisColor={theme.backgroundSelected}
+                    hideRules
+                    curved
+                  />
+                </ThemedView>
+              )}
 
               <ThemedView type="backgroundElement" style={styles.formCard}>
                 <TextField
@@ -105,6 +152,26 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   pageTitle: { fontSize: 28, lineHeight: 34, marginBottom: Spacing.two },
+  heroCard: {
+    borderRadius: Spacing.four,
+    padding: Spacing.four,
+    alignItems: 'center',
+    marginBottom: Spacing.three,
+  },
+  eyebrow: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  heroValue: {
+    fontSize: 40,
+    lineHeight: 46,
+  },
+  chartCard: {
+    borderRadius: Spacing.four,
+    padding: Spacing.three,
+    gap: Spacing.two,
+    marginBottom: Spacing.three,
+  },
   formCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,

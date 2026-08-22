@@ -223,17 +223,19 @@ export function PersonalRecordsPage() {
   return (
     <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
-        <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">PR</h1>
-
-        <p className="text-sm text-muted-foreground">
-          Registra tu mejor levantamiento por ejercicio. Esto es completamente independiente de tu entrenamiento —
-          no crea ni modifica ninguna sesión.
-        </p>
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Personal Records</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Tus mejores levantamientos</p>
+        </div>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="w-full space-y-4 rounded-xl border border-border bg-card p-6"
         >
+          <p className="text-xs text-muted-foreground">
+            Independiente de tu entrenamiento — no crea ni modifica ninguna sesión.
+          </p>
+
           <div className="space-y-1.5">
             <label htmlFor="exercise_id" className="text-sm font-medium">
               Ejercicio
@@ -256,31 +258,33 @@ export function PersonalRecordsPage() {
             {errors.exercise_id && <p className="text-xs text-destructive">{errors.exercise_id.message}</p>}
           </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="weight_kg" className="text-sm font-medium">
-              Peso (kg)
-            </label>
-            <input
-              id="weight_kg"
-              type="number"
-              step="0.5"
-              {...register("weight_kg")}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            />
-            {errors.weight_kg && <p className="text-xs text-destructive">{errors.weight_kg.message}</p>}
-          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label htmlFor="weight_kg" className="text-sm font-medium">
+                Peso (kg)
+              </label>
+              <input
+                id="weight_kg"
+                type="number"
+                step="0.5"
+                {...register("weight_kg")}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              />
+              {errors.weight_kg && <p className="text-xs text-destructive">{errors.weight_kg.message}</p>}
+            </div>
 
-          <div className="space-y-1.5">
-            <label htmlFor="reps" className="text-sm font-medium">
-              Repeticiones
-            </label>
-            <input
-              id="reps"
-              type="number"
-              {...register("reps")}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            />
-            {errors.reps && <p className="text-xs text-destructive">{errors.reps.message}</p>}
+            <div className="space-y-1.5">
+              <label htmlFor="reps" className="text-sm font-medium">
+                Repeticiones
+              </label>
+              <input
+                id="reps"
+                type="number"
+                {...register("reps")}
+                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+              />
+              {errors.reps && <p className="text-xs text-destructive">{errors.reps.message}</p>}
+            </div>
           </div>
 
           {serverError && <p className="text-sm text-destructive">{serverError}</p>}
@@ -300,27 +304,32 @@ export function PersonalRecordsPage() {
         <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium text-foreground">Tus récords</h2>
 
-          {isLoading && <Skeleton className="mt-3 h-20 w-full" />}
+          {isLoading && <Skeleton className="mt-3 h-40 w-full" />}
 
           {!isLoading && (records?.length ?? 0) === 0 && (
             <p className="mt-3 text-sm text-muted-foreground">Todavía no tienes récords registrados.</p>
           )}
 
           {!isLoading && (records?.length ?? 0) > 0 && (
-            <ul className="mt-3 divide-y divide-border">
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {records!.map((record) => (
-                <li key={record.id} className="flex items-center justify-between py-2.5 text-sm">
-                  <span className="text-foreground">{record.exercise_name}</span>
-                  <span className="flex items-center gap-2">
-                    <span className="flex items-center gap-1 font-medium text-primary">
-                      <Trophy className="size-3.5" />
-                      {record.value} kg
-                    </span>
-                    <span className="text-xs text-muted-foreground">{record.achieved_at}</span>
-                  </span>
-                </li>
+                <div
+                  key={record.id}
+                  className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-background px-3 py-5 text-center"
+                >
+                  <div className="mb-1 flex size-11 items-center justify-center rounded-full bg-primary/15">
+                    <Trophy className="size-5 text-primary" />
+                  </div>
+                  <p className="truncate text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                    {record.exercise_name}
+                  </p>
+                  <p className="font-heading text-2xl font-extrabold tabular-nums text-foreground">
+                    {record.value} kg
+                  </p>
+                  <p className="text-xs text-muted-foreground">{record.achieved_at}</p>
+                </div>
               ))}
-            </ul>
+            </div>
           )}
         </div>
 

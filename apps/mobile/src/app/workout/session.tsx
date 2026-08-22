@@ -255,7 +255,7 @@ export default function WorkoutSessionScreen() {
             </ThemedView>
           )}
 
-          <ExerciseVideoPlayer videoUrl={workoutExercise.exercise.video_url} />
+          <ExerciseVideoPlayer videoUrl={workoutExercise.exercise.video_url} exerciseName={workoutExercise.exercise.name} />
 
           {workoutExercise.alternative && (
             <ThemedView style={styles.swapBlock}>

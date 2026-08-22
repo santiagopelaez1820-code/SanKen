@@ -1,38 +1,51 @@
 import { useEffect } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { WorkoutSession } from '@sanken/core';
+import { Dumbbell } from 'lucide-react-native';
+import { getWorkoutSessionStatus, WORKOUT_SESSION_STATUS_LABEL, type WorkoutSession } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Badge, type BadgeVariant } from '@/components/ui/badge';
+import { Icon } from '@/components/ui/icon';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useWorkoutHistoryStore } from '@/store/workout-history-store';
 
+const STATUS_BADGE_VARIANT: Record<ReturnType<typeof getWorkoutSessionStatus>, BadgeVariant> = {
+  completed: 'success',
+  active: 'accent2',
+  skipped: 'neutral',
+  cancelled: 'warning',
+};
+
+function formatDate(performedAt: string): string {
+  return new Date(performedAt)
+    .toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })
+    .toUpperCase();
+}
+
 function SessionRow({ session }: { session: WorkoutSession }) {
   const theme = useTheme();
+  const status = getWorkoutSessionStatus(session);
 
   return (
     <ThemedView type="backgroundElement" style={styles.row}>
-      <ThemedView style={styles.rowHeader}>
-        <ThemedText type="smallBold">{session.routine_day_label ?? 'Sesión libre'}</ThemedText>
+      <ThemedView style={[styles.iconCircle, { backgroundColor: theme.backgroundSelected }]}>
+        <Icon icon={Dumbbell} size={18} color={theme.textSecondary} />
+      </ThemedView>
+
+      <ThemedView style={styles.info}>
+        <ThemedText type="smallBold" numberOfLines={1}>
+          {session.routine_day_label ?? 'Sesión libre'}
+        </ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
-          {session.performed_at}
+          {formatDate(session.performed_at)} · {session.exercises.length} ejercicios
+          {session.completed && session.duration_minutes !== null ? ` · ${session.duration_minutes} min` : ''}
         </ThemedText>
       </ThemedView>
-      <ThemedText type="small" themeColor="textSecondary">
-        {session.exercises.length} ejercicios ·{' '}
-        {session.completed
-          ? session.duration_minutes !== null
-            ? `${session.duration_minutes} min`
-            : '—'
-          : 'En curso'}
-      </ThemedText>
-      {!session.completed && (
-        <ThemedText type="small" style={{ color: theme.accent }}>
-          Sin completar
-        </ThemedText>
-      )}
+
+      <Badge label={WORKOUT_SESSION_STATUS_LABEL[status]} variant={STATUS_BADGE_VARIANT[status]} />
     </ThemedView>
   );
 }
@@ -94,14 +107,23 @@ const styles = StyleSheet.create({
   },
   pageTitle: { fontSize: 28, lineHeight: 34, marginBottom: Spacing.two },
   row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
     borderRadius: Spacing.three,
-    padding: Spacing.three,
-    gap: Spacing.half,
+    padding: Spacing.two,
     marginBottom: Spacing.two,
   },
-  rowHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  iconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  info: {
+    flex: 1,
+    gap: 2,
     backgroundColor: 'transparent',
   },
   spinner: { marginVertical: Spacing.three },

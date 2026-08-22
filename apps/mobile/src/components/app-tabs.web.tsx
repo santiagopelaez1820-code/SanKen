@@ -7,7 +7,7 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { Image, Pressable, View, StyleSheet } from 'react-native';
-import { BarChart3, History, Home, Ruler, Trophy, type LucideIcon } from 'lucide-react-native';
+import { BarChart3, Flag, History, Home, Trophy, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -27,11 +27,11 @@ export default function AppTabs() {
           <TabTrigger name="dashboard" href="/dashboard" asChild>
             <TabButton icon={BarChart3}>Progreso</TabButton>
           </TabTrigger>
+          <TabTrigger name="retos" href="/retos" asChild>
+            <TabButton icon={Flag}>Retos</TabButton>
+          </TabTrigger>
           <TabTrigger name="history" href="/history" asChild>
             <TabButton icon={History}>Historial</TabButton>
-          </TabTrigger>
-          <TabTrigger name="measurements" href="/measurements" asChild>
-            <TabButton icon={Ruler}>Medidas</TabButton>
           </TabTrigger>
           <TabTrigger name="prs" href="/prs" asChild>
             <TabButton icon={Trophy}>PR</TabButton>

@@ -7,7 +7,9 @@ import { estimateWorkoutMinutes } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { AchievementsRow } from '@/components/dashboard/achievements-row';
 import { PerformanceHero } from '@/components/dashboard/performance-hero';
+import { RecentPRsRow } from '@/components/dashboard/recent-prs-row';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -124,6 +126,14 @@ export default function HomeScreen() {
               onPress={() => setConfirmingSkip(true)}
             />
           </ThemedView>
+        )}
+
+        {!isLoadingStats && <RecentPRsRow records={stats?.recent_personal_records ?? []} />}
+
+        {!isLoadingGamification && (
+          <AchievementsRow
+            achievements={[...(summary?.unlocked_achievements ?? []), ...(summary?.locked_achievements ?? [])]}
+          />
         )}
 
         <ConfirmDialog

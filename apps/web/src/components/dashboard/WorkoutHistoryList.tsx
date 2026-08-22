@@ -1,7 +1,26 @@
 import { useQuery } from "@tanstack/react-query"
-import type { WorkoutSession } from "@sanken/core"
+import type { VariantProps } from "class-variance-authority"
+import { Dumbbell } from "lucide-react"
+import { getWorkoutSessionStatus, WORKOUT_SESSION_STATUS_LABEL, type WorkoutSession } from "@sanken/core"
 import { api } from "@/lib/api"
+import { Badge, badgeVariants } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+
+const STATUS_BADGE_VARIANT: Record<
+  ReturnType<typeof getWorkoutSessionStatus>,
+  VariantProps<typeof badgeVariants>["variant"]
+> = {
+  completed: "success",
+  active: "accent2",
+  skipped: "neutral",
+  cancelled: "warning",
+}
+
+function formatDate(performedAt: string): string {
+  return new Date(performedAt)
+    .toLocaleDateString("es-AR", { day: "2-digit", month: "short", year: "numeric" })
+    .toUpperCase()
+}
 
 export function WorkoutHistoryList() {
   const { data, isLoading } = useQuery({
@@ -23,19 +42,26 @@ export function WorkoutHistoryList() {
 
       {!isLoading && sessions.length > 0 && (
         <ul className="mt-3 divide-y divide-border">
-          {sessions.map((session) => (
-            <li key={session.id} className="flex items-center justify-between py-2.5 text-sm">
-              <div>
-                <p className="text-foreground">{session.routine_day_label ?? "Sesión libre"}</p>
-                <p className="text-xs text-muted-foreground">
-                  {session.performed_at} · {session.exercises.length} ejercicios
-                </p>
-              </div>
-              <span className="text-xs text-muted-foreground">
-                {session.completed ? `${session.duration_minutes ?? "—"} min` : "En curso"}
-              </span>
-            </li>
-          ))}
+          {sessions.map((session) => {
+            const status = getWorkoutSessionStatus(session)
+            return (
+              <li key={session.id} className="flex items-center gap-3 py-2.5">
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
+                  <Dumbbell className="size-4 text-muted-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm text-foreground">{session.routine_day_label ?? "Sesión libre"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {formatDate(session.performed_at)} · {session.exercises.length} ejercicios
+                    {session.completed && session.duration_minutes !== null
+                      ? ` · ${session.duration_minutes} min`
+                      : ""}
+                  </p>
+                </div>
+                <Badge variant={STATUS_BADGE_VARIANT[status]}>{WORKOUT_SESSION_STATUS_LABEL[status]}</Badge>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

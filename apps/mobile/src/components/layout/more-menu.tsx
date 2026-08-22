@@ -1,12 +1,13 @@
 import { router } from 'expo-router';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import {
   Apple,
   Bell,
   CalendarDays,
-  Flag,
+  ChevronRight,
   LogOut,
   MessageCircle,
+  Ruler,
   Settings,
   Shield,
   User,
@@ -35,22 +36,69 @@ interface MoreMenuProps {
   unreadFeedCount: number;
 }
 
+function MenuTile({ item, onPress }: { item: MoreMenuItem; onPress: () => void }) {
+  const theme = useTheme();
+
+  return (
+    <Pressable onPress={onPress} style={[styles.tile, { backgroundColor: theme.backgroundElement }]}>
+      <Icon icon={item.icon} size={24} color={theme.text} />
+      <ThemedText type="small" style={styles.tileLabel} numberOfLines={1}>
+        {item.label}
+      </ThemedText>
+      {!!item.badge && (
+        <ThemedView style={[styles.badge, { backgroundColor: theme.accent }]}>
+          <ThemedText type="small" style={styles.badgeText}>
+            {item.badge > 9 ? '9+' : item.badge}
+          </ThemedText>
+        </ThemedView>
+      )}
+    </Pressable>
+  );
+}
+
+function MenuRow({ item, onPress }: { item: MoreMenuItem; onPress: () => void }) {
+  const theme = useTheme();
+
+  return (
+    <Pressable onPress={onPress} style={[styles.wideRow, { backgroundColor: theme.backgroundElement }]}>
+      <Icon icon={item.icon} size={20} color={theme.text} />
+      <ThemedText type="default" style={styles.wideRowLabel}>
+        {item.label}
+      </ThemedText>
+      <Icon icon={ChevronRight} size={18} color={theme.textSecondary} />
+    </Pressable>
+  );
+}
+
+function GroupLabel({ children }: { children: string }) {
+  return (
+    <ThemedText type="small" themeColor="textSecondary" style={styles.groupLabel}>
+      {children}
+    </ThemedText>
+  );
+}
+
 export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
   const theme = useTheme();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
-  const items: MoreMenuItem[] = [
+  const socialItems: MoreMenuItem[] = [
     user?.role === 'trainer'
       ? { label: 'Mis clientes', icon: Users, path: '/trainer' }
       : { label: 'Mi entrenador', icon: User, path: '/mi-entrenador' },
     { label: 'Chat', icon: MessageCircle, path: '/chat' },
     { label: 'Novedades', icon: Bell, path: '/novedades', badge: unreadFeedCount },
-    { label: 'Retos', icon: Flag, path: '/retos' },
+  ];
+
+  const organizacionItems: MoreMenuItem[] = [
     { label: 'Calendario', icon: CalendarDays, path: '/calendario' },
     { label: 'Nutrición', icon: Apple, path: '/nutricion' },
-    ...(user?.role === 'super_admin' ? [{ label: 'Super Admin', icon: Shield, path: '/admin' }] : []),
   ];
+
+  const seguimientoItem: MoreMenuItem = { label: 'Medidas corporales', icon: Ruler, path: '/measurements' };
+  const adminItem: MoreMenuItem | null =
+    user?.role === 'super_admin' ? { label: 'Super Admin', icon: Shield, path: '/admin' } : null;
 
   const go = (path: string) => {
     onClose();
@@ -59,22 +107,34 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
 
   return (
     <BottomSheet visible={visible} onClose={onClose}>
-      <ThemedView style={styles.list}>
-        {items.map((item) => (
-          <Pressable key={item.path} onPress={() => go(item.path)} style={styles.row}>
-            <Icon icon={item.icon} size={20} color={theme.text} />
-            <ThemedText type="default" style={styles.label}>
-              {item.label}
-            </ThemedText>
-            {!!item.badge && (
-              <ThemedView style={[styles.badge, { backgroundColor: theme.accent }]}>
-                <ThemedText type="small" style={styles.badgeText}>
-                  {item.badge > 9 ? '9+' : item.badge}
-                </ThemedText>
-              </ThemedView>
-            )}
-          </Pressable>
-        ))}
+      <ThemedView style={styles.container}>
+        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.title}>
+          MÁS
+        </ThemedText>
+
+        <GroupLabel>SOCIAL</GroupLabel>
+        <View style={styles.grid}>
+          {socialItems.map((item) => (
+            <MenuTile key={item.path} item={item} onPress={() => go(item.path)} />
+          ))}
+        </View>
+
+        <GroupLabel>ORGANIZACIÓN</GroupLabel>
+        <View style={styles.grid}>
+          {organizacionItems.map((item) => (
+            <MenuTile key={item.path} item={item} onPress={() => go(item.path)} />
+          ))}
+        </View>
+
+        <GroupLabel>SEGUIMIENTO</GroupLabel>
+        <MenuRow item={seguimientoItem} onPress={() => go(seguimientoItem.path)} />
+
+        {adminItem && (
+          <>
+            <GroupLabel>ADMINISTRACIÓN</GroupLabel>
+            <MenuRow item={adminItem} onPress={() => go(adminItem.path)} />
+          </>
+        )}
 
         <ThemedView style={[styles.divider, { backgroundColor: theme.border }]} />
 
@@ -83,9 +143,9 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
             onClose();
             router.push('/settings');
           }}
-          style={styles.row}>
+          style={styles.accountRow}>
           <Icon icon={Settings} size={20} color={theme.text} />
-          <ThemedText type="default" style={styles.label}>
+          <ThemedText type="default" style={styles.accountRowLabel}>
             Configuración
           </ThemedText>
         </Pressable>
@@ -95,9 +155,9 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
             onClose();
             logout();
           }}
-          style={styles.row}>
+          style={styles.accountRow}>
           <Icon icon={LogOut} size={20} color={theme.textSecondary} />
-          <ThemedText type="default" themeColor="textSecondary" style={styles.label}>
+          <ThemedText type="default" themeColor="textSecondary" style={styles.accountRowLabel}>
             Cerrar sesión
           </ThemedText>
         </Pressable>
@@ -107,35 +167,77 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
 }
 
 const styles = StyleSheet.create({
-  list: {
+  container: {
     paddingHorizontal: Spacing.three,
     paddingBottom: Spacing.four,
-    gap: Spacing.half,
+    gap: Spacing.two,
   },
-  row: {
+  title: {
+    textAlign: 'center',
+    letterSpacing: 1,
+    marginBottom: Spacing.one,
+  },
+  groupLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginTop: Spacing.two,
+  },
+  grid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.two,
+    flexWrap: 'wrap',
+    gap: Spacing.two,
   },
-  label: {
-    flex: 1,
+  tile: {
+    flexBasis: '31%',
+    flexGrow: 1,
+    alignItems: 'center',
+    gap: Spacing.one,
+    borderRadius: Spacing.three,
+    paddingVertical: Spacing.three,
+    paddingHorizontal: Spacing.one,
+  },
+  tileLabel: {
+    textAlign: 'center',
   },
   badge: {
-    minWidth: 20,
-    height: 20,
-    borderRadius: 10,
+    position: 'absolute',
+    top: Spacing.one,
+    right: Spacing.one,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
   },
   badgeText: {
     color: '#050505',
     fontWeight: '700',
+    fontSize: 10,
+  },
+  wideRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    borderRadius: Spacing.three,
+    paddingVertical: Spacing.three,
+    paddingHorizontal: Spacing.three,
+  },
+  wideRowLabel: {
+    flex: 1,
   },
   divider: {
     height: 1,
     marginVertical: Spacing.two,
+  },
+  accountRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.two,
+  },
+  accountRowLabel: {
+    flex: 1,
   },
 });

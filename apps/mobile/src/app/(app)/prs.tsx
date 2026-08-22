@@ -3,7 +3,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Medal, Trophy } from 'lucide-react-native';
+import { ChevronRight, Dumbbell, Medal, Trophy } from 'lucide-react-native';
 import type { ExerciseCatalogItem, ExerciseRankingScope, ExerciseRankingSex, PersonalRecordSummary, PrSubmission } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
@@ -105,22 +105,26 @@ const RANKING_SEXES: { value: ExerciseRankingSex; label: string }[] = [
 
 const MEDAL_COLORS: Record<number, string> = { 1: '#D4AF37', 2: '#A8A9AD', 3: '#B08D57' };
 
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
 function RecordRow({ record }: { record: PersonalRecordSummary }) {
   const theme = useTheme();
   return (
-    <ThemedView type="backgroundElement" style={styles.row}>
-      <ThemedText type="small">{record.exercise_name}</ThemedText>
-      <ThemedView style={styles.rowValue}>
-        <ThemedView style={styles.trophyRow}>
-          <Icon icon={Trophy} size={14} color={theme.accent} />
-          <ThemedText type="smallBold" themeColor="accent">
-            {record.value} kg
-          </ThemedText>
-        </ThemedView>
-        <ThemedText type="small" themeColor="textSecondary">
-          {record.achieved_at}
-        </ThemedText>
+    <ThemedView type="backgroundElement" style={styles.trophyCard}>
+      <ThemedView style={[styles.trophyCircle, { backgroundColor: `${theme.accent}22` }]}>
+        <Icon icon={Trophy} size={22} color={theme.accent} />
       </ThemedView>
+      <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={styles.trophyName}>
+        {record.exercise_name}
+      </ThemedText>
+      <ThemedText type="stat" style={styles.trophyValue}>
+        {record.value} kg
+      </ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">
+        {formatDate(record.achieved_at)}
+      </ThemedText>
     </ThemedView>
   );
 }
@@ -234,45 +238,52 @@ export default function PersonalRecordsScreen() {
         <FlatList
           style={styles.list}
           data={records}
+          numColumns={2}
+          columnWrapperStyle={styles.trophyRow}
           keyExtractor={(item) => String(item.id)}
           renderItem={({ item }) => <RecordRow record={item} />}
           contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}
           ListHeaderComponent={
             <>
               <ThemedText type="title" style={styles.pageTitle}>
-                PR
+                Personal Records
               </ThemedText>
               <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
-                Registra tu mejor levantamiento por ejercicio — independiente de tu entrenamiento.
+                Tus mejores levantamientos
               </ThemedText>
 
               <ThemedView type="backgroundElement" style={styles.formCard}>
-                <ThemedView style={styles.field}>
-                  <ThemedText type="small" themeColor="textSecondary">
-                    Ejercicio
-                  </ThemedText>
-                  <PrimaryButton
-                    label={selectedExercise?.name ?? 'Elegir ejercicio'}
-                    variant="ghost"
-                    onPress={() => setPickerVisible(true)}
-                  />
+                <Pressable style={styles.pickerRow} onPress={() => setPickerVisible(true)}>
+                  <ThemedView style={styles.pickerRowLeft}>
+                    <Icon icon={Dumbbell} size={16} color={theme.textSecondary} />
+                    <ThemedText type="small" numberOfLines={1}>
+                      {selectedExercise?.name ?? 'Elegir ejercicio'}
+                    </ThemedText>
+                  </ThemedView>
+                  <Icon icon={ChevronRight} size={16} color={theme.textSecondary} />
+                </Pressable>
+
+                <ThemedView style={styles.formRow}>
+                  <ThemedView style={styles.formRowField}>
+                    <TextField
+                      label="Peso (kg)"
+                      value={weightInput}
+                      onChangeText={setWeightInput}
+                      keyboardType="decimal-pad"
+                      placeholder="0.0"
+                    />
+                  </ThemedView>
+
+                  <ThemedView style={styles.formRowField}>
+                    <TextField
+                      label="Repeticiones"
+                      value={repsInput}
+                      onChangeText={setRepsInput}
+                      keyboardType="number-pad"
+                      placeholder="1"
+                    />
+                  </ThemedView>
                 </ThemedView>
-
-                <TextField
-                  label="Peso (kg)"
-                  value={weightInput}
-                  onChangeText={setWeightInput}
-                  keyboardType="decimal-pad"
-                  placeholder="0.0"
-                />
-
-                <TextField
-                  label="Repeticiones"
-                  value={repsInput}
-                  onChangeText={setRepsInput}
-                  keyboardType="number-pad"
-                  placeholder="1"
-                />
 
                 {(formError || submitError) && (
                   <ThemedText type="small" style={styles.error}>
@@ -539,8 +550,56 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     marginBottom: Spacing.two,
   },
-  rowValue: { alignItems: 'flex-end' },
-  trophyRow: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: 'transparent' },
+  pickerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderRadius: Spacing.three,
+    borderWidth: 1,
+    borderColor: 'rgba(128,128,128,0.25)',
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+  },
+  pickerRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    flex: 1,
+    backgroundColor: 'transparent',
+  },
+  formRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+    backgroundColor: 'transparent',
+  },
+  formRowField: { flex: 1 },
+  trophyRow: { gap: Spacing.two },
+  trophyCard: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: Spacing.four,
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.two,
+    gap: Spacing.half,
+    marginBottom: Spacing.two,
+  },
+  trophyCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.half,
+  },
+  trophyName: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    textAlign: 'center',
+  },
+  trophyValue: {
+    fontSize: 24,
+    lineHeight: 28,
+  },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   rankNumber: { width: 16, textAlign: 'center' },
   submissionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.one },

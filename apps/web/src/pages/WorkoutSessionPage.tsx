@@ -319,7 +319,7 @@ export function WorkoutSessionPage() {
           </div>
         )}
 
-        <ExerciseVideoPlayer videoUrl={currentExercise.exercise.video_url} />
+        <ExerciseVideoPlayer videoUrl={currentExercise.exercise.video_url} exerciseName={currentExercise.exercise.name} />
 
         {currentExercise.alternative && (
           <div className="flex flex-col gap-1">

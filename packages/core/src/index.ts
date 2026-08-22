@@ -19,4 +19,5 @@ export * from './types/nutrition';
 export * from './types/admin';
 export * from './types/pr-submissions';
 export * from './lib/routine';
+export * from './lib/workout-session';
 export * from './realtime/echo';
