@@ -72,7 +72,7 @@ export function MuscleVolumeChart() {
         )}
 
         {!isLoading && data && data.length > 0 && !showTable && (
-          <ResponsiveContainer width="100%" height={240} debounce={200}>
+          <ResponsiveContainer key={range} width="100%" height={240} debounce={200}>
             <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis
@@ -88,7 +88,15 @@ export function MuscleVolumeChart() {
                 width={56}
               />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--muted)" }} />
-              <Bar dataKey="volume_kg" fill="var(--chart-2)" radius={[4, 4, 0, 0]} maxBarSize={48} />
+              <Bar
+                dataKey="volume_kg"
+                fill="var(--chart-2)"
+                radius={[4, 4, 0, 0]}
+                maxBarSize={48}
+                isAnimationActive
+                animationDuration={650}
+                animationEasing="ease-out"
+              />
             </BarChart>
           </ResponsiveContainer>
         )}

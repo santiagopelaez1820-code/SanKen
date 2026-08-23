@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"
 import { LogOut, Settings } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuthStore } from "@/lib/auth-store"
@@ -53,7 +54,13 @@ export function Sidebar() {
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
-                    {active && <span className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-primary" />}
+                    {active && (
+                      <motion.span
+                        layoutId="sidebar-active-indicator"
+                        className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]"
+                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                      />
+                    )}
                     <item.icon className="size-4 shrink-0" />
                     <span className="flex-1 truncate">{item.label}</span>
                     {badgeCount > 0 && (

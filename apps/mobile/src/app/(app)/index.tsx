@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Dumbbell, Menu } from 'lucide-react-native';
 import { estimateWorkoutMinutes } from '@sanken/core';
 
@@ -15,7 +16,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoreMenu } from '@/components/layout/more-menu';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, CardShadow, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useAuthStore } from '@/store/auth-store';
@@ -84,7 +85,9 @@ export default function HomeScreen() {
           </Pressable>
         </ThemedView>
 
-        <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
+        <Animated.View entering={FadeInUp.delay(0).duration(320)}>
+          <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
+        </Animated.View>
 
         {error && (
           <ThemedText type="small" style={styles.error}>
@@ -105,35 +108,44 @@ export default function HomeScreen() {
         )}
 
         {day && (
-          <ThemedView
-            style={[
-              styles.todayCard,
-              { backgroundColor: `${theme.accentSecondary}14`, borderColor: `${theme.accentSecondary}40` },
-            ]}>
-            <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accentSecondary }]}>
-              ENTRENAMIENTO DE HOY
-            </ThemedText>
-            <ThemedText type="subtitle">{day.label}</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
-            </ThemedText>
-            <ThemedView style={styles.spacer} />
-            <PrimaryButton label="Comenzar" onPress={() => router.push('/workout/precheck')} />
-            <ThemedView style={styles.buttonGap} />
-            <PrimaryButton
-              label="Saltar entrenamiento"
-              variant="ghost"
-              onPress={() => setConfirmingSkip(true)}
-            />
-          </ThemedView>
+          <Animated.View entering={FadeInUp.delay(60).duration(320)}>
+            <ThemedView
+              style={[
+                styles.todayCard,
+                { backgroundColor: `${theme.accentSecondary}14`, borderColor: `${theme.accentSecondary}40` },
+                glowShadow(theme.accentSecondary),
+              ]}>
+              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accentSecondary }]}>
+                ENTRENAMIENTO DE HOY
+              </ThemedText>
+              <ThemedText type="subtitle">{day.label}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">
+                {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
+              </ThemedText>
+              <ThemedView style={styles.spacer} />
+              <PrimaryButton label="Comenzar" onPress={() => router.push('/workout/precheck')} />
+              <ThemedView style={styles.buttonGap} />
+              <PrimaryButton
+                label="Saltar entrenamiento"
+                variant="ghost"
+                onPress={() => setConfirmingSkip(true)}
+              />
+            </ThemedView>
+          </Animated.View>
         )}
 
-        {!isLoadingStats && <RecentPRsRow records={stats?.recent_personal_records ?? []} />}
+        {!isLoadingStats && (
+          <Animated.View entering={FadeInUp.delay(120).duration(320)}>
+            <RecentPRsRow records={stats?.recent_personal_records ?? []} />
+          </Animated.View>
+        )}
 
         {!isLoadingGamification && (
-          <AchievementsRow
-            achievements={[...(summary?.unlocked_achievements ?? []), ...(summary?.locked_achievements ?? [])]}
-          />
+          <Animated.View entering={FadeInUp.delay(180).duration(320)}>
+            <AchievementsRow
+              achievements={[...(summary?.unlocked_achievements ?? []), ...(summary?.locked_achievements ?? [])]}
+            />
+          </Animated.View>
         )}
 
         <ConfirmDialog

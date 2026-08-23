@@ -83,7 +83,7 @@ export function ProgressChart() {
         )}
 
         {!isLoading && data && data.length > 0 && !showTable && (
-          <ResponsiveContainer width="100%" height={240} debounce={200}>
+          <ResponsiveContainer key={metric} width="100%" height={240} debounce={200}>
             <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
               <XAxis
@@ -107,6 +107,9 @@ export function ProgressChart() {
                 strokeWidth={2}
                 dot={{ r: 3, fill: "var(--chart-1)", strokeWidth: 0 }}
                 activeDot={{ r: 5 }}
+                isAnimationActive
+                animationDuration={650}
+                animationEasing="ease-out"
               />
             </LineChart>
           </ResponsiveContainer>

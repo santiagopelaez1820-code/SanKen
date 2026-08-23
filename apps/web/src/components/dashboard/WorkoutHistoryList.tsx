@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 import type { VariantProps } from "class-variance-authority"
+import { motion } from "framer-motion"
 import { Dumbbell } from "lucide-react"
 import { getWorkoutSessionStatus, WORKOUT_SESSION_STATUS_LABEL, type WorkoutSession } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Badge, badgeVariants } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
+import { fadeInUp, staggerContainer } from "@/lib/motion"
 
 const STATUS_BADGE_VARIANT: Record<
   ReturnType<typeof getWorkoutSessionStatus>,
@@ -41,11 +43,20 @@ export function WorkoutHistoryList() {
       )}
 
       {!isLoading && sessions.length > 0 && (
-        <ul className="mt-3 divide-y divide-border">
+        <motion.ul
+          className="mt-3 divide-y divide-border"
+          variants={staggerContainer(0.04)}
+          initial="hidden"
+          animate="show"
+        >
           {sessions.map((session) => {
             const status = getWorkoutSessionStatus(session)
             return (
-              <li key={session.id} className="flex items-center gap-3 py-2.5">
+              <motion.li
+                key={session.id}
+                variants={fadeInUp}
+                className="flex items-center gap-3 rounded-lg py-2.5 transition-colors hover:bg-muted/50"
+              >
                 <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
                   <Dumbbell className="size-4 text-muted-foreground" />
                 </div>
@@ -59,10 +70,10 @@ export function WorkoutHistoryList() {
                   </p>
                 </div>
                 <Badge variant={STATUS_BADGE_VARIANT[status]}>{WORKOUT_SESSION_STATUS_LABEL[status]}</Badge>
-              </li>
+              </motion.li>
             )
           })}
-        </ul>
+        </motion.ul>
       )}
     </div>
   )

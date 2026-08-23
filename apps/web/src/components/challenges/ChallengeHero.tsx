@@ -1,3 +1,4 @@
+import { motion } from "framer-motion"
 import { Flame } from "lucide-react"
 import type { Challenge } from "@sanken/core"
 import { Button } from "@/components/ui/button"
@@ -55,9 +56,11 @@ export function ChallengeHero({ challenge, expanded, onToggle, onJoin }: Challen
       {challenge.joined && (
         <div>
           <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
-            <div
-              className="h-full rounded-full bg-primary shadow-[0_0_12px_rgba(207,255,54,0.6)] transition-all"
-              style={{ width: `${progressPct}%` }}
+            <motion.div
+              className="h-full rounded-full bg-primary shadow-[0_0_12px_rgba(207,255,54,0.6)]"
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             />
           </div>
           <div className="mt-2 flex items-center justify-between">

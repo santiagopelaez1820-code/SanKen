@@ -158,3 +158,29 @@
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -12px rgba(0, 0, 0, 0.45);
     }
 }
+
+@layer utilities {
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  /*
+   * Skeleton loaders: animate-pulse (ya en la clase) da la respiración de
+   * opacidad; esto suma un barrido de brillo real encima, mismo criterio
+   * que apps premium (Linear/Notion) usan para "esto está cargando de
+   * verdad" en vez de un bloque gris estático.
+   */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+    animation: shimmer 1.8s infinite;
+  }
+}

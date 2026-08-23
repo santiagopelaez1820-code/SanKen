@@ -77,3 +77,29 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+/** Sombra real para cards protagonistas, en vez de depender solo del contraste de fondo. */
+export const CardShadow = {
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.35,
+  shadowRadius: 14,
+  elevation: 6,
+} as const;
+
+/**
+ * Glow de color (lima/cyan) para el borde de una card destacada -- usar con
+ * moderación. Solo iOS: `shadowColor` con un color (no negro) combinado con
+ * `elevation` en Android no se ve como un glow suave, sale como un borde
+ * sólido del color -- Android se queda solo con el tinte de borde que cada
+ * pantalla ya pone inline, sin sombra extra.
+ */
+export function glowShadow(color: string) {
+  if (Platform.OS === 'android') return {} as const;
+  return {
+    shadowColor: color,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.35,
+    shadowRadius: 16,
+  } as const;
+}

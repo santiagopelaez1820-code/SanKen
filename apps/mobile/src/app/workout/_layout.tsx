@@ -15,7 +15,7 @@ export default function WorkoutLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, animation: 'fade' }}>
       <Stack.Screen name="precheck" />
       <Stack.Screen name="session" />
     </Stack>

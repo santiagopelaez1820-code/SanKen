@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInUp } from 'react-native-reanimated';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import { BarChart3, Clock, Flame, ListChecks, Lock, Trophy, Weight } from 'lucide-react-native';
 import type { ProgressMetric, VolumeRange } from '@sanken/core';
@@ -101,25 +102,34 @@ export default function DashboardScreen() {
           )}
 
           <ThemedView style={styles.tileGrid}>
-            <StatTile
-              icon={Clock}
-              label="Horas entrenadas"
-              value={isLoadingStats ? '…' : `${stats?.total_hours ?? 0} h`}
-            />
-            <StatTile icon={ListChecks} label="Series totales" value={isLoadingStats ? '…' : `${stats?.total_sets ?? 0}`} />
-            <StatTile
-              icon={Weight}
-              label="Toneladas movidas"
-              value={isLoadingStats ? '…' : `${((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t`}
-            />
-            <StatTile
-              icon={Flame}
-              label="Racha actual"
-              value={isLoadingStats ? '…' : `${stats?.current_streak_days ?? 0} días`}
-              hint={stats && stats.current_streak_days > 0 ? '¡Sigue así!' : undefined}
-            />
+            <Animated.View entering={FadeInUp.delay(0).duration(280)} style={styles.tileWrap}>
+              <StatTile
+                icon={Clock}
+                label="Horas entrenadas"
+                value={isLoadingStats ? '…' : `${stats?.total_hours ?? 0} h`}
+              />
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(40).duration(280)} style={styles.tileWrap}>
+              <StatTile icon={ListChecks} label="Series totales" value={isLoadingStats ? '…' : `${stats?.total_sets ?? 0}`} />
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(80).duration(280)} style={styles.tileWrap}>
+              <StatTile
+                icon={Weight}
+                label="Toneladas movidas"
+                value={isLoadingStats ? '…' : `${((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t`}
+              />
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(120).duration(280)} style={styles.tileWrap}>
+              <StatTile
+                icon={Flame}
+                label="Racha actual"
+                value={isLoadingStats ? '…' : `${stats?.current_streak_days ?? 0} días`}
+                hint={stats && stats.current_streak_days > 0 ? '¡Sigue así!' : undefined}
+              />
+            </Animated.View>
           </ThemedView>
 
+          <Animated.View entering={FadeInUp.delay(160).duration(300)}>
           <ThemedView type="backgroundElement" style={[styles.card, styles.xpCard]}>
             <ProgressRing
               value={summary?.progress_pct ?? 0}
@@ -141,7 +151,9 @@ export default function DashboardScreen() {
               )}
             </ThemedView>
           </ThemedView>
+          </Animated.View>
 
+          <Animated.View entering={FadeInUp.delay(220).duration(300)}>
           <ThemedView type="backgroundElement" style={styles.card}>
             <ThemedView style={styles.cardHeader}>
               <ThemedText type="smallBold">Volumen por músculo</ThemedText>
@@ -173,10 +185,14 @@ export default function DashboardScreen() {
                 yAxisColor={theme.backgroundSelected}
                 xAxisColor={theme.backgroundSelected}
                 hideRules
+                isAnimated
+                animationDuration={500}
               />
             )}
           </ThemedView>
+          </Animated.View>
 
+          <Animated.View entering={FadeInUp.delay(280).duration(300)}>
           <ThemedView type="backgroundElement" style={styles.card}>
             <ThemedView style={styles.cardHeader}>
               <ThemedText type="smallBold">Progreso</ThemedText>
@@ -208,10 +224,14 @@ export default function DashboardScreen() {
                 xAxisColor={theme.backgroundSelected}
                 hideRules
                 curved
+                isAnimated
+                animationDuration={500}
               />
             )}
           </ThemedView>
+          </Animated.View>
 
+          <Animated.View entering={FadeInUp.delay(340).duration(300)}>
           <ThemedView type="backgroundElement" style={styles.card}>
             <ThemedText type="smallBold">Récords recientes</ThemedText>
             {(stats?.recent_personal_records.length ?? 0) === 0 && !isLoadingStats && (
@@ -226,7 +246,9 @@ export default function DashboardScreen() {
               </ThemedView>
             ))}
           </ThemedView>
+          </Animated.View>
 
+          <Animated.View entering={FadeInUp.delay(400).duration(300)}>
           <ThemedView type="backgroundElement" style={styles.card}>
             <ThemedView style={styles.cardHeader}>
               <ThemedText type="smallBold">Logros</ThemedText>
@@ -264,6 +286,7 @@ export default function DashboardScreen() {
               )}
             </ThemedView>
           </ThemedView>
+          </Animated.View>
         </ScrollView>
       </SafeAreaView>
     </ThemedView>
@@ -288,6 +311,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.two,
     backgroundColor: 'transparent',
+  },
+  tileWrap: {
+    flexBasis: '47%',
+    flexGrow: 1,
   },
   card: {
     borderRadius: Spacing.four,

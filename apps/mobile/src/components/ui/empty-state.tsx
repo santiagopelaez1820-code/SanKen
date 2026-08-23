@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
+import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -16,12 +18,24 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
   const theme = useTheme();
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withTiming(1, { duration: 350, easing: Easing.out(Easing.cubic) });
+  }, [progress]);
+
+  const iconStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ scale: 0.8 + progress.value * 0.2 }],
+  }));
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView type="backgroundElement" style={styles.iconCircle}>
-        <Icon icon={icon} size={24} color={theme.textSecondary} />
-      </ThemedView>
+      <Animated.View style={iconStyle}>
+        <ThemedView type="backgroundElement" style={styles.iconCircle}>
+          <Icon icon={icon} size={24} color={theme.textSecondary} />
+        </ThemedView>
+      </Animated.View>
       <ThemedText type="smallBold" style={styles.centerText}>
         {title}
       </ThemedText>

@@ -1,16 +1,29 @@
 import { useEffect } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Flame } from 'lucide-react-native';
 import type { Challenge } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { CardShadow, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useRetosStore } from '@/store/retos-store';
 import { Skeleton } from '@/components/ui/skeleton';
+
+function ProgressFill({ pct, color }: { pct: number; color: string }) {
+  const width = useSharedValue(0);
+
+  useEffect(() => {
+    width.value = withTiming(pct, { duration: 700 });
+  }, [pct, width]);
+
+  const style = useAnimatedStyle(() => ({ width: `${width.value}%` }));
+
+  return <Animated.View style={[styles.progressFill, { backgroundColor: color }, style]} />;
+}
 
 const METRIC_LABEL: Record<Challenge['criteria']['metric'], string> = {
   workouts_count: 'entrenamientos',
@@ -60,7 +73,12 @@ function ChallengeHero({ challenge }: { challenge: Challenge }) {
   const daysLeft = daysRemaining(challenge.ends_at);
 
   return (
-    <ThemedView style={[styles.hero, { borderColor: `${theme.accent}40`, backgroundColor: `${theme.accent}14` }]}>
+    <ThemedView
+      style={[
+        styles.hero,
+        { borderColor: `${theme.accent}40`, backgroundColor: `${theme.accent}14` },
+        glowShadow(theme.accent),
+      ]}>
       <ThemedView style={styles.heroHeader}>
         <ThemedView style={[styles.heroIcon, { backgroundColor: `${theme.accent}26` }]}>
           <Flame size={20} color={theme.accent} />
@@ -82,7 +100,7 @@ function ChallengeHero({ challenge }: { challenge: Challenge }) {
       {challenge.joined && (
         <ThemedView style={styles.progressBlock}>
           <ThemedView style={[styles.progressTrack, { backgroundColor: theme.backgroundSelected }]}>
-            <ThemedView style={[styles.progressFill, { width: `${progressPct}%`, backgroundColor: theme.accent }]} />
+            <ProgressFill pct={progressPct} color={theme.accent} />
           </ThemedView>
           <ThemedView style={styles.progressRow}>
             <ThemedText type="smallBold">
@@ -153,7 +171,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
             )}
           </ThemedView>
           <ThemedView style={[styles.progressTrack, { backgroundColor: theme.backgroundSelected }]}>
-            <ThemedView style={[styles.progressFill, { width: `${progressPct}%`, backgroundColor: theme.accent }]} />
+            <ProgressFill pct={progressPct} color={theme.accent} />
           </ThemedView>
         </ThemedView>
       )}
@@ -210,10 +228,16 @@ export default function RetosScreen() {
             </ThemedText>
           )}
 
-          {current && <ChallengeHero challenge={current} />}
+          {current && (
+            <Animated.View entering={FadeInUp.delay(0).duration(320)}>
+              <ChallengeHero challenge={current} />
+            </Animated.View>
+          )}
 
-          {rest.map((challenge) => (
-            <ChallengeCard key={challenge.id} challenge={challenge} />
+          {rest.map((challenge, index) => (
+            <Animated.View key={challenge.id} entering={FadeInUp.delay(80 + index * 60).duration(280)}>
+              <ChallengeCard challenge={challenge} />
+            </Animated.View>
           ))}
         </ScrollView>
       </SafeAreaView>
@@ -264,6 +288,7 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     padding: Spacing.three,
     gap: Spacing.two,
+    ...CardShadow,
   },
   eyebrow: { letterSpacing: 1 },
   progressBlock: { gap: Spacing.one },

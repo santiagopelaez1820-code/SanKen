@@ -3,6 +3,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { FlatList, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
 import { ChevronRight, Dumbbell, Medal, Trophy } from 'lucide-react-native';
 import type { ExerciseCatalogItem, ExerciseRankingScope, ExerciseRankingSex, PersonalRecordSummary, PrSubmission } from '@sanken/core';
 
@@ -13,7 +14,7 @@ import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { ExercisePickerModal } from '@/components/trainer/exercise-picker-modal';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, CardShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
@@ -109,23 +110,28 @@ function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-function RecordRow({ record }: { record: PersonalRecordSummary }) {
+function RecordRow({ record, index }: { record: PersonalRecordSummary; index: number }) {
   const theme = useTheme();
   return (
-    <ThemedView type="backgroundElement" style={styles.trophyCard}>
-      <ThemedView style={[styles.trophyCircle, { backgroundColor: `${theme.accent}22` }]}>
-        <Icon icon={Trophy} size={22} color={theme.accent} />
+    <Animated.View
+      style={{ flex: 1 }}
+      entering={FadeInUp.delay(Math.min(index, 8) * 40).duration(280)}
+    >
+      <ThemedView type="backgroundElement" style={[styles.trophyCard, CardShadow]}>
+        <ThemedView style={[styles.trophyCircle, { backgroundColor: `${theme.accent}22` }]}>
+          <Icon icon={Trophy} size={22} color={theme.accent} />
+        </ThemedView>
+        <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={styles.trophyName}>
+          {record.exercise_name}
+        </ThemedText>
+        <ThemedText type="stat" style={styles.trophyValue}>
+          {record.value} kg
+        </ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">
+          {formatDate(record.achieved_at)}
+        </ThemedText>
       </ThemedView>
-      <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={styles.trophyName}>
-        {record.exercise_name}
-      </ThemedText>
-      <ThemedText type="stat" style={styles.trophyValue}>
-        {record.value} kg
-      </ThemedText>
-      <ThemedText type="small" themeColor="textSecondary">
-        {formatDate(record.achieved_at)}
-      </ThemedText>
-    </ThemedView>
+    </Animated.View>
   );
 }
 
@@ -241,7 +247,7 @@ export default function PersonalRecordsScreen() {
           numColumns={2}
           columnWrapperStyle={styles.trophyRow}
           keyExtractor={(item) => String(item.id)}
-          renderItem={({ item }) => <RecordRow record={item} />}
+          renderItem={({ item, index }) => <RecordRow record={item} index={index} />}
           contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}
           ListHeaderComponent={
             <>
@@ -290,10 +296,18 @@ export default function PersonalRecordsScreen() {
                     {formError ?? submitError}
                   </ThemedText>
                 )}
-                {confirmation && (
-                  <ThemedText
-                    type={confirmationIsNewBest ? 'smallBold' : 'small'}
-                    themeColor={confirmationIsNewBest ? 'accent' : 'textSecondary'}>
+                {confirmation && confirmationIsNewBest && (
+                  <Animated.View entering={FadeIn.duration(250)}>
+                    <ThemedView style={[styles.confirmationBanner, { backgroundColor: `${theme.accent}1F` }]}>
+                      <Icon icon={Trophy} size={16} color={theme.accent} />
+                      <ThemedText type="smallBold" themeColor="accent">
+                        {confirmation}
+                      </ThemedText>
+                    </ThemedView>
+                  </Animated.View>
+                )}
+                {confirmation && !confirmationIsNewBest && (
+                  <ThemedText type="small" themeColor="textSecondary">
                     {confirmation}
                   </ThemedText>
                 )}
@@ -436,50 +450,52 @@ export default function PersonalRecordsScreen() {
                     <Skeleton height={72} borderRadius={Spacing.three} />
                   )}
 
-                  {!isLoadingRanking && rankingData?.scope_label && (
-                    <ThemedText type="small" themeColor="textSecondary">
-                      {rankingData.scope_label}
-                    </ThemedText>
-                  )}
+                  {!isLoadingRanking && (
+                    <Animated.View key={`${rankingScope}-${rankingSex}`} entering={FadeIn.duration(220)}>
+                      {rankingData?.scope_label && (
+                        <ThemedText type="small" themeColor="textSecondary">
+                          {rankingData.scope_label}
+                        </ThemedText>
+                      )}
 
-                  {!isLoadingRanking && (rankingData?.entries.length ?? 0) === 0 && (
-                    <ThemedText type="small" themeColor="textSecondary">
-                      Todavía no hay suficientes récords públicos para este ranking.
-                    </ThemedText>
-                  )}
+                      {(rankingData?.entries.length ?? 0) === 0 && (
+                        <ThemedText type="small" themeColor="textSecondary">
+                          Todavía no hay suficientes récords públicos para este ranking.
+                        </ThemedText>
+                      )}
 
-                  {!isLoadingRanking &&
-                    rankingData?.entries.map((entry) => (
-                      <ThemedView
-                        key={entry.user_id}
-                        style={[styles.listRow, entry.is_viewer && { backgroundColor: theme.backgroundSelected }]}
-                      >
-                        <ThemedView style={styles.rankRow}>
-                          {MEDAL_COLORS[entry.rank] ? (
-                            <Icon icon={Medal} size={16} color={MEDAL_COLORS[entry.rank]} />
-                          ) : (
-                            <ThemedText type="small" themeColor="textSecondary" style={styles.rankNumber}>
-                              {entry.rank}
-                            </ThemedText>
-                          )}
-                          <ThemedText type="small">{entry.user_name}</ThemedText>
+                      {rankingData?.entries.map((entry) => (
+                        <ThemedView
+                          key={entry.user_id}
+                          style={[styles.listRow, entry.is_viewer && { backgroundColor: theme.backgroundSelected }]}
+                        >
+                          <ThemedView style={styles.rankRow}>
+                            {MEDAL_COLORS[entry.rank] ? (
+                              <Icon icon={Medal} size={16} color={MEDAL_COLORS[entry.rank]} />
+                            ) : (
+                              <ThemedText type="small" themeColor="textSecondary" style={styles.rankNumber}>
+                                {entry.rank}
+                              </ThemedText>
+                            )}
+                            <ThemedText type="small">{entry.user_name}</ThemedText>
+                          </ThemedView>
+                          <ThemedText type="smallBold" style={{ color: theme.accent }}>
+                            {entry.metric_value.toLocaleString('es-AR')} kg
+                          </ThemedText>
                         </ThemedView>
-                        <ThemedText type="smallBold" style={{ color: theme.accent }}>
-                          {entry.metric_value.toLocaleString('es-AR')} kg
-                        </ThemedText>
-                      </ThemedView>
-                    ))}
+                      ))}
 
-                  {!isLoadingRanking &&
-                    rankingData?.viewer &&
-                    !rankingData.entries.some((e) => e.user_id === rankingData.viewer?.user_id) && (
-                      <ThemedView style={[styles.listRow, styles.viewerRow, { borderColor: theme.backgroundSelected }]}>
-                        <ThemedText type="small">Tu posición: {rankingData.viewer.rank}</ThemedText>
-                        <ThemedText type="smallBold" style={{ color: theme.accent }}>
-                          {rankingData.viewer.metric_value.toLocaleString('es-AR')} kg
-                        </ThemedText>
-                      </ThemedView>
-                    )}
+                      {rankingData?.viewer &&
+                        !rankingData.entries.some((e) => e.user_id === rankingData.viewer?.user_id) && (
+                          <ThemedView style={[styles.listRow, styles.viewerRow, { borderColor: theme.backgroundSelected }]}>
+                            <ThemedText type="small">Tu posición: {rankingData.viewer.rank}</ThemedText>
+                            <ThemedText type="smallBold" style={{ color: theme.accent }}>
+                              {rankingData.viewer.metric_value.toLocaleString('es-AR')} kg
+                            </ThemedText>
+                          </ThemedView>
+                        )}
+                    </Animated.View>
+                  )}
                 </>
               )}
             </ThemedView>
@@ -573,6 +589,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   formRowField: { flex: 1 },
+  confirmationBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+    borderRadius: Spacing.three,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.three,
+  },
   trophyRow: { gap: Spacing.two },
   trophyCard: {
     flex: 1,

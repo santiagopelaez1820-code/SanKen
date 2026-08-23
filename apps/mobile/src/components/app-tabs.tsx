@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { Tabs, TabList, TabTrigger, TabSlot, useTabTrigger } from 'expo-router/ui';
 import { StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { BarChart3, Flag, History, Home, Trophy, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
@@ -13,13 +15,29 @@ function TabIcon({ name, icon, label }: { name: string; icon: LucideIcon; label:
   const { trigger } = useTabTrigger({ name });
   const focused = !!trigger?.isFocused;
   const color = focused ? theme.accent : theme.textSecondary;
+  const progress = useSharedValue(focused ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withSpring(focused ? 1 : 0, { damping: 14, stiffness: 220 });
+  }, [focused, progress]);
+
+  const iconWrapStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + progress.value * 0.14 }],
+  }));
+  const dotStyle = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ scale: progress.value }],
+  }));
 
   return (
     <View style={styles.tabContent}>
-      <TabBarIcon icon={icon} focused={focused} color={color} />
+      <Animated.View style={iconWrapStyle}>
+        <TabBarIcon icon={icon} focused={focused} color={color} />
+      </Animated.View>
       <ThemedText type="small" style={[styles.label, { color }]}>
         {label}
       </ThemedText>
+      <Animated.View style={[styles.dot, { backgroundColor: theme.accent }, dotStyle]} />
     </View>
   );
 }
@@ -88,8 +106,17 @@ const styles = StyleSheet.create({
   tabContent: {
     alignItems: 'center',
     gap: Spacing.half,
+    position: 'relative',
+    paddingBottom: Spacing.one,
   },
   label: {
     fontSize: 11,
+  },
+  dot: {
+    position: 'absolute',
+    bottom: 0,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
 });

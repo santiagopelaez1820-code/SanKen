@@ -6,7 +6,7 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withTiming,
+  withSpring,
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/themed-view';
@@ -20,6 +20,7 @@ interface BottomSheetProps {
 }
 
 const DISMISS_THRESHOLD = 120;
+const SHEET_SPRING = { damping: 26, stiffness: 280, mass: 0.9 };
 
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   const theme = useTheme();
@@ -27,7 +28,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   const translateY = useSharedValue(height);
 
   useEffect(() => {
-    translateY.value = withTiming(visible ? 0 : height, { duration: 220 });
+    translateY.value = withSpring(visible ? 0 : height, SHEET_SPRING);
   }, [visible, height, translateY]);
 
   const pan = Gesture.Pan()
@@ -38,11 +39,11 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
     .onEnd((e) => {
       if (e.translationY > DISMISS_THRESHOLD) {
         // eslint-disable-next-line react-hooks/immutability -- mutar .value es la API real de Reanimated para shared values, no un valor de React state
-        translateY.value = withTiming(height, { duration: 200 }, (finished) => {
+        translateY.value = withSpring(height, SHEET_SPRING, (finished) => {
           if (finished) runOnJS(onClose)();
         });
       } else {
-        translateY.value = withTiming(0, { duration: 180 });
+        translateY.value = withSpring(0, SHEET_SPRING);
       }
     });
 

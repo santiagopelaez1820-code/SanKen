@@ -58,7 +58,7 @@ export function NextWorkoutCard() {
   if (!day) return null
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-secondary-accent/12 via-card to-primary/8 p-6">
+    <div className="relative overflow-hidden rounded-2xl border border-secondary-accent/20 bg-gradient-to-br from-secondary-accent/12 via-card to-primary/8 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.3),0_10px_32px_-10px_rgba(0,0,0,0.6),0_0_0_1px_rgba(32,234,255,0.06)] transition-shadow duration-200 hover:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_14px_40px_-8px_rgba(0,0,0,0.65),0_0_28px_-6px_var(--secondary-accent)]">
       <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-secondary-accent/15 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-20 -left-10 size-48 rounded-full bg-primary/10 blur-3xl" />
 

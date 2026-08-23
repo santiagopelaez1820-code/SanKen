@@ -50,22 +50,22 @@ export function Stepper({ value, onChange, min = 0, max = 999, step = 1, unit }:
         onPressIn={() => startHold(-step)}
         onPressOut={stopHold}
         style={[styles.button, { backgroundColor: theme.backgroundSelected }]}>
-        <Minus size={20} color={theme.text} />
+        <Minus size={18} color={theme.text} />
       </Pressable>
 
       <ThemedView style={styles.valueWrap}>
-        <ThemedText type="stat" style={styles.value}>
+        <ThemedText type="stat" style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
           {current}
         </ThemedText>
         {unit && (
-          <ThemedText type="small" themeColor="textSecondary" style={styles.unit}>
+          <ThemedText type="small" themeColor="textSecondary" style={styles.unit} numberOfLines={1}>
             {unit}
           </ThemedText>
         )}
       </ThemedView>
 
       <Pressable onPressIn={() => startHold(step)} onPressOut={stopHold} style={[styles.button, { backgroundColor: theme.accent }]}>
-        <Plus size={20} color="#050505" />
+        <Plus size={18} color="#050505" />
       </Pressable>
     </ThemedView>
   );
@@ -77,24 +77,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: Spacing.three,
-    padding: Spacing.two,
-    gap: Spacing.three,
+    padding: Spacing.one,
+    gap: Spacing.two,
   },
   button: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     borderRadius: Spacing.two,
     alignItems: 'center',
     justifyContent: 'center',
   },
   valueWrap: {
     flex: 1,
+    minWidth: 0,
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
   value: {
-    fontSize: 30,
-    lineHeight: 34,
+    fontSize: 26,
+    lineHeight: 30,
+    alignSelf: 'stretch',
+    textAlign: 'center',
   },
   unit: {
     textTransform: 'uppercase',

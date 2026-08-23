@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { AnimatePresence, motion } from "framer-motion"
 import { Trophy } from "lucide-react"
 import {
   ApiError,
@@ -21,6 +22,7 @@ import type { VariantProps } from "class-variance-authority"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ExerciseRankingList } from "@/components/rankings/ExerciseRankingList"
 import { Skeleton } from "@/components/ui/skeleton"
+import { fadeInUp, staggerContainer } from "@/lib/motion"
 
 const STATUS_LABEL: Record<PrSubmission["status"], string> = {
   pending: "En revisión",
@@ -121,10 +123,16 @@ function ExerciseRankingPanel({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <motion.div
+      key={`${scope}-${sex}`}
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
+      className="flex flex-col gap-2"
+    >
       {data?.scope_label && <p className="text-xs text-muted-foreground">{data.scope_label}</p>}
       <ExerciseRankingList entries={data?.entries ?? []} viewer={data?.viewer ?? null} />
-    </div>
+    </motion.div>
   )
 }
 
@@ -288,12 +296,19 @@ export function PersonalRecordsPage() {
           </div>
 
           {serverError && <p className="text-sm text-destructive">{serverError}</p>}
-          {confirmation && confirmationIsNewBest && (
-            <p className="flex items-center gap-1.5 text-sm font-bold tracking-wide text-primary uppercase">
-              <Trophy className="size-4" />
-              {confirmation}
-            </p>
-          )}
+          <AnimatePresence>
+            {confirmation && confirmationIsNewBest && (
+              <motion.p
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 400, damping: 18 }}
+                className="flex items-center gap-1.5 rounded-lg bg-primary/10 px-3 py-2 text-sm font-bold tracking-wide text-primary uppercase shadow-[0_0_16px_-4px_var(--primary)]"
+              >
+                <Trophy className="size-4" />
+                {confirmation}
+              </motion.p>
+            )}
+          </AnimatePresence>
           {confirmation && !confirmationIsNewBest && <p className="text-sm text-muted-foreground">{confirmation}</p>}
 
           <Button type="submit" disabled={isSubmitting} className="w-full">
@@ -311,11 +326,17 @@ export function PersonalRecordsPage() {
           )}
 
           {!isLoading && (records?.length ?? 0) > 0 && (
-            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <motion.div
+              className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3"
+              variants={staggerContainer(0.04)}
+              initial="hidden"
+              animate="show"
+            >
               {records!.map((record) => (
-                <div
+                <motion.div
                   key={record.id}
-                  className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-background px-3 py-5 text-center"
+                  variants={fadeInUp}
+                  className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-background px-3 py-5 text-center transition-transform duration-200 hover:-translate-y-0.5"
                 >
                   <div className="mb-1 flex size-11 items-center justify-center rounded-full bg-primary/15">
                     <Trophy className="size-5 text-primary" />
@@ -327,9 +348,9 @@ export function PersonalRecordsPage() {
                     {record.value} kg
                   </p>
                   <p className="text-xs text-muted-foreground">{record.achieved_at}</p>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
         </div>
 

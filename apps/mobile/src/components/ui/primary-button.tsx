@@ -1,4 +1,6 @@
-import { ActivityIndicator, Pressable, StyleSheet, type PressableProps } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, type GestureResponderEvent, type PressableProps } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { ThemedText } from '@/components/themed-text';
 import { Icon, type LucideIcon } from '@/components/ui/icon';
@@ -20,42 +22,85 @@ interface PrimaryButtonProps extends PressableProps {
   variant?: 'primary' | 'accent2' | 'neutral' | 'ghost';
 }
 
-export function PrimaryButton({ label, loading, icon, variant = 'primary', style, disabled, ...props }: PrimaryButtonProps) {
+const PRESS_SPRING = { damping: 16, stiffness: 320 };
+
+export function PrimaryButton({
+  label,
+  loading,
+  icon,
+  variant = 'primary',
+  style,
+  disabled,
+  onPressIn,
+  onPressOut,
+  ...props
+}: PrimaryButtonProps) {
   const theme = useTheme();
+  const scale = useSharedValue(1);
   const isGhost = variant === 'ghost';
   const isNeutral = variant === 'neutral';
   const isAccent2 = variant === 'accent2';
-
-  const variantStyle = isGhost
-    ? [styles.ghost, { borderColor: theme.accent }]
-    : isNeutral
-      ? [styles.neutral, { backgroundColor: theme.backgroundElement, borderColor: theme.border }]
-      : isAccent2
-        ? [styles.solid, { backgroundColor: theme.accentSecondary, shadowColor: theme.accentSecondary }]
-        : [styles.solid, { backgroundColor: theme.accent, shadowColor: theme.accent }];
+  const isSolid = !isGhost && !isNeutral;
   const labelColor = isGhost ? theme.accent : isNeutral ? theme.text : '#050505';
+  const glowColor = isAccent2 ? theme.accentSecondary : theme.accent;
+
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+
+  const handlePressIn = (e: GestureResponderEvent) => {
+    scale.value = withSpring(0.97, PRESS_SPRING);
+    onPressIn?.(e);
+  };
+  const handlePressOut = (e: GestureResponderEvent) => {
+    scale.value = withSpring(1, PRESS_SPRING);
+    onPressOut?.(e);
+  };
+
+  const content = loading ? (
+    <ActivityIndicator color={labelColor} />
+  ) : (
+    <>
+      {icon && <Icon icon={icon} size={16} color={labelColor} />}
+      <ThemedText type="smallBold" style={{ color: labelColor }}>
+        {label}
+      </ThemedText>
+    </>
+  );
+
+  if (isSolid) {
+    return (
+      <Animated.View style={[animatedStyle, (disabled || loading) && styles.disabled]}>
+        <Pressable
+          disabled={disabled || loading}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          {...props}>
+          <LinearGradient
+            colors={[glowColor, `${glowColor}D9`]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 0, y: 1 }}
+            style={[styles.base, styles.solid, { shadowColor: glowColor }, style as object]}>
+            {content}
+          </LinearGradient>
+        </Pressable>
+      </Animated.View>
+    );
+  }
+
+  const staticVariantStyle = isGhost
+    ? [styles.ghost, { borderColor: theme.accent }]
+    : [styles.neutral, { backgroundColor: theme.backgroundElement, borderColor: theme.border }];
 
   return (
-    <Pressable
-      disabled={disabled || loading}
-      style={(state) => [
-        styles.base,
-        variantStyle,
-        (disabled || loading) && styles.disabled,
-        typeof style === 'function' ? style(state) : style,
-      ]}
-      {...props}>
-      {loading ? (
-        <ActivityIndicator color={labelColor} />
-      ) : (
-        <>
-          {icon && <Icon icon={icon} size={16} color={labelColor} />}
-          <ThemedText type="smallBold" style={{ color: labelColor }}>
-            {label}
-          </ThemedText>
-        </>
-      )}
-    </Pressable>
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        disabled={disabled || loading}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[styles.base, staticVariantStyle, (disabled || loading) && styles.disabled, style as object]}
+        {...props}>
+        {content}
+      </Pressable>
+    </Animated.View>
   );
 }
 
