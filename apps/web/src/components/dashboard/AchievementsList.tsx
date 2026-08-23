@@ -9,7 +9,7 @@ export function AchievementsList({ achievements }: { achievements: Achievement[]
       <div className="d-flex align-items-center justify-content-between mb-1">
         <h2 className="sank-eyebrow mb-0">Logros</h2>
         {achievements.length > 0 && (
-          <span className="fw-bold sank-tabular-nums" style={{ color: "var(--sanken-gold-light)" }}>
+          <span className="fw-bold sank-tabular-nums" style={{ color: "var(--sanken-orange-light)" }}>
             {unlockedCount}/{achievements.length}
           </span>
         )}
@@ -27,13 +27,13 @@ export function AchievementsList({ achievements }: { achievements: Achievement[]
               style={{
                 minWidth: 96,
                 padding: "0.75rem 0.5rem",
-                border: achievement.unlocked ? "1px solid rgba(201,162,39,0.3)" : "1px solid var(--bs-border-color)",
-                background: achievement.unlocked ? "var(--sanken-gold-dim)" : "transparent",
+                border: achievement.unlocked ? "1px solid rgba(255, 106, 0,0.3)" : "1px solid var(--bs-border-color)",
+                background: achievement.unlocked ? "var(--sanken-orange-dim)" : "transparent",
                 opacity: achievement.unlocked ? 1 : 0.5,
               }}
             >
               {achievement.unlocked ? (
-                <Trophy size={22} color="var(--sanken-gold)" />
+                <Trophy size={22} color="var(--sanken-orange)" />
               ) : (
                 <Lock size={22} className="text-body-secondary" />
               )}

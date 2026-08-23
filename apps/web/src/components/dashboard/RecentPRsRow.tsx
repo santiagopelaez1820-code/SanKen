@@ -22,14 +22,14 @@ export function RecentPRsRow({ records }: { records: PersonalRecordSummary[] }) 
       title="Récords recientes"
       itemWidth="152px"
       action={
-        <Link to="/progress" className="small fw-medium text-decoration-none" style={{ color: "var(--sanken-gold-light)" }}>
+        <Link to="/progress" className="small fw-medium text-decoration-none" style={{ color: "var(--sanken-orange-light)" }}>
           Ver todos
         </Link>
       }
     >
       {records.slice(0, 8).map((record) => (
         <SankCard key={record.id} className="p-3 h-100">
-          <Trophy size={16} color="var(--sanken-gold)" className="mb-2" />
+          <Trophy size={16} color="var(--sanken-orange)" className="mb-2" />
           <p className="small text-body-secondary text-truncate mb-1">{record.exercise_name}</p>
           <p className="fs-5 fw-bold sank-tabular-nums mb-0">{record.value} kg</p>
         </SankCard>

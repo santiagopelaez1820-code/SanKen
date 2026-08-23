@@ -96,7 +96,7 @@ export function RegisterPage() {
 
         <p className="text-center small text-body-secondary mb-0">
           ¿Ya tenés cuenta?{" "}
-          <Link to="/login" className="fw-medium" style={{ color: "var(--sanken-gold-light)" }}>
+          <Link to="/login" className="fw-medium" style={{ color: "var(--sanken-orange-light)" }}>
             Iniciá sesión
           </Link>
         </p>

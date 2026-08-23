@@ -38,7 +38,7 @@ export function TopBar() {
           {feedUnread > 0 && (
             <span
               className="position-absolute rounded-circle"
-              style={{ top: 6, right: 6, width: 7, height: 7, background: "var(--sanken-gold)" }}
+              style={{ top: 6, right: 6, width: 7, height: 7, background: "var(--sanken-orange)" }}
             />
           )}
         </Link>
@@ -49,8 +49,8 @@ export function TopBar() {
             width: 34,
             height: 34,
             borderRadius: "var(--bs-border-radius-sm)",
-            background: "var(--sanken-gold-dim)",
-            color: "var(--sanken-gold-light)",
+            background: "var(--sanken-orange-dim)",
+            color: "var(--sanken-orange-light)",
             fontSize: "0.8rem",
           }}
           aria-label="Perfil"

@@ -2,7 +2,7 @@
 // SanKen — punto de entrada del tema Bootstrap.
 // Sobrescribe variables de Bootstrap ANTES de importarlo (única forma soportada
 // de tematizar Sass de Bootstrap), luego añade una capa fina de utilidades
-// propias (gradientes de marca, glow del dorado, cards con profundidad) que
+// propias (gradientes de marca, glow del naranja, cards con profundidad) que
 // Bootstrap no expone por variables.
 // ---------------------------------------------------------------------------
 
@@ -18,9 +18,9 @@
   --sanken-gray: #{$sanken-gray};
   --sanken-gray-light: #{$sanken-gray-light};
   --sanken-white: #{$sanken-white};
-  --sanken-gold: #{$sanken-gold};
-  --sanken-gold-light: #{$sanken-gold-light};
-  --sanken-gold-dim: #{$sanken-gold-dim};
+  --sanken-orange: #{$sanken-orange};
+  --sanken-orange-light: #{$sanken-orange-light};
+  --sanken-orange-dim: #{$sanken-orange-dim};
 }
 
 html {
@@ -46,32 +46,32 @@ body {
   &:hover,
   &:focus-visible {
     transform: translateY(-2px);
-    border-color: rgba(201, 162, 39, 0.35);
+    border-color: rgba(255, 106, 0, 0.35);
     box-shadow:
       0 2px 4px rgba(0, 0, 0, 0.35),
       0 20px 36px -18px rgba(0, 0, 0, 0.65);
   }
 }
 
-// Botón primario: bloque dorado plano y sólido, esquina técnica — no un
-// gradiente suave de SaaS. La fuerza viene del contraste duro negro/dorado,
+// Botón primario: bloque naranja plano y sólido, esquina técnica — no un
+// gradiente suave de SaaS. La fuerza viene del contraste duro negro/naranja,
 // no de una simulación de "brillo".
 .btn-primary {
-  background: $sanken-gold;
-  border-color: $sanken-gold;
+  background: $sanken-orange;
+  border-color: $sanken-orange;
   color: $sanken-black;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
   &:hover,
   &:focus-visible {
-    background: $sanken-gold-light;
-    border-color: $sanken-gold-light;
+    background: $sanken-orange-light;
+    border-color: $sanken-orange-light;
     color: $sanken-black;
   }
 
   &:active {
-    background: darken($sanken-gold, 8%);
+    background: darken($sanken-orange, 8%);
   }
 }
 
@@ -93,14 +93,14 @@ body {
 }
 
 .btn-outline-primary {
-  color: $sanken-gold-light;
-  border-color: rgba(201, 162, 39, 0.5);
+  color: $sanken-orange-light;
+  border-color: rgba(255, 106, 0, 0.5);
 
   &:hover,
   &:focus-visible {
-    background: $sanken-gold-dim;
-    color: $sanken-gold-light;
-    border-color: $sanken-gold;
+    background: $sanken-orange-dim;
+    color: $sanken-orange-light;
+    border-color: $sanken-orange;
   }
 }
 
@@ -133,7 +133,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-// Navegación (Sidebar / Offcanvas) — indicador activo dorado discreto, sin
+// Navegación (Sidebar / Offcanvas) — indicador activo naranja discreto, sin
 // llenar el link entero de color.
 .sank-nav-link {
   color: $sanken-gray-light;
@@ -148,8 +148,8 @@ body {
 }
 
 .sank-nav-link-active {
-  color: $sanken-gold-light;
-  background: $sanken-gold-dim;
+  color: $sanken-orange-light;
+  background: $sanken-orange-dim;
   position: relative;
 
   &::before {
@@ -161,7 +161,7 @@ body {
     width: 3px;
     height: 1.1rem;
     border-radius: 0 2px 2px 0;
-    background: $sanken-gold;
+    background: $sanken-orange;
   }
 }
 
@@ -175,8 +175,8 @@ body {
   color: $sanken-gray-light;
 }
 
-.sank-eyebrow--gold {
-  color: $sanken-gold-light;
+.sank-eyebrow--orange {
+  color: $sanken-orange-light;
 }
 
 // Número hero — tipografía display, tabular, sin decoración. La escala es lo
@@ -189,10 +189,10 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-// Borde hairline dorado — detalle de marca en superficies hero, en vez de
+// Borde hairline naranja — detalle de marca en superficies hero, en vez de
 // depender solo de un fondo tintado.
 .sank-hairline {
-  border: 1px solid rgba(201, 162, 39, 0.25);
+  border: 1px solid rgba(255, 106, 0, 0.25);
 }
 
 // ---------------------------------------------------------------------------
@@ -225,12 +225,12 @@ body {
 
 .sank-rail-link-active {
   color: $sanken-black;
-  background: $sanken-gold;
+  background: $sanken-orange;
 
   &:hover,
   &:focus-visible {
     color: $sanken-black;
-    background: $sanken-gold-light;
+    background: $sanken-orange-light;
   }
 }
 
@@ -297,20 +297,20 @@ body {
 }
 
 .sank-bottom-nav-link-active {
-  color: $sanken-gold;
+  color: $sanken-orange;
 }
 
 .sank-bottom-nav-fab {
   width: 52px;
   height: 52px;
   border-radius: $border-radius;
-  background: $sanken-gold;
+  background: $sanken-orange;
   color: $sanken-black;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: -22px;
-  box-shadow: 0 6px 20px -4px rgba(201, 162, 39, 0.55);
+  box-shadow: 0 6px 20px -4px rgba(255, 106, 0, 0.55);
   border: 3px solid $sanken-black;
   flex-shrink: 0;
 }

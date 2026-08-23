@@ -3,7 +3,7 @@
 //
 // Identidad: premium + deportiva + tecnológica. Dark-first (única experiencia
 // hoy, sin toggle de light mode — igual que el estado anterior de la app).
-// El dorado es un acento, no un color de fondo: se reserva para CTAs
+// El naranja es un acento, no un color de fondo: se reserva para CTAs
 // primarios, progreso, logros y detalles de marca.
 // ---------------------------------------------------------------------------
 
@@ -15,9 +15,11 @@ $sanken-charcoal-2:   #262626; // borde / divisor sutil
 $sanken-gray:         #6B6B6B; // texto secundario
 $sanken-gray-light:   #9A9A9A; // texto terciario
 $sanken-white:        #FFFFFF;
-$sanken-gold:         #C9A227; // acento de marca
-$sanken-gold-light:   #E0BE55; // hover/gradiente del acento
-$sanken-gold-dim:     rgba(201, 162, 39, 0.16); // fondo tenue para badges/rings
+// Naranja exacto muestreado del isotipo (flecha S+X) — no un naranja genérico.
+$sanken-orange:         #FF6A00; // acento de marca
+$sanken-orange-light:   #FF8F1F; // hover/gradiente del acento (tono de la punta de flecha)
+$sanken-orange-deep:    #FF4B00; // active/pressed (tono de la base de flecha)
+$sanken-orange-dim:     rgba(255, 106, 0, 0.16); // fondo tenue para badges/rings
 
 $sanken-success:      #2FA84F;
 $sanken-warning:      #D9A441;
@@ -25,7 +27,7 @@ $sanken-danger:       #D9534F;
 $sanken-info:         #4C8DFF;
 
 // Bootstrap color system ------------------------------------------------------
-$primary:       $sanken-gold;
+$primary:       $sanken-orange;
 $secondary:     $sanken-charcoal;
 $success:       $sanken-success;
 $warning:       $sanken-warning;
@@ -34,7 +36,7 @@ $info:          $sanken-info;
 $light:         $sanken-white;
 $dark:          $sanken-black;
 
-$min-contrast-ratio: 1.6; // el dorado sobre negro no cumple 4.5:1 con texto blanco encima; se ajusta color-contrast manualmente donde aplica
+$min-contrast-ratio: 1.6; // el naranja sobre negro no cumple 4.5:1 con texto blanco encima; se ajusta color-contrast manualmente donde aplica
 
 $body-bg:        $sanken-black;
 $body-color:      $sanken-white;
@@ -98,7 +100,7 @@ $badge-padding-y: 0.4em;
 $badge-padding-x: 0.65em;
 
 $progress-bg: $sanken-charcoal;
-$progress-bar-bg: $sanken-gold;
+$progress-bar-bg: $sanken-orange;
 $progress-border-radius: $border-radius-sm;
 $progress-height: 0.375rem;
 
@@ -112,8 +114,8 @@ $dropdown-bg: $sanken-charcoal;
 $dropdown-border-color: $border-color;
 $dropdown-link-color: $sanken-white;
 $dropdown-link-hover-bg: rgba(255, 255, 255, 0.06);
-$dropdown-link-active-bg: $sanken-gold-dim;
-$dropdown-link-active-color: $sanken-gold-light;
+$dropdown-link-active-bg: $sanken-orange-dim;
+$dropdown-link-active-color: $sanken-orange-light;
 
 $nav-link-color: $sanken-gray-light;
 $nav-link-hover-color: $sanken-white;
@@ -127,15 +129,15 @@ $offcanvas-border-color: $border-color;
 $list-group-bg: transparent;
 $list-group-border-color: $border-color;
 $list-group-hover-bg: rgba(255, 255, 255, 0.04);
-$list-group-active-bg: $sanken-gold-dim;
-$list-group-active-border-color: $sanken-gold;
+$list-group-active-bg: $sanken-orange-dim;
+$list-group-active-border-color: $sanken-orange;
 $list-group-active-color: $sanken-white;
 
 $input-bg: $sanken-charcoal;
 $input-color: $sanken-white;
 $input-border-color: $border-color;
-$input-focus-border-color: $sanken-gold;
-$input-focus-box-shadow: 0 0 0 0.2rem rgba(201, 162, 39, 0.25);
+$input-focus-border-color: $sanken-orange;
+$input-focus-box-shadow: 0 0 0 0.2rem rgba(255, 106, 0, 0.25);
 $input-placeholder-color: $sanken-gray;
 
 $table-color: $sanken-white;
@@ -156,22 +158,22 @@ $toast-header-background-color: $sanken-charcoal;
 
 $accordion-bg: transparent;
 $accordion-border-color: $border-color;
-$accordion-button-active-bg: $sanken-gold-dim;
-$accordion-button-active-color: $sanken-gold-light;
+$accordion-button-active-bg: $sanken-orange-dim;
+$accordion-button-active-color: $sanken-orange-light;
 
 $pagination-bg: transparent;
 $pagination-border-color: $border-color;
 $pagination-color: $sanken-white;
 $pagination-hover-bg: rgba(255, 255, 255, 0.06);
-$pagination-active-bg: $sanken-gold;
-$pagination-active-border-color: $sanken-gold;
+$pagination-active-bg: $sanken-orange;
+$pagination-active-border-color: $sanken-orange;
 $pagination-active-color: $sanken-black;
 
 $spinner-width: 1.5rem;
 $spinner-height: 1.5rem;
 
-$link-color: $sanken-gold-light;
-$link-hover-color: $sanken-gold;
+$link-color: $sanken-orange-light;
+$link-hover-color: $sanken-orange;
 $link-decoration: none;
 
 $enable-negative-margins: true;

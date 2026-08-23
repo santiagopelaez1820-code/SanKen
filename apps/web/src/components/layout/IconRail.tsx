@@ -48,7 +48,7 @@ export function IconRail() {
                   {badgeCount > 0 && (
                     <span
                       className="position-absolute rounded-circle"
-                      style={{ top: 4, right: 4, width: 7, height: 7, background: active ? "var(--sanken-black)" : "var(--sanken-gold)" }}
+                      style={{ top: 4, right: 4, width: 7, height: 7, background: active ? "var(--sanken-black)" : "var(--sanken-orange)" }}
                     />
                   )}
                   <span className="sank-rail-tooltip">{item.label}</span>

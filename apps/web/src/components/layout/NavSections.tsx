@@ -49,7 +49,7 @@ export function NavSections({ user, badgeCounts, onNavigate }: NavSectionsProps)
                         minWidth: 18,
                         height: 18,
                         fontSize: "0.65rem",
-                        background: "var(--sanken-gold)",
+                        background: "var(--sanken-orange)",
                         color: "var(--sanken-black)",
                         padding: "0 5px",
                       }}

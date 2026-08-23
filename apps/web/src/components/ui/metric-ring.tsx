@@ -33,7 +33,7 @@ export function MetricRing({
         {glow && (
           <div
             className="position-absolute top-0 start-0 w-100 h-100 rounded-circle"
-            style={{ background: "var(--sanken-gold)", opacity: 0.25, filter: "blur(20px)" }}
+            style={{ background: "var(--sanken-orange)", opacity: 0.25, filter: "blur(20px)" }}
             aria-hidden
           />
         )}
@@ -51,7 +51,7 @@ export function MetricRing({
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke="var(--sanken-gold)"
+            stroke="var(--sanken-orange)"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
             strokeDasharray={circumference}

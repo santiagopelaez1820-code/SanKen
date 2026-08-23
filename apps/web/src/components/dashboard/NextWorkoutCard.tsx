@@ -63,13 +63,13 @@ export function NextWorkoutCard() {
       style={{
         background: `
           linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%),
-          radial-gradient(120% 140% at 100% 0%, rgba(201,162,39,0.22), transparent 55%),
+          radial-gradient(120% 140% at 100% 0%, rgba(255, 106, 0,0.22), transparent 55%),
           var(--sanken-black-2)`,
         boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 28px 60px -24px rgba(0,0,0,0.7)",
       }}
     >
       <div className="p-4 p-sm-5">
-        <p className="sank-eyebrow sank-eyebrow--gold mb-2">Entrenamiento de hoy</p>
+        <p className="sank-eyebrow sank-eyebrow--orange mb-2">Entrenamiento de hoy</p>
         <h2 className="display-4 sank-stat mb-0">{day.label}</h2>
 
         <div className="d-flex gap-4 gap-sm-5 mt-4 mb-4">

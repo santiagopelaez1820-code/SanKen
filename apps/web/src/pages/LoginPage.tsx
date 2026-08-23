@@ -83,7 +83,7 @@ export function LoginPage() {
 
         <p className="text-center small text-body-secondary mb-0">
           ¿No tenés cuenta?{" "}
-          <Link to="/register" className="fw-medium" style={{ color: "var(--sanken-gold-light)" }}>
+          <Link to="/register" className="fw-medium" style={{ color: "var(--sanken-orange-light)" }}>
             Registrate
           </Link>
         </p>

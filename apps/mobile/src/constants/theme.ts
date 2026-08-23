@@ -7,10 +7,10 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// Paleta de marca SANKEN: negro profundo + dorado. Un único acento de marca
-// (no dos hues distintos como antes) — accentSecondary es un tinte más claro
-// del mismo dorado, reservado para distinguir CTAs de entrenamiento/actividad
-// sin salirse de la familia de color. El dorado se usa con moderación: nunca
+// Paleta de marca SANKEN: negro profundo + naranja (muestreado del isotipo
+// S+flecha). Un único acento de marca — accentSecondary es un tinte más claro
+// del mismo naranja, reservado para distinguir CTAs de entrenamiento/actividad
+// sin salirse de la familia de color. El naranja se usa con moderación: nunca
 // como fondo extenso, solo CTAs, progreso, logros y detalles de marca.
 export const Colors = {
   light: {
@@ -19,8 +19,8 @@ export const Colors = {
     backgroundElement: '#F0F0F0',
     backgroundSelected: '#E5E5E5',
     textSecondary: '#6B6B6B',
-    accent: '#C9A227',
-    accentSecondary: '#B8860E',
+    accent: '#FF6A00',
+    accentSecondary: '#FF4B00',
     border: 'rgba(0, 0, 0, 0.10)',
     success: '#2FA84F',
     warning: '#D9A441',
@@ -32,8 +32,8 @@ export const Colors = {
     backgroundElement: '#121212',
     backgroundSelected: '#1C1C1C',
     textSecondary: '#9A9A9A',
-    accent: '#C9A227',
-    accentSecondary: '#E0BE55',
+    accent: '#FF6A00',
+    accentSecondary: '#FF8F1F',
     border: 'rgba(255, 255, 255, 0.10)',
     success: '#2FA84F',
     warning: '#D9A441',
