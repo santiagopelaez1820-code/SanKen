@@ -12,13 +12,13 @@ export function AppShell() {
   const location = useLocation()
 
   return (
-    <div className="flex min-h-svh bg-background text-foreground">
+    <div className="d-flex" style={{ minHeight: "100svh", background: "var(--sanken-black)" }}>
       <RouteProgressBar />
       <Sidebar />
       <MobileNavDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="d-flex flex-column flex-grow-1" style={{ minWidth: 0 }}>
         <TopBar onMenuClick={() => setDrawerOpen(true)} />
-        <main className="flex-1">
+        <main className="flex-grow-1">
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 6 }}

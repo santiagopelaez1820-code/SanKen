@@ -1,5 +1,6 @@
 import { Menu } from "lucide-react"
 import { Link } from "react-router-dom"
+import { Navbar } from "react-bootstrap"
 
 interface TopBarProps {
   onMenuClick: () => void
@@ -7,19 +8,25 @@ interface TopBarProps {
 
 export function TopBar({ onMenuClick }: TopBarProps) {
   return (
-    <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 lg:hidden">
-      <Link to="/dashboard" className="flex items-center gap-2">
-        <img src="/logo.png" alt="" className="h-7 w-7" />
-        <span className="font-heading text-base font-bold tracking-tight text-foreground">SANKEN</span>
+    <Navbar
+      className="d-lg-none border-bottom px-3 py-2"
+      style={{ background: "var(--sanken-black-2)", borderColor: "var(--bs-border-color)" }}
+    >
+      <Link to="/dashboard" className="navbar-brand d-flex align-items-center gap-2 text-white mb-0">
+        <img src="/logo.png" alt="" width={28} height={28} />
+        <span className="fw-bold" style={{ letterSpacing: "-0.01em" }}>
+          SANKEN
+        </span>
       </Link>
       <button
         type="button"
         onClick={onMenuClick}
         aria-label="Abrir menú"
-        className="flex size-9 items-center justify-center rounded-lg text-foreground hover:bg-muted"
+        className="btn btn-outline-secondary border-0 d-flex align-items-center justify-content-center p-0 ms-auto"
+        style={{ width: 36, height: 36 }}
       >
-        <Menu className="size-5" />
+        <Menu size={20} />
       </button>
-    </header>
+    </Navbar>
   )
 }

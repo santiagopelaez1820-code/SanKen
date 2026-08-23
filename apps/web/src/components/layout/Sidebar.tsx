@@ -1,10 +1,9 @@
-import { motion } from "framer-motion"
 import { LogOut, Settings } from "lucide-react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import { useAuthStore } from "@/lib/auth-store"
 import { useFeed } from "@/hooks/use-feed"
 import { useChatUnread } from "@/hooks/use-chat-unread"
-import { buildNavSections } from "@/components/layout/nav-config"
+import { NavSections } from "@/components/layout/NavSections"
 import { cn } from "@/lib/utils"
 
 export function Sidebar() {
@@ -15,11 +14,8 @@ export function Sidebar() {
   const { unreadCount: feedUnread } = useFeed()
   const chatUnread = useChatUnread()
 
-  const sections = buildNavSections(user)
   const badgeCounts = { feed: feedUnread, chat: chatUnread }
-
-  const isActive = (path: string) =>
-    location.pathname === path || (path !== "/dashboard" && location.pathname.startsWith(`${path}/`))
+  const isActive = (path: string) => location.pathname === path
 
   const handleLogout = () => {
     clearSession()
@@ -27,74 +23,44 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="hidden h-svh w-64 shrink-0 flex-col border-r border-border bg-card lg:flex">
-      <Link to="/dashboard" className="flex items-center gap-2.5 px-5 py-5">
-        <img src="/logo.png" alt="" className="h-8 w-8" />
-        <span className="font-heading text-lg font-bold tracking-tight text-foreground">SANKEN</span>
+    <aside
+      className="d-none d-lg-flex flex-column flex-shrink-0 vh-100 border-end"
+      style={{ width: 264, borderColor: "var(--bs-border-color)", background: "var(--sanken-black-2)", position: "sticky", top: 0 }}
+    >
+      <Link to="/dashboard" className="d-flex align-items-center gap-2 px-4 py-4 text-decoration-none">
+        <img src="/logo.png" alt="" width={32} height={32} />
+        <span className="fw-bold fs-5 text-white" style={{ letterSpacing: "-0.01em" }}>
+          SANKEN
+        </span>
       </Link>
 
-      <nav className="flex-1 overflow-y-auto px-3 pb-3">
-        {sections.map((section) => (
-          <div key={section.title} className="mb-4">
-            <p className="px-3 pb-1.5 text-[0.65rem] font-semibold tracking-widest text-muted-foreground uppercase">
-              {section.title}
-            </p>
-            <div className="flex flex-col gap-0.5">
-              {section.items.map((item) => {
-                const active = isActive(item.path)
-                const badgeCount = item.badge ? badgeCounts[item.badge] : 0
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={cn(
-                      "relative flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-primary/10 text-primary"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    )}
-                  >
-                    {active && (
-                      <motion.span
-                        layoutId="sidebar-active-indicator"
-                        className="absolute top-1/2 left-0 h-4 w-0.5 -translate-y-1/2 rounded-full bg-primary shadow-[0_0_6px_var(--primary)]"
-                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
-                      />
-                    )}
-                    <item.icon className="size-4 shrink-0" />
-                    <span className="flex-1 truncate">{item.label}</span>
-                    {badgeCount > 0 && (
-                      <span className="flex h-4.5 min-w-4.5 items-center justify-center rounded-full bg-primary px-1 text-[0.65rem] font-bold text-primary-foreground">
-                        {badgeCount > 9 ? "9+" : badgeCount}
-                      </span>
-                    )}
-                  </Link>
-                )
-              })}
-            </div>
-          </div>
-        ))}
+      <nav
+        className="flex-grow-1 overflow-y-auto px-3 pb-3"
+        style={{
+          minHeight: 0,
+          maskImage: "linear-gradient(to bottom, transparent, black 12px, black calc(100% - 12px), transparent)",
+        }}
+      >
+        <NavSections user={user} badgeCounts={badgeCounts} />
       </nav>
 
-      <div className="flex flex-col gap-0.5 border-t border-border px-3 py-3">
+      <div className="d-flex flex-column gap-1 border-top px-3 py-3" style={{ borderColor: "var(--bs-border-color)" }}>
         <Link
           to="/settings"
           className={cn(
-            "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-            isActive("/settings")
-              ? "bg-primary/10 text-primary"
-              : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            "d-flex align-items-center gap-2 rounded-3 px-3 py-2 fw-medium text-decoration-none",
+            isActive("/settings") ? "sank-nav-link-active" : "sank-nav-link"
           )}
         >
-          <Settings className="size-4 shrink-0" />
+          <Settings size={16} className="flex-shrink-0" />
           Configuración
         </Link>
         <button
           type="button"
           onClick={handleLogout}
-          className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="sank-nav-link d-flex align-items-center gap-2 rounded-3 px-3 py-2 fw-medium text-start border-0 bg-transparent"
         >
-          <LogOut className="size-4 shrink-0" />
+          <LogOut size={16} className="flex-shrink-0" />
           Cerrar sesión
         </button>
       </div>
