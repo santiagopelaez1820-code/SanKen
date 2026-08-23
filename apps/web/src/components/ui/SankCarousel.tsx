@@ -58,7 +58,7 @@ export function SankCarousel({
     <section className={className}>
       {(title || action) && (
         <div className="d-flex align-items-center justify-content-between mb-3">
-          {title && <h2 className="h6 fw-bold mb-0 text-uppercase text-body-secondary">{title}</h2>}
+          {title && <h2 className="sank-eyebrow mb-0">{title}</h2>}
           <div className="d-flex align-items-center gap-2">
             {action}
             <div className="d-none d-md-flex gap-1">

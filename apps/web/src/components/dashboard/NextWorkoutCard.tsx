@@ -33,11 +33,11 @@ export function NextWorkoutCard() {
     },
   })
 
-  if (isLoading) return <Skeleton style={{ height: 192, width: "100%" }} />
+  if (isLoading) return <Skeleton style={{ height: 280, width: "100%" }} />
 
   if (genericError) {
     return (
-      <div className="sank-surface rounded-4 p-4">
+      <div className="sank-surface rounded-2 p-4">
         <p className="small text-body-secondary mb-0">No se pudo cargar tu rutina.</p>
       </div>
     )
@@ -45,7 +45,7 @@ export function NextWorkoutCard() {
 
   if (hasNoRoutine) {
     return (
-      <div className="sank-surface rounded-4">
+      <div className="sank-surface sank-hairline rounded-2">
         <SankEmptyState
           icon={Dumbbell}
           title="Generando tu plan"
@@ -59,31 +59,38 @@ export function NextWorkoutCard() {
 
   return (
     <div
-      className="position-relative overflow-hidden rounded-4 p-4 p-sm-5"
+      className="position-relative overflow-hidden rounded-2 sank-hairline"
       style={{
-        background:
-          "radial-gradient(140% 180% at 100% 0%, rgba(201,162,39,0.18), transparent 55%), var(--sanken-black-2)",
-        border: "1px solid rgba(201,162,39,0.18)",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 20px 44px -18px rgba(0,0,0,0.65)",
+        background: `
+          linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%),
+          radial-gradient(120% 140% at 100% 0%, rgba(201,162,39,0.22), transparent 55%),
+          var(--sanken-black-2)`,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 28px 60px -24px rgba(0,0,0,0.7)",
       }}
     >
-      <p className="small fw-semibold text-uppercase mb-1" style={{ letterSpacing: "0.08em", color: "var(--sanken-gold-light)" }}>
-        Entrenamiento de hoy
-      </p>
-      <h2 className="display-6 fw-bold mb-1" style={{ letterSpacing: "-0.01em" }}>
-        {day.label}
-      </h2>
-      <p className="small fw-medium text-uppercase text-body-secondary mb-4" style={{ letterSpacing: "0.04em" }}>
-        {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
-      </p>
+      <div className="p-4 p-sm-5">
+        <p className="sank-eyebrow sank-eyebrow--gold mb-2">Entrenamiento de hoy</p>
+        <h2 className="display-4 sank-stat mb-0">{day.label}</h2>
 
-      <div className="d-flex flex-wrap align-items-center gap-3">
-        <SankButton variant="primary" onClick={() => navigate("/workout/precheck")} iconEnd={<ArrowRight size={16} />}>
-          Comenzar entrenamiento
-        </SankButton>
-        <SankButton variant="ghost" onClick={() => setConfirmingSkip(true)}>
-          Saltar entrenamiento
-        </SankButton>
+        <div className="d-flex gap-4 gap-sm-5 mt-4 mb-4">
+          <div>
+            <div className="display-6 sank-stat">{estimateWorkoutMinutes(day)}</div>
+            <p className="sank-eyebrow mb-0">Minutos</p>
+          </div>
+          <div>
+            <div className="display-6 sank-stat">{day.exercises.length}</div>
+            <p className="sank-eyebrow mb-0">Ejercicios</p>
+          </div>
+        </div>
+
+        <div className="d-flex flex-wrap align-items-center gap-3">
+          <SankButton variant="primary" size="lg" onClick={() => navigate("/workout/precheck")} iconEnd={<ArrowRight size={18} />}>
+            Comenzar
+          </SankButton>
+          <SankButton variant="ghost" onClick={() => setConfirmingSkip(true)}>
+            Saltar
+          </SankButton>
+        </div>
       </div>
 
       <ConfirmDialog

@@ -8,6 +8,7 @@ import { NextWorkoutCard } from "@/components/dashboard/NextWorkoutCard"
 import { PerformanceHero } from "@/components/dashboard/PerformanceHero"
 import { RecentPRsRow } from "@/components/dashboard/RecentPRsRow"
 import { AchievementsList } from "@/components/dashboard/AchievementsList"
+import { DashboardChallengesRow } from "@/components/dashboard/DashboardChallengesRow"
 import { fadeInUp, staggerContainer } from "@/lib/motion"
 
 function greeting() {
@@ -31,15 +32,12 @@ export function DashboardPage() {
   })
 
   return (
-    <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1040 }}>
+    <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1080 }}>
       <motion.div className="d-flex flex-column gap-4" variants={staggerContainer()} initial="hidden" animate="show">
         <motion.div variants={fadeInUp}>
-          <p className="small fw-semibold text-uppercase mb-1" style={{ letterSpacing: "0.08em", color: "var(--sanken-gold-light)" }}>
-            {greeting()}
-          </p>
-          <h1 className="display-5 fw-bold mb-0" style={{ letterSpacing: "-0.01em" }}>
-            {user?.name?.split(" ")[0] ?? "Atleta"}
-          </h1>
+          <p className="sank-eyebrow sank-eyebrow--gold mb-1">{greeting()}</p>
+          <h1 className="display-3 sank-stat mb-2">{user?.name?.split(" ")[0] ?? "Atleta"}</h1>
+          <p className="text-body-secondary mb-0">¿Listo para entrenar?</p>
         </motion.div>
 
         <motion.div variants={fadeInUp}>
@@ -48,6 +46,10 @@ export function DashboardPage() {
 
         <motion.div variants={fadeInUp}>
           <PerformanceHero stats={stats} gamification={gamification} isLoading={isLoading || isLoadingGamification} />
+        </motion.div>
+
+        <motion.div variants={fadeInUp}>
+          <DashboardChallengesRow />
         </motion.div>
 
         <motion.div variants={fadeInUp}>

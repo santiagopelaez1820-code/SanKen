@@ -85,3 +85,12 @@ export function buildNavSections(user: User | null): NavSection[] {
 
   return sections
 }
+
+/** Etiqueta de la sección actual para el TopBar — cae a "SanKen" si la ruta no matchea ningún item de nav. */
+export function findNavLabel(sections: NavSection[], pathname: string): string {
+  for (const section of sections) {
+    const match = section.items.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`))
+    if (match) return match.label
+  }
+  return "SanKen"
+}

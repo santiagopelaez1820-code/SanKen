@@ -5,9 +5,9 @@ export function AchievementsList({ achievements }: { achievements: Achievement[]
   const unlockedCount = achievements.filter((a) => a.unlocked).length
 
   return (
-    <div className="sank-surface rounded-4 p-4">
+    <div className="sank-surface rounded-2 p-4">
       <div className="d-flex align-items-center justify-content-between mb-1">
-        <h2 className="h6 fw-bold mb-0">Logros</h2>
+        <h2 className="sank-eyebrow mb-0">Logros</h2>
         {achievements.length > 0 && (
           <span className="fw-bold sank-tabular-nums" style={{ color: "var(--sanken-gold-light)" }}>
             {unlockedCount}/{achievements.length}

@@ -8,9 +8,9 @@ import { SankCarousel } from "@/components/ui/SankCarousel"
 export function RecentPRsRow({ records }: { records: PersonalRecordSummary[] }) {
   if (records.length === 0) {
     return (
-      <div className="sank-surface rounded-4 p-4">
+      <div className="sank-surface rounded-2 p-4">
         <div className="d-flex align-items-center justify-content-between mb-2">
-          <h2 className="h6 fw-bold mb-0">Récords recientes</h2>
+          <h2 className="sank-eyebrow mb-0">Récords recientes</h2>
         </div>
         <SankEmptyState icon={Trophy} title="Sin récords todavía" description="Registra tu primer PR desde PR y Rankings." />
       </div>

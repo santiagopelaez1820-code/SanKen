@@ -53,24 +53,31 @@ body {
   }
 }
 
-// Botón primario con gradiente dorado sutil — el dorado plano de Bootstrap
-// se siente flat; un degradado de 6-8% de luminosidad le da peso "premium"
-// sin salir de la paleta de marca.
+// Botón primario: bloque dorado plano y sólido, esquina técnica — no un
+// gradiente suave de SaaS. La fuerza viene del contraste duro negro/dorado,
+// no de una simulación de "brillo".
 .btn-primary {
-  background: linear-gradient(135deg, $sanken-gold-light, $sanken-gold 65%);
+  background: $sanken-gold;
   border-color: $sanken-gold;
   color: $sanken-black;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 
   &:hover,
   &:focus-visible {
-    background: linear-gradient(135deg, $sanken-gold-light, darken($sanken-gold, 6%) 65%);
+    background: $sanken-gold-light;
     border-color: $sanken-gold-light;
     color: $sanken-black;
   }
 
   &:active {
-    background: $sanken-gold;
+    background: darken($sanken-gold, 8%);
   }
+}
+
+.btn-lg, .btn-sm {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 // SankButton variant="ghost" — texto siempre legible sobre cualquier fondo
@@ -155,6 +162,164 @@ body {
     height: 1.1rem;
     border-radius: 0 2px 2px 0;
     background: $sanken-gold;
+  }
+}
+
+// Etiqueta "eyebrow" — mayúsculas, tracking amplio, uso constante para
+// encabezar secciones en vez de simplemente subir el tamaño del título.
+.sank-eyebrow {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: $sanken-gray-light;
+}
+
+.sank-eyebrow--gold {
+  color: $sanken-gold-light;
+}
+
+// Número hero — tipografía display, tabular, sin decoración. La escala es lo
+// que le da peso, no el color.
+.sank-stat {
+  font-family: $headings-font-family;
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+// Borde hairline dorado — detalle de marca en superficies hero, en vez de
+// depender solo de un fondo tintado.
+.sank-hairline {
+  border: 1px solid rgba(201, 162, 39, 0.25);
+}
+
+// ---------------------------------------------------------------------------
+// Rail de navegación (desktop) — carril angosto de iconos, no un sidebar
+// ancho con etiquetas. La etiqueta aparece como tooltip al hover.
+// ---------------------------------------------------------------------------
+.sank-rail {
+  width: 76px;
+  background: $sanken-black-2;
+  border-right: 1px solid $border-color;
+}
+
+.sank-rail-link {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $sanken-gray-light;
+  border-radius: $border-radius-sm;
+  position: relative;
+  transition: color 150ms ease-out, background-color 150ms ease-out;
+
+  &:hover,
+  &:focus-visible {
+    color: $sanken-white;
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+.sank-rail-link-active {
+  color: $sanken-black;
+  background: $sanken-gold;
+
+  &:hover,
+  &:focus-visible {
+    color: $sanken-black;
+    background: $sanken-gold-light;
+  }
+}
+
+.sank-rail-tooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: $sanken-charcoal;
+  color: $sanken-white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 0.35rem 0.65rem;
+  border-radius: $border-radius-sm;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease-out;
+  z-index: 40;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.sank-rail-link:hover .sank-rail-tooltip {
+  opacity: 1;
+}
+
+// ---------------------------------------------------------------------------
+// Bottom navigation (mobile) — reemplaza el patrón hamburguesa+drawer como
+// navegación primaria. FAB central para la acción de mayor frecuencia.
+// ---------------------------------------------------------------------------
+.sank-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1030;
+  display: flex;
+  align-items: stretch;
+  height: 64px;
+  background: rgba(11, 11, 11, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid $border-color;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sank-bottom-nav-link {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: $sanken-gray;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: color 150ms ease-out;
+
+  &:hover {
+    color: $sanken-gray-light;
+  }
+}
+
+.sank-bottom-nav-link-active {
+  color: $sanken-gold;
+}
+
+.sank-bottom-nav-fab {
+  width: 52px;
+  height: 52px;
+  border-radius: $border-radius;
+  background: $sanken-gold;
+  color: $sanken-black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -22px;
+  box-shadow: 0 6px 20px -4px rgba(201, 162, 39, 0.55);
+  border: 3px solid $sanken-black;
+  flex-shrink: 0;
+}
+
+.sank-content-safe-bottom {
+  padding-bottom: 76px;
+
+  @include media-breakpoint-up(lg) {
+    padding-bottom: 0;
   }
 }
 
