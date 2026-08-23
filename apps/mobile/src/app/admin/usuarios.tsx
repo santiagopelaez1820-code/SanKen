@@ -268,5 +268,5 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.two },
   userCard: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
   actionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginTop: Spacing.one },
-  warn: { color: '#C9564A' },
+  warn: { color: '#D9534F' },
 });

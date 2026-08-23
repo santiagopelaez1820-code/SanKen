@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   headerRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two },
-  removeLink: { color: '#C9564A' },
+  removeLink: { color: '#D9534F' },
   exerciseRow: {
     borderRadius: Spacing.three,
     padding: Spacing.two,

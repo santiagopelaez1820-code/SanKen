@@ -303,5 +303,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.one,
     borderRadius: Spacing.two,
   },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
 });

@@ -7,34 +7,37 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// Paleta de marca SANKEN — "Power Ascend": negro + lima + cyan.
-// accent (lima) = progreso/positivo/CTAs; accentSecondary (cyan) = entrenamiento/actividad.
+// Paleta de marca SANKEN: negro profundo + dorado. Un único acento de marca
+// (no dos hues distintos como antes) — accentSecondary es un tinte más claro
+// del mismo dorado, reservado para distinguir CTAs de entrenamiento/actividad
+// sin salirse de la familia de color. El dorado se usa con moderación: nunca
+// como fondo extenso, solo CTAs, progreso, logros y detalles de marca.
 export const Colors = {
   light: {
-    text: '#0A0A0A',
+    text: '#0B0B0B',
     background: '#FAFAFA',
     backgroundElement: '#F0F0F0',
     backgroundSelected: '#E5E5E5',
     textSecondary: '#6B6B6B',
-    accent: '#CFFF36',
-    accentSecondary: '#0EA5C4',
+    accent: '#C9A227',
+    accentSecondary: '#B8860E',
     border: 'rgba(0, 0, 0, 0.10)',
-    success: '#16A34A',
-    warning: '#D97706',
-    error: '#DC2626',
+    success: '#2FA84F',
+    warning: '#D9A441',
+    error: '#D9534F',
   },
   dark: {
-    text: '#FAFAFA',
-    background: '#0A0A0A',
-    backgroundElement: '#161616',
-    backgroundSelected: '#242424',
-    textSecondary: '#A3A3A3',
-    accent: '#CFFF36',
-    accentSecondary: '#20EAFF',
+    text: '#FFFFFF',
+    background: '#0B0B0B',
+    backgroundElement: '#121212',
+    backgroundSelected: '#1C1C1C',
+    textSecondary: '#9A9A9A',
+    accent: '#C9A227',
+    accentSecondary: '#E0BE55',
     border: 'rgba(255, 255, 255, 0.10)',
-    success: '#22C55E',
-    warning: '#F59E0B',
-    error: '#EF4444',
+    success: '#2FA84F',
+    warning: '#D9A441',
+    error: '#D9534F',
   },
 } as const;
 

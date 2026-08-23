@@ -185,5 +185,5 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     marginBottom: Spacing.two,
   },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
 });

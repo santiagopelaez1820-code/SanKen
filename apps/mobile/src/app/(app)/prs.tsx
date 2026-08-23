@@ -628,7 +628,7 @@ const styles = StyleSheet.create({
   rankNumber: { width: 16, textAlign: 'center' },
   submissionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.one },
   videoLink: { alignSelf: 'flex-end' },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
   rankingCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,

@@ -306,5 +306,5 @@ const styles = StyleSheet.create({
   optionList: { gap: Spacing.two },
   sectionSpacer: { marginTop: Spacing.two },
   fieldsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
 });

@@ -305,7 +305,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   pageTitle: { fontSize: 28, lineHeight: 34, marginBottom: Spacing.one },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
   tileGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

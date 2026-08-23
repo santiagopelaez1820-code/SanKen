@@ -130,5 +130,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   spinner: { marginVertical: Spacing.three },
-  error: { color: '#C9564A', textAlign: 'center', paddingHorizontal: Spacing.four, paddingBottom: Spacing.two },
+  error: { color: '#D9534F', textAlign: 'center', paddingHorizontal: Spacing.four, paddingBottom: Spacing.two },
 });

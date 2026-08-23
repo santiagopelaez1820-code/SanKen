@@ -104,5 +104,5 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   cardInfo: { flex: 1, gap: 2 },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
 });

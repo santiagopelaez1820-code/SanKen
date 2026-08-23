@@ -93,5 +93,5 @@ const styles = StyleSheet.create({
   rowInfo: { flex: 1, gap: 2, marginRight: Spacing.two },
   badge: { minWidth: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
   badgeLabel: { color: '#050505' },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
 });

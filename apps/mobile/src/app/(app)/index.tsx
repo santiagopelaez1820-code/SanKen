@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   centerText: { textAlign: 'center' },
-  error: { color: '#C9564A', textAlign: 'center' },
+  error: { color: '#D9534F', textAlign: 'center' },
   card: {
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.three,

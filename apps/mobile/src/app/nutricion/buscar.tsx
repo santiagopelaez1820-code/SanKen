@@ -113,5 +113,5 @@ const styles = StyleSheet.create({
   searchButton: { borderRadius: Spacing.two, paddingHorizontal: Spacing.three, justifyContent: 'center' },
   disabled: { opacity: 0.5 },
   resultRow: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.half },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
 });

@@ -166,5 +166,5 @@ const styles = StyleSheet.create({
   card: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
   input: { borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.two },
   actionsRow: { flexDirection: 'row', gap: Spacing.two },
-  error: { color: '#C9564A' },
+  error: { color: '#D9534F' },
 });
