@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
+import { Container } from "react-bootstrap"
 import type { DashboardStats, GamificationSummary } from "@sanken/core"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
@@ -8,6 +9,13 @@ import { PerformanceHero } from "@/components/dashboard/PerformanceHero"
 import { RecentPRsRow } from "@/components/dashboard/RecentPRsRow"
 import { AchievementsList } from "@/components/dashboard/AchievementsList"
 import { fadeInUp, staggerContainer } from "@/lib/motion"
+
+function greeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return "Buenos días"
+  if (hour < 19) return "Buenas tardes"
+  return "Buenas noches"
+}
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user)
@@ -23,26 +31,23 @@ export function DashboardPage() {
   })
 
   return (
-    <main className="px-6 py-8">
-      <motion.div
-        className="mx-auto flex max-w-5xl flex-col gap-6"
-        variants={staggerContainer()}
-        initial="hidden"
-        animate="show"
-      >
+    <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1040 }}>
+      <motion.div className="d-flex flex-column gap-4" variants={staggerContainer()} initial="hidden" animate="show">
         <motion.div variants={fadeInUp}>
-          <p className="text-xs font-semibold tracking-widest text-primary uppercase">Dashboard</p>
-          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">
-            Hola, {user?.name?.split(" ")[0] ?? "atleta"}
+          <p className="small fw-semibold text-uppercase mb-1" style={{ letterSpacing: "0.08em", color: "var(--sanken-gold-light)" }}>
+            {greeting()}
+          </p>
+          <h1 className="display-5 fw-bold mb-0" style={{ letterSpacing: "-0.01em" }}>
+            {user?.name?.split(" ")[0] ?? "Atleta"}
           </h1>
         </motion.div>
 
         <motion.div variants={fadeInUp}>
-          <PerformanceHero stats={stats} gamification={gamification} isLoading={isLoading || isLoadingGamification} />
+          <NextWorkoutCard />
         </motion.div>
 
         <motion.div variants={fadeInUp}>
-          <NextWorkoutCard />
+          <PerformanceHero stats={stats} gamification={gamification} isLoading={isLoading || isLoadingGamification} />
         </motion.div>
 
         <motion.div variants={fadeInUp}>
@@ -58,6 +63,6 @@ export function DashboardPage() {
           />
         </motion.div>
       </motion.div>
-    </main>
+    </Container>
   )
 }

@@ -30,7 +30,6 @@ export function RestTimerRing({ restingUntil, totalSeconds, onSkip }: RestTimerR
       <MetricRing
         value={remaining}
         max={totalSeconds}
-        color="secondary-accent"
         size={140}
         strokeWidth={10}
         label="Descanso"

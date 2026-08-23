@@ -73,6 +73,18 @@ body {
   }
 }
 
+// SankButton variant="ghost" — texto siempre legible sobre cualquier fondo
+// oscuro (outline-secondary de Bootstrap usa $secondary, casi invisible).
+.sank-ghost-btn {
+  color: $sanken-gray-light !important;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    color: $sanken-white !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+  }
+}
+
 .btn-outline-primary {
   color: $sanken-gold-light;
   border-color: rgba(201, 162, 39, 0.5);

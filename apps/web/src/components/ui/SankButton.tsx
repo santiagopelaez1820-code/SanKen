@@ -56,7 +56,7 @@ export function SankButton({
       disabled={disabled || loading}
       className={cn(
         "d-inline-flex align-items-center gap-2 fw-semibold",
-        variant === "ghost" && "border-0 bg-transparent",
+        variant === "ghost" && "border-0 bg-transparent text-body-secondary sank-ghost-btn",
         SIZE_CLASS[size],
         className
       )}

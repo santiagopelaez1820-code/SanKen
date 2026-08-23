@@ -4,10 +4,10 @@ import { useNavigate } from "react-router-dom"
 import { ArrowRight, Dumbbell } from "lucide-react"
 import { ApiError, estimateWorkoutMinutes, findNextDay, type Routine, type WorkoutSession } from "@sanken/core"
 import { api } from "@/lib/api"
-import { Button } from "@/components/ui/button"
+import { SankButton } from "@/components/ui/SankButton"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { EmptyState } from "@/components/ui/empty-state"
+import { SankEmptyState } from "@/components/ui/SankEmptyState"
 
 export function NextWorkoutCard() {
   const navigate = useNavigate()
@@ -33,20 +33,20 @@ export function NextWorkoutCard() {
     },
   })
 
-  if (isLoading) return <Skeleton className="h-48 w-full" />
+  if (isLoading) return <Skeleton style={{ height: 192, width: "100%" }} />
 
   if (genericError) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <p className="text-sm text-muted-foreground">No se pudo cargar tu rutina.</p>
+      <div className="sank-surface rounded-4 p-4">
+        <p className="small text-body-secondary mb-0">No se pudo cargar tu rutina.</p>
       </div>
     )
   }
 
   if (hasNoRoutine) {
     return (
-      <div className="rounded-2xl border border-border bg-card">
-        <EmptyState
+      <div className="sank-surface rounded-4">
+        <SankEmptyState
           icon={Dumbbell}
           title="Generando tu plan"
           description="Todavía estamos armando tu rutina. Vuelve en un momento."
@@ -58,26 +58,32 @@ export function NextWorkoutCard() {
   if (!day) return null
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-secondary-accent/20 bg-gradient-to-br from-secondary-accent/12 via-card to-primary/8 p-6 shadow-[0_1px_2px_rgba(0,0,0,0.3),0_10px_32px_-10px_rgba(0,0,0,0.6),0_0_0_1px_rgba(32,234,255,0.06)] transition-shadow duration-200 hover:shadow-[0_1px_2px_rgba(0,0,0,0.3),0_14px_40px_-8px_rgba(0,0,0,0.65),0_0_28px_-6px_var(--secondary-accent)]">
-      <div className="pointer-events-none absolute -top-16 -right-16 size-48 rounded-full bg-secondary-accent/15 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -left-10 size-48 rounded-full bg-primary/10 blur-3xl" />
+    <div
+      className="position-relative overflow-hidden rounded-4 p-4 p-sm-5"
+      style={{
+        background:
+          "radial-gradient(140% 180% at 100% 0%, rgba(201,162,39,0.18), transparent 55%), var(--sanken-black-2)",
+        border: "1px solid rgba(201,162,39,0.18)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 20px 44px -18px rgba(0,0,0,0.65)",
+      }}
+    >
+      <p className="small fw-semibold text-uppercase mb-1" style={{ letterSpacing: "0.08em", color: "var(--sanken-gold-light)" }}>
+        Entrenamiento de hoy
+      </p>
+      <h2 className="display-6 fw-bold mb-1" style={{ letterSpacing: "-0.01em" }}>
+        {day.label}
+      </h2>
+      <p className="small fw-medium text-uppercase text-body-secondary mb-4" style={{ letterSpacing: "0.04em" }}>
+        {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
+      </p>
 
-      <div className="relative">
-        <p className="text-xs font-semibold tracking-widest text-secondary-accent uppercase">Entrenamiento de hoy</p>
-        <h2 className="mt-1 font-heading text-3xl font-bold tracking-tight text-foreground">{day.label}</h2>
-        <p className="mt-1 text-sm font-medium tracking-wide text-muted-foreground uppercase">
-          {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
-        </p>
-
-        <div className="mt-5 flex flex-wrap items-center gap-3">
-          <Button variant="emphasis" onClick={() => navigate("/workout/precheck")}>
-            Comenzar entrenamiento
-            <ArrowRight className="size-4" />
-          </Button>
-          <Button variant="ghost" onClick={() => setConfirmingSkip(true)}>
-            Saltar entrenamiento
-          </Button>
-        </div>
+      <div className="d-flex flex-wrap align-items-center gap-3">
+        <SankButton variant="primary" onClick={() => navigate("/workout/precheck")} iconEnd={<ArrowRight size={16} />}>
+          Comenzar entrenamiento
+        </SankButton>
+        <SankButton variant="ghost" onClick={() => setConfirmingSkip(true)}>
+          Saltar entrenamiento
+        </SankButton>
       </div>
 
       <ConfirmDialog

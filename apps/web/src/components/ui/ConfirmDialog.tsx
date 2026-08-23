@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import { Modal } from "react-bootstrap"
+import { SankButton } from "@/components/ui/SankButton"
 
 interface ConfirmDialogProps {
   open: boolean
@@ -13,7 +13,7 @@ interface ConfirmDialogProps {
   onCancel: () => void
 }
 
-/** Modal de confirmación genérico — mismo shell visual que LevelUpModal, reutilizable para cualquier acción que necesite un "¿Seguro?" antes de ejecutarse. */
+/** Modal de confirmación genérico, reutilizable para cualquier acción que necesite un "¿Seguro?" antes de ejecutarse. */
 export function ConfirmDialog({
   open,
   title,
@@ -26,35 +26,19 @@ export function ConfirmDialog({
   onCancel,
 }: ConfirmDialogProps) {
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onCancel}
-        >
-          <motion.div
-            className="w-full max-w-sm rounded-2xl border border-border bg-card p-6 text-center"
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <p className="font-heading text-lg font-medium text-foreground">{title}</p>
-            {description && <p className="mt-2 text-sm text-muted-foreground">{description}</p>}
-            <div className="mt-5 flex justify-center gap-3">
-              <Button variant="outline" onClick={onCancel} disabled={isLoading}>
-                {cancelLabel}
-              </Button>
-              <Button variant={destructive ? "destructive" : "default"} onClick={onConfirm} disabled={isLoading}>
-                {isLoading ? "…" : confirmLabel}
-              </Button>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <Modal show={open} onHide={onCancel} centered size="sm">
+      <Modal.Body className="text-center py-4">
+        <p className="fw-medium fs-5 mb-1">{title}</p>
+        {description && <p className="small text-body-secondary mb-0">{description}</p>}
+        <div className="d-flex justify-content-center gap-2 mt-4">
+          <SankButton variant="outline" onClick={onCancel} disabled={isLoading}>
+            {cancelLabel}
+          </SankButton>
+          <SankButton variant={destructive ? "destructive" : "primary"} onClick={onConfirm} disabled={isLoading} loading={isLoading}>
+            {confirmLabel}
+          </SankButton>
+        </div>
+      </Modal.Body>
+    </Modal>
   )
 }

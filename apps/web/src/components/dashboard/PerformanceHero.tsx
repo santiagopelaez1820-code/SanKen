@@ -1,6 +1,5 @@
 import { Flame } from "lucide-react"
 import type { DashboardStats, GamificationSummary } from "@sanken/core"
-import { GlassCard } from "@/components/ui/glass-card"
 import { MetricRing } from "@/components/ui/metric-ring"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -12,55 +11,64 @@ interface PerformanceHeroProps {
 
 export function PerformanceHero({ stats, gamification, isLoading }: PerformanceHeroProps) {
   if (isLoading) {
-    return <Skeleton className="h-44 w-full" />
+    return <Skeleton style={{ height: 176, width: "100%" }} />
   }
 
   const progressPct = Math.round((gamification?.progress_pct ?? 0) * 100)
 
   return (
-    <GlassCard tone="lime" className="flex flex-col gap-5 sm:flex-row sm:items-center">
+    <div
+      className="sank-surface rounded-4 p-4 p-sm-5 d-flex flex-column flex-sm-row align-items-sm-center gap-4"
+      style={{
+        background:
+          "radial-gradient(120% 160% at 0% 0%, rgba(201,162,39,0.12), transparent 55%), var(--sanken-black-2)",
+        border: "1px solid rgba(201,162,39,0.12)",
+      }}
+    >
       <MetricRing
         value={gamification?.progress_pct ?? 0}
         max={1}
         size={104}
         strokeWidth={9}
-        color="primary"
         glow
         label="Nivel"
         valueLabel={`${gamification?.level ?? 1}`}
       />
 
-      <div className="flex-1">
-        <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Progreso de nivel</p>
-        <p className="font-heading text-4xl font-extrabold tabular-nums text-foreground">{progressPct}%</p>
-        <p className="text-sm text-muted-foreground">
+      <div className="flex-grow-1">
+        <p className="small fw-semibold text-uppercase text-body-secondary mb-1" style={{ letterSpacing: "0.08em" }}>
+          Progreso de nivel
+        </p>
+        <p className="display-6 fw-bold sank-tabular-nums mb-0">{progressPct}%</p>
+        <p className="small text-body-secondary mb-0">
           {gamification?.total_xp ?? 0} / {gamification?.xp_for_next_level ?? 100} XP
         </p>
       </div>
 
-      <div className="flex gap-5 sm:gap-7">
-        <div className="flex items-center gap-2">
-          <div className="flex size-10 items-center justify-center rounded-full bg-primary/15">
-            <Flame className="size-5 text-primary" />
+      <div className="d-flex gap-4 gap-sm-5">
+        <div className="d-flex align-items-center gap-2">
+          <div
+            className="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+            style={{ width: 40, height: 40, background: "var(--sanken-gold-dim)" }}
+          >
+            <Flame size={20} color="var(--sanken-gold)" />
           </div>
           <div>
-            <p className="font-heading text-2xl font-extrabold tabular-nums text-foreground">
-              {stats?.current_streak_days ?? 0}
-            </p>
-            <p className="text-xs text-muted-foreground">días de racha</p>
+            <p className="fs-4 fw-bold sank-tabular-nums mb-0 lh-1">{stats?.current_streak_days ?? 0}</p>
+            <p className="small text-body-secondary mb-0">días de racha</p>
           </div>
         </div>
-        <div className="flex flex-col justify-center">
-          <p className="font-heading text-2xl font-extrabold tabular-nums text-foreground">{stats?.total_hours ?? 0} h</p>
-          <p className="text-xs text-muted-foreground">entrenadas</p>
+        <div className="d-flex flex-column justify-content-center">
+          <p className="fs-4 fw-bold sank-tabular-nums mb-0 lh-1">{stats?.total_hours ?? 0} h</p>
+          <p className="small text-body-secondary mb-0">entrenadas</p>
         </div>
-        <div className="flex flex-col justify-center">
-          <p className="font-heading text-2xl font-extrabold tabular-nums text-foreground">
+        <div className="d-flex flex-column justify-content-center">
+          <p className="fs-4 fw-bold sank-tabular-nums mb-0 lh-1">
             {((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t
           </p>
-          <p className="text-xs text-muted-foreground">movidas</p>
+          <p className="small text-body-secondary mb-0">movidas</p>
         </div>
       </div>
-    </GlassCard>
+    </div>
   )
 }
