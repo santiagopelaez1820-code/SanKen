@@ -29,6 +29,13 @@ jobs:
         # si se hoistea a la raíz del monorepo. @sanken/core se consume vía `file:`.
         run: npm install
 
+      - name: Install @sanken/core dependencies
+        # packages/core no es parte del workspace raíz de npm (ver arriba), así
+        # que sus propias dependencias (pusher-js, laravel-echo) nunca se instalan
+        # solas -- sin este paso, tsc no puede resolver los tipos de esos paquetes
+        # al type-checkear código que importa @sanken/core.
+        run: npm install --prefix ../../packages/core
+
       - name: Type-check
         run: npx tsc --noEmit
 

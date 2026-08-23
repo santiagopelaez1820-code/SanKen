@@ -77,7 +77,7 @@ export function OnboardingPage() {
     setAnswers((prev) => ({ ...prev, [key]: value }))
   }
 
-  const toggleGoal = (value: string) => {
+  const toggleGoal = (value: FitnessGoal) => {
     const current = answers.goals ?? []
     const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value]
     setAnswer("goals", next)

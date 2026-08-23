@@ -3,6 +3,7 @@
 namespace Tests\Feature\Routine;
 
 use App\Models\PersonalRecord;
+use App\Models\Routine;
 use App\Models\User;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
@@ -67,7 +68,7 @@ class ExerciseSwapTest extends TestCase
         $this->assertSame($original, $back['exercise']['name']);
 
         // No se creo una rutina nueva.
-        $this->assertSame(1, \App\Models\Routine::query()->where('user_id', $user->id)->count());
+        $this->assertSame(1, Routine::query()->where('user_id', $user->id)->count());
     }
 
     public function test_swapping_an_exercise_without_an_alternative_fails_clearly(): void

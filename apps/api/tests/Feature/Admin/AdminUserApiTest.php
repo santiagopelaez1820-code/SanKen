@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\City;
 use App\Models\Country;
 use App\Models\Routine;
+use App\Models\State;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -153,8 +154,8 @@ class AdminUserApiTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'super_admin']);
         $country = Country::factory()->create();
-        $antioquia = \App\Models\State::factory()->create(['country_id' => $country->id, 'name' => 'Antioquia']);
-        $cundinamarca = \App\Models\State::factory()->create(['country_id' => $country->id, 'name' => 'Cundinamarca']);
+        $antioquia = State::factory()->create(['country_id' => $country->id, 'name' => 'Antioquia']);
+        $cundinamarca = State::factory()->create(['country_id' => $country->id, 'name' => 'Cundinamarca']);
         $medellin = City::factory()->create(['country_id' => $country->id, 'state_id' => $antioquia->id]);
         $bogota = City::factory()->create(['country_id' => $country->id, 'state_id' => $cundinamarca->id]);
 

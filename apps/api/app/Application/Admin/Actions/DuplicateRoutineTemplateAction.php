@@ -13,7 +13,7 @@ class DuplicateRoutineTemplateAction
 
         return DB::transaction(function () use ($source) {
             $copy = RoutineTemplate::query()->create([
-                'name' => trim(($source->name ?: "{$source->frequency_days} días") . ' (copia)'),
+                'name' => trim(($source->name ?: "{$source->frequency_days} días").' (copia)'),
                 'sex' => $source->sex,
                 'frequency_days' => $source->frequency_days,
                 'split_type' => $source->split_type,

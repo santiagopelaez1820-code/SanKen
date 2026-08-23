@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\City;
 use App\Models\Country;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -79,7 +78,7 @@ class CountrySeeder extends Seeder
             'CA' => ['Canadá', ['Toronto', 'Montreal', 'Vancouver', 'Calgary', 'Ottawa', 'Edmonton', 'Quebec', 'Winnipeg', 'Halifax']],
             'QA' => ['Catar', ['Doha']],
             'KZ' => ['Kazajistán', ['Almaty', 'Astaná', 'Shymkent']],
-            'TD' => ['Chad', ["Yamena"]],
+            'TD' => ['Chad', ['Yamena']],
             'CL' => ['Chile', ['Santiago', 'Valparaíso', 'Concepción', 'La Serena', 'Antofagasta', 'Temuco', 'Viña del Mar']],
             'CN' => ['China', ['Pekín', 'Shanghái', 'Cantón', 'Shenzhen', 'Chengdú', 'Wuhan', 'Xi\'an', 'Hangzhou', 'Nankín', 'Tianjín']],
             'CY' => ['Chipre', ['Nicosia', 'Limasol']],
@@ -90,7 +89,7 @@ class CountrySeeder extends Seeder
             'CD' => ['República Democrática del Congo', ['Kinsasa', 'Lubumbashi', 'Mbuji-Mayi']],
             'KP' => ['Corea del Norte', ['Pionyang']],
             'KR' => ['Corea del Sur', ['Seúl', 'Busan', 'Incheon', 'Daegu', 'Daejeon']],
-            'CI' => ["Costa de Marfil", ['Abiyán', 'Yamusukro', 'Bouaké']],
+            'CI' => ['Costa de Marfil', ['Abiyán', 'Yamusukro', 'Bouaké']],
             'CR' => ['Costa Rica', ['San José', 'Alajuela', 'Cartago', 'Limón']],
             'HR' => ['Croacia', ['Zagreb', 'Split', 'Rijeka', 'Dubrovnik']],
             'CU' => ['Cuba', ['La Habana', 'Santiago de Cuba', 'Camagüey']],
@@ -229,7 +228,7 @@ class CountrySeeder extends Seeder
             'VU' => ['Vanuatu', ['Port Vila']],
             'VE' => ['Venezuela', ['Caracas', 'Maracaibo', 'Valencia', 'Barquisimeto', 'Maracay']],
             'VN' => ['Vietnam', ['Hanói', 'Ciudad Ho Chi Minh', 'Da Nang']],
-            'YE' => ['Yemen', ["Saná", 'Adén']],
+            'YE' => ['Yemen', ['Saná', 'Adén']],
             'DJ' => ['Yibuti', ['Yibuti']],
             'ZM' => ['Zambia', ['Lusaka', 'Ndola']],
             'ZW' => ['Zimbabue', ['Harare', 'Bulawayo']],

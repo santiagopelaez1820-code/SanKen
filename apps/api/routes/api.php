@@ -3,10 +3,10 @@
 use App\Http\Controllers\Api\V1\Admin\AdminAuditLogController;
 use App\Http\Controllers\Api\V1\Admin\AdminChallengeTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminExerciseController;
-use App\Http\Controllers\Api\V1\Admin\AdminRoutineTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminNewsController;
 use App\Http\Controllers\Api\V1\Admin\AdminPrSubmissionController;
 use App\Http\Controllers\Api\V1\Admin\AdminReportController;
+use App\Http\Controllers\Api\V1\Admin\AdminRoutineTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminStatsController;
 use App\Http\Controllers\Api\V1\Admin\AdminUserController;
 use App\Http\Controllers\Api\V1\Admin\AdminUserRoutineController;

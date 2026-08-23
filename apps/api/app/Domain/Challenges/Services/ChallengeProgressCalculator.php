@@ -2,8 +2,8 @@
 
 namespace App\Domain\Challenges\Services;
 
-use App\Models\WorkoutSet;
 use App\Models\WorkoutSession;
+use App\Models\WorkoutSet;
 use Carbon\CarbonInterface;
 use InvalidArgumentException;
 
