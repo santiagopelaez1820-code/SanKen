@@ -1,0 +1,13 @@
+import type { ReactNode } from "react"
+import { Navigate } from "react-router-dom"
+import { useAuthStore } from "@/lib/auth-store"
+
+export function RequireAdmin({ children }: { children: ReactNode }) {
+  const role = useAuthStore((state) => state.user?.role)
+
+  if (role !== "super_admin") {
+    return <Navigate to="/dashboard" replace />
+  }
+
+  return children
+}

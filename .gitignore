@@ -1,0 +1,55 @@
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+dist/
+build/
+.expo/
+.expo-shared/
+*.log
+npm-debug.log*
+
+# PHP / Laravel (apps/api)
+apps/api/vendor/
+apps/api/node_modules/
+apps/api/.env
+apps/api/.env.backup
+apps/api/.phpunit.result.cache
+apps/api/storage/*.key
+apps/api/storage/framework/cache/*
+apps/api/storage/framework/sessions/*
+apps/api/storage/framework/views/*
+apps/api/storage/logs/*
+!apps/api/storage/framework/cache/.gitignore
+!apps/api/storage/framework/sessions/.gitignore
+!apps/api/storage/framework/views/.gitignore
+!apps/api/storage/logs/.gitignore
+apps/api/public/hot
+apps/api/public/storage
+apps/api/bootstrap/cache/*.php
+apps/api/.phpactor.json
+
+# Web (apps/web)
+apps/web/dist/
+apps/web/.env
+apps/web/.env.local
+
+# Mobile (apps/mobile)
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/web-build/
+apps/mobile/.env
+apps/mobile/*.jks
+apps/mobile/*.p8
+apps/mobile/*.p12
+apps/mobile/*.key
+apps/mobile/*.mobileprovision
+
+# IDE
+.vscode/
+.idea/

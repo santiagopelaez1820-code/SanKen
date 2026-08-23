@@ -1,0 +1,39 @@
+name: sanken
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: sanken-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: sanken
+      MYSQL_USER: sanken
+      MYSQL_PASSWORD: sanken
+      MYSQL_ROOT_PASSWORD: sanken_root
+    ports:
+      - "3306:3306"
+    volumes:
+      - sanken_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psanken_root"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: sanken-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - sanken_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  sanken_mysql_data:
+  sanken_redis_data:

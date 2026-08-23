@@ -1,0 +1,13 @@
+{
+  "name": "sanken",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "packages/core"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:mobile": "npm --prefix apps/mobile run start",
+    "build:web": "npm run build --workspace=apps/web"
+  }
+}

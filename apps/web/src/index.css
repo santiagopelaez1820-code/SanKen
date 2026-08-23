@@ -1,0 +1,186 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-warning: var(--warning);
+    --color-success: var(--success);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-accent-foreground: var(--secondary-accent-foreground);
+    --color-secondary-accent: var(--secondary-accent);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+    --radius-sm: calc(var(--radius) * 0.6);
+    --radius-md: calc(var(--radius) * 0.8);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) * 1.4);
+    --radius-2xl: calc(var(--radius) * 1.8);
+    --radius-3xl: calc(var(--radius) * 2.2);
+    --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/*
+ * SANKEN brand tokens — "Power Ascend": negro + lima + cyan.
+ * Dos acentos con propósito: lima (--primary) = progreso/positivo/CTAs,
+ * cyan (--secondary-accent) = entrenamiento/actividad. Dark mode es la
+ * experiencia por defecto; light mode invierte los mismos tokens.
+ */
+:root {
+    --background: #FAFAFA;
+    --foreground: #0A0A0A;
+    --card: #FFFFFF;
+    --card-foreground: #0A0A0A;
+    --popover: #FFFFFF;
+    --popover-foreground: #0A0A0A;
+    --primary: #CFFF36;
+    --primary-foreground: #0A0A0A;
+    --secondary: #F0F0F0;
+    --secondary-foreground: #0A0A0A;
+    --secondary-accent: #0EA5C4;
+    --secondary-accent-foreground: #FFFFFF;
+    --muted: #F0F0F0;
+    --muted-foreground: #6B6B6B;
+    --accent: rgba(207, 255, 54, 0.16);
+    --accent-foreground: #4D6600;
+    --success: #16A34A;
+    --warning: #D97706;
+    --destructive: #DC2626;
+    --border: rgba(0, 0, 0, 0.10);
+    --input: rgba(0, 0, 0, 0.14);
+    --ring: #CFFF36;
+    --chart-1: #CFFF36;
+    --chart-2: #0EA5C4;
+    --chart-3: #0A0A0A;
+    --chart-4: #0B6E86;
+    --chart-5: #16A34A;
+    --radius: 0.625rem;
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #0A0A0A;
+    --sidebar-primary: #CFFF36;
+    --sidebar-primary-foreground: #0A0A0A;
+    --sidebar-accent: #F0F0F0;
+    --sidebar-accent-foreground: #0A0A0A;
+    --sidebar-border: rgba(0, 0, 0, 0.10);
+    --sidebar-ring: #CFFF36;
+}
+
+.dark {
+    --background: #050505;
+    --foreground: #FAFAFA;
+    --card: #101010;
+    --card-foreground: #FAFAFA;
+    --popover: #101010;
+    --popover-foreground: #FAFAFA;
+    --primary: #CFFF36;
+    --primary-foreground: #050505;
+    --secondary: #101010;
+    --secondary-foreground: #FAFAFA;
+    --secondary-accent: #20EAFF;
+    --secondary-accent-foreground: #050505;
+    --muted: #101010;
+    --muted-foreground: #A3A3A3;
+    --accent: rgba(207, 255, 54, 0.16);
+    --accent-foreground: #DFFF6E;
+    --success: #22C55E;
+    --warning: #F59E0B;
+    --destructive: #EF4444;
+    --border: rgba(255, 255, 255, 0.10);
+    --input: rgba(255, 255, 255, 0.14);
+    --ring: #CFFF36;
+    --chart-1: #CFFF36;
+    --chart-2: #20EAFF;
+    --chart-3: #FAFAFA;
+    --chart-4: #0EA5C4;
+    --chart-5: #22C55E;
+    --sidebar: #101010;
+    --sidebar-foreground: #FAFAFA;
+    --sidebar-primary: #CFFF36;
+    --sidebar-primary-foreground: #050505;
+    --sidebar-accent: #101010;
+    --sidebar-accent-foreground: #FAFAFA;
+    --sidebar-border: rgba(255, 255, 255, 0.08);
+    --sidebar-ring: #CFFF36;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+    }
+  body {
+    @apply bg-background text-foreground;
+    }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+    }
+  html {
+    @apply font-sans;
+    }
+  /*
+   * Tarjetas más "premium": las ~36 pantallas que usan bg-card (el
+   * contenedor estándar de la app) pasan de borde-plano-de-1px a una sombra
+   * real de una sola vez, sin tocar cada archivo — parte del pedido de
+   * rediseño "más premium, sombras sutiles".
+   */
+  .bg-card {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -12px rgba(0, 0, 0, 0.45);
+    }
+}
+
+@layer utilities {
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  /*
+   * Skeleton loaders: animate-pulse (ya en la clase) da la respiración de
+   * opacidad; esto suma un barrido de brillo real encima, mismo criterio
+   * que apps premium (Linear/Notion) usan para "esto está cargando de
+   * verdad" en vez de un bloque gris estático.
+   */
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .skeleton-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+    animation: shimmer 1.8s infinite;
+  }
+}
