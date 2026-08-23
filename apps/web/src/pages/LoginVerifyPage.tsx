@@ -2,11 +2,13 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { Form, Alert } from "react-bootstrap"
 import { useNavigate } from "react-router-dom"
 import { ApiError, type AuthPayload } from "@sanken/core"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
-import { Button } from "@/components/ui/button"
+import { SankButton } from "@/components/ui/SankButton"
+import { AuthLayout } from "@/components/layout/AuthLayout"
 
 const verifySchema = z.object({
   code: z.string().min(1, "Ingresa el código"),
@@ -58,37 +60,33 @@ export function LoginVerifyPage() {
   if (!pendingChallenge) return null
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background px-6 text-foreground">
-      <img src="/logo-full.png" alt="SANKEN" className="h-auto w-64" />
-
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-border bg-card p-6"
-      >
-        <div className="space-y-1.5">
-          <label htmlFor="code" className="text-sm font-medium">
-            Código de verificación
-          </label>
-          <p className="text-xs text-muted-foreground">
+    <AuthLayout>
+      <Form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column gap-3" noValidate>
+        <Form.Group controlId="code">
+          <Form.Label className="small fw-medium">Código de verificación</Form.Label>
+          <Form.Text className="d-block mb-2 text-body-secondary">
             Ingresa el código de tu app autenticadora, o un código de recuperación.
-          </p>
-          <input
-            id="code"
+          </Form.Text>
+          <Form.Control
             type="text"
             autoComplete="one-time-code"
             autoFocus
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            isInvalid={!!errors.code}
             {...register("code")}
           />
-          {errors.code && <p className="text-xs text-destructive">{errors.code.message}</p>}
-        </div>
+          <Form.Control.Feedback type="invalid">{errors.code?.message}</Form.Control.Feedback>
+        </Form.Group>
 
-        {serverError && <p className="text-sm text-destructive">{serverError}</p>}
+        {serverError && (
+          <Alert variant="danger" className="py-2 small mb-0">
+            {serverError}
+          </Alert>
+        )}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <SankButton type="submit" disabled={isSubmitting} loading={isSubmitting} className="w-100 justify-content-center">
           {isSubmitting ? "Verificando…" : "Verificar"}
-        </Button>
-      </form>
-    </main>
+        </SankButton>
+      </Form>
+    </AuthLayout>
   )
 }
