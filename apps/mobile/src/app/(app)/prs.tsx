@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     marginBottom: Spacing.three,
   },
-  field: { gap: Spacing.one },
+  field: { gap: Spacing.one, backgroundColor: 'transparent' },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     backgroundColor: 'transparent',
   },
-  formRowField: { flex: 1 },
+  formRowField: { flex: 1, backgroundColor: 'transparent' },
   confirmationBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -626,7 +626,13 @@ const styles = StyleSheet.create({
   },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   rankNumber: { width: 16, textAlign: 'center' },
-  submissionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.one },
+  submissionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.one,
+    backgroundColor: 'transparent',
+  },
   videoLink: { alignSelf: 'flex-end' },
   error: { color: '#FF4D5E' },
   rankingCard: {
@@ -635,7 +641,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     marginTop: Spacing.three,
   },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, backgroundColor: 'transparent' },
   chip: {
     borderWidth: 1,
     borderRadius: Spacing.three,

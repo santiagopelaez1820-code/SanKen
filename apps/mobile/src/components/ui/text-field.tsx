@@ -1,7 +1,6 @@
-import { StyleSheet, TextInput, type TextInputProps, useColorScheme } from 'react-native';
+import { StyleSheet, TextInput, type TextInputProps, useColorScheme, View } from 'react-native';
 
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { Colors, Spacing } from '@/constants/theme';
 
 interface TextFieldProps extends TextInputProps {
@@ -13,7 +12,7 @@ export function TextField({ label, style, ...props }: TextFieldProps) {
   const colors = Colors[scheme === 'unspecified' ? 'dark' : (scheme ?? 'dark')];
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <ThemedText type="small" themeColor="textSecondary">
         {label}
       </ThemedText>
@@ -26,7 +25,7 @@ export function TextField({ label, style, ...props }: TextFieldProps) {
         ]}
         {...props}
       />
-    </ThemedView>
+    </View>
   );
 }
 
