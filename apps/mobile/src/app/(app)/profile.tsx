@@ -1,14 +1,16 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { LogOut, Settings } from 'lucide-react-native';
+import { Camera, LogOut, Settings } from 'lucide-react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { AchievementsRow } from '@/components/dashboard/achievements-row';
 import { RecentPRsRow } from '@/components/dashboard/recent-prs-row';
+import { AvatarEditSheet } from '@/components/profile/avatar-edit-sheet';
+import { Avatar } from '@/components/ui/avatar';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Icon } from '@/components/ui/icon';
@@ -38,13 +40,13 @@ export default function ProfileScreen() {
   const logout = useAuthStore((s) => s.logout);
   const { stats, isLoadingStats, loadStats } = useDashboardStore();
   const { summary, isLoading: isLoadingGamification, loadSummary } = useGamificationStore();
+  const [avatarSheetVisible, setAvatarSheetVisible] = useState(false);
 
   useEffect(() => {
     loadStats();
     loadSummary();
   }, [loadStats, loadSummary]);
 
-  const initial = user?.name?.trim()?.[0]?.toUpperCase() ?? '?';
   const progressPct = Math.round((summary?.progress_pct ?? 0) * 100);
   const isLoading = isLoadingStats || isLoadingGamification;
 
@@ -57,7 +59,11 @@ export default function ProfileScreen() {
               PERFIL DE ATLETA
             </ThemedText>
 
-            <View style={styles.avatarBlock}>
+            <Pressable
+              onPress={() => setAvatarSheetVisible(true)}
+              style={styles.avatarBlock}
+              accessibilityRole="button"
+              accessibilityLabel="Cambiar foto de perfil">
               {isLoading ? (
                 <Skeleton height={96} width={96} borderRadius={48} />
               ) : (
@@ -69,16 +75,15 @@ export default function ProfileScreen() {
                   color="accent"
                   label=""
                   valueLabel=""
-                  centerContent={
-                    <ThemedView type="backgroundSelected" style={styles.avatar}>
-                      <ThemedText type="title" style={styles.avatarInitial}>
-                        {initial}
-                      </ThemedText>
-                    </ThemedView>
-                  }
+                  centerContent={<Avatar name={user?.name} avatarUrl={user?.avatar_url} size={76} />}
                 />
               )}
-            </View>
+              {!isLoading && (
+                <ThemedView style={[styles.cameraBadge, { backgroundColor: theme.accent, borderColor: theme.background }]}>
+                  <Icon icon={Camera} size={14} color="#050505" />
+                </ThemedView>
+              )}
+            </Pressable>
 
             <ThemedText type="title" style={styles.name}>
               {user?.name ?? 'Atleta'}
@@ -130,6 +135,12 @@ export default function ProfileScreen() {
           </Animated.View>
         </ScrollView>
       </SafeAreaView>
+
+      <AvatarEditSheet
+        visible={avatarSheetVisible}
+        onClose={() => setAvatarSheetVisible(false)}
+        hasAvatar={!!user?.avatar_url}
+      />
     </ThemedView>
   );
 }
@@ -158,15 +169,16 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
     marginBottom: Spacing.one,
   },
-  avatar: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+  cameraBadge: {
+    position: 'absolute',
+    right: 0,
+    bottom: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  avatarInitial: {
-    fontSize: 30,
   },
   name: {
     fontSize: 24,

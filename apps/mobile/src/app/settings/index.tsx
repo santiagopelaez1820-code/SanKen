@@ -3,11 +3,12 @@ import { router } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
-import { Eye, MapPin, ShieldCheck, UserCircle2 } from 'lucide-react-native';
+import { Eye, MapPin, ShieldCheck } from 'lucide-react-native';
 import type { OnboardingState, User } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Avatar } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { OptionCard } from '@/components/ui/option-card';
@@ -126,9 +127,7 @@ export default function SettingsScreen() {
           </ThemedText>
 
           <ThemedView type="backgroundElement" style={[styles.card, styles.identityCard]}>
-            <ThemedView style={[styles.avatarCircle, { backgroundColor: theme.backgroundSelected }]}>
-              <Icon icon={UserCircle2} size={28} color={theme.textSecondary} />
-            </ThemedView>
+            <Avatar name={user?.name} avatarUrl={user?.avatar_url} size={48} />
             <ThemedView style={styles.identityInfo}>
               <ThemedText type="smallBold">{user?.name ?? '…'}</ThemedText>
               <ThemedText type="small" themeColor="textSecondary">
@@ -337,13 +336,12 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   identityCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
-  avatarCircle: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   identityInfo: { gap: 2, backgroundColor: 'transparent' },
   cardHeading: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: 'transparent' },
-  enrollBox: { gap: Spacing.two, marginTop: Spacing.two },
-  locationRow: { gap: Spacing.two, marginTop: Spacing.two },
-  locationActions: { gap: Spacing.two, marginTop: Spacing.two },
-  recoveryBox: { gap: Spacing.one, marginTop: Spacing.two },
+  enrollBox: { gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
+  locationRow: { gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
+  locationActions: { gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
+  recoveryBox: { gap: Spacing.one, marginTop: Spacing.two, backgroundColor: 'transparent' },
   recoveryCode: { textAlign: 'center' },
   qr: { alignSelf: 'center' },
   center: { textAlign: 'center' },

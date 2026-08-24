@@ -69,6 +69,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
             Route::get('/me', [AuthController::class, 'me'])->name('me');
+            Route::post('/me/avatar', [AuthController::class, 'updateAvatar'])
+                ->middleware('throttle:writes')
+                ->name('me.avatar.store');
+            Route::delete('/me/avatar', [AuthController::class, 'deleteAvatar'])
+                ->middleware('throttle:writes')
+                ->name('me.avatar.destroy');
             Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
                 ->middleware('throttle:3,5')
                 ->name('email.resend');

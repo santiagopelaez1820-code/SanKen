@@ -8,11 +8,13 @@ use App\Domain\User\Contracts\UserRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\UpdateAvatarRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\Validation\ValidationException;
 
@@ -68,6 +70,70 @@ class AuthController extends Controller
         return response()->json([
             'data' => new UserResource($request->user()),
         ]);
+    }
+
+    /**
+     * El usuario sube su propia foto — nunca un ID ajeno, $request->user()
+     * es siempre el dueño del token actual. Reemplazo seguro: sube y
+     * confirma que el nuevo archivo quedó guardado ANTES de borrar el
+     * anterior — así un upload fallido a mitad de camino nunca deja al
+     * usuario sin avatar (mismo patrón que AdminExerciseController::uploadVideo).
+     */
+    public function updateAvatar(UpdateAvatarRequest $request): JsonResponse
+    {
+        $user = $request->user();
+        $previousPath = $this->publicPathFromUrl($user->avatar_url);
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+
+        abort_unless(Storage::disk('public')->exists($path), 500, 'No se pudo guardar la foto.');
+
+        // Ruta relativa, no Storage::disk('public')->url(): ver el mismo
+        // comentario en AdminExerciseController::uploadVideo — cada cliente
+        // resuelve esto contra su propio baseUrl vía ApiClient::mediaUrl().
+        $user->update(['avatar_url' => '/storage/'.$path]);
+
+        if ($previousPath && Storage::disk('public')->exists($previousPath)) {
+            Storage::disk('public')->delete($previousPath);
+        }
+
+        return response()->json(['data' => new UserResource($user->fresh())]);
+    }
+
+    /**
+     * Borra el archivo y limpia avatar_url — el usuario sigue existiendo y
+     * vuelve a mostrar la inicial de su nombre (lo maneja el mobile).
+     */
+    public function deleteAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $previousPath = $this->publicPathFromUrl($user->avatar_url);
+
+        $user->update(['avatar_url' => null]);
+
+        if ($previousPath && Storage::disk('public')->exists($previousPath)) {
+            Storage::disk('public')->delete($previousPath);
+        }
+
+        return response()->json(['data' => new UserResource($user->fresh())]);
+    }
+
+    /**
+     * avatar_url guarda la ruta relativa ("/storage/avatars/x.jpg"), así que
+     * para volver a encontrar el archivo en disco alcanza con recortar el
+     * marcador. Si viniera de algo que esta app no subió (sin '/storage/'),
+     * devuelve null a propósito: nunca se intenta borrar un archivo ajeno.
+     */
+    private function publicPathFromUrl(?string $url): ?string
+    {
+        if (! $url) {
+            return null;
+        }
+
+        $marker = '/storage/';
+        $position = strpos($url, $marker);
+
+        return $position === false ? null : substr($url, $position + strlen($marker));
     }
 
     public function forgotPassword(Request $request, UserRepositoryInterface $users): JsonResponse

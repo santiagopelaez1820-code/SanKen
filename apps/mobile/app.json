@@ -47,6 +47,13 @@
           "barcodeScannerEnabled": true
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "SanKen usa tus fotos para que elijas una foto de perfil.",
+          "cameraPermission": false
+        }
+      ],
       "expo-video"
     ],
     "experiments": {

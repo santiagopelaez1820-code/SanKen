@@ -14,6 +14,7 @@ const clientUser: User = {
   id: 2,
   name: 'Cliente',
   email: 'cliente@example.com',
+  avatar_url: null,
   role: 'user',
   two_factor_enabled: false,
   is_public_profile: false,

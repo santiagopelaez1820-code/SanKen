@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'name',
         'email',
         'phone',
+        'avatar_url',
         'password',
         'role',
         'is_public_profile',

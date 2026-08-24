@@ -192,10 +192,10 @@ export default function AdminRutinasScreen() {
               Sexo
             </ThemedText>
             <ThemedView style={styles.optionRow}>
-              <ThemedView style={{ flex: 1 }}>
+              <ThemedView style={{ flex: 1, backgroundColor: 'transparent' }}>
                 <OptionCard label="Hombre" selected={form.sex === 'male'} onPress={() => setForm({ ...form, sex: 'male' })} />
               </ThemedView>
-              <ThemedView style={{ flex: 1 }}>
+              <ThemedView style={{ flex: 1, backgroundColor: 'transparent' }}>
                 <OptionCard
                   label="Mujer"
                   selected={form.sex === 'female'}
@@ -324,10 +324,10 @@ const styles = StyleSheet.create({
   },
   pageTitle: { fontSize: 28, lineHeight: 34 },
   card: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.two },
-  optionRow: { flexDirection: 'row', gap: Spacing.two },
-  optionList: { gap: Spacing.two },
-  actionsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two },
+  optionRow: { flexDirection: 'row', gap: Spacing.two, backgroundColor: 'transparent' },
+  optionList: { gap: Spacing.two, backgroundColor: 'transparent' },
+  actionsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
   templateCard: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
-  templateActionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  templateActionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, backgroundColor: 'transparent' },
   error: { color: '#FF4D5E' },
 });

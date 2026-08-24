@@ -103,6 +103,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: Spacing.two,
   },
-  cardInfo: { flex: 1, gap: 2 },
+  cardInfo: { flex: 1, gap: 2, backgroundColor: 'transparent' },
   error: { color: '#FF4D5E' },
 });

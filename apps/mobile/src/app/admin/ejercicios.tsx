@@ -265,6 +265,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   exerciseInfo: { flex: 1 },
-  videoRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two },
+  videoRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   error: { color: '#FF4D5E' },
 });

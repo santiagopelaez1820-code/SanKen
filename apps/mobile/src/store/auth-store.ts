@@ -1,3 +1,4 @@
+import { Platform } from 'react-native';
 import { create } from 'zustand';
 import type { AuthPayload, LoginPayload, RegisterPayload, TwoFactorChallengeResponse, User } from '@sanken/core';
 import { ApiError, isTwoFactorChallenge } from '@sanken/core';
@@ -9,6 +10,12 @@ interface PendingChallenge {
   challengeToken: string;
 }
 
+interface AvatarPickerAsset {
+  uri: string;
+  name: string;
+  mimeType: string | null;
+}
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -18,6 +25,9 @@ interface AuthState {
   error: string | null;
   pendingChallenge: PendingChallenge | null;
 
+  isUploadingAvatar: boolean;
+  avatarError: string | null;
+
   hydrate: () => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
@@ -25,6 +35,8 @@ interface AuthState {
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
   setOnboardingCompleted: () => void;
+  updateAvatar: (asset: AvatarPickerAsset) => Promise<void>;
+  deleteAvatar: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -43,6 +55,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isSubmitting: false,
   error: null,
   pendingChallenge: null,
+
+  isUploadingAvatar: false,
+  avatarError: null,
 
   hydrate: async () => {
     const token = await tokenStorage.get();
@@ -129,6 +144,51 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setOnboardingCompleted: () => {
     const { user } = get();
     if (user) set({ user: { ...user, onboarding_completed: true } });
+  },
+
+  /**
+   * Si el upload falla, `user` nunca se toca — la foto anterior queda como
+   * estaba. Solo se reemplaza en `set()` cuando el backend confirma que la
+   * nueva quedó guardada.
+   */
+  updateAvatar: async (asset) => {
+    set({ isUploadingAvatar: true, avatarError: null });
+    const formData = new FormData();
+
+    // El shape { uri, name, type } es la API de fetch de React Native para
+    // adjuntar un archivo por su ruta local (funciona con file:// / content://
+    // en Android e iOS). En web, expo-image-picker devuelve un blob:/data:
+    // URI en vez de una ruta de archivo — fetch web no sabe adjuntar eso
+    // directamente, hay que resolverlo primero a un Blob real.
+    if (Platform.OS === 'web') {
+      const blob = await fetch(asset.uri).then((r) => r.blob());
+      formData.append('avatar', blob, asset.name);
+    } else {
+      formData.append('avatar', {
+        uri: asset.uri,
+        name: asset.name,
+        type: asset.mimeType ?? 'image/jpeg',
+      } as unknown as Blob);
+    }
+
+    try {
+      const user = await api.post<User>('/auth/me/avatar', formData);
+      set({ user, isUploadingAvatar: false });
+    } catch (err) {
+      set({ isUploadingAvatar: false, avatarError: readErrorMessage(err) });
+      throw err;
+    }
+  },
+
+  deleteAvatar: async () => {
+    set({ isUploadingAvatar: true, avatarError: null });
+    try {
+      const user = await api.delete<User>('/auth/me/avatar');
+      set({ user, isUploadingAvatar: false });
+    } catch (err) {
+      set({ isUploadingAvatar: false, avatarError: readErrorMessage(err) });
+      throw err;
+    }
   },
 
   clearError: () => set({ error: null }),
