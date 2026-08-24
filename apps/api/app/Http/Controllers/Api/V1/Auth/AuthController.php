@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Application\Auth\Actions\AuthenticateUserAction;
 use App\Application\Auth\Actions\RegisterUserAction;
+use App\Application\Auth\Actions\SocialLoginAction;
 use App\Domain\User\Contracts\UserRepositoryInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\SocialLoginRequest;
 use App\Http\Requests\UpdateAvatarRequest;
 use App\Http\Resources\UserResource;
 use Illuminate\Http\JsonResponse;
@@ -38,6 +40,37 @@ class AuthController extends Controller
         $result = $action->execute(
             $request->string('email')->toString(),
             $request->string('password')->toString(),
+            $request->input('device_name') ?? $request->userAgent() ?? 'api',
+        );
+
+        if ($result->requiresTwoFactor()) {
+            return response()->json([
+                'data' => [
+                    'requires_two_factor' => true,
+                    'challenge_token' => $result->challengeToken,
+                ],
+            ]);
+        }
+
+        return response()->json([
+            'data' => [
+                'user' => new UserResource($result->token->accessToken->tokenable),
+                'token' => $result->token->plainTextToken,
+            ],
+        ]);
+    }
+
+    /**
+     * Mismo contrato de respuesta que login()/register() (user+token, o
+     * requires_two_factor) — así el mobile reutiliza el mismo manejo de
+     * respuesta para los tres. El id_token de Firebase se verifica dentro
+     * de SocialLoginAction, nunca se confía en nada más del body.
+     */
+    public function socialLogin(SocialLoginRequest $request, SocialLoginAction $action): JsonResponse
+    {
+        $result = $action->execute(
+            $request->string('id_token')->toString(),
+            $request->string('provider')->toString(),
             $request->input('device_name') ?? $request->userAgent() ?? 'api',
         );
 

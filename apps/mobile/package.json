@@ -27,6 +27,7 @@
     "expo-system-ui": "~57.0.2",
     "expo-video": "~57.0.2",
     "expo-web-browser": "~57.0.2",
+    "firebase": "^12.18.0",
     "laravel-echo": "^2.4.0",
     "lucide-react-native": "^1.33.0",
     "pusher-js": "^8.6.0",
@@ -66,6 +67,8 @@
   "jest": {
     "preset": "jest-expo",
     "moduleNameMapper": {
+      "^@/lib/social-auth$": "<rootDir>/src/lib/__mocks__/social-auth.ts",
+      "^@/lib/firebase$": "<rootDir>/src/lib/__mocks__/firebase.ts",
       "^@/(.*)$": "<rootDir>/src/$1"
     }
   },

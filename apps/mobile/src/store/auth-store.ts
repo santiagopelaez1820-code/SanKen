@@ -4,6 +4,7 @@ import type { AuthPayload, LoginPayload, RegisterPayload, TwoFactorChallengeResp
 import { ApiError, isTwoFactorChallenge } from '@sanken/core';
 
 import { api } from '@/lib/api';
+import { describeSocialAuthError, signInWithGoogle, SocialAuthCancelledError } from '@/lib/social-auth';
 import { tokenStorage } from '@/lib/token-storage';
 
 interface PendingChallenge {
@@ -22,6 +23,8 @@ interface AuthState {
   /** true mientras se restaura la sesión guardada al abrir la app. */
   isHydrating: boolean;
   isSubmitting: boolean;
+  /** Separado de isSubmitting para que el botón de Google muestre su propio "Continuando…" sin pisar el form tradicional. */
+  isSubmittingGoogle: boolean;
   error: string | null;
   pendingChallenge: PendingChallenge | null;
 
@@ -31,6 +34,7 @@ interface AuthState {
   hydrate: () => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
   challenge2fa: (code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshMe: () => Promise<void>;
@@ -53,6 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   token: null,
   isHydrating: true,
   isSubmitting: false,
+  isSubmittingGoogle: false,
   error: null,
   pendingChallenge: null,
 
@@ -104,6 +109,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user: response.user, token: response.token, isSubmitting: false });
     } catch (err) {
       set({ isSubmitting: false, error: readErrorMessage(err) });
+      throw err;
+    }
+  },
+
+  /**
+   * Google → Firebase → ID Token → mismo endpoint de "resultado de login"
+   * que ya maneja email/password (user+token o desafío de 2FA) — así el
+   * resto del flujo (guardar token, setOnboardingCompleted, etc.) es
+   * idéntico sin importar cómo se autenticó.
+   */
+  loginWithGoogle: async () => {
+    set({ isSubmittingGoogle: true, error: null });
+    try {
+      const { idToken } = await signInWithGoogle();
+      const response = await api.post<AuthPayload | TwoFactorChallengeResponse>('/auth/social', {
+        id_token: idToken,
+        provider: 'google',
+      });
+
+      if (isTwoFactorChallenge(response)) {
+        set({ isSubmittingGoogle: false, pendingChallenge: { challengeToken: response.challenge_token } });
+        return;
+      }
+
+      await tokenStorage.set(response.token);
+      set({ user: response.user, token: response.token, isSubmittingGoogle: false });
+    } catch (err) {
+      // Cancelar el popup a propósito no es un error para mostrarle al
+      // usuario — solo se limpia el estado de carga y vuelve al login.
+      if (err instanceof SocialAuthCancelledError) {
+        set({ isSubmittingGoogle: false });
+        return;
+      }
+      // Un ApiError viene del backend (ej. "ya existe una cuenta con este
+      // correo") y ya trae un mensaje en español listo para mostrar — solo
+      // los errores de Firebase/red necesitan el mapeo de códigos técnicos.
+      const message = err instanceof ApiError ? readErrorMessage(err) : describeSocialAuthError(err);
+      set({ isSubmittingGoogle: false, error: message });
       throw err;
     }
   },

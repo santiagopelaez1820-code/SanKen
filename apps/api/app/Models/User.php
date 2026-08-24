@@ -30,6 +30,8 @@ class User extends Authenticatable implements MustVerifyEmailContract
         'email',
         'phone',
         'avatar_url',
+        'firebase_uid',
+        'auth_provider',
         'password',
         'role',
         'is_public_profile',

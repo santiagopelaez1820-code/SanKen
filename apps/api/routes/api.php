@@ -50,6 +50,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             ->middleware('throttle:5,1')
             ->name('login');
 
+        Route::post('/social', [AuthController::class, 'socialLogin'])
+            ->middleware('throttle:5,1')
+            ->name('social');
+
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
             ->middleware('throttle:5,1')
             ->name('forgot-password');
