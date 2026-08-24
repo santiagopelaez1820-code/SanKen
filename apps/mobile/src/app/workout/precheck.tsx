@@ -77,5 +77,5 @@ const styles = StyleSheet.create({
   title: { textAlign: 'center' },
   subtitle: { textAlign: 'center' },
   form: { gap: Spacing.four },
-  error: { color: '#D9534F', textAlign: 'center' },
+  error: { color: '#FF4D5E', textAlign: 'center' },
 });

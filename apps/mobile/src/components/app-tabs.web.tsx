@@ -7,7 +7,7 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { Image, Pressable, View, StyleSheet } from 'react-native';
-import { BarChart3, Flag, History, Home, Trophy, type LucideIcon } from 'lucide-react-native';
+import { BarChart3, Flag, Home, User, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -30,12 +30,12 @@ export default function AppTabs() {
           <TabTrigger name="retos" href="/retos" asChild>
             <TabButton icon={Flag}>Retos</TabButton>
           </TabTrigger>
-          <TabTrigger name="history" href="/history" asChild>
-            <TabButton icon={History}>Historial</TabButton>
+          <TabTrigger name="profile" href="/profile" asChild>
+            <TabButton icon={User}>Perfil</TabButton>
           </TabTrigger>
-          <TabTrigger name="prs" href="/prs" asChild>
-            <TabButton icon={Trophy}>PR</TabButton>
-          </TabTrigger>
+          <TabTrigger name="history" href="/history" style={styles.hidden} />
+          <TabTrigger name="prs" href="/prs" style={styles.hidden} />
+          <TabTrigger name="measurements" href="/measurements" style={styles.hidden} />
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -114,6 +114,11 @@ const styles = StyleSheet.create({
   brandText: {},
   pressed: {
     opacity: 0.7,
+  },
+  hidden: {
+    width: 0,
+    height: 0,
+    display: 'none',
   },
   tabButtonView: {
     paddingVertical: Spacing.one,

@@ -7,37 +7,41 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// Paleta de marca SANKEN: negro profundo + naranja (muestreado del isotipo
-// S+flecha). Un único acento de marca — accentSecondary es un tinte más claro
-// del mismo naranja, reservado para distinguir CTAs de entrenamiento/actividad
-// sin salirse de la familia de color. El naranja se usa con moderación: nunca
-// como fondo extenso, solo CTAs, progreso, logros y detalles de marca.
+// Paleta de marca SANKEN mobile — "Dark Performance": negro azulado profundo
+// + cian como acento único de identidad. NO es la misma paleta que la web
+// (esa quedó negro+naranja): mobile pidió explícitamente abandonar
+// negro+dorado/naranja por esta nueva base. El cian se usa con moderación:
+// nunca como fondo extenso, solo CTAs, progreso, logros y detalles de marca.
 export const Colors = {
   light: {
     text: '#0B0B0B',
-    background: '#FAFAFA',
-    backgroundElement: '#F0F0F0',
-    backgroundSelected: '#E5E5E5',
-    textSecondary: '#6B6B6B',
-    accent: '#FF6A00',
-    accentSecondary: '#FF4B00',
+    background: '#F5F7FA',
+    backgroundElement: '#E9EDF1',
+    backgroundSelected: '#DCE3E9',
+    card: '#FFFFFF',
+    cardElevated: '#FFFFFF',
+    textSecondary: '#5B6670',
+    accent: '#0093AD',
+    accentSecondary: '#00B8D9',
     border: 'rgba(0, 0, 0, 0.10)',
-    success: '#2FA84F',
-    warning: '#D9A441',
-    error: '#D9534F',
+    success: '#1CA97F',
+    warning: '#C97F0E',
+    error: '#E23C4C',
   },
   dark: {
-    text: '#FFFFFF',
-    background: '#0B0B0B',
-    backgroundElement: '#121212',
-    backgroundSelected: '#1C1C1C',
-    textSecondary: '#9A9A9A',
-    accent: '#FF6A00',
-    accentSecondary: '#FF8F1F',
+    text: '#F5F7FA',
+    background: '#080C10',
+    backgroundElement: '#111820',
+    backgroundSelected: '#1D2732',
+    card: '#151D26',
+    cardElevated: '#1D2732',
+    textSecondary: '#9AA6B2',
+    accent: '#00B8D9',
+    accentSecondary: '#00D4FF',
     border: 'rgba(255, 255, 255, 0.10)',
-    success: '#2FA84F',
-    warning: '#D9A441',
-    error: '#D9534F',
+    success: '#20C997',
+    warning: '#FFB020',
+    error: '#FF4D5E',
   },
 } as const;
 

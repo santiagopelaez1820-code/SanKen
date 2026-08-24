@@ -90,6 +90,6 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     gap: Spacing.three,
   },
-  error: { color: '#D9534F' },
+  error: { color: '#FF4D5E' },
   footerLink: { marginTop: Spacing.two },
 });

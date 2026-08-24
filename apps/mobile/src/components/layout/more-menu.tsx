@@ -5,11 +5,13 @@ import {
   Bell,
   CalendarDays,
   ChevronRight,
+  History,
   LogOut,
   MessageCircle,
   Ruler,
   Settings,
   Shield,
+  Trophy,
   User,
   Users,
   type LucideIcon,
@@ -96,7 +98,11 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
     { label: 'Nutrición', icon: Apple, path: '/nutricion' },
   ];
 
-  const seguimientoItem: MoreMenuItem = { label: 'Medidas corporales', icon: Ruler, path: '/measurements' };
+  const seguimientoItems: MoreMenuItem[] = [
+    { label: 'Historial', icon: History, path: '/history' },
+    { label: 'PR', icon: Trophy, path: '/prs' },
+    { label: 'Medidas corporales', icon: Ruler, path: '/measurements' },
+  ];
   const adminItem: MoreMenuItem | null =
     user?.role === 'super_admin' ? { label: 'Super Admin', icon: Shield, path: '/admin' } : null;
 
@@ -127,7 +133,11 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
         </View>
 
         <GroupLabel>SEGUIMIENTO</GroupLabel>
-        <MenuRow item={seguimientoItem} onPress={() => go(seguimientoItem.path)} />
+        <View style={styles.grid}>
+          {seguimientoItems.map((item) => (
+            <MenuTile key={item.path} item={item} onPress={() => go(item.path)} />
+          ))}
+        </View>
 
         {adminItem && (
           <>

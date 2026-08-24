@@ -347,5 +347,5 @@ const styles = StyleSheet.create({
   recoveryCode: { textAlign: 'center' },
   qr: { alignSelf: 'center' },
   center: { textAlign: 'center' },
-  error: { color: '#D9534F' },
+  error: { color: '#FF4D5E' },
 });

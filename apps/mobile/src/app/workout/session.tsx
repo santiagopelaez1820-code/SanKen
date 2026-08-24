@@ -424,7 +424,7 @@ const styles = StyleSheet.create({
   inputsRow: { flexDirection: 'row', gap: Spacing.three },
   inputHalf: { flex: 1 },
   stepperLabel: { marginBottom: Spacing.one },
-  error: { color: '#D9534F', textAlign: 'center' },
+  error: { color: '#FF4D5E', textAlign: 'center' },
   feedbackRow: { flexDirection: 'row', gap: Spacing.three, alignSelf: 'stretch' },
   feedbackHalf: { flex: 1 },
 });

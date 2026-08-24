@@ -329,5 +329,5 @@ const styles = StyleSheet.create({
   actionsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two },
   templateCard: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
   templateActionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  error: { color: '#D9534F' },
+  error: { color: '#FF4D5E' },
 });

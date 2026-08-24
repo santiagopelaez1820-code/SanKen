@@ -213,5 +213,5 @@ const styles = StyleSheet.create({
   subtitle: { marginBottom: Spacing.four },
   section: { gap: Spacing.two, marginBottom: Spacing.four },
   optionsList: { gap: Spacing.two, marginTop: Spacing.two },
-  error: { color: '#D9534F', marginBottom: Spacing.two },
+  error: { color: '#FF4D5E', marginBottom: Spacing.two },
 });

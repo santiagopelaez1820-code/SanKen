@@ -8,9 +8,8 @@ import { estimateWorkoutMinutes } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { AchievementsRow } from '@/components/dashboard/achievements-row';
+import { ChallengesRow } from '@/components/dashboard/challenges-row';
 import { PerformanceHero } from '@/components/dashboard/performance-hero';
-import { RecentPRsRow } from '@/components/dashboard/recent-prs-row';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -25,6 +24,13 @@ import { useFeedStore } from '@/store/feed-store';
 import { useGamificationStore } from '@/store/gamification-store';
 import { findNextDay, useRoutineStore } from '@/store/routine-store';
 import { useWorkoutStore } from '@/store/workout-store';
+
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Buenos días';
+  if (hour < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -72,9 +78,14 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ThemedView style={styles.header}>
-          <ThemedText type="title" style={styles.title}>
-            Hola, {user?.name.split(' ')[0]}
-          </ThemedText>
+          <ThemedView style={{ backgroundColor: 'transparent' }}>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.greetingLabel}>
+              {greeting().toUpperCase()}
+            </ThemedText>
+            <ThemedText type="title" style={styles.title}>
+              {user?.name.split(' ')[0]}
+            </ThemedText>
+          </ThemedView>
           <Pressable
             onPress={() => setMoreMenuVisible(true)}
             style={[styles.menuButton, { backgroundColor: theme.backgroundElement }]}>
@@ -85,17 +96,13 @@ export default function HomeScreen() {
           </Pressable>
         </ThemedView>
 
-        <Animated.View entering={FadeInUp.delay(0).duration(320)}>
-          <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
-        </Animated.View>
-
         {error && (
           <ThemedText type="small" style={styles.error}>
             {error}
           </ThemedText>
         )}
 
-        {isLoading && <Skeleton height={140} borderRadius={Spacing.four} />}
+        {isLoading && <Skeleton height={200} borderRadius={Spacing.four} />}
 
         {hasNoRoutine && !isLoading && (
           <ThemedView type="backgroundElement" style={styles.card}>
@@ -108,20 +115,39 @@ export default function HomeScreen() {
         )}
 
         {day && (
-          <Animated.View entering={FadeInUp.delay(60).duration(320)}>
+          <Animated.View entering={FadeInUp.delay(0).duration(320)}>
             <ThemedView
               style={[
                 styles.todayCard,
-                { backgroundColor: `${theme.accentSecondary}14`, borderColor: `${theme.accentSecondary}40` },
-                glowShadow(theme.accentSecondary),
+                { backgroundColor: `${theme.accent}12`, borderColor: `${theme.accent}35` },
+                glowShadow(theme.accent),
               ]}>
-              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accentSecondary }]}>
+              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accent }]}>
                 ENTRENAMIENTO DE HOY
               </ThemedText>
-              <ThemedText type="subtitle">{day.label}</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
+              <ThemedText type="title" style={styles.todayTitle}>
+                {day.label}
               </ThemedText>
+
+              <ThemedView style={styles.todayStats}>
+                <ThemedView style={styles.todayStat}>
+                  <ThemedText type="title" style={styles.todayStatValue}>
+                    {estimateWorkoutMinutes(day)}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                    MIN
+                  </ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.todayStat}>
+                  <ThemedText type="title" style={styles.todayStatValue}>
+                    {day.exercises.length}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                    EJERCICIOS
+                  </ThemedText>
+                </ThemedView>
+              </ThemedView>
+
               <ThemedView style={styles.spacer} />
               <PrimaryButton label="Comenzar" onPress={() => router.push('/workout/precheck')} />
               <ThemedView style={styles.buttonGap} />
@@ -134,19 +160,13 @@ export default function HomeScreen() {
           </Animated.View>
         )}
 
-        {!isLoadingStats && (
-          <Animated.View entering={FadeInUp.delay(120).duration(320)}>
-            <RecentPRsRow records={stats?.recent_personal_records ?? []} />
-          </Animated.View>
-        )}
+        <Animated.View entering={FadeInUp.delay(60).duration(320)}>
+          <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
+        </Animated.View>
 
-        {!isLoadingGamification && (
-          <Animated.View entering={FadeInUp.delay(180).duration(320)}>
-            <AchievementsRow
-              achievements={[...(summary?.unlocked_achievements ?? []), ...(summary?.locked_achievements ?? [])]}
-            />
-          </Animated.View>
-        )}
+        <Animated.View entering={FadeInUp.delay(120).duration(320)}>
+          <ChallengesRow />
+        </Animated.View>
 
         <ConfirmDialog
           visible={confirmingSkip}
@@ -194,6 +214,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: 'transparent',
   },
+  greetingLabel: {
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
   title: {
     fontSize: 30,
     lineHeight: 36,
@@ -215,7 +239,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   centerText: { textAlign: 'center' },
-  error: { color: '#D9534F', textAlign: 'center' },
+  error: { color: '#FF4D5E', textAlign: 'center' },
   card: {
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.three,
@@ -227,6 +251,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.four,
     borderWidth: 1,
+  },
+  todayTitle: {
+    fontSize: 26,
+    lineHeight: 31,
+    marginBottom: Spacing.three,
+  },
+  todayStats: {
+    flexDirection: 'row',
+    gap: Spacing.five,
+    backgroundColor: 'transparent',
+  },
+  todayStat: {
+    backgroundColor: 'transparent',
+  },
+  todayStatValue: {
+    fontSize: 24,
+    lineHeight: 28,
+  },
+  todayStatLabel: {
+    letterSpacing: 0.5,
+    fontSize: 11,
   },
   eyebrow: {
     letterSpacing: 1,

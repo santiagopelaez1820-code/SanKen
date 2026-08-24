@@ -124,5 +124,5 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 28, lineHeight: 34 },
   card: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
   errorBlock: { gap: Spacing.two, alignItems: 'flex-start', backgroundColor: 'transparent' },
-  error: { color: '#D9534F' },
+  error: { color: '#FF4D5E' },
 });
