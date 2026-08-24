@@ -1,5 +1,6 @@
 import type { Challenge } from "@sanken/core"
-import { Button } from "@/components/ui/button"
+import { SankButton } from "@/components/ui/SankButton"
+import { SankProgress } from "@/components/ui/SankProgress"
 import { ChallengeLeaderboard } from "@/components/challenges/ChallengeLeaderboard"
 
 const METRIC_LABEL: Record<Challenge["criteria"]["metric"], string> = {
@@ -15,47 +16,41 @@ interface ChallengeCardProps {
 }
 
 export function ChallengeCard({ challenge, expanded, onToggle, onJoin }: ChallengeCardProps) {
-  const progressPct = challenge.progress_value !== null
-    ? Math.min(100, Math.round((challenge.progress_value / challenge.criteria.target) * 100))
-    : 0
-
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="text-xs font-medium uppercase text-muted-foreground">
-            {challenge.type === "weekly" ? "Semanal" : "Mensual"}
-          </p>
-          <h3 className="font-heading text-lg font-medium">{challenge.title}</h3>
-          <p className="text-sm text-muted-foreground">{challenge.description}</p>
-        </div>
+    <div className="sank-surface rounded-2 p-4 h-100 d-flex flex-column">
+      <p className="sank-eyebrow mb-1">{challenge.type === "weekly" ? "Semanal" : "Mensual"}</p>
+      <p className="fw-bold fs-6 mb-1">{challenge.title}</p>
+      <p className="small text-body-secondary flex-grow-1">{challenge.description}</p>
+
+      {challenge.joined && (
+        <>
+          <SankProgress
+            value={challenge.progress_value ?? 0}
+            max={challenge.criteria.target}
+            label={`${challenge.progress_value ?? 0} / ${challenge.criteria.target} ${METRIC_LABEL[challenge.criteria.metric]}`}
+            showValue={!challenge.completed}
+            className="mb-1"
+          />
+          {challenge.completed && (
+            <p className="small fw-bold mb-2" style={{ color: "var(--sanken-orange)" }}>¡Completado!</p>
+          )}
+        </>
+      )}
+
+      <div className="d-flex gap-2 mt-2">
         {challenge.joined ? (
-          <Button variant="outline" size="sm" onClick={onToggle}>
+          <SankButton variant="outline" size="sm" onClick={onToggle} className="flex-grow-1 justify-content-center">
             {expanded ? "Ocultar tabla" : "Ver tabla"}
-          </Button>
+          </SankButton>
         ) : (
-          <Button size="sm" onClick={onJoin}>
+          <SankButton size="sm" onClick={onJoin} className="flex-grow-1 justify-content-center">
             Unirme
-          </Button>
+          </SankButton>
         )}
       </div>
 
-      {challenge.joined && (
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>
-              {challenge.progress_value ?? 0} / {challenge.criteria.target} {METRIC_LABEL[challenge.criteria.metric]}
-            </span>
-            {challenge.completed && <span className="font-medium text-primary">¡Completado!</span>}
-          </div>
-          <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-muted">
-            <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${progressPct}%` }} />
-          </div>
-        </div>
-      )}
-
       {expanded && (
-        <div className="mt-4 border-t border-border pt-4">
+        <div className="mt-3 pt-3" style={{ borderTop: "1px solid var(--bs-border-color)" }}>
           <ChallengeLeaderboard challengeId={challenge.id} />
         </div>
       )}

@@ -1,13 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
-import { Clock, Flame, ListChecks, Weight } from "lucide-react"
+import { Container } from "react-bootstrap"
 import type { DashboardStats } from "@sanken/core"
 import { api } from "@/lib/api"
-import { MetricCard } from "@/components/ui/metric-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MuscleVolumeChart } from "@/components/dashboard/MuscleVolumeChart"
 import { ProgressChart } from "@/components/dashboard/ProgressChart"
-import { RecentPRsList } from "@/components/dashboard/RecentPRsList"
+import { RecentPRsRow } from "@/components/dashboard/RecentPRsRow"
 import { WorkoutHistoryList } from "@/components/dashboard/WorkoutHistoryList"
 import { BodyMeasurementsPanel } from "@/components/dashboard/BodyMeasurementsPanel"
 import { fadeInUp, staggerContainer } from "@/lib/motion"
@@ -19,63 +18,52 @@ export function ProgressPage() {
   })
 
   return (
-    <main className="px-6 py-8">
-      <motion.div
-        className="mx-auto flex max-w-5xl flex-col gap-6"
-        variants={staggerContainer()}
-        initial="hidden"
-        animate="show"
-      >
+    <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1080 }}>
+      <motion.div className="d-flex flex-column gap-4" variants={staggerContainer()} initial="hidden" animate="show">
         <motion.div variants={fadeInUp}>
-          <p className="text-xs font-semibold tracking-widest text-secondary-accent uppercase">Progreso</p>
-          <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Tu progreso</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Datos acumulados y evolución por semana o mes.</p>
+          <p className="sank-eyebrow sank-eyebrow--orange mb-1">Progreso</p>
+          {isLoading ? (
+            <Skeleton style={{ height: 64, width: 220 }} />
+          ) : (
+            <div className="d-flex align-items-baseline gap-3 flex-wrap">
+              <span className="display-2 sank-stat">{stats?.total_hours ?? 0}h</span>
+              <span className="text-body-secondary">entrenadas en total</span>
+            </div>
+          )}
+          <div className="d-flex gap-4 mt-2">
+            <p className="small text-body-secondary mb-0">
+              <span className="fw-bold sank-tabular-nums text-white">{stats?.total_sets ?? 0}</span> series
+            </p>
+            <p className="small text-body-secondary mb-0">
+              <span className="fw-bold sank-tabular-nums text-white">{((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)}t</span> movidas
+            </p>
+            <p className="small text-body-secondary mb-0">
+              <span className="fw-bold sank-tabular-nums text-white">{stats?.current_streak_days ?? 0}</span> días de racha
+            </p>
+          </div>
         </motion.div>
 
-        <motion.section
-          className="grid grid-cols-2 gap-4 sm:grid-cols-4"
-          variants={staggerContainer(0.05)}
-        >
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32" />)
-          ) : (
-            <>
-              <motion.div variants={fadeInUp}>
-                <MetricCard icon={Clock} label="Horas entrenadas" value={`${stats?.total_hours ?? 0} h`} />
-              </motion.div>
-              <motion.div variants={fadeInUp}>
-                <MetricCard icon={ListChecks} label="Series totales" value={`${stats?.total_sets ?? 0}`} />
-              </motion.div>
-              <motion.div variants={fadeInUp}>
-                <MetricCard
-                  icon={Weight}
-                  label="Toneladas movidas"
-                  value={`${((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t`}
-                />
-              </motion.div>
-              <motion.div variants={fadeInUp}>
-                <MetricCard
-                  icon={Flame}
-                  label="Racha actual"
-                  value={`${stats?.current_streak_days ?? 0} días`}
-                  tone="primary"
-                />
-              </motion.div>
-            </>
-          )}
-        </motion.section>
-
-        <motion.section className="grid grid-cols-1 gap-4 lg:grid-cols-2" variants={fadeInUp}>
-          <MuscleVolumeChart />
+        <motion.div variants={fadeInUp}>
           <ProgressChart />
-        </motion.section>
+        </motion.div>
 
-        <motion.section className="grid grid-cols-1 gap-4 lg:grid-cols-3" variants={fadeInUp}>
-          <RecentPRsList records={stats?.recent_personal_records ?? []} />
-          <WorkoutHistoryList />
-          <BodyMeasurementsPanel />
-        </motion.section>
+        <motion.div variants={fadeInUp}>
+          <MuscleVolumeChart />
+        </motion.div>
+
+        <motion.div variants={fadeInUp}>
+          <RecentPRsRow records={stats?.recent_personal_records ?? []} />
+        </motion.div>
+
+        <motion.div className="row g-3" variants={fadeInUp}>
+          <div className="col-12 col-lg-6">
+            <WorkoutHistoryList />
+          </div>
+          <div className="col-12 col-lg-6">
+            <BodyMeasurementsPanel />
+          </div>
+        </motion.div>
       </motion.div>
-    </main>
+    </Container>
   )
 }

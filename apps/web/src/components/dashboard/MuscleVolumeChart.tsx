@@ -16,9 +16,9 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: { paylo
   const point = payload[0].payload
 
   return (
-    <div className="rounded-lg border border-border bg-card px-3 py-2 text-xs shadow-sm">
-      <p className="font-medium text-foreground">{point.muscle_group}</p>
-      <p className="text-muted-foreground">{point.volume_kg.toLocaleString("es")} kg</p>
+    <div className="rounded-1 px-3 py-2" style={{ background: "var(--sanken-charcoal)", border: "1px solid var(--bs-border-color)" }}>
+      <p className="small fw-semibold mb-0">{point.muscle_group}</p>
+      <p className="small text-body-secondary mb-0">{point.volume_kg.toLocaleString("es")} kg</p>
     </div>
   )
 }
@@ -33,66 +33,56 @@ export function MuscleVolumeChart() {
   })
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-heading text-sm font-medium text-foreground">Volumen por grupo muscular</h2>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg border border-border p-0.5 text-xs">
+    <div className="sank-surface rounded-2 p-4">
+      <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+        <h2 className="sank-eyebrow mb-0">Volumen por grupo muscular</h2>
+        <div className="d-flex align-items-center gap-2">
+          <div className="d-flex gap-1">
             {RANGES.map((r) => (
               <button
                 key={r.value}
                 onClick={() => setRange(r.value)}
                 className={cn(
-                  "rounded-md px-2.5 py-1 font-medium transition-colors",
-                  range === r.value
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                  "btn btn-sm rounded-1 border-0",
+                  range === r.value ? "btn-primary" : "sank-ghost-btn bg-transparent"
                 )}
               >
                 {r.label}
               </button>
             ))}
           </div>
-          <button
-            onClick={() => setShowTable((v) => !v)}
-            className="text-xs font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-          >
+          <button onClick={() => setShowTable((v) => !v)} className="btn btn-sm sank-ghost-btn border-0 bg-transparent">
             {showTable ? "Ver gráfica" : "Ver tabla"}
           </button>
         </div>
       </div>
 
-      <div className="mt-4">
-        {isLoading && <Skeleton className="py-10 text-center h-20 w-full" />}
+      <div className="mt-3">
+        {isLoading && <Skeleton style={{ height: 260, width: "100%" }} />}
 
         {!isLoading && data?.length === 0 && (
-          <p className="py-10 text-center text-sm text-muted-foreground">
+          <p className="py-5 text-center small text-body-secondary mb-0">
             Sin entrenamientos registrados en este rango todavía.
           </p>
         )}
 
         {!isLoading && data && data.length > 0 && !showTable && (
-          <ResponsiveContainer key={range} width="100%" height={240} debounce={200}>
+          <ResponsiveContainer key={range} width="100%" height={260} debounce={200}>
             <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
               <XAxis
                 dataKey="muscle_group"
-                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
+                tick={{ fill: "#6B6B6B", fontSize: 12 }}
                 tickLine={false}
-                axisLine={{ stroke: "var(--border)" }}
+                axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
               />
-              <YAxis
-                tick={{ fill: "var(--muted-foreground)", fontSize: 12 }}
-                tickLine={false}
-                axisLine={false}
-                width={56}
-              />
-              <Tooltip content={<ChartTooltip />} cursor={{ fill: "var(--muted)" }} />
+              <YAxis tick={{ fill: "#6B6B6B", fontSize: 12 }} tickLine={false} axisLine={false} width={56} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
               <Bar
                 dataKey="volume_kg"
-                fill="var(--chart-2)"
-                radius={[4, 4, 0, 0]}
-                maxBarSize={48}
+                fill="#FF6A00"
+                radius={[2, 2, 0, 0]}
+                maxBarSize={44}
                 isAnimationActive
                 animationDuration={650}
                 animationEasing="ease-out"
@@ -102,22 +92,24 @@ export function MuscleVolumeChart() {
         )}
 
         {!isLoading && data && data.length > 0 && showTable && (
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border text-left text-xs text-muted-foreground">
-                <th className="py-2 font-medium">Grupo muscular</th>
-                <th className="py-2 font-medium">Volumen</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((row) => (
-                <tr key={row.muscle_group} className="border-b border-border last:border-0">
-                  <td className="py-2 text-foreground">{row.muscle_group}</td>
-                  <td className="py-2 text-foreground">{row.volume_kg.toLocaleString("es")} kg</td>
+          <div className="table-responsive">
+            <table className="table table-sm mb-0">
+              <thead>
+                <tr>
+                  <th className="small text-body-secondary fw-medium">Grupo muscular</th>
+                  <th className="small text-body-secondary fw-medium">Volumen</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {data.map((row) => (
+                  <tr key={row.muscle_group}>
+                    <td className="small">{row.muscle_group}</td>
+                    <td className="small sank-tabular-nums">{row.volume_kg.toLocaleString("es")} kg</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
     </div>

@@ -2,9 +2,10 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Form } from "react-bootstrap"
 import type { BodyMeasurement } from "@sanken/core"
 import { api } from "@/lib/api"
-import { Button } from "@/components/ui/button"
+import { SankButton } from "@/components/ui/SankButton"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const measurementSchema = z.object({
@@ -40,43 +41,38 @@ export function BodyMeasurementsPanel() {
   const measurements = data?.data ?? []
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <h2 className="font-heading text-sm font-medium text-foreground">Medidas corporales</h2>
+    <div className="sank-surface rounded-2 p-4 h-100">
+      <h2 className="sank-eyebrow mb-2">Medidas corporales</h2>
 
-      <form
-        onSubmit={handleSubmit((values) => mutation.mutate(values))}
-        className="mt-3 flex items-end gap-2"
-      >
-        <div className="flex-1 space-y-1.5">
-          <label htmlFor="weight_kg" className="text-xs font-medium text-muted-foreground">
-            Peso de hoy (kg)
-          </label>
-          <input
-            id="weight_kg"
+      <Form onSubmit={handleSubmit((values) => mutation.mutate(values))} className="d-flex align-items-end gap-2">
+        <Form.Group className="flex-grow-1">
+          <Form.Label className="small text-body-secondary mb-1">Peso de hoy (kg)</Form.Label>
+          <Form.Control
             type="number"
             step="0.1"
-            className="w-full rounded-lg border border-input bg-background px-3 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            size="sm"
+            isInvalid={!!errors.weight_kg}
             {...register("weight_kg", { valueAsNumber: true })}
           />
-        </div>
-        <Button type="submit" disabled={isSubmitting} size="sm">
+        </Form.Group>
+        <SankButton type="submit" size="sm" disabled={isSubmitting} loading={isSubmitting}>
           Registrar
-        </Button>
-      </form>
-      {errors.weight_kg && <p className="mt-1 text-xs text-destructive">{errors.weight_kg.message}</p>}
+        </SankButton>
+      </Form>
+      {errors.weight_kg && <p className="small mt-1 mb-0" style={{ color: "var(--bs-danger)" }}>{errors.weight_kg.message}</p>}
 
-      {isLoading && <Skeleton className="mt-4 h-20 w-full" />}
+      {isLoading && <Skeleton style={{ height: 120, width: "100%" }} className="mt-3" />}
 
       {!isLoading && measurements.length === 0 && (
-        <p className="mt-4 text-sm text-muted-foreground">Todavía no hay medidas registradas.</p>
+        <p className="mt-3 small text-body-secondary mb-0">Todavía no hay medidas registradas.</p>
       )}
 
       {!isLoading && measurements.length > 0 && (
-        <ul className="mt-3 divide-y divide-border">
+        <ul className="mt-2 list-unstyled mb-0">
           {measurements.slice(0, 5).map((m) => (
-            <li key={m.id} className="flex items-center justify-between py-2 text-sm">
-              <span className="text-muted-foreground">{m.measured_at}</span>
-              <span className="text-foreground">{m.weight_kg !== null ? `${m.weight_kg} kg` : "—"}</span>
+            <li key={m.id} className="d-flex align-items-center justify-content-between py-2" style={{ borderTop: "1px solid var(--bs-border-color)" }}>
+              <span className="small text-body-secondary">{m.measured_at}</span>
+              <span className="small sank-tabular-nums">{m.weight_kg !== null ? `${m.weight_kg} kg` : "—"}</span>
             </li>
           ))}
         </ul>

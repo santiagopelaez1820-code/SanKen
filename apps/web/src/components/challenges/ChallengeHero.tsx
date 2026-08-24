@@ -1,8 +1,6 @@
 import { motion } from "framer-motion"
-import { Flame } from "lucide-react"
 import type { Challenge } from "@sanken/core"
-import { Button } from "@/components/ui/button"
-import { GlassCard } from "@/components/ui/glass-card"
+import { SankButton } from "@/components/ui/SankButton"
 import { ChallengeLeaderboard } from "@/components/challenges/ChallengeLeaderboard"
 
 const METRIC_LABEL: Record<Challenge["criteria"]["metric"], string> = {
@@ -29,60 +27,59 @@ export function ChallengeHero({ challenge, expanded, onToggle, onJoin }: Challen
   const daysLeft = daysRemaining(challenge.ends_at)
 
   return (
-    <GlassCard tone="lime" className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-full bg-primary/15">
-            <Flame className="size-5 text-primary" />
-          </div>
-          <div>
-            <p className="text-xs font-semibold tracking-widest text-primary uppercase">Tu desafío actual</p>
-            <h2 className="font-heading text-xl font-bold tracking-tight text-foreground">{challenge.title}</h2>
-          </div>
-        </div>
-        {challenge.joined ? (
-          <Button variant="outline" size="sm" onClick={onToggle}>
-            {expanded ? "Ocultar tabla" : "Ver tabla"}
-          </Button>
-        ) : (
-          <Button variant="emphasis" size="sm" onClick={onJoin}>
-            Unirme
-          </Button>
-        )}
-      </div>
+    <div
+      className="position-relative overflow-hidden rounded-2 sank-hairline p-4 p-sm-5 text-center"
+      style={{
+        background:
+          "radial-gradient(80% 100% at 50% 0%, rgba(255,106,0,0.16), transparent 60%), var(--sanken-black-2)",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 28px 60px -24px rgba(0,0,0,0.7)",
+      }}
+    >
+      <p className="sank-eyebrow sank-eyebrow--orange mb-2">
+        {challenge.type === "weekly" ? "Reto semanal" : "Reto mensual"}
+      </p>
+      <h1 className="display-4 sank-stat mb-2">{challenge.title}</h1>
+      <p className="text-body-secondary mx-auto mb-4" style={{ maxWidth: 440 }}>
+        {challenge.description}
+      </p>
 
-      <p className="text-sm text-muted-foreground">{challenge.description}</p>
+      <p className="sank-stat mb-1" style={{ fontSize: "1.75rem", color: challenge.completed ? "var(--sanken-orange)" : undefined }}>
+        {challenge.completed ? "¡Completado!" : `${daysLeft} días restantes`}
+      </p>
 
       {challenge.joined && (
-        <div>
-          <div className="h-3 w-full overflow-hidden rounded-full bg-muted">
+        <div className="mx-auto mt-3" style={{ maxWidth: 480 }}>
+          <div className="rounded-pill overflow-hidden" style={{ height: 10, background: "var(--sanken-charcoal)" }}>
             <motion.div
-              className="h-full rounded-full bg-primary shadow-[0_0_12px_rgba(207,255,54,0.6)]"
+              style={{ height: "100%", background: "linear-gradient(90deg, var(--sanken-orange-deep), var(--sanken-orange-light))" }}
               initial={{ width: 0 }}
               animate={{ width: `${progressPct}%` }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
             />
           </div>
-          <div className="mt-2 flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">
-              {challenge.progress_value ?? 0} / {challenge.criteria.target} {METRIC_LABEL[challenge.criteria.metric]}
-            </p>
-            {challenge.completed ? (
-              <p className="text-sm font-bold text-primary">¡Completado!</p>
-            ) : (
-              <p className="text-sm text-muted-foreground">{daysLeft} días restantes</p>
-            )}
-          </div>
+          <p className="small text-body-secondary mt-2 mb-0 sank-tabular-nums">
+            {challenge.progress_value ?? 0} / {challenge.criteria.target} {METRIC_LABEL[challenge.criteria.metric]} · {progressPct}%
+          </p>
         </div>
       )}
 
-      {!challenge.joined && <p className="text-sm text-muted-foreground">{daysLeft} días restantes</p>}
+      <div className="mt-4">
+        {challenge.joined ? (
+          <SankButton variant="outline" onClick={onToggle}>
+            {expanded ? "Ocultar ranking" : "Ver ranking"}
+          </SankButton>
+        ) : (
+          <SankButton variant="primary" size="lg" onClick={onJoin}>
+            Unirme al reto
+          </SankButton>
+        )}
+      </div>
 
       {expanded && (
-        <div className="border-t border-border pt-4">
+        <div className="mt-4 pt-4 text-start" style={{ borderTop: "1px solid var(--bs-border-color)" }}>
           <ChallengeLeaderboard challengeId={challenge.id} />
         </div>
       )}
-    </GlassCard>
+    </div>
   )
 }

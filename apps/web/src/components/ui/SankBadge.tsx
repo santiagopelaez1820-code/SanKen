@@ -22,6 +22,7 @@ export function SankBadge({ variant = "neutral", icon, className, children, ...p
   return (
     <Badge
       pill
+      bg=""
       className={cn(
         "d-inline-flex align-items-center gap-1 fw-semibold py-1 px-2",
         VARIANT_CLASS[variant],
