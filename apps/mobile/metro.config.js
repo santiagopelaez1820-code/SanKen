@@ -9,4 +9,10 @@ const config = getDefaultConfig(__dirname);
 // resolved fine before expo-camera was added.
 config.resolver.unstable_enablePackageExports = false;
 
+// El SDK de Firebase (firebase/auth) para React Native se resuelve como
+// .cjs — sin esto, Metro puede fallar en resolverlo correctamente en el
+// bundle nativo (aunque funcione en web), causando errores en tiempo de
+// arranque como "Component auth has not been registered yet".
+config.resolver.sourceExts.push('cjs');
+
 module.exports = config;

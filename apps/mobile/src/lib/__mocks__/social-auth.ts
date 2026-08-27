@@ -12,6 +12,8 @@ export async function signInWithGoogle(): Promise<{ idToken: string }> {
   throw new SocialAuthUnavailableError('signInWithGoogle está mockeado en tests.');
 }
 
+export async function signOutFromGoogle(): Promise<void> {}
+
 export function describeSocialAuthError(_err: unknown): string {
   return 'Mocked social auth error.';
 }

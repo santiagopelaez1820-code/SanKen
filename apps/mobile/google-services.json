@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "52949828231",
+    "project_id": "sanken-bc2d9",
+    "storage_bucket": "sanken-bc2d9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:52949828231:android:025221e25a92a6760e6e22",
+        "android_client_info": {
+          "package_name": "com.sanken.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "52949828231-fmovjdto0m07pf1c93k4fgdhkqb6kk5v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sanken.mobile",
+            "certificate_hash": "acd4082f7bf7c23267d6da7a1579b252121d0d1d"
+          }
+        },
+        {
+          "client_id": "52949828231-bn1sv6i78pal6tno72ou206jlgh9dpo3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXLjcfXzC08jrh6aDKR-wdjOBRgtdvCHY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "52949828231-bn1sv6i78pal6tno72ou206jlgh9dpo3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

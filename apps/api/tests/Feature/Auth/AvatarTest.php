@@ -68,6 +68,19 @@ class AvatarTest extends TestCase
         $this->assertNull($user->fresh()->avatar_url);
     }
 
+    public function test_user_can_upload_a_gif_avatar(): void
+    {
+        Storage::fake('public');
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/auth/me/avatar', [
+            'avatar' => UploadedFile::fake()->image('avatar.gif'),
+        ]);
+
+        $response->assertOk();
+        $this->assertNotNull($response->json('data.avatar_url'));
+    }
+
     public function test_avatar_upload_rejects_non_image_files(): void
     {
         Storage::fake('public');

@@ -109,6 +109,6 @@ const styles = StyleSheet.create({
     padding: Spacing.two,
     gap: Spacing.two,
   },
-  fieldsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two },
-  fieldThird: { flex: 1 },
+  fieldsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two, backgroundColor: 'transparent' },
+  fieldThird: { flex: 1, backgroundColor: 'transparent' },
 });

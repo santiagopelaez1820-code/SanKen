@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
 import { StyleSheet } from 'react-native';
 
@@ -24,13 +25,24 @@ export function Avatar({ name, avatarUrl, size }: AvatarProps) {
   const resolvedUrl = api.mediaUrl(avatarUrl);
   const initial = name?.trim()?.[0]?.toUpperCase() ?? '?';
 
-  if (resolvedUrl) {
+  // Si la URL cambia (nueva foto, o el usuario vuelve a intentar), hay que
+  // darle otra oportunidad de cargar en vez de quedar pegado en el error
+  // de la URL anterior.
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [resolvedUrl]);
+
+  if (resolvedUrl && !failed) {
     return (
       <Image
         source={{ uri: resolvedUrl }}
         style={[styles.image, { width: size, height: size, borderRadius: size / 2 }]}
         contentFit="cover"
         transition={150}
+        // Una URL que no carga (backend momentáneamente inalcanzable, foto
+        // borrada del disco, etc.) no debe dejar un ícono de "imagen rota"
+        // — mejor la inicial, que es el mismo fallback que ya se usa
+        // cuando directamente no hay avatar_url.
+        onError={() => setFailed(true)}
       />
     );
   }

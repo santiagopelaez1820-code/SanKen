@@ -45,7 +45,7 @@ export function OptionPickerModal({ visible, title, options, onSelect, onClose }
 
           <TextField label="Buscar" value={query} onChangeText={setQuery} autoCapitalize="none" />
 
-          <Pressable onPress={() => onSelect(null)}>
+          <Pressable onPress={() => onSelect(null)} style={styles.pressableRow}>
             <ThemedView type="backgroundElement" style={styles.row}>
               <ThemedText type="default">Todos</ThemedText>
             </ThemedView>
@@ -56,7 +56,7 @@ export function OptionPickerModal({ visible, title, options, onSelect, onClose }
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
-              <Pressable onPress={() => onSelect(item)}>
+              <Pressable onPress={() => onSelect(item)} style={styles.pressableRow}>
                 <ThemedView type="backgroundElement" style={styles.row}>
                   <ThemedText type="default">{item.name}</ThemedText>
                 </ThemedView>
@@ -84,5 +84,13 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
+  },
+  // El radio visual vive en `row` (aplicado al ThemedView de adentro), pero
+  // en web el foco de teclado lo recibe el `Pressable` — sin este mismo
+  // radio ACÁ, el navegador dibuja su anillo de foco como un rectángulo
+  // recto que no sigue las esquinas redondeadas del ítem (mismo bug que en
+  // primary-button.tsx).
+  pressableRow: {
+    borderRadius: Spacing.three,
   },
 });

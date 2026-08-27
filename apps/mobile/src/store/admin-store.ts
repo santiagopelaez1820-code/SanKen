@@ -181,13 +181,12 @@ export const useAdminStore = create<AdminStoreState>((set, get) => ({
   },
   uploadExerciseVideo: async (id, asset) => {
     const formData = new FormData();
-    // React Native's fetch acepta este shape de objeto para archivos —
-    // distinto de File/Blob (usado en web), por eso el `as unknown as Blob`.
-    formData.append('video', {
-      uri: asset.uri,
-      name: asset.name,
-      type: asset.mimeType ?? 'video/mp4',
-    } as unknown as Blob);
+    // El shape clásico { uri, name, type } no funciona: desde SDK 53 Expo
+    // reemplaza `fetch` global por su propio runtime en todas las
+    // plataformas, y su FormData solo reconoce Blob real (o string) — ver
+    // el mismo comentario en auth-store.ts::updateAvatar.
+    const blob = await fetch(asset.uri).then((r) => r.blob());
+    formData.append('video', blob, asset.name);
     await api.post(`/admin/exercises/${id}/video`, formData);
     await get().loadExercises();
   },

@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SanKen",
-    "slug": "sanken",
+    "slug": "kennethsanken",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,6 +12,7 @@
     },
     "android": {
       "package": "com.sanken.mobile",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "backgroundColor": "#080C10",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -54,7 +55,8 @@
           "cameraPermission": false
         }
       ],
-      "expo-video"
+      "expo-video",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -63,9 +65,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "c4488862-6197-451f-819d-86f1b63cafc6"
+        "projectId": "b830c06f-7e0d-4278-a435-4b24c8a23193"
       }
     },
-    "owner": "santiago.pelaez"
+    "owner": "kennethsankens-team"
   }
 }

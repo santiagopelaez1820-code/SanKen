@@ -18,7 +18,7 @@ function FeedRow({ item, onPress }: { item: FeedItem; onPress: (item: FeedItem) 
 
   if (item.feed_type === 'news') {
     return (
-      <Pressable onPress={() => onPress(item)}>
+      <Pressable onPress={() => onPress(item)} style={styles.pressableCard}>
         <ThemedView type="backgroundElement" style={[styles.card, unreadStyle]}>
           <ThemedText type="smallBold">{item.title}</ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
@@ -34,7 +34,7 @@ function FeedRow({ item, onPress }: { item: FeedItem; onPress: (item: FeedItem) 
 
   const data = item.data as unknown as NewChatMessageNotificationData;
   return (
-    <Pressable onPress={() => onPress(item)}>
+    <Pressable onPress={() => onPress(item)} style={styles.pressableCard}>
       <ThemedView type="backgroundElement" style={[styles.card, unreadStyle]}>
         <ThemedText type="small" themeColor="textSecondary">
           {new Date(item.created_at).toLocaleDateString('es-AR')}
@@ -123,6 +123,11 @@ const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   pageTitle: { fontSize: 28, lineHeight: 34 },
   card: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
+  // Mismo radio que `card` en el Pressable que lo envuelve — sin esto, el
+  // anillo de foco de teclado en web se dibuja como un rectángulo recto
+  // que no sigue las esquinas redondeadas de la tarjeta (mismo bug que en
+  // primary-button.tsx).
+  pressableCard: { borderRadius: Spacing.three },
   errorBlock: { gap: Spacing.two, alignItems: 'flex-start', backgroundColor: 'transparent' },
   error: { color: '#FF4D5E' },
 });

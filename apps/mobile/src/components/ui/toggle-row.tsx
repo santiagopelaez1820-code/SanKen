@@ -42,12 +42,16 @@ export function ToggleRow({ label, description, icon, value, onValueChange, disa
 }
 
 const styles = StyleSheet.create({
+  // ToggleRow siempre se usa dentro de una card `backgroundElement` (ver
+  // settings/index.tsx) — sin este override quedaba un recuadro del fondo
+  // general de la app encima del fondo real de la card.
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.two,
+    backgroundColor: 'transparent',
   },
-  text: { flex: 1, gap: Spacing.half },
+  text: { flex: 1, gap: Spacing.half, backgroundColor: 'transparent' },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: 'transparent' },
 });

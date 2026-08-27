@@ -1,10 +1,9 @@
-import { Platform } from 'react-native';
 import { create } from 'zustand';
 import type { AuthPayload, LoginPayload, RegisterPayload, TwoFactorChallengeResponse, User } from '@sanken/core';
 import { ApiError, isTwoFactorChallenge } from '@sanken/core';
 
 import { api } from '@/lib/api';
-import { describeSocialAuthError, signInWithGoogle, SocialAuthCancelledError } from '@/lib/social-auth';
+import { describeSocialAuthError, signInWithGoogle, signOutFromGoogle, SocialAuthCancelledError } from '@/lib/social-auth';
 import { tokenStorage } from '@/lib/token-storage';
 
 interface PendingChallenge {
@@ -176,6 +175,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       // Si el token ya era inválido no hay nada que revertir del lado del servidor.
     }
     await tokenStorage.clear();
+    // Sin esto, la próxima vez que se toca "Continuar con Google" el SDK
+    // nativo reutiliza en silencio la última cuenta sin mostrar el
+    // selector — ver el comentario en signOutFromGoogle().
+    await signOutFromGoogle();
     set({ user: null, token: null });
   },
 
@@ -196,29 +199,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
    */
   updateAvatar: async (asset) => {
     set({ isUploadingAvatar: true, avatarError: null });
-    const formData = new FormData();
-
-    // El shape { uri, name, type } es la API de fetch de React Native para
-    // adjuntar un archivo por su ruta local (funciona con file:// / content://
-    // en Android e iOS). En web, expo-image-picker devuelve un blob:/data:
-    // URI en vez de una ruta de archivo — fetch web no sabe adjuntar eso
-    // directamente, hay que resolverlo primero a un Blob real.
-    if (Platform.OS === 'web') {
-      const blob = await fetch(asset.uri).then((r) => r.blob());
-      formData.append('avatar', blob, asset.name);
-    } else {
-      formData.append('avatar', {
-        uri: asset.uri,
-        name: asset.name,
-        type: asset.mimeType ?? 'image/jpeg',
-      } as unknown as Blob);
-    }
 
     try {
+      const formData = new FormData();
+
+      // El shape clásico { uri, name, type } de React Native para adjuntar
+      // un archivo por su ruta local NO funciona acá: desde SDK 53, Expo
+      // reemplaza el `fetch` global por su propio runtime ("expo/fetch") en
+      // todas las plataformas — ver node_modules/expo/src/winter/runtime.native.ts
+      // — y su conversor de FormData (winter/fetch/convertFormData.ts) solo
+      // reconoce partes que sean string o instancia real de Blob, nunca ese
+      // objeto plano. Resolver siempre a un Blob real evita depender de ese
+      // detalle interno y funciona igual en ambas plataformas. Va dentro del
+      // try: si esto falla, isUploadingAvatar tiene que volver a false igual.
+      const blob = await fetch(asset.uri).then((r) => r.blob());
+      formData.append('avatar', blob, asset.name);
+
       const user = await api.post<User>('/auth/me/avatar', formData);
+      // El backend siempre debe devolver avatar_url tras un upload exitoso
+      // (ver AuthController::updateAvatar) — si por lo que sea no viene,
+      // mejor mostrar un error real que dejar la sesión con un estado que
+      // no coincide con lo que el usuario acaba de confirmar en pantalla.
+      if (!user.avatar_url) {
+        const message = 'La foto se subió pero el servidor no confirmó el cambio. Probá de nuevo.';
+        set({ isUploadingAvatar: false, avatarError: message });
+        throw new Error(message);
+      }
       set({ user, isUploadingAvatar: false });
     } catch (err) {
-      set({ isUploadingAvatar: false, avatarError: readErrorMessage(err) });
+      // Un ApiError ya trae un mensaje pensado para mostrarse (validación,
+      // "no se pudo guardar la foto", etc). Cualquier otra cosa es un fallo
+      // técnico (red, FormData, el runtime de fetch) que no tiene sentido
+      // mostrarle crudo al usuario — se loguea para debugging y se muestra
+      // un mensaje genérico en su lugar.
+      const message = err instanceof ApiError ? readErrorMessage(err) : 'No se pudo subir la foto. Probá de nuevo.';
+      if (!(err instanceof ApiError)) {
+        console.error('[updateAvatar] fallo inesperado subiendo el avatar:', err);
+      }
+      set((state) => ({ isUploadingAvatar: false, avatarError: state.avatarError ?? message }));
       throw err;
     }
   },

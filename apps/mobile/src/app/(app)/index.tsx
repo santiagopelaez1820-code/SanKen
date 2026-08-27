@@ -277,6 +277,12 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     marginBottom: Spacing.one,
   },
-  spacer: { height: Spacing.three },
-  buttonGap: { height: Spacing.two },
+  // `ThemedView` sin `type` pinta `theme.background` (el fondo general de
+  // la app) por default — correcto para un contenedor de pantalla, pero
+  // acá son simples espaciadores DENTRO de la card cian traslúcida
+  // (`todayCard`). Sin este override quedaba un rectángulo del color de
+  // fondo general de la app, mal encajado, arriba y abajo de "Comenzar" —
+  // el mismo mecanismo que causaba el rectángulo reportado.
+  spacer: { height: Spacing.three, backgroundColor: 'transparent' },
+  buttonGap: { height: Spacing.two, backgroundColor: 'transparent' },
 });

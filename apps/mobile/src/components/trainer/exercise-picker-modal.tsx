@@ -50,7 +50,7 @@ export function ExercisePickerModal({ visible, exercises, onSelect, onClose }: E
             keyExtractor={(item) => String(item.id)}
             contentContainerStyle={styles.list}
             renderItem={({ item }) => (
-              <Pressable onPress={() => onSelect(item)}>
+              <Pressable onPress={() => onSelect(item)} style={styles.pressableRow}>
                 <ThemedView type="backgroundElement" style={styles.row}>
                   <ThemedText type="default">{item.name}</ThemedText>
                   <ThemedText type="small" themeColor="textSecondary">
@@ -81,5 +81,11 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.three,
+  },
+  // Mismo radio que `row` (ver el comentario equivalente en
+  // option-picker-modal.tsx) para que el anillo de foco en web siga las
+  // esquinas redondeadas en vez de dibujar un rectángulo recto.
+  pressableRow: {
+    borderRadius: Spacing.three,
   },
 });

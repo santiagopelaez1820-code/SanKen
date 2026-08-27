@@ -14,6 +14,7 @@ jest.mock('@/lib/token-storage', () => ({
 }));
 jest.mock('@/lib/social-auth', () => ({
   signInWithGoogle: jest.fn(),
+  signOutFromGoogle: jest.fn(),
   describeSocialAuthError: () => 'No se pudo iniciar sesión con Google. Inténtalo nuevamente.',
   SocialAuthCancelledError: class SocialAuthCancelledError extends Error {},
   SocialAuthUnavailableError: class SocialAuthUnavailableError extends Error {},
