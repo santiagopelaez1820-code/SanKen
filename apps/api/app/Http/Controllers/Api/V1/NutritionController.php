@@ -61,11 +61,11 @@ class NutritionController extends Controller
             ->get();
 
         $summary = $logs->reduce(function (array $totals, MealLog $log) {
-            $factor = (float) $log->quantity_grams / 100;
-            $totals['calories'] += (float) $log->foodItem->calories_per_100g * $factor;
-            $totals['protein_g'] += (float) $log->foodItem->protein_per_100g * $factor;
-            $totals['carbs_g'] += (float) $log->foodItem->carbs_per_100g * $factor;
-            $totals['fat_g'] += (float) $log->foodItem->fat_per_100g * $factor;
+            $macros = $log->foodItem->macrosFor((float) $log->quantity_grams);
+            $totals['calories'] += $macros['calories'];
+            $totals['protein_g'] += $macros['protein_g'];
+            $totals['carbs_g'] += $macros['carbs_g'];
+            $totals['fat_g'] += $macros['fat_g'];
 
             return $totals;
         }, ['calories' => 0.0, 'protein_g' => 0.0, 'carbs_g' => 0.0, 'fat_g' => 0.0]);

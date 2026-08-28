@@ -1,9 +1,10 @@
 import { Offcanvas } from "react-bootstrap"
 import { LogOut, Settings } from "lucide-react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { useAuthStore } from "@/lib/auth-store"
 import { useFeed } from "@/hooks/use-feed"
 import { useChatUnread } from "@/hooks/use-chat-unread"
+import { useLogout } from "@/hooks/use-logout"
 import { NavSections } from "@/components/layout/NavSections"
 
 interface MoreSheetProps {
@@ -14,15 +15,13 @@ interface MoreSheetProps {
 /** Hoja inferior con todo lo que no entra en la bottom nav — mismo patrón que la app mobile nativa. */
 export function MoreSheet({ open, onClose }: MoreSheetProps) {
   const user = useAuthStore((state) => state.user)
-  const clearSession = useAuthStore((state) => state.clearSession)
-  const navigate = useNavigate()
+  const logout = useLogout()
   const { unreadCount: feedUnread } = useFeed()
   const chatUnread = useChatUnread()
 
   const handleLogout = () => {
-    clearSession()
+    logout()
     onClose()
-    navigate("/login")
   }
 
   return (

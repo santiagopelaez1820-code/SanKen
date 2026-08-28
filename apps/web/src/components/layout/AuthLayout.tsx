@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
 import { Card } from "react-bootstrap"
 
-/** Shell compartido por login / registro / verificación 2FA — logo + card centrada sobre fondo con glow naranja sutil. */
+/** Shell compartido por login / registro / verificación 2FA — logo + card centrada sobre fondo con glow cyan sutil. */
 export function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <main
@@ -9,7 +9,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
       style={{
         minHeight: "100svh",
         background:
-          "radial-gradient(60% 50% at 50% 0%, rgba(255, 106, 0,0.12), transparent 70%), var(--sanken-black)",
+          "radial-gradient(60% 50% at 50% 0%, rgba(0, 184, 217, 0.12), transparent 70%), var(--sanken-black)",
       }}
     >
       <img src="/logo-full.png" alt="SANKEN" style={{ width: 220, height: "auto" }} />

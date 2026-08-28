@@ -1,33 +1,33 @@
 // ---------------------------------------------------------------------------
 // SanKen — tema Bootstrap
 //
-// Identidad: premium + deportiva + tecnológica. Dark-first (única experiencia
-// hoy, sin toggle de light mode — igual que el estado anterior de la app).
-// El naranja es un acento, no un color de fondo: se reserva para CTAs
-// primarios, progreso, logros y detalles de marca.
+// Identidad: "Dark Performance" — la misma paleta cyan que apps/mobile
+// (apps/mobile/src/constants/theme.ts). Un solo acento con propósito: cyan
+// para CTAs primarios, progreso, estados activos y detalles de marca. Dark
+// es la experiencia por defecto en ambas plataformas.
 // ---------------------------------------------------------------------------
 
-// Paleta base ----------------------------------------------------------------
-$sanken-black:        #0B0B0B; // fondo principal
-$sanken-black-2:      #121212; // superficie / card
-$sanken-charcoal:     #1C1C1C; // superficie elevada / hover
-$sanken-charcoal-2:   #262626; // borde / divisor sutil
-$sanken-gray:         #6B6B6B; // texto secundario
-$sanken-gray-light:   #9A9A9A; // texto terciario
-$sanken-white:        #FFFFFF;
-// Naranja exacto muestreado del isotipo (flecha S+X) — no un naranja genérico.
-$sanken-orange:         #FF6A00; // acento de marca
-$sanken-orange-light:   #FF8F1F; // hover/gradiente del acento (tono de la punta de flecha)
-$sanken-orange-deep:    #FF4B00; // active/pressed (tono de la base de flecha)
-$sanken-orange-dim:     rgba(255, 106, 0, 0.16); // fondo tenue para badges/rings
+// Paleta base — valores idénticos a Colors.dark en apps/mobile/theme.ts -----
+$sanken-black:        #080C10; // fondo principal (mobile: background)
+$sanken-black-2:      #111820; // superficie / card (mobile: backgroundElement)
+$sanken-charcoal:     #1D2732; // superficie elevada / hover (mobile: backgroundSelected)
+$sanken-charcoal-2:   #263140; // borde / divisor sutil
+$sanken-gray:         #9AA6B2; // texto secundario (mobile: textSecondary)
+$sanken-gray-light:   #B8C2CC; // texto terciario
+$sanken-white:        #F5F7FA; // (mobile: text)
+// Cyan de marca — idéntico al accent de mobile, no un cyan genérico.
+$sanken-cyan:         #00B8D9; // acento de marca (mobile: accent)
+$sanken-cyan-light:   #00D4FF; // hover/glow del acento (mobile: accentSecondary)
+$sanken-cyan-deep:    #0093AD; // active/pressed
+$sanken-cyan-dim:     rgba(0, 184, 217, 0.16); // fondo tenue para badges/rings
 
-$sanken-success:      #2FA84F;
-$sanken-warning:      #D9A441;
-$sanken-danger:       #D9534F;
+$sanken-success:      #20C997;
+$sanken-warning:      #FFB020;
+$sanken-danger:       #FF4D5E;
 $sanken-info:         #4C8DFF;
 
 // Bootstrap color system ------------------------------------------------------
-$primary:       $sanken-orange;
+$primary:       $sanken-cyan;
 $secondary:     $sanken-charcoal;
 $success:       $sanken-success;
 $warning:       $sanken-warning;
@@ -36,7 +36,7 @@ $info:          $sanken-info;
 $light:         $sanken-white;
 $dark:          $sanken-black;
 
-$min-contrast-ratio: 1.6; // el naranja sobre negro no cumple 4.5:1 con texto blanco encima; se ajusta color-contrast manualmente donde aplica
+$min-contrast-ratio: 1.6; // el cyan sobre negro no cumple 4.5:1 con texto blanco encima; se ajusta color-contrast manualmente donde aplica
 
 $body-bg:        $sanken-black;
 $body-color:      $sanken-white;
@@ -44,13 +44,13 @@ $body-secondary-color: $sanken-gray-light;
 $body-tertiary-bg: $sanken-black-2;
 
 $border-color:    rgba(255, 255, 255, 0.08);
-// "Black Performance": esquinas técnicas, no el redondeo genérico de SaaS.
-// Nada de pills salvo badges/tags puntuales — los CTAs son rectangulares.
-$border-radius:         0.25rem;
-$border-radius-sm:      0.125rem;
-$border-radius-lg:      0.5rem;
-$border-radius-xl:      0.75rem;
-$border-radius-2xl:     1rem;
+// "Dark Performance": mismo redondeo generoso que mobile (cards a 24px,
+// controles a 16px) — reemplaza las esquinas técnicas de la identidad anterior.
+$border-radius:         0.75rem;
+$border-radius-sm:      0.5rem;
+$border-radius-lg:      1rem;
+$border-radius-xl:      1.25rem;
+$border-radius-2xl:     1.5rem;
 $border-radius-pill:    50rem;
 
 // Tipografía -------------------------------------------------------------
@@ -77,14 +77,14 @@ $display-font-sizes: (
 // Componentes --------------------------------------------------------------
 $card-bg: $sanken-black-2;
 $card-border-color: $border-color;
-$card-border-radius: $border-radius-lg;
+$card-border-radius: $border-radius-2xl;
 $card-cap-bg: transparent;
 $card-spacer-y: 1.25rem;
 $card-spacer-x: 1.25rem;
 
-$btn-border-radius: $border-radius;
+$btn-border-radius: $border-radius-lg;
 $btn-border-radius-sm: $border-radius-sm;
-$btn-border-radius-lg: $border-radius-lg;
+$btn-border-radius-lg: $border-radius-xl;
 $btn-font-weight: 700;
 $btn-font-family: $headings-font-family;
 $btn-padding-y: 0.85rem;
@@ -100,7 +100,7 @@ $badge-padding-y: 0.4em;
 $badge-padding-x: 0.65em;
 
 $progress-bg: $sanken-charcoal;
-$progress-bar-bg: $sanken-orange;
+$progress-bar-bg: $sanken-cyan;
 $progress-border-radius: $border-radius-sm;
 $progress-height: 0.375rem;
 
@@ -114,8 +114,8 @@ $dropdown-bg: $sanken-charcoal;
 $dropdown-border-color: $border-color;
 $dropdown-link-color: $sanken-white;
 $dropdown-link-hover-bg: rgba(255, 255, 255, 0.06);
-$dropdown-link-active-bg: $sanken-orange-dim;
-$dropdown-link-active-color: $sanken-orange-light;
+$dropdown-link-active-bg: $sanken-cyan-dim;
+$dropdown-link-active-color: $sanken-cyan-light;
 
 $nav-link-color: $sanken-gray-light;
 $nav-link-hover-color: $sanken-white;
@@ -129,15 +129,15 @@ $offcanvas-border-color: $border-color;
 $list-group-bg: transparent;
 $list-group-border-color: $border-color;
 $list-group-hover-bg: rgba(255, 255, 255, 0.04);
-$list-group-active-bg: $sanken-orange-dim;
-$list-group-active-border-color: $sanken-orange;
+$list-group-active-bg: $sanken-cyan-dim;
+$list-group-active-border-color: $sanken-cyan;
 $list-group-active-color: $sanken-white;
 
 $input-bg: $sanken-charcoal;
 $input-color: $sanken-white;
 $input-border-color: $border-color;
-$input-focus-border-color: $sanken-orange;
-$input-focus-box-shadow: 0 0 0 0.2rem rgba(255, 106, 0, 0.25);
+$input-focus-border-color: $sanken-cyan;
+$input-focus-box-shadow: 0 0 0 0.2rem rgba(0, 184, 217, 0.25);
 $input-placeholder-color: $sanken-gray;
 
 $table-color: $sanken-white;
@@ -158,22 +158,22 @@ $toast-header-background-color: $sanken-charcoal;
 
 $accordion-bg: transparent;
 $accordion-border-color: $border-color;
-$accordion-button-active-bg: $sanken-orange-dim;
-$accordion-button-active-color: $sanken-orange-light;
+$accordion-button-active-bg: $sanken-cyan-dim;
+$accordion-button-active-color: $sanken-cyan-light;
 
 $pagination-bg: transparent;
 $pagination-border-color: $border-color;
 $pagination-color: $sanken-white;
 $pagination-hover-bg: rgba(255, 255, 255, 0.06);
-$pagination-active-bg: $sanken-orange;
-$pagination-active-border-color: $sanken-orange;
+$pagination-active-bg: $sanken-cyan;
+$pagination-active-border-color: $sanken-cyan;
 $pagination-active-color: $sanken-black;
 
 $spinner-width: 1.5rem;
 $spinner-height: 1.5rem;
 
-$link-color: $sanken-orange-light;
-$link-hover-color: $sanken-orange;
+$link-color: $sanken-cyan-light;
+$link-hover-color: $sanken-cyan;
 $link-decoration: none;
 
 $enable-negative-margins: true;

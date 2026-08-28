@@ -20,8 +20,8 @@ export function RouteProgressBar() {
             key="route-progress"
             style={{
               height: "100%",
-              background: "var(--sanken-orange)",
-              boxShadow: "0 0 8px var(--sanken-orange)",
+              background: "var(--sanken-cyan)",
+              boxShadow: "0 0 8px var(--sanken-cyan)",
             }}
             initial={{ x: "-100%" }}
             animate={{ x: "0%" }}

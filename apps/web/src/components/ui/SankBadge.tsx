@@ -2,10 +2,10 @@ import * as React from "react"
 import { Badge } from "react-bootstrap"
 import { cn } from "@/lib/utils"
 
-export type SankBadgeVariant = "orange" | "neutral" | "success" | "warning" | "danger" | "outline"
+export type SankBadgeVariant = "cyan" | "neutral" | "success" | "warning" | "danger" | "outline"
 
 const VARIANT_CLASS: Record<SankBadgeVariant, string> = {
-  orange: "text-bg-primary",
+  cyan: "text-bg-primary",
   neutral: "bg-secondary-subtle text-body",
   success: "text-bg-success",
   warning: "text-bg-warning",

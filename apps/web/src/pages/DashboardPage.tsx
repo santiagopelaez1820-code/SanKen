@@ -35,7 +35,7 @@ export function DashboardPage() {
     <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1080 }}>
       <motion.div className="d-flex flex-column gap-4" variants={staggerContainer()} initial="hidden" animate="show">
         <motion.div variants={fadeInUp}>
-          <p className="sank-eyebrow sank-eyebrow--orange mb-1">{greeting()}</p>
+          <p className="sank-eyebrow sank-eyebrow--cyan mb-1">{greeting()}</p>
           <h1 className="display-3 sank-stat mb-2">{user?.name?.split(" ")[0] ?? "Atleta"}</h1>
           <p className="text-body-secondary mb-0">¿Listo para entrenar?</p>
         </motion.div>

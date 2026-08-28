@@ -30,7 +30,7 @@ export function DashboardChallengesRow() {
       title="Retos activos"
       itemWidth="260px"
       action={
-        <Link to="/challenges" className="small fw-semibold text-uppercase text-decoration-none" style={{ color: "var(--sanken-orange-light)", letterSpacing: "0.04em" }}>
+        <Link to="/challenges" className="small fw-semibold text-uppercase text-decoration-none" style={{ color: "var(--sanken-cyan-light)", letterSpacing: "0.04em" }}>
           Ver todos
         </Link>
       }
@@ -44,7 +44,7 @@ export function DashboardChallengesRow() {
           className="p-4 h-100 text-decoration-none text-reset d-block"
         >
           <div className="d-flex align-items-center gap-2 mb-2">
-            <Flag size={14} color="var(--sanken-orange)" />
+            <Flag size={14} color="var(--sanken-cyan)" />
             <span className="sank-eyebrow mb-0">{challenge.type === "weekly" ? "Semanal" : "Mensual"} · {daysLeft(challenge.ends_at)}d</span>
           </div>
           <p className="fw-bold fs-6 mb-3 text-truncate">{challenge.title}</p>
@@ -55,7 +55,7 @@ export function DashboardChallengesRow() {
               label={`${challenge.progress_value ?? 0} / ${challenge.criteria.target}`}
             />
           ) : (
-            <span className="small fw-semibold" style={{ color: "var(--sanken-orange-light)" }}>Unirme →</span>
+            <span className="small fw-semibold" style={{ color: "var(--sanken-cyan-light)" }}>Unirme →</span>
           )}
         </SankCard>
       ))}

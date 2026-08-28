@@ -32,7 +32,7 @@ export function ChallengeCard({ challenge, expanded, onToggle, onJoin }: Challen
             className="mb-1"
           />
           {challenge.completed && (
-            <p className="small fw-bold mb-2" style={{ color: "var(--sanken-orange)" }}>¡Completado!</p>
+            <p className="small fw-bold mb-2" style={{ color: "var(--sanken-cyan)" }}>¡Completado!</p>
           )}
         </>
       )}

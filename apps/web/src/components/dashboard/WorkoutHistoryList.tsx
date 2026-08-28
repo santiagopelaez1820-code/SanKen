@@ -9,7 +9,7 @@ import { fadeInUp, staggerContainer } from "@/lib/motion"
 
 const STATUS_BADGE_VARIANT: Record<ReturnType<typeof getWorkoutSessionStatus>, SankBadgeVariant> = {
   completed: "success",
-  active: "orange",
+  active: "cyan",
   skipped: "neutral",
   cancelled: "warning",
 }

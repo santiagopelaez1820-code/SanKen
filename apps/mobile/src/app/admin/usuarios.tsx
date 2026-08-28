@@ -8,7 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { OptionPickerModal } from '@/components/ui/option-picker-modal';
+import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
@@ -222,27 +222,42 @@ export default function AdminUsuariosScreen() {
           onCancel={() => setConfirmingDeleteId(null)}
         />
 
-        <OptionPickerModal
+        <ListPickerModal
           visible={countryPickerVisible}
           title="País"
-          options={countries}
+          items={countries}
+          getId={(option) => option.id}
+          getLabel={(option) => option.name}
           onSelect={(option) => {
             setCountry(option);
             setCity(null);
             setCountryPickerVisible(false);
-            applyFilters({ countryId: option?.id, cityId: undefined });
+            applyFilters({ countryId: option.id, cityId: undefined });
+          }}
+          onSelectAll={() => {
+            setCountry(null);
+            setCity(null);
+            setCountryPickerVisible(false);
+            applyFilters({ countryId: undefined, cityId: undefined });
           }}
           onClose={() => setCountryPickerVisible(false)}
         />
 
-        <OptionPickerModal
+        <ListPickerModal
           visible={cityPickerVisible}
           title="Ciudad"
-          options={cities}
+          items={cities}
+          getId={(option) => option.id}
+          getLabel={(option) => option.name}
           onSelect={(option) => {
             setCity(option);
             setCityPickerVisible(false);
-            applyFilters({ cityId: option?.id });
+            applyFilters({ cityId: option.id });
+          }}
+          onSelectAll={() => {
+            setCity(null);
+            setCityPickerVisible(false);
+            applyFilters({ cityId: undefined });
           }}
           onClose={() => setCityPickerVisible(false)}
         />

@@ -1,28 +1,23 @@
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { LogOut, Settings } from "lucide-react"
 import { useAuthStore } from "@/lib/auth-store"
 import { useFeed } from "@/hooks/use-feed"
 import { useChatUnread } from "@/hooks/use-chat-unread"
+import { useLogout } from "@/hooks/use-logout"
 import { buildNavSections } from "@/components/layout/nav-config"
 import { cn } from "@/lib/utils"
 
 /** Carril de navegación de escritorio: solo iconos + tooltip, no un sidebar con etiquetas. */
 export function IconRail() {
   const user = useAuthStore((state) => state.user)
-  const clearSession = useAuthStore((state) => state.clearSession)
   const location = useLocation()
-  const navigate = useNavigate()
+  const handleLogout = useLogout()
   const { unreadCount: feedUnread } = useFeed()
   const chatUnread = useChatUnread()
 
   const sections = buildNavSections(user)
   const badgeCounts = { feed: feedUnread, chat: chatUnread }
   const isActive = (path: string) => location.pathname === path
-
-  const handleLogout = () => {
-    clearSession()
-    navigate("/login")
-  }
 
   return (
     <aside className="sank-rail d-none d-lg-flex flex-column align-items-center flex-shrink-0 vh-100" style={{ position: "sticky", top: 0 }}>
@@ -48,7 +43,7 @@ export function IconRail() {
                   {badgeCount > 0 && (
                     <span
                       className="position-absolute rounded-circle"
-                      style={{ top: 4, right: 4, width: 7, height: 7, background: active ? "var(--sanken-black)" : "var(--sanken-orange)" }}
+                      style={{ top: 4, right: 4, width: 7, height: 7, background: active ? "var(--sanken-black)" : "var(--sanken-cyan)" }}
                     />
                   )}
                   <span className="sank-rail-tooltip">{item.label}</span>

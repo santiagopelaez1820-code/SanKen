@@ -55,16 +55,16 @@ export function ChallengeLeaderboard({ challengeId }: { challengeId: number }) {
             "d-flex align-items-center justify-content-between py-2 px-2 rounded-1",
             entry.is_viewer && "fw-semibold"
           )}
-          style={entry.is_viewer ? { background: "var(--sanken-orange-dim)" } : undefined}
+          style={entry.is_viewer ? { background: "var(--sanken-cyan-dim)" } : undefined}
         >
           <span className="d-flex align-items-center gap-3">
             <span className="text-body-secondary sank-tabular-nums" style={{ width: 20, textAlign: "right", fontSize: "0.75rem" }}>
               {entry.rank}
             </span>
             <span className="small">{entry.user_name}</span>
-            {entry.completed && <span className="small" style={{ color: "var(--sanken-orange)" }}>✓</span>}
+            {entry.completed && <span className="small" style={{ color: "var(--sanken-cyan)" }}>✓</span>}
           </span>
-          <span className="small fw-semibold sank-tabular-nums" style={{ color: "var(--sanken-orange-light)" }}>
+          <span className="small fw-semibold sank-tabular-nums" style={{ color: "var(--sanken-cyan-light)" }}>
             {entry.progress_value.toLocaleString("es-AR")}
           </span>
         </li>

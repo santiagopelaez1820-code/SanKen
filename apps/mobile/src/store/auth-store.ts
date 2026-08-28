@@ -36,6 +36,14 @@ interface AuthState {
   loginWithGoogle: () => Promise<void>;
   challenge2fa: (code: string) => Promise<void>;
   logout: () => Promise<void>;
+  /**
+   * Limpia la sesión local sin llamar al servidor — a diferencia de
+   * logout(), no hace POST /auth/logout. Pensada para el interceptor de 401
+   * del ApiClient (ver lib/api.ts): si ya llegó un 401, el server ya
+   * considera el token inválido, así que un logout "normal" solo generaría
+   * otro 401 (y, sin cuidado, otra llamada a este mismo handler en bucle).
+   */
+  clearSessionLocal: () => void;
   refreshMe: () => Promise<void>;
   setOnboardingCompleted: () => void;
   updateAvatar: (asset: AvatarPickerAsset) => Promise<void>;
@@ -180,6 +188,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     // selector — ver el comentario en signOutFromGoogle().
     await signOutFromGoogle();
     set({ user: null, token: null });
+  },
+
+  clearSessionLocal: () => {
+    set({ user: null, token: null });
+    void tokenStorage.clear();
   },
 
   refreshMe: async () => {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Http\Controllers\Concerns\ReplacesPublicFile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StorePrSubmissionRequest;
 use App\Http\Requests\UploadPrSubmissionVideoRequest;
@@ -9,7 +10,6 @@ use App\Http\Resources\PrSubmissionResource;
 use App\Models\PrSubmission;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -22,6 +22,8 @@ use Illuminate\Validation\ValidationException;
  */
 class PrSubmissionController extends Controller
 {
+    use ReplacesPublicFile;
+
     public function index(Request $request): JsonResponse
     {
         $submissions = PrSubmission::query()
@@ -73,17 +75,13 @@ class PrSubmissionController extends Controller
             ]);
         }
 
-        $previousPath = $this->publicPathFromUrl($prSubmission->video_url);
-
-        $path = $request->file('video')->store('pr-submission-videos', 'public');
-
-        abort_unless(Storage::disk('public')->exists($path), 500, 'No se pudo guardar el video.');
-
-        $prSubmission->update(['video_url' => '/storage/'.$path]);
-
-        if ($previousPath && Storage::disk('public')->exists($previousPath)) {
-            Storage::disk('public')->delete($previousPath);
-        }
+        $videoUrl = $this->storePublicFileReplacing(
+            $request->file('video'),
+            'pr-submission-videos',
+            $prSubmission->video_url,
+            'No se pudo guardar el video.',
+        );
+        $prSubmission->update(['video_url' => $videoUrl]);
 
         return response()->json([
             'data' => new PrSubmissionResource($prSubmission->fresh(['exercise', 'reviewer'])),
@@ -93,17 +91,5 @@ class PrSubmissionController extends Controller
     private function authorizeOwner(Request $request, PrSubmission $submission): void
     {
         abort_unless($submission->user_id === $request->user()->id, 403);
-    }
-
-    private function publicPathFromUrl(?string $url): ?string
-    {
-        if (! $url) {
-            return null;
-        }
-
-        $marker = '/storage/';
-        $position = strpos($url, $marker);
-
-        return $position === false ? null : substr($url, $position + strlen($marker));
     }
 }

@@ -19,11 +19,7 @@ class BodyMeasurementController extends Controller
 
         return response()->json([
             'data' => BodyMeasurementResource::collection($measurements->items()),
-            'meta' => [
-                'current_page' => $measurements->currentPage(),
-                'last_page' => $measurements->lastPage(),
-                'total' => $measurements->total(),
-            ],
+            'meta' => $this->paginationMeta($measurements),
         ]);
     }
 

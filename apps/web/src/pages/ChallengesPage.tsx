@@ -35,7 +35,7 @@ export function ChallengesPage() {
     <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1080 }}>
       <motion.div className="d-flex flex-column gap-4" variants={staggerContainer()} initial="hidden" animate="show">
         <motion.div variants={fadeInUp}>
-          <p className="sank-eyebrow sank-eyebrow--orange mb-1">Comunidad</p>
+          <p className="sank-eyebrow sank-eyebrow--cyan mb-1">Comunidad</p>
           <h1 className="display-5 sank-stat mb-0">Retos</h1>
         </motion.div>
 

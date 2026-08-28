@@ -6,13 +6,13 @@ import type { ExerciseCatalogItem, FitnessGoal, ManualRoutinePayload, Routine, S
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { OptionCard } from '@/components/ui/option-card';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
 import { useTrainerClientsStore } from '@/store/trainer-clients-store';
-import { ExercisePickerModal } from './exercise-picker-modal';
 import { RoutineDayEditor } from './routine-day-editor';
 import { EMPTY_DAY, EMPTY_EXERCISE, GOAL_OPTIONS, SPLIT_OPTIONS, type DayFormValues } from './routine-editor-types';
 
@@ -281,9 +281,14 @@ function RoutineEditorFields({ mode, trainerClientId, routineId, initialRoutine 
         </ScrollView>
       </SafeAreaView>
 
-      <ExercisePickerModal
+      <ListPickerModal
         visible={pickerSlot !== null}
-        exercises={exercises}
+        title="Elegir ejercicio"
+        items={exercises}
+        getId={(exercise) => exercise.id}
+        getLabel={(exercise) => exercise.name}
+        getSubtitle={(exercise) => `${exercise.primary_muscle.name} · ${exercise.equipment}`}
+        searchPlaceholder="Nombre del ejercicio…"
         onSelect={handlePickExercise}
         onClose={() => setPickerSlot(null)}
       />

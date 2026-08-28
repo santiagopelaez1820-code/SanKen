@@ -12,11 +12,6 @@ export const fadeInUp: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: DURATION, ease: EASE_OUT } },
 }
 
-export const fadeIn: Variants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { duration: DURATION, ease: EASE_OUT } },
-}
-
 /** Envolver una lista con esto y cada hijo con `fadeInUp` para un stagger consistente. */
 export const staggerContainer = (staggerChildren = 0.06, delayChildren = 0): Variants => ({
   hidden: {},

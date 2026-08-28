@@ -13,8 +13,9 @@ class SocialLoginRequest extends FormRequest
     }
 
     /**
-     * `provider` solo acepta 'google' por ahora — Facebook todavía no está
-     * implementado, se amplía esta lista cuando lo esté.
+     * `provider` solo acepta 'google' por ahora — Facebook requiere que la
+     * app esté verificada como negocio en Meta para permitir login público,
+     * lo cual no aplica a este proyecto (ver historial de esta ronda).
      *
      * @return array<string, mixed>
      */

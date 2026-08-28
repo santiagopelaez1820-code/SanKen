@@ -31,11 +31,11 @@ export function ChallengeHero({ challenge, expanded, onToggle, onJoin }: Challen
       className="position-relative overflow-hidden rounded-2 sank-hairline p-4 p-sm-5 text-center"
       style={{
         background:
-          "radial-gradient(80% 100% at 50% 0%, rgba(255,106,0,0.16), transparent 60%), var(--sanken-black-2)",
+          "radial-gradient(80% 100% at 50% 0%, rgba(0,184,217,0.16), transparent 60%), var(--sanken-black-2)",
         boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 28px 60px -24px rgba(0,0,0,0.7)",
       }}
     >
-      <p className="sank-eyebrow sank-eyebrow--orange mb-2">
+      <p className="sank-eyebrow sank-eyebrow--cyan mb-2">
         {challenge.type === "weekly" ? "Reto semanal" : "Reto mensual"}
       </p>
       <h1 className="display-4 sank-stat mb-2">{challenge.title}</h1>
@@ -43,7 +43,7 @@ export function ChallengeHero({ challenge, expanded, onToggle, onJoin }: Challen
         {challenge.description}
       </p>
 
-      <p className="sank-stat mb-1" style={{ fontSize: "1.75rem", color: challenge.completed ? "var(--sanken-orange)" : undefined }}>
+      <p className="sank-stat mb-1" style={{ fontSize: "1.75rem", color: challenge.completed ? "var(--sanken-cyan)" : undefined }}>
         {challenge.completed ? "¡Completado!" : `${daysLeft} días restantes`}
       </p>
 
@@ -51,7 +51,7 @@ export function ChallengeHero({ challenge, expanded, onToggle, onJoin }: Challen
         <div className="mx-auto mt-3" style={{ maxWidth: 480 }}>
           <div className="rounded-pill overflow-hidden" style={{ height: 10, background: "var(--sanken-charcoal)" }}>
             <motion.div
-              style={{ height: "100%", background: "linear-gradient(90deg, var(--sanken-orange-deep), var(--sanken-orange-light))" }}
+              style={{ height: "100%", background: "linear-gradient(90deg, var(--sanken-cyan-deep), var(--sanken-cyan-light))" }}
               initial={{ width: 0 }}
               animate={{ width: `${progressPct}%` }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}

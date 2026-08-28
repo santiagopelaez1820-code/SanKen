@@ -72,15 +72,15 @@ export function MuscleVolumeChart() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
               <XAxis
                 dataKey="muscle_group"
-                tick={{ fill: "#6B6B6B", fontSize: 12 }}
+                tick={{ fill: "#9AA6B2", fontSize: 12 }}
                 tickLine={false}
                 axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
               />
-              <YAxis tick={{ fill: "#6B6B6B", fontSize: 12 }} tickLine={false} axisLine={false} width={56} />
+              <YAxis tick={{ fill: "#9AA6B2", fontSize: 12 }} tickLine={false} axisLine={false} width={56} />
               <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
               <Bar
                 dataKey="volume_kg"
-                fill="#FF6A00"
+                fill="#00B8D9"
                 radius={[2, 2, 0, 0]}
                 maxBarSize={44}
                 isAnimationActive

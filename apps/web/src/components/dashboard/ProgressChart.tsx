@@ -84,12 +84,12 @@ export function ProgressChart() {
               <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "#6B6B6B", fontSize: 12 }}
+                tick={{ fill: "#9AA6B2", fontSize: 12 }}
                 tickLine={false}
                 axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
               />
               <YAxis
-                tick={{ fill: "#6B6B6B", fontSize: 12 }}
+                tick={{ fill: "#9AA6B2", fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
                 width={56}
@@ -99,9 +99,9 @@ export function ProgressChart() {
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#FF6A00"
+                stroke="#00B8D9"
                 strokeWidth={2.5}
-                dot={{ r: 3, fill: "#FF6A00", strokeWidth: 0 }}
+                dot={{ r: 3, fill: "#00B8D9", strokeWidth: 0 }}
                 activeDot={{ r: 5 }}
                 isAnimationActive
                 animationDuration={650}

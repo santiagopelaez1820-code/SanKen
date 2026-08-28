@@ -34,4 +34,27 @@ class FoodItem extends Model
     {
         return $this->hasMany(MealLog::class);
     }
+
+    /**
+     * Macros para una porción de $quantityGrams, escalados desde los
+     * valores por 100g — la misma fórmula (factor = gramos/100) vivía
+     * duplicada en MealLogResource, NutritionPlanMealItemResource, y el
+     * resumen diario de NutritionController::meals(). Devuelve valores SIN
+     * redondear a propósito: los Resources redondean cada ítem para
+     * mostrarlo, pero el resumen diario suma los valores crudos de varios
+     * ítems y redondea recién al final — redondear acá cambiaría ese total.
+     *
+     * @return array{calories: float, protein_g: float, carbs_g: float, fat_g: float}
+     */
+    public function macrosFor(float $quantityGrams): array
+    {
+        $factor = $quantityGrams / 100;
+
+        return [
+            'calories' => (float) $this->calories_per_100g * $factor,
+            'protein_g' => (float) $this->protein_per_100g * $factor,
+            'carbs_g' => (float) $this->carbs_per_100g * $factor,
+            'fat_g' => (float) $this->fat_per_100g * $factor,
+        ];
+    }
 }

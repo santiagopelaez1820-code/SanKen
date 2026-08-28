@@ -33,6 +33,18 @@ export interface ApiClientConfig {
   withCredentials?: boolean;
   /** Returns the current XSRF-TOKEN cookie value, URL-decoded. Web only. */
   getCsrfToken?: () => string | null | undefined;
+  /**
+   * Called whenever the API rejects an authenticated request with 401. The
+   * backend never returns 401 for a failed login/register (those are 422
+   * validation errors, see AuthenticateUserAction) — a 401 always means the
+   * caller's session/token is no longer valid (expired, revoked, or —
+   * concretely, what happened to a dev testing this — pointing at a token
+   * row that no longer exists after the local DB was rebuilt). Each
+   * platform wires this to clear its local session so the UI falls back to
+   * the login screen instead of hanging on a request that can never
+   * succeed (see OnboardingPage's old `isLoading || !questions` bug).
+   */
+  onUnauthorized?: () => void;
 }
 
 /**
@@ -45,12 +57,14 @@ export class ApiClient {
   private readonly getToken?: () => string | null | undefined;
   private readonly withCredentials: boolean;
   private readonly getCsrfToken?: () => string | null | undefined;
+  private readonly onUnauthorized?: () => void;
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/+$/, '');
     this.getToken = config.getToken;
     this.withCredentials = config.withCredentials ?? false;
     this.getCsrfToken = config.getCsrfToken;
+    this.onUnauthorized = config.onUnauthorized;
   }
 
   /**
@@ -150,6 +164,9 @@ export class ApiClient {
       | null;
 
     if (!res.ok) {
+      if (res.status === 401) {
+        this.onUnauthorized?.();
+      }
       throw new ApiError(res.status, (json as ApiErrorBody) ?? { message: res.statusText });
     }
 

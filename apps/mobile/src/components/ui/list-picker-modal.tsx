@@ -7,28 +7,45 @@ import { ThemedView } from '@/components/themed-view';
 import { TextField } from '@/components/ui/text-field';
 import { Spacing } from '@/constants/theme';
 
-interface Option {
-  id: number;
-  name: string;
-}
-
-interface OptionPickerModalProps {
+interface ListPickerModalProps<T> {
   visible: boolean;
   title: string;
-  options: Option[];
-  onSelect: (option: Option | null) => void;
+  items: T[];
+  getId: (item: T) => string | number;
+  getLabel: (item: T) => string;
+  getSubtitle?: (item: T) => string | undefined;
+  onSelect: (item: T) => void;
   onClose: () => void;
+  searchPlaceholder?: string;
+  /** Si se pasa, agrega una fila "Todos" arriba de la lista que llama a esto en vez de onSelect — para filtros con opción "sin elegir" (ver admin/usuarios.tsx). */
+  onSelectAll?: () => void;
 }
 
-/** Selector genérico {id,name} con búsqueda — mismo shell que ExercisePickerModal, reutilizado para país/ciudad en los filtros de Super Admin. */
-export function OptionPickerModal({ visible, title, options, onSelect, onClose }: OptionPickerModalProps) {
+/**
+ * Modal de selección con búsqueda genérico — antes existían dos copias casi
+ * idénticas de esto (OptionPickerModal para país/ciudad, ExercisePickerModal
+ * para ejercicios), diferenciadas solo por la forma del ítem y si mostraban
+ * subtítulo/opción "Todos". Se unificaron acá.
+ */
+export function ListPickerModal<T>({
+  visible,
+  title,
+  items,
+  getId,
+  getLabel,
+  getSubtitle,
+  onSelect,
+  onClose,
+  searchPlaceholder,
+  onSelectAll,
+}: ListPickerModalProps<T>) {
   const [query, setQuery] = useState('');
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return options;
-    return options.filter((o) => o.name.toLowerCase().includes(q));
-  }, [options, query]);
+    if (!q) return items;
+    return items.filter((item) => getLabel(item).toLowerCase().includes(q));
+  }, [items, query, getLabel]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -43,25 +60,41 @@ export function OptionPickerModal({ visible, title, options, onSelect, onClose }
             </ThemedText>
           </ThemedView>
 
-          <TextField label="Buscar" value={query} onChangeText={setQuery} autoCapitalize="none" />
+          <TextField
+            label="Buscar"
+            value={query}
+            onChangeText={setQuery}
+            placeholder={searchPlaceholder}
+            autoCapitalize="none"
+          />
 
-          <Pressable onPress={() => onSelect(null)} style={styles.pressableRow}>
-            <ThemedView type="backgroundElement" style={styles.row}>
-              <ThemedText type="default">Todos</ThemedText>
-            </ThemedView>
-          </Pressable>
+          {onSelectAll && (
+            <Pressable onPress={onSelectAll} style={styles.pressableRow}>
+              <ThemedView type="backgroundElement" style={styles.row}>
+                <ThemedText type="default">Todos</ThemedText>
+              </ThemedView>
+            </Pressable>
+          )}
 
           <FlatList
             data={filtered}
-            keyExtractor={(item) => String(item.id)}
+            keyExtractor={(item) => String(getId(item))}
             contentContainerStyle={styles.list}
-            renderItem={({ item }) => (
-              <Pressable onPress={() => onSelect(item)} style={styles.pressableRow}>
-                <ThemedView type="backgroundElement" style={styles.row}>
-                  <ThemedText type="default">{item.name}</ThemedText>
-                </ThemedView>
-              </Pressable>
-            )}
+            renderItem={({ item }) => {
+              const subtitle = getSubtitle?.(item);
+              return (
+                <Pressable onPress={() => onSelect(item)} style={styles.pressableRow}>
+                  <ThemedView type="backgroundElement" style={styles.row}>
+                    <ThemedText type="default">{getLabel(item)}</ThemedText>
+                    {subtitle && (
+                      <ThemedText type="small" themeColor="textSecondary">
+                        {subtitle}
+                      </ThemedText>
+                    )}
+                  </ThemedView>
+                </Pressable>
+              );
+            }}
             ListEmptyComponent={
               <ThemedText type="small" themeColor="textSecondary">
                 Sin resultados.

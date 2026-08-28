@@ -9,4 +9,9 @@ export const api = new ApiClient({
   // CSRF) — ver docs/03-api.md §1. Mobile sigue usando solo el Bearer token.
   withCredentials: true,
   getCsrfToken: () => readCookie("XSRF-TOKEN"),
+  // Un 401 significa que la sesión local ya no es válida en el servidor
+  // (token/cookie revocado o expirado). Sin esto, una página que dependa
+  // de una query que falla por 401 se queda mostrando su loading state para
+  // siempre (ver OnboardingPage) en vez de mandar al usuario a /login.
+  onUnauthorized: () => useAuthStore.getState().clearSession(),
 })

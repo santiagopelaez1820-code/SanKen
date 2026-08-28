@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Http\Controllers\Concerns\ReplacesPublicFile;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ExerciseRequest;
 use App\Http\Requests\Admin\UploadExerciseVideoRequest;
@@ -11,10 +12,11 @@ use App\Models\MuscleGroup;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 class AdminExerciseController extends Controller
 {
+    use ReplacesPublicFile;
+
     private const EAGER = ['primaryMuscle', 'alternatives'];
 
     /**
@@ -98,29 +100,19 @@ class AdminExerciseController extends Controller
     /**
      * El admin sube su propio archivo — nunca se busca video automáticamente
      * ni se integra con YouTube/APIs externas (instrucción explícita del
-     * pedido). Reemplazo seguro: sube y confirma que el nuevo archivo quedó
-     * guardado ANTES de borrar el anterior — así un upload fallido a mitad
-     * de camino nunca deja al ejercicio sin video.
+     * pedido). storePublicFileReplacing() confirma que el nuevo archivo
+     * quedó guardado ANTES de borrar el anterior — así un upload fallido a
+     * mitad de camino nunca deja al ejercicio sin video.
      */
     public function uploadVideo(UploadExerciseVideoRequest $request, Exercise $exercise): JsonResponse
     {
-        $previousPath = $this->publicPathFromUrl($exercise->video_url);
-
-        $path = $request->file('video')->store('exercise-videos', 'public');
-
-        abort_unless(Storage::disk('public')->exists($path), 500, 'No se pudo guardar el video.');
-
-        // Ruta relativa, NO Storage::disk('public')->url($path): esa función
-        // antepone APP_URL, que en dev es "http://localhost" — inalcanzable
-        // desde un celular físico (localhost ahí es el propio celular, no
-        // esta máquina) y frágil incluso en prod si el dominio cambia. Cada
-        // cliente resuelve esta ruta contra su propio API baseUrl vía
-        // ApiClient::mediaUrl() (ver packages/core/src/api/client.ts).
-        $exercise->update(['video_url' => '/storage/'.$path]);
-
-        if ($previousPath && Storage::disk('public')->exists($previousPath)) {
-            Storage::disk('public')->delete($previousPath);
-        }
+        $videoUrl = $this->storePublicFileReplacing(
+            $request->file('video'),
+            'exercise-videos',
+            $exercise->video_url,
+            'No se pudo guardar el video.',
+        );
+        $exercise->update(['video_url' => $videoUrl]);
 
         return response()->json(['data' => new AdminExerciseResource($exercise->fresh(self::EAGER))]);
     }
@@ -131,34 +123,9 @@ class AdminExerciseController extends Controller
      */
     public function deleteVideo(Exercise $exercise): JsonResponse
     {
-        $previousPath = $this->publicPathFromUrl($exercise->video_url);
-
+        $this->deletePublicFileByUrl($exercise->video_url);
         $exercise->update(['video_url' => null]);
 
-        if ($previousPath && Storage::disk('public')->exists($previousPath)) {
-            Storage::disk('public')->delete($previousPath);
-        }
-
         return response()->json(['data' => new AdminExerciseResource($exercise->fresh(self::EAGER))]);
-    }
-
-    /**
-     * video_url guarda la URL pública completa (Storage::disk('public')->url()
-     * ya antepone APP_URL . '/storage/'), así que para volver a encontrar el
-     * archivo en el disco hay que recortar todo lo anterior a ese marcador.
-     * Si video_url viene de una carga vieja por texto libre (URL externa,
-     * sin '/storage/'), esto devuelve null a propósito: nunca se intenta
-     * borrar un archivo que esta app no subió.
-     */
-    private function publicPathFromUrl(?string $url): ?string
-    {
-        if (! $url) {
-            return null;
-        }
-
-        $marker = '/storage/';
-        $position = strpos($url, $marker);
-
-        return $position === false ? null : substr($url, $position + strlen($marker));
     }
 }

@@ -38,11 +38,7 @@ class AdminUserController extends Controller
 
         return response()->json([
             'data' => AdminUserResource::collection($users->items()),
-            'meta' => [
-                'current_page' => $users->currentPage(),
-                'last_page' => $users->lastPage(),
-                'total' => $users->total(),
-            ],
+            'meta' => $this->paginationMeta($users),
         ]);
     }
 

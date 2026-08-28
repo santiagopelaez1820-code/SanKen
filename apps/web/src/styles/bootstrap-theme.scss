@@ -2,7 +2,7 @@
 // SanKen — punto de entrada del tema Bootstrap.
 // Sobrescribe variables de Bootstrap ANTES de importarlo (única forma soportada
 // de tematizar Sass de Bootstrap), luego añade una capa fina de utilidades
-// propias (gradientes de marca, glow del naranja, cards con profundidad) que
+// propias (gradientes de marca, glow del cyan, cards con profundidad) que
 // Bootstrap no expone por variables.
 // ---------------------------------------------------------------------------
 
@@ -18,9 +18,9 @@
   --sanken-gray: #{$sanken-gray};
   --sanken-gray-light: #{$sanken-gray-light};
   --sanken-white: #{$sanken-white};
-  --sanken-orange: #{$sanken-orange};
-  --sanken-orange-light: #{$sanken-orange-light};
-  --sanken-orange-dim: #{$sanken-orange-dim};
+  --sanken-cyan: #{$sanken-cyan};
+  --sanken-cyan-light: #{$sanken-cyan-light};
+  --sanken-cyan-dim: #{$sanken-cyan-dim};
 }
 
 html {
@@ -46,32 +46,32 @@ body {
   &:hover,
   &:focus-visible {
     transform: translateY(-2px);
-    border-color: rgba(255, 106, 0, 0.35);
+    border-color: rgba(0, 184, 217, 0.35);
     box-shadow:
       0 2px 4px rgba(0, 0, 0, 0.35),
       0 20px 36px -18px rgba(0, 0, 0, 0.65);
   }
 }
 
-// Botón primario: bloque naranja plano y sólido, esquina técnica — no un
-// gradiente suave de SaaS. La fuerza viene del contraste duro negro/naranja,
-// no de una simulación de "brillo".
+// Botón primario: bloque cyan plano y sólido, esquina redondeada como en
+// mobile — no un gradiente suave de SaaS. La fuerza viene del contraste
+// duro negro/cyan, no de una simulación de "brillo".
 .btn-primary {
-  background: $sanken-orange;
-  border-color: $sanken-orange;
+  background: $sanken-cyan;
+  border-color: $sanken-cyan;
   color: $sanken-black;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
   &:hover,
   &:focus-visible {
-    background: $sanken-orange-light;
-    border-color: $sanken-orange-light;
+    background: $sanken-cyan-light;
+    border-color: $sanken-cyan-light;
     color: $sanken-black;
   }
 
   &:active {
-    background: darken($sanken-orange, 8%);
+    background: darken($sanken-cyan, 8%);
   }
 }
 
@@ -93,14 +93,14 @@ body {
 }
 
 .btn-outline-primary {
-  color: $sanken-orange-light;
-  border-color: rgba(255, 106, 0, 0.5);
+  color: $sanken-cyan-light;
+  border-color: rgba(0, 184, 217, 0.5);
 
   &:hover,
   &:focus-visible {
-    background: $sanken-orange-dim;
-    color: $sanken-orange-light;
-    border-color: $sanken-orange;
+    background: $sanken-cyan-dim;
+    color: $sanken-cyan-light;
+    border-color: $sanken-cyan;
   }
 }
 
@@ -133,7 +133,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-// Navegación (Sidebar / Offcanvas) — indicador activo naranja discreto, sin
+// Navegación (Sidebar / Offcanvas) — indicador activo cyan discreto, sin
 // llenar el link entero de color.
 .sank-nav-link {
   color: $sanken-gray-light;
@@ -148,8 +148,8 @@ body {
 }
 
 .sank-nav-link-active {
-  color: $sanken-orange-light;
-  background: $sanken-orange-dim;
+  color: $sanken-cyan-light;
+  background: $sanken-cyan-dim;
   position: relative;
 
   &::before {
@@ -161,7 +161,7 @@ body {
     width: 3px;
     height: 1.1rem;
     border-radius: 0 2px 2px 0;
-    background: $sanken-orange;
+    background: $sanken-cyan;
   }
 }
 
@@ -175,8 +175,8 @@ body {
   color: $sanken-gray-light;
 }
 
-.sank-eyebrow--orange {
-  color: $sanken-orange-light;
+.sank-eyebrow--cyan {
+  color: $sanken-cyan-light;
 }
 
 // Número hero — tipografía display, tabular, sin decoración. La escala es lo
@@ -189,10 +189,10 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-// Borde hairline naranja — detalle de marca en superficies hero, en vez de
+// Borde hairline cyan — detalle de marca en superficies hero, en vez de
 // depender solo de un fondo tintado.
 .sank-hairline {
-  border: 1px solid rgba(255, 106, 0, 0.25);
+  border: 1px solid rgba(0, 184, 217, 0.25);
 }
 
 // ---------------------------------------------------------------------------
@@ -225,12 +225,12 @@ body {
 
 .sank-rail-link-active {
   color: $sanken-black;
-  background: $sanken-orange;
+  background: $sanken-cyan;
 
   &:hover,
   &:focus-visible {
     color: $sanken-black;
-    background: $sanken-orange-light;
+    background: $sanken-cyan-light;
   }
 }
 
@@ -270,7 +270,7 @@ body {
   display: flex;
   align-items: stretch;
   height: 64px;
-  background: rgba(11, 11, 11, 0.92);
+  background: rgba(8, 12, 16, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid $border-color;
@@ -297,20 +297,20 @@ body {
 }
 
 .sank-bottom-nav-link-active {
-  color: $sanken-orange;
+  color: $sanken-cyan;
 }
 
 .sank-bottom-nav-fab {
   width: 52px;
   height: 52px;
-  border-radius: $border-radius;
-  background: $sanken-orange;
+  border-radius: 16px;
+  background: $sanken-cyan;
   color: $sanken-black;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: -22px;
-  box-shadow: 0 6px 20px -4px rgba(255, 106, 0, 0.55);
+  margin-top: -30px;
+  box-shadow: 0 6px 20px -4px rgba(0, 184, 217, 0.55);
   border: 3px solid $sanken-black;
   flex-shrink: 0;
 }

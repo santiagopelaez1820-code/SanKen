@@ -4,7 +4,6 @@ export * from './types/auth';
 export * from './types/onboarding';
 export * from './types/routine';
 export * from './types/workout';
-export * from './types/ping';
 export * from './types/stats';
 export * from './types/exercise';
 export * from './types/trainer';
