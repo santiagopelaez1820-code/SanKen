@@ -20,12 +20,16 @@ export function TopBar() {
       className="d-flex align-items-center justify-content-between px-3 px-lg-4"
       style={{ height: 60, borderBottom: "1px solid var(--bs-border-color)", background: "var(--sanken-black)" }}
     >
-      <div className="d-flex align-items-center gap-2 d-lg-none">
+      <Link
+        to="/dashboard"
+        className="d-flex align-items-center gap-2 d-lg-none text-decoration-none"
+        style={{ color: "inherit" }}
+      >
         <img src="/logo.png" alt="" width={22} height={22} />
         <span className="fw-bold" style={{ fontFamily: "var(--bs-body-font-family)", letterSpacing: "-0.01em" }}>
           SANKEN
         </span>
-      </div>
+      </Link>
       <span className="d-none d-lg-block sank-eyebrow mb-0">{title}</span>
 
       <div className="d-flex align-items-center gap-2">

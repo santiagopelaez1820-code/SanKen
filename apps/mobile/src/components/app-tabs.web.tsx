@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import {
   Tabs,
   TabList,
@@ -69,12 +70,12 @@ export function CustomTabList(props: TabListProps) {
   return (
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <View style={styles.brand}>
+        <Pressable style={styles.brand} onPress={() => router.push('/')}>
           <Image source={require('@/assets/images/logo.png')} style={styles.brandLogo} resizeMode="contain" />
           <ThemedText type="smallBold" style={styles.brandText}>
             SANKEN
           </ThemedText>
-        </View>
+        </Pressable>
 
         {props.children}
       </ThemedView>
