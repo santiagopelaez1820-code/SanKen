@@ -11,15 +11,25 @@ import { OptionCard } from '@/components/ui/option-card';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { useAdminStore } from '@/store/admin-store';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
 import { useTrainerClientsStore } from '@/store/trainer-clients-store';
 import { RoutineDayEditor } from './routine-day-editor';
 import { EMPTY_DAY, EMPTY_EXERCISE, GOAL_OPTIONS, SPLIT_OPTIONS, type DayFormValues } from './routine-editor-types';
 
 interface RoutineEditorFormProps {
+  /**
+   * "admin" apunta a /admin/users/{userId}/routine — rutina personalizada
+   * asignada por Super Admin, aislada al usuario objetivo (ver
+   * apps/web RoutineEditorPage scope="admin", mismo criterio acá). Default
+   * "trainer" (comportamiento existente, sin cambios).
+   */
+  scope?: 'trainer' | 'admin';
   mode: 'create' | 'edit';
   trainerClientId?: number;
   routineId?: number;
+  /** Requerido cuando scope="admin" — identifica de quién es la rutina. */
+  userId?: number;
 }
 
 interface PickerSlot {
@@ -52,8 +62,9 @@ function routineToDays(routine: Routine): DayFormValues[] {
  * que el estado local pueda inicializarse directamente desde los datos ya
  * resueltos en vez de sincronizarse después vía efecto.
  */
-export function RoutineEditorForm({ mode, trainerClientId, routineId }: RoutineEditorFormProps) {
+export function RoutineEditorForm({ scope = 'trainer', mode, trainerClientId, routineId, userId }: RoutineEditorFormProps) {
   const { routineForEdit, isLoadingRoutine, loadRoutineForEdit } = useTrainerClientsStore();
+  const { adminRoutineForEdit, isLoadingAdminRoutine, loadAdminRoutineForEdit } = useAdminStore();
   const loadExercises = useExerciseCatalogStore((s) => s.load);
 
   useEffect(() => {
@@ -61,10 +72,21 @@ export function RoutineEditorForm({ mode, trainerClientId, routineId }: RoutineE
   }, [loadExercises]);
 
   useEffect(() => {
-    if (mode === 'edit' && routineId) loadRoutineForEdit(routineId);
-  }, [mode, routineId, loadRoutineForEdit]);
+    if (scope === 'admin' && userId) {
+      loadAdminRoutineForEdit(userId);
+    } else if (mode === 'edit' && routineId) {
+      loadRoutineForEdit(routineId);
+    }
+  }, [scope, mode, routineId, userId, loadRoutineForEdit, loadAdminRoutineForEdit]);
 
-  if (mode === 'edit' && (isLoadingRoutine || !routineForEdit)) {
+  // Para scope="admin" no hay un modo explícito de create/edit por URL — se
+  // carga la rutina personalizada del usuario (si existe) y de ahí sale si
+  // el submit termina en POST (asignar) o PATCH (reemplazar), igual que
+  // apps/web RoutineEditorPage scope="admin".
+  const isLoading = scope === 'admin' ? isLoadingAdminRoutine : mode === 'edit' && isLoadingRoutine;
+  const initialRoutine = scope === 'admin' ? adminRoutineForEdit : mode === 'edit' ? routineForEdit : null;
+
+  if (isLoading) {
     return (
       <ThemedView style={styles.root}>
         <SafeAreaView style={styles.safeArea}>
@@ -78,10 +100,12 @@ export function RoutineEditorForm({ mode, trainerClientId, routineId }: RoutineE
 
   return (
     <RoutineEditorFields
+      scope={scope}
       mode={mode}
       trainerClientId={trainerClientId}
       routineId={routineId}
-      initialRoutine={mode === 'edit' ? routineForEdit : null}
+      userId={userId}
+      initialRoutine={initialRoutine}
     />
   );
 }
@@ -90,8 +114,9 @@ interface RoutineEditorFieldsProps extends RoutineEditorFormProps {
   initialRoutine: Routine | null;
 }
 
-function RoutineEditorFields({ mode, trainerClientId, routineId, initialRoutine }: RoutineEditorFieldsProps) {
+function RoutineEditorFields({ scope = 'trainer', mode, trainerClientId, routineId, userId, initialRoutine }: RoutineEditorFieldsProps) {
   const { isSubmitting, submitError, createRoutine, updateRoutine } = useTrainerClientsStore();
+  const { isSubmittingAdminRoutine, adminRoutineError, saveAdminRoutine } = useAdminStore();
   const exercises = useExerciseCatalogStore((s) => s.exercises);
 
   const [goal, setGoal] = useState<FitnessGoal>(() => initialRoutine?.goal ?? 'gain_muscle');
@@ -199,6 +224,12 @@ function RoutineEditorFields({ mode, trainerClientId, routineId, initialRoutine 
     const payload = buildPayload();
     if (!payload) return;
 
+    if (scope === 'admin' && userId) {
+      const routine = await saveAdminRoutine(userId, payload);
+      if (routine) router.replace(`/admin/usuarios/${userId}`);
+      return;
+    }
+
     if (mode === 'create' && trainerClientId) {
       const routine = await createRoutine(trainerClientId, payload);
       if (routine) router.replace(`/trainer/clients/${trainerClientId}`);
@@ -216,7 +247,13 @@ function RoutineEditorFields({ mode, trainerClientId, routineId, initialRoutine 
             ← Volver
           </ThemedText>
           <ThemedText type="title" style={styles.pageTitle}>
-            {mode === 'create' ? 'Nueva rutina manual' : 'Editar rutina'}
+            {scope === 'admin'
+              ? initialRoutine
+                ? 'Editar rutina personalizada'
+                : 'Asignar rutina personalizada'
+              : mode === 'create'
+                ? 'Nueva rutina manual'
+                : 'Editar rutina'}
           </ThemedText>
 
           <ThemedText type="smallBold">Objetivo</ThemedText>
@@ -271,13 +308,17 @@ function RoutineEditorFields({ mode, trainerClientId, routineId, initialRoutine 
             onPress={() => setDays((prev) => [...prev, EMPTY_DAY])}
           />
 
-          {(formError || submitError) && (
+          {(formError || (scope === 'admin' ? adminRoutineError : submitError)) && (
             <ThemedText type="small" style={styles.error}>
-              {formError ?? submitError}
+              {formError ?? (scope === 'admin' ? adminRoutineError : submitError)}
             </ThemedText>
           )}
 
-          <PrimaryButton label="Guardar rutina" loading={isSubmitting} onPress={handleSave} />
+          <PrimaryButton
+            label="Guardar rutina"
+            loading={scope === 'admin' ? isSubmittingAdminRoutine : isSubmitting}
+            onPress={handleSave}
+          />
         </ScrollView>
       </SafeAreaView>
 

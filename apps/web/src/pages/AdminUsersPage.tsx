@@ -61,7 +61,7 @@ export function AdminUsersPage() {
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Usuarios</h1>
 
         <section className="flex flex-wrap items-end gap-3 rounded-xl border border-border bg-card p-4">
-          <div className="space-y-1.5">
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto">
             <label htmlFor="role-filter" className="text-xs font-medium text-muted-foreground">
               Rol
             </label>
@@ -69,7 +69,7 @@ export function AdminUsersPage() {
               id="role-filter"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+              className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm sm:w-auto"
             >
               <option value="">Todos</option>
               <option value="user">Usuario</option>
@@ -77,7 +77,7 @@ export function AdminUsersPage() {
               <option value="super_admin">Super Admin</option>
             </select>
           </div>
-          <div className="space-y-1.5">
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto">
             <label htmlFor="country-filter" className="text-xs font-medium text-muted-foreground">
               País
             </label>
@@ -88,7 +88,7 @@ export function AdminUsersPage() {
                 setCountryId(e.target.value)
                 setCityId("")
               }}
-              className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+              className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm sm:w-auto"
             >
               <option value="">Todos</option>
               {questions?.countries.map((c) => (
@@ -98,7 +98,7 @@ export function AdminUsersPage() {
               ))}
             </select>
           </div>
-          <div className="space-y-1.5">
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto">
             <label htmlFor="city-filter" className="text-xs font-medium text-muted-foreground">
               Ciudad
             </label>
@@ -107,7 +107,7 @@ export function AdminUsersPage() {
               value={cityId}
               onChange={(e) => setCityId(e.target.value)}
               disabled={!countryId}
-              className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+              className="w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm sm:w-auto"
             >
               <option value="">Todas</option>
               {cities?.map((c) => (
@@ -117,11 +117,11 @@ export function AdminUsersPage() {
               ))}
             </select>
           </div>
-          <label className="flex items-center gap-1.5 text-sm">
+          <label className="flex w-full items-center gap-1.5 text-sm sm:w-auto">
             <input type="checkbox" checked={bannedOnly} onChange={(e) => setBannedOnly(e.target.checked)} />
             Solo baneados
           </label>
-          <div className="w-full space-y-1.5 sm:w-auto sm:flex-1">
+          <div className="flex w-full flex-col gap-1.5 sm:w-auto sm:flex-1">
             <label htmlFor="q" className="text-xs font-medium text-muted-foreground">
               Buscar (nombre o correo)
             </label>
@@ -142,7 +142,10 @@ export function AdminUsersPage() {
           {!isLoading && users && users.length > 0 && (
             <ul className="divide-y divide-border">
               {users.map((user) => (
-                <li key={user.id} className="flex items-center justify-between gap-3 py-2.5">
+                <li
+                  key={user.id}
+                  className="flex flex-col gap-2 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                >
                   <Link to={`/admin/users/${user.id}`} className="min-w-0">
                     <p className="text-sm text-foreground">
                       {user.name} <span className="text-xs text-muted-foreground">· {ROLE_LABELS[user.role]}</span>
@@ -158,7 +161,7 @@ export function AdminUsersPage() {
                       )}
                     </p>
                   </Link>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-shrink-0 items-center gap-2">
                     {user.role === "trainer" && (
                       <Button
                         variant="outline"

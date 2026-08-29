@@ -8,7 +8,9 @@ import { ApiError, isTwoFactorChallenge, type AuthPayload, type TwoFactorChallen
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { SankButton } from "@/components/ui/SankButton"
+import { GoogleIcon } from "@/components/ui/GoogleIcon"
 import { AuthLayout } from "@/components/layout/AuthLayout"
+import { describeSocialAuthError, signInWithGoogle, SocialAuthCancelledError } from "@/lib/social-auth"
 
 const loginSchema = z.object({
   email: z.string().email("Ingresa un correo válido"),
@@ -22,6 +24,39 @@ export function LoginPage() {
   const setSession = useAuthStore((state) => state.setSession)
   const setPendingChallenge = useAuthStore((state) => state.setPendingChallenge)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [isSubmittingGoogle, setIsSubmittingGoogle] = useState(false)
+
+  const handleGoogleSubmit = async () => {
+    setServerError(null)
+    setIsSubmittingGoogle(true)
+    try {
+      const { idToken } = await signInWithGoogle()
+      await api.bootstrapCsrf()
+      const response = await api.post<AuthPayload | TwoFactorChallengeResponse>("/auth/social", {
+        id_token: idToken,
+        provider: "google",
+      })
+
+      if (isTwoFactorChallenge(response)) {
+        setPendingChallenge(response.challenge_token)
+        navigate("/login/verify")
+        return
+      }
+
+      setSession(response.token, response.user)
+      navigate(response.user.role === "trainer" ? "/trainer" : "/dashboard", { replace: true })
+    } catch (err) {
+      if (err instanceof SocialAuthCancelledError) {
+        // El usuario cerró el popup a propósito — no es un error para mostrar.
+      } else if (err instanceof ApiError) {
+        setServerError(err.body.message)
+      } else {
+        setServerError(describeSocialAuthError(err))
+      }
+    } finally {
+      setIsSubmittingGoogle(false)
+    }
+  }
 
   const {
     register,
@@ -77,8 +112,31 @@ export function LoginPage() {
           </Alert>
         )}
 
-        <SankButton type="submit" disabled={isSubmitting} loading={isSubmitting} className="w-100 justify-content-center">
+        <SankButton
+          type="submit"
+          disabled={isSubmitting || isSubmittingGoogle}
+          loading={isSubmitting}
+          className="w-100 justify-content-center"
+        >
           {isSubmitting ? "Ingresando…" : "Ingresar"}
+        </SankButton>
+
+        <div className="d-flex align-items-center gap-2">
+          <div style={{ height: 1, flex: 1, background: "var(--bs-border-color)" }} />
+          <span className="small text-body-secondary">O</span>
+          <div style={{ height: 1, flex: 1, background: "var(--bs-border-color)" }} />
+        </div>
+
+        <SankButton
+          type="button"
+          variant="secondary"
+          disabled={isSubmitting || isSubmittingGoogle}
+          loading={isSubmittingGoogle}
+          iconStart={!isSubmittingGoogle ? <GoogleIcon /> : undefined}
+          onClick={handleGoogleSubmit}
+          className="w-100 justify-content-center"
+        >
+          {isSubmittingGoogle ? "Continuando con Google…" : "Continuar con Google"}
         </SankButton>
 
         <p className="text-center small text-body-secondary mb-0">

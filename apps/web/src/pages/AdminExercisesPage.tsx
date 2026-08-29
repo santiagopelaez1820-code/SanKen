@@ -230,6 +230,7 @@ export function AdminExercisesPage() {
                       <Button
                         variant="destructive"
                         size="sm"
+                        className="flex-shrink-0"
                         onClick={() => deactivateMutation.mutate(exercise.id)}
                         disabled={deactivateMutation.isPending}
                       >

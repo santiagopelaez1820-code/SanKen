@@ -5,8 +5,10 @@ import type {
   AdminStats,
   AdminUser,
   AuditLogEntry,
+  ManualRoutinePayload,
   NewsPromotion,
   Report,
+  Routine,
 } from '@sanken/core';
 
 import { api } from '@/lib/api';
@@ -58,6 +60,15 @@ const routineTemplate: AdminRoutineTemplate = {
   days: [],
 };
 
+const adminRoutine: Routine = {
+  id: 5, source: 'trainer', goal: 'gain_muscle', split_type: 'full_body', frequency_days: 3, duration_weeks: 6,
+  is_active: true, starts_at: null, ends_at: null, days: [],
+};
+
+const routinePayload: ManualRoutinePayload = {
+  goal: 'gain_muscle', split_type: 'full_body', frequency_days: 3, duration_weeks: 6, days: [],
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
   useAdminStore.setState({
@@ -68,6 +79,8 @@ beforeEach(() => {
     stats: null, isLoadingStats: false,
     auditLog: [], isLoadingAuditLog: false,
     routineTemplates: [], isLoadingRoutineTemplates: false,
+    userDetail: null, isLoadingUserDetail: false,
+    adminRoutineForEdit: null, isLoadingAdminRoutine: false, isSubmittingAdminRoutine: false, adminRoutineError: null,
   });
 });
 
@@ -267,6 +280,81 @@ describe('routine templates', () => {
     await useAdminStore.getState().deactivateRoutineTemplate(1);
 
     expect(mockedApi.patch).toHaveBeenCalledWith('/admin/routine-templates/1/deactivate');
+  });
+});
+
+describe('admin-assigned routine (super admin)', () => {
+  it('loads the existing personalized routine for a user (null if it has none)', async () => {
+    mockedApi.get.mockResolvedValueOnce(null);
+
+    await useAdminStore.getState().loadAdminRoutineForEdit(1);
+
+    expect(mockedApi.get).toHaveBeenCalledWith('/admin/users/1/routine');
+    expect(useAdminStore.getState().adminRoutineForEdit).toBeNull();
+  });
+
+  it('sets an error when loading the routine fails', async () => {
+    mockedApi.get.mockRejectedValueOnce(new Error('no autorizado'));
+
+    await useAdminStore.getState().loadAdminRoutineForEdit(1);
+
+    expect(useAdminStore.getState().adminRoutineError).toBe('no autorizado');
+    expect(useAdminStore.getState().isLoadingAdminRoutine).toBe(false);
+  });
+
+  it('assigns a routine (POST) when the user had none yet, then refreshes the user detail', async () => {
+    mockedApi.post.mockResolvedValueOnce(adminRoutine);
+    mockedApi.get.mockResolvedValueOnce({ ...user, id: 1 });
+
+    const result = await useAdminStore.getState().saveAdminRoutine(1, routinePayload);
+
+    expect(mockedApi.post).toHaveBeenCalledWith('/admin/users/1/routine', routinePayload);
+    expect(mockedApi.patch).not.toHaveBeenCalled();
+    expect(mockedApi.get).toHaveBeenCalledWith('/admin/users/1');
+    expect(result).toEqual(adminRoutine);
+  });
+
+  it('replaces a routine (PATCH) when the user already had a personalized one loaded', async () => {
+    useAdminStore.setState({ adminRoutineForEdit: adminRoutine });
+    mockedApi.patch.mockResolvedValueOnce({ ...adminRoutine, frequency_days: 4 });
+    mockedApi.get.mockResolvedValueOnce({ ...user, id: 1 });
+
+    const result = await useAdminStore.getState().saveAdminRoutine(1, routinePayload);
+
+    expect(mockedApi.patch).toHaveBeenCalledWith('/admin/routines/5', routinePayload);
+    expect(mockedApi.post).not.toHaveBeenCalled();
+    expect(result?.frequency_days).toBe(4);
+  });
+
+  it('sets an error and returns null when saving fails', async () => {
+    mockedApi.post.mockRejectedValueOnce(new Error('rutina inválida'));
+
+    const result = await useAdminStore.getState().saveAdminRoutine(1, routinePayload);
+
+    expect(result).toBeNull();
+    expect(useAdminStore.getState().adminRoutineError).toBe('rutina inválida');
+    expect(useAdminStore.getState().isSubmittingAdminRoutine).toBe(false);
+  });
+
+  it('reverts to the general routine and refreshes the user detail', async () => {
+    useAdminStore.setState({ adminRoutineForEdit: adminRoutine });
+    mockedApi.delete.mockResolvedValueOnce(undefined);
+    mockedApi.get.mockResolvedValueOnce({ ...user, id: 1 });
+
+    const ok = await useAdminStore.getState().revertToGeneralRoutine(1);
+
+    expect(mockedApi.delete).toHaveBeenCalledWith('/admin/users/1/routine');
+    expect(ok).toBe(true);
+    expect(useAdminStore.getState().adminRoutineForEdit).toBeNull();
+  });
+
+  it('returns false and sets an error when reverting fails', async () => {
+    mockedApi.delete.mockRejectedValueOnce(new Error('no se pudo'));
+
+    const ok = await useAdminStore.getState().revertToGeneralRoutine(1);
+
+    expect(ok).toBe(false);
+    expect(useAdminStore.getState().adminRoutineError).toBe('no se pudo');
   });
 });
 

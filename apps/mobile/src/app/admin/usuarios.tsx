@@ -152,18 +152,20 @@ export default function AdminUsuariosScreen() {
 
           {users.map((user) => (
             <ThemedView key={user.id} type="backgroundElement" style={styles.userCard}>
-              <ThemedText type="smallBold">
-                {user.name} <ThemedText type="small" themeColor="textSecondary">· {ROLE_LABELS[user.role]}</ThemedText>
-                {user.trainer_verified_at && <ThemedText type="small" themeColor="accent"> ✓</ThemedText>}
-                {user.is_deactivated && <ThemedText type="small" style={styles.warn}> · Desactivado</ThemedText>}
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {user.email}
-                {(user.country || user.city) && ` · ${[user.city, user.country].filter(Boolean).join(', ')}`}
-              </ThemedText>
-              <ThemedText type="small" themeColor={user.current_routine?.source === 'admin' ? 'accent' : 'textSecondary'}>
-                Rutina: {user.current_routine?.label ?? 'Sin rutina activa'}
-              </ThemedText>
+              <Pressable onPress={() => router.push(`/admin/usuarios/${user.id}`)}>
+                <ThemedText type="smallBold">
+                  {user.name} <ThemedText type="small" themeColor="textSecondary">· {ROLE_LABELS[user.role]}</ThemedText>
+                  {user.trainer_verified_at && <ThemedText type="small" themeColor="accent"> ✓</ThemedText>}
+                  {user.is_deactivated && <ThemedText type="small" style={styles.warn}> · Desactivado</ThemedText>}
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {user.email}
+                  {(user.country || user.city) && ` · ${[user.city, user.country].filter(Boolean).join(', ')}`}
+                </ThemedText>
+                <ThemedText type="small" themeColor={user.current_routine?.source === 'admin' ? 'accent' : 'textSecondary'}>
+                  Rutina: {user.current_routine?.label ?? 'Sin rutina activa'}
+                </ThemedText>
+              </Pressable>
               <View style={styles.actionsRow}>
                 {user.role === 'trainer' && (
                   <PrimaryButton

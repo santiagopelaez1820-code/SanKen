@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Dumbbell, Menu } from 'lucide-react-native';
 import { estimateWorkoutMinutes } from '@sanken/core';
@@ -85,6 +86,9 @@ export default function HomeScreen() {
             <ThemedText type="title" style={styles.title}>
               {user?.name.split(' ')[0]}
             </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              ¿Listo para entrenar?
+            </ThemedText>
           </ThemedView>
           <Pressable
             onPress={() => setMoreMenuVisible(true)}
@@ -95,6 +99,32 @@ export default function HomeScreen() {
             )}
           </Pressable>
         </ThemedView>
+
+        <Animated.View entering={FadeInUp.duration(360)}>
+          <ThemedView
+            type="backgroundElement"
+            style={[styles.brandCard, { borderColor: `${theme.accent}30` }, glowShadow(theme.accent)]}>
+            <LinearGradient
+              colors={[`${theme.accent}33`, `${theme.accent}00`]}
+              start={{ x: 0.15, y: 0 }}
+              end={{ x: 0.85, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <Image source={require('@/assets/images/logo-full.png')} style={styles.brandLogo} resizeMode="contain" />
+            <ThemedView style={styles.brandSloganRow}>
+              {['ENTRENA', 'PROGRESA', 'SUPÉRATE'].map((word, i) => (
+                <ThemedView key={word} style={styles.brandSloganItem}>
+                  {i > 0 && (
+                    <ThemedView style={[styles.brandDot, { backgroundColor: theme.accent }]} />
+                  )}
+                  <ThemedText type="small" style={[styles.brandSloganWord, { color: theme.accent }]}>
+                    {word}
+                  </ThemedText>
+                </ThemedView>
+              ))}
+            </ThemedView>
+          </ThemedView>
+        </Animated.View>
 
         {error && (
           <ThemedText type="small" style={styles.error}>
@@ -237,6 +267,39 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     borderWidth: 1.5,
+  },
+  brandCard: {
+    alignItems: 'center',
+    gap: Spacing.three,
+    borderRadius: Spacing.four,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.five,
+    overflow: 'hidden',
+  },
+  brandLogo: { width: 192, height: 131 },
+  brandSloganRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  brandSloganItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  brandSloganWord: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 2,
+    marginHorizontal: Spacing.one,
+  },
+  brandDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
   },
   centerText: { textAlign: 'center' },
   error: { color: '#FF4D5E', textAlign: 'center' },

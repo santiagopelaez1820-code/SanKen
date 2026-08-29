@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { Link } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Bell, Eye, MapPin, ShieldCheck, UserCircle } from "lucide-react"
+import { Bell, Camera, Eye, MapPin, Shield, ShieldCheck, Trash2, UserCircle } from "lucide-react"
 import {
   ApiError,
   type OnboardingCity,
@@ -43,6 +44,39 @@ export function SettingsPage() {
     queryKey: ["auth", "me"],
     queryFn: () => api.get<User>("/auth/me"),
   })
+
+  const avatarInputRef = useRef<HTMLInputElement>(null)
+  const [avatarError, setAvatarError] = useState<string | null>(null)
+
+  const updateAvatarMutation = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData()
+      formData.append("avatar", file)
+      return api.post<User>("/auth/me/avatar", formData)
+    },
+    onSuccess: (updated) => {
+      setAvatarError(null)
+      queryClient.setQueryData(["auth", "me"], updated)
+    },
+    onError: (err) =>
+      setAvatarError(err instanceof ApiError ? err.body.message : "No se pudo actualizar la foto."),
+  })
+
+  const deleteAvatarMutation = useMutation({
+    mutationFn: () => api.delete<User>("/auth/me/avatar"),
+    onSuccess: (updated) => {
+      setAvatarError(null)
+      queryClient.setQueryData(["auth", "me"], updated)
+    },
+    onError: (err) =>
+      setAvatarError(err instanceof ApiError ? err.body.message : "No se pudo quitar la foto."),
+  })
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ""
+    if (file) updateAvatarMutation.mutate(file)
+  }
 
   const [enrollment, setEnrollment] = useState<TwoFactorEnableResponse | null>(null)
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null)
@@ -160,14 +194,72 @@ export function SettingsPage() {
         </div>
 
         <Card className="flex items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-full bg-muted">
-            <UserCircle className="size-6 text-muted-foreground" />
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={updateAvatarMutation.isPending}
+              className="flex size-12 items-center justify-center overflow-hidden rounded-full bg-muted disabled:opacity-60"
+              aria-label="Cambiar foto de perfil"
+            >
+              {user?.avatar_url ? (
+                <img src={api.mediaUrl(user.avatar_url) ?? undefined} alt="" className="size-full object-cover" />
+              ) : (
+                <UserCircle className="size-6 text-muted-foreground" />
+              )}
+            </button>
+            <span className="absolute -right-1 -bottom-1 flex size-5 items-center justify-center rounded-full border-2 border-card bg-primary text-primary-foreground">
+              <Camera className="size-2.5" />
+            </span>
+            <input
+              ref={avatarInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleAvatarFileChange}
+            />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <p className="font-heading text-base font-bold text-foreground">{user?.name ?? "…"}</p>
             <p className="text-xs text-muted-foreground">{user ? ROLE_LABEL[user.role] : ""}</p>
           </div>
+          <div className="flex flex-shrink-0 flex-col items-end gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => avatarInputRef.current?.click()}
+              disabled={updateAvatarMutation.isPending}
+            >
+              {updateAvatarMutation.isPending ? "Subiendo…" : "Cambiar foto"}
+            </Button>
+            {user?.avatar_url && (
+              <button
+                type="button"
+                onClick={() => deleteAvatarMutation.mutate()}
+                disabled={deleteAvatarMutation.isPending}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive disabled:opacity-60"
+              >
+                <Trash2 className="size-3" />
+                Quitar
+              </button>
+            )}
+          </div>
         </Card>
+        {avatarError && <p className="-mt-4 text-xs text-destructive">{avatarError}</p>}
+
+        {user?.role === "super_admin" && (
+          <Link to="/admin">
+            <Card className="flex items-center gap-3 transition-colors hover:border-primary/40">
+              <div className="flex size-10 flex-shrink-0 items-center justify-center rounded-full bg-primary/10">
+                <Shield className="size-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-foreground">Panel de administración</p>
+                <p className="text-xs text-muted-foreground">Usuarios, ejercicios, rutinas, reportes y más.</p>
+              </div>
+            </Card>
+          </Link>
+        )}
 
         <Card>
           <div className="flex items-center gap-2">

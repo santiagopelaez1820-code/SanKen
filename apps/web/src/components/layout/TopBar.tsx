@@ -2,6 +2,7 @@ import { Bell } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { useAuthStore } from "@/lib/auth-store"
 import { useFeed } from "@/hooks/use-feed"
+import { api } from "@/lib/api"
 import { buildNavSections, findNavLabel } from "@/components/layout/nav-config"
 
 /** Barra superior persistente — reemplaza el header mobile-only anterior. Vive en desktop y mobile. */
@@ -44,7 +45,7 @@ export function TopBar() {
         </Link>
         <Link
           to="/settings"
-          className="d-flex align-items-center justify-content-center fw-bold"
+          className="d-flex align-items-center justify-content-center fw-bold overflow-hidden"
           style={{
             width: 34,
             height: 34,
@@ -55,7 +56,16 @@ export function TopBar() {
           }}
           aria-label="Perfil"
         >
-          {initial}
+          {user?.avatar_url ? (
+            <img
+              src={api.mediaUrl(user.avatar_url) ?? undefined}
+              alt=""
+              className="h-100 w-100"
+              style={{ objectFit: "cover" }}
+            />
+          ) : (
+            initial
+          )}
         </Link>
       </div>
     </header>

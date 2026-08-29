@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
-import { Eye, MapPin, ShieldCheck } from 'lucide-react-native';
+import { Bell, Eye, MapPin, Shield, ShieldCheck } from 'lucide-react-native';
 import type { OnboardingState, User } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
@@ -18,6 +18,11 @@ import { ToggleRow } from '@/components/ui/toggle-row';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
+import {
+  isPushNotificationsEnabled,
+  registerForPushNotificationsAsync,
+  unregisterFromPushNotifications,
+} from '@/lib/push';
 import { useAuthStore } from '@/store/auth-store';
 import { useOnboardingStore } from '@/store/onboarding-store';
 import { useSettingsStore } from '@/store/settings-store';
@@ -46,6 +51,26 @@ export default function SettingsScreen() {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadQuestions]);
+
+  const [pushEnabled, setPushEnabled] = useState(false);
+  const [isTogglingPush, setIsTogglingPush] = useState(false);
+  useEffect(() => {
+    isPushNotificationsEnabled().then(setPushEnabled);
+  }, []);
+
+  const handlePushToggle = async (enabled: boolean) => {
+    setIsTogglingPush(true);
+    try {
+      if (enabled) {
+        await registerForPushNotificationsAsync();
+      } else {
+        await unregisterFromPushNotifications();
+      }
+      setPushEnabled(await isPushNotificationsEnabled());
+    } finally {
+      setIsTogglingPush(false);
+    }
+  };
 
   const [locationEditing, setLocationEditing] = useState(false);
   const [countryId, setCountryId] = useState<number | null>(null);
@@ -135,6 +160,22 @@ export default function SettingsScreen() {
               </ThemedText>
             </ThemedView>
           </ThemedView>
+
+          {user?.role === 'super_admin' && (
+            <Pressable onPress={() => router.push('/admin')}>
+              <ThemedView type="backgroundElement" style={[styles.card, styles.identityCard]}>
+                <ThemedView style={[styles.adminIconBubble, { backgroundColor: theme.accent + '1A' }]}>
+                  <Icon icon={Shield} size={20} color={theme.accent} />
+                </ThemedView>
+                <ThemedView style={styles.identityInfo}>
+                  <ThemedText type="smallBold">Panel de administración</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    Usuarios, ejercicios, rutinas, reportes y más.
+                  </ThemedText>
+                </ThemedView>
+              </ThemedView>
+            </Pressable>
+          )}
 
           <ThemedView type="backgroundElement" style={styles.card}>
             <ThemedView style={styles.cardHeading}>
@@ -311,6 +352,17 @@ export default function SettingsScreen() {
             />
           </ThemedView>
 
+          <ThemedView type="backgroundElement" style={styles.card}>
+            <ToggleRow
+              icon={Bell}
+              label="Notificaciones push"
+              description="Recibí un aviso cuando te llegue un mensaje, aunque no tengas SanKen abierto."
+              value={pushEnabled}
+              disabled={isTogglingPush}
+              onValueChange={handlePushToggle}
+            />
+          </ThemedView>
+
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />
         </ScrollView>
       </SafeAreaView>
@@ -337,6 +389,13 @@ const styles = StyleSheet.create({
   },
   identityCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.three },
   identityInfo: { gap: 2, backgroundColor: 'transparent' },
+  adminIconBubble: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardHeading: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: 'transparent' },
   enrollBox: { gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
   locationRow: { gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
