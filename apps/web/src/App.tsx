@@ -35,6 +35,9 @@ import { AdminReportsPage } from "@/pages/AdminReportsPage"
 import { AdminNewsPage } from "@/pages/AdminNewsPage"
 import { AdminStatsPage } from "@/pages/AdminStatsPage"
 import { AdminAuditLogPage } from "@/pages/AdminAuditLogPage"
+import { AdminProductsPage } from "@/pages/AdminProductsPage"
+import { AdminOrdersPage } from "@/pages/AdminOrdersPage"
+import { AdminOrderDetailPage } from "@/pages/AdminOrderDetailPage"
 
 function App() {
   return (
@@ -214,6 +217,30 @@ function App() {
           element={
             <RequireAdmin>
               <AdminAuditLogPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/admin/products"
+          element={
+            <RequireAdmin>
+              <AdminProductsPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <RequireAdmin>
+              <AdminOrdersPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/admin/orders/:orderId"
+          element={
+            <RequireAdmin>
+              <AdminOrderDetailPage />
             </RequireAdmin>
           }
         />

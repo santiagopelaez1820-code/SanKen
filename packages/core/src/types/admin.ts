@@ -1,4 +1,5 @@
 import type { PersonalRecordSummary } from './stats';
+import type { ProductCategory } from './store';
 import type { UserRole } from './user';
 
 export type CurrentRoutineSource = 'engine' | 'trainer' | 'admin';
@@ -170,4 +171,30 @@ export interface RoutineTemplatePayload {
   frequency_days?: number;
   split_type?: RoutineSplitType;
   days?: RoutineTemplateDayPayload[];
+}
+
+/** GET/POST/PATCH /admin/products — igual que Product pero con los campos de uso interno del superadmin. */
+export interface AdminProduct {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  short_description: string;
+  image: string | null;
+  category: ProductCategory;
+  price: string;
+  active: boolean;
+  dropi_reference: string | null;
+  created_at: string;
+}
+
+/** Payload de POST/PATCH /admin/products. */
+export interface ProductPayload {
+  name?: string;
+  description?: string;
+  short_description?: string;
+  category?: ProductCategory;
+  price?: number;
+  active?: boolean;
+  dropi_reference?: string | null;
 }

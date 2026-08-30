@@ -6,7 +6,9 @@ import {
   FileText,
   Flag,
   Newspaper,
+  Package,
   ScrollText,
+  ShoppingCart,
   Trophy,
   Users,
 } from "lucide-react"
@@ -16,6 +18,8 @@ const TILES = [
   { label: "Usuarios", to: "/admin/users", icon: Users },
   { label: "Ejercicios", to: "/admin/exercises", icon: Dumbbell },
   { label: "Rutinas generales", to: "/admin/routine-templates", icon: ClipboardList },
+  { label: "Productos", to: "/admin/products", icon: Package },
+  { label: "Pedidos", to: "/admin/orders", icon: ShoppingCart },
   { label: "Reportes", to: "/admin/reports", icon: FileText },
   { label: "PR pendientes", to: "/admin/pr-submissions", icon: Trophy },
   { label: "Retos", to: "/admin/challenge-templates", icon: Flag },

@@ -4,12 +4,14 @@ import { Tabs, TabList, TabTrigger, TabSlot, useTabTrigger } from 'expo-router/u
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { BarChart3, Dumbbell, Flag, Home, User, type LucideIcon } from 'lucide-react-native';
+import { BarChart3, Flag, Home, ShoppingBag, User, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
+import { ThemedView } from './themed-view';
 import { TabBarIcon } from './ui/tab-bar-icon';
 import { CardShadow, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useCartStore } from '@/store/cart-store';
 
 function TabIcon({ name, icon, label }: { name: string; icon: LucideIcon; label: string }) {
   const theme = useTheme();
@@ -43,15 +45,29 @@ function TabIcon({ name, icon, label }: { name: string; icon: LucideIcon; label:
   );
 }
 
-/** Botón central elevado — acción de mayor frecuencia (comenzar entrenamiento), no un tab más. */
+/**
+ * Botón central elevado — antes abría "Comenzar entrenamiento" (esa acción
+ * se reubicó al menú "Más" y sigue disponible como CTA principal en Home);
+ * ahora es el acceso a SanKen Store, la acción de mayor frecuencia después
+ * de eso.
+ */
 function CenterAction() {
   const theme = useTheme();
+  const itemCount = useCartStore((s) => s.getItemCount());
+
   return (
     <Pressable
-      onPress={() => router.push('/workout/precheck')}
+      onPress={() => router.push('/store')}
       style={[styles.fab, { backgroundColor: theme.accent, borderColor: theme.background }, CardShadow]}
-      accessibilityLabel="Comenzar entrenamiento">
-      <Dumbbell size={24} color={theme.background} strokeWidth={2.3} />
+      accessibilityLabel="Tienda SanKen">
+      <ShoppingBag size={24} color={theme.background} strokeWidth={2.3} />
+      {itemCount > 0 && (
+        <ThemedView style={[styles.fabBadge, { backgroundColor: theme.error, borderColor: theme.background }]}>
+          <ThemedText type="small" style={styles.fabBadgeText}>
+            {itemCount > 9 ? '9+' : itemCount}
+          </ThemedText>
+        </ThemedView>
+      )}
     </Pressable>
   );
 }
@@ -129,6 +145,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: -30,
     borderWidth: 3,
+  },
+  fabBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  fabBadgeText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 10,
   },
   hidden: {
     width: 0,

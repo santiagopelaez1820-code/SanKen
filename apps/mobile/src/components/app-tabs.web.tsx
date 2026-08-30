@@ -8,7 +8,7 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { Image, Pressable, View, StyleSheet } from 'react-native';
-import { BarChart3, Flag, Home, User, type LucideIcon } from 'lucide-react-native';
+import { BarChart3, Flag, Home, ShoppingBag, User, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -17,6 +17,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 
 export default function AppTabs() {
+  const theme = useTheme();
+
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
@@ -28,6 +30,25 @@ export default function AppTabs() {
           <TabTrigger name="dashboard" href="/dashboard" asChild>
             <TabButton icon={BarChart3}>Progreso</TabButton>
           </TabTrigger>
+          {/*
+            "Tienda" NO es un TabTrigger como los demás: /store vive en su
+            propio Stack top-level (src/app/store/), fuera de este grupo
+            (app), así que expo-router/ui no puede resolverlo como
+            sub-segmento de este navigator (lo intenté — tira "multiple
+            trigger components... map to the same sub-segment" porque lo
+            confunde con "/"). Un Pressable + router.push() normal, con la
+            misma pinta visual de TabButton, es el equivalente web del FAB
+            nativo (ver CenterAction en app-tabs.tsx, que por la misma razón
+            tampoco es un TabTrigger).
+          */}
+          <Pressable onPress={() => router.push('/store')} style={({ pressed }) => pressed && styles.pressed}>
+            <ThemedView type="backgroundElement" style={[styles.tabButtonView, styles.tabButtonRow]}>
+              <ShoppingBag size={16} color={theme.textSecondary} />
+              <ThemedText type="small" themeColor="textSecondary">
+                Tienda
+              </ThemedText>
+            </ThemedView>
+          </Pressable>
           <TabTrigger name="retos" href="/retos" asChild>
             <TabButton icon={Flag}>Retos</TabButton>
           </TabTrigger>

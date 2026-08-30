@@ -5,6 +5,7 @@ import {
   Bell,
   CalendarDays,
   ChevronRight,
+  Dumbbell,
   History,
   LogOut,
   MessageCircle,
@@ -85,6 +86,14 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
+  /**
+   * El botón central de la tab bar pasó a ser el acceso a la tienda (ver
+   * app-tabs.tsx) — "Comenzar entrenamiento" se reubicó acá para que siga
+   * alcanzable en 1-2 taps desde cualquier pestaña. Sigue existiendo además
+   * como CTA principal dentro de la card de hoy en Home.
+   */
+  const entrenamientoItems: MoreMenuItem[] = [{ label: 'Comenzar entrenamiento', icon: Dumbbell, path: '/workout/precheck' }];
+
   const socialItems: MoreMenuItem[] = [
     user?.role === 'trainer'
       ? { label: 'Mis clientes', icon: Users, path: '/trainer' }
@@ -117,6 +126,13 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
         <ThemedText type="smallBold" themeColor="textSecondary" style={styles.title}>
           MÁS
         </ThemedText>
+
+        <GroupLabel>ENTRENAMIENTO</GroupLabel>
+        <View style={styles.grid}>
+          {entrenamientoItems.map((item) => (
+            <MenuTile key={item.path} item={item} onPress={() => go(item.path)} />
+          ))}
+        </View>
 
         <GroupLabel>SOCIAL</GroupLabel>
         <View style={styles.grid}>
