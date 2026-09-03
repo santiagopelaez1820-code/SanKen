@@ -1,24 +1,34 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import type { User } from '@sanken/core';
+import { ApiError, type User } from '@sanken/core';
 
 import { api } from '@/lib/api';
+import { SocialAuthCancelledError, signInWithGoogle } from '@/lib/social-auth';
 import { tokenStorage } from '@/lib/token-storage';
 import { useAuthStore } from './auth-store';
 
 jest.mock('@/lib/api', () => ({
-  api: { post: jest.fn(), get: jest.fn(), patch: jest.fn() },
+  api: { post: jest.fn(), get: jest.fn(), patch: jest.fn(), delete: jest.fn() },
 }));
 jest.mock('@/lib/token-storage', () => ({
   tokenStorage: { get: jest.fn(), set: jest.fn(), clear: jest.fn() },
 }));
+jest.mock('@/lib/social-auth', () => ({
+  signInWithGoogle: jest.fn(),
+  signOutFromGoogle: jest.fn(),
+  describeSocialAuthError: () => 'No se pudo iniciar sesión con Google. Inténtalo nuevamente.',
+  SocialAuthCancelledError: class SocialAuthCancelledError extends Error {},
+  SocialAuthUnavailableError: class SocialAuthUnavailableError extends Error {},
+}));
 
 const mockedApi = api as jest.Mocked<typeof api>;
 const mockedTokenStorage = tokenStorage as jest.Mocked<typeof tokenStorage>;
+const mockedSignInWithGoogle = signInWithGoogle as jest.MockedFunction<typeof signInWithGoogle>;
 
 const user: User = {
   id: 1,
   name: 'Test',
   email: 'test@example.com',
+  avatar_url: null,
   role: 'user',
   two_factor_enabled: false,
   is_public_profile: false,
@@ -36,6 +46,7 @@ beforeEach(() => {
     token: null,
     isHydrating: false,
     isSubmitting: false,
+    isSubmittingGoogle: false,
     error: null,
     pendingChallenge: null,
   });
@@ -76,6 +87,57 @@ describe('login', () => {
     expect(state.user).toBeNull();
     expect(state.token).toBeNull();
     expect(state.error).toBe('Credenciales inválidas');
+  });
+});
+
+describe('loginWithGoogle', () => {
+  it('stores the user/token on success', async () => {
+    mockedSignInWithGoogle.mockResolvedValueOnce({ idToken: 'firebase-id-token' });
+    mockedApi.post.mockResolvedValueOnce({ user, token: 'tok-google' });
+
+    await useAuthStore.getState().loginWithGoogle();
+
+    const state = useAuthStore.getState();
+    expect(state.user).toEqual(user);
+    expect(state.token).toBe('tok-google');
+    expect(state.isSubmittingGoogle).toBe(false);
+    expect(mockedApi.post).toHaveBeenCalledWith('/auth/social', { id_token: 'firebase-id-token', provider: 'google' });
+    expect(mockedTokenStorage.set).toHaveBeenCalledWith('tok-google');
+  });
+
+  it('sets pendingChallenge without an error when the backend requires 2FA', async () => {
+    mockedSignInWithGoogle.mockResolvedValueOnce({ idToken: 'firebase-id-token' });
+    mockedApi.post.mockResolvedValueOnce({ requires_two_factor: true, challenge_token: 'chal-google' });
+
+    await useAuthStore.getState().loginWithGoogle();
+
+    const state = useAuthStore.getState();
+    expect(state.pendingChallenge).toEqual({ challengeToken: 'chal-google' });
+    expect(state.token).toBeNull();
+    expect(state.error).toBeNull();
+  });
+
+  it('clears the loading state without setting an error when the user cancels', async () => {
+    mockedSignInWithGoogle.mockRejectedValueOnce(new SocialAuthCancelledError('cancelled'));
+
+    await useAuthStore.getState().loginWithGoogle();
+
+    const state = useAuthStore.getState();
+    expect(state.isSubmittingGoogle).toBe(false);
+    expect(state.error).toBeNull();
+    expect(mockedApi.post).not.toHaveBeenCalled();
+  });
+
+  it('surfaces a friendly error message when the backend rejects the token', async () => {
+    mockedSignInWithGoogle.mockResolvedValueOnce({ idToken: 'firebase-id-token' });
+    mockedApi.post.mockRejectedValueOnce(new ApiError(422, { message: 'Ya existe una cuenta con este correo.' }));
+
+    await expect(useAuthStore.getState().loginWithGoogle()).rejects.toThrow();
+
+    const state = useAuthStore.getState();
+    expect(state.user).toBeNull();
+    expect(state.isSubmittingGoogle).toBe(false);
+    expect(state.error).toBe('Ya existe una cuenta con este correo.');
   });
 });
 

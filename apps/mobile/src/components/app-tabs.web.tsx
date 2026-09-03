@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import {
   Tabs,
   TabList,
@@ -7,7 +8,7 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { Image, Pressable, View, StyleSheet } from 'react-native';
-import { BarChart3, Flag, History, Home, Trophy, type LucideIcon } from 'lucide-react-native';
+import { BarChart3, Flag, Home, ShoppingBag, User, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -16,6 +17,8 @@ import { useTheme } from '@/hooks/use-theme';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 
 export default function AppTabs() {
+  const theme = useTheme();
+
   return (
     <Tabs>
       <TabSlot style={{ height: '100%' }} />
@@ -27,15 +30,34 @@ export default function AppTabs() {
           <TabTrigger name="dashboard" href="/dashboard" asChild>
             <TabButton icon={BarChart3}>Progreso</TabButton>
           </TabTrigger>
+          {/*
+            "Tienda" NO es un TabTrigger como los demás: /store vive en su
+            propio Stack top-level (src/app/store/), fuera de este grupo
+            (app), así que expo-router/ui no puede resolverlo como
+            sub-segmento de este navigator (lo intenté — tira "multiple
+            trigger components... map to the same sub-segment" porque lo
+            confunde con "/"). Un Pressable + router.push() normal, con la
+            misma pinta visual de TabButton, es el equivalente web del FAB
+            nativo (ver CenterAction en app-tabs.tsx, que por la misma razón
+            tampoco es un TabTrigger).
+          */}
+          <Pressable onPress={() => router.push('/store')} style={({ pressed }) => pressed && styles.pressed}>
+            <ThemedView type="backgroundElement" style={[styles.tabButtonView, styles.tabButtonRow]}>
+              <ShoppingBag size={16} color={theme.textSecondary} />
+              <ThemedText type="small" themeColor="textSecondary">
+                Tienda
+              </ThemedText>
+            </ThemedView>
+          </Pressable>
           <TabTrigger name="retos" href="/retos" asChild>
             <TabButton icon={Flag}>Retos</TabButton>
           </TabTrigger>
-          <TabTrigger name="history" href="/history" asChild>
-            <TabButton icon={History}>Historial</TabButton>
+          <TabTrigger name="profile" href="/profile" asChild>
+            <TabButton icon={User}>Perfil</TabButton>
           </TabTrigger>
-          <TabTrigger name="prs" href="/prs" asChild>
-            <TabButton icon={Trophy}>PR</TabButton>
-          </TabTrigger>
+          <TabTrigger name="history" href="/history" style={styles.hidden} />
+          <TabTrigger name="prs" href="/prs" style={styles.hidden} />
+          <TabTrigger name="measurements" href="/measurements" style={styles.hidden} />
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -69,12 +91,12 @@ export function CustomTabList(props: TabListProps) {
   return (
     <View {...props} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <View style={styles.brand}>
+        <Pressable style={styles.brand} onPress={() => router.push('/')}>
           <Image source={require('@/assets/images/logo.png')} style={styles.brandLogo} resizeMode="contain" />
           <ThemedText type="smallBold" style={styles.brandText}>
             SANKEN
           </ThemedText>
-        </View>
+        </Pressable>
 
         {props.children}
       </ThemedView>
@@ -114,6 +136,11 @@ const styles = StyleSheet.create({
   brandText: {},
   pressed: {
     opacity: 0.7,
+  },
+  hidden: {
+    width: 0,
+    height: 0,
+    display: 'none',
   },
   tabButtonView: {
     paddingVertical: Spacing.one,

@@ -8,7 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { OptionPickerModal } from '@/components/ui/option-picker-modal';
+import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
@@ -152,18 +152,20 @@ export default function AdminUsuariosScreen() {
 
           {users.map((user) => (
             <ThemedView key={user.id} type="backgroundElement" style={styles.userCard}>
-              <ThemedText type="smallBold">
-                {user.name} <ThemedText type="small" themeColor="textSecondary">· {ROLE_LABELS[user.role]}</ThemedText>
-                {user.trainer_verified_at && <ThemedText type="small" themeColor="accent"> ✓</ThemedText>}
-                {user.is_deactivated && <ThemedText type="small" style={styles.warn}> · Desactivado</ThemedText>}
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {user.email}
-                {(user.country || user.city) && ` · ${[user.city, user.country].filter(Boolean).join(', ')}`}
-              </ThemedText>
-              <ThemedText type="small" themeColor={user.current_routine?.source === 'admin' ? 'accent' : 'textSecondary'}>
-                Rutina: {user.current_routine?.label ?? 'Sin rutina activa'}
-              </ThemedText>
+              <Pressable onPress={() => router.push(`/admin/usuarios/${user.id}`)}>
+                <ThemedText type="smallBold">
+                  {user.name} <ThemedText type="small" themeColor="textSecondary">· {ROLE_LABELS[user.role]}</ThemedText>
+                  {user.trainer_verified_at && <ThemedText type="small" themeColor="accent"> ✓</ThemedText>}
+                  {user.is_deactivated && <ThemedText type="small" style={styles.warn}> · Desactivado</ThemedText>}
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {user.email}
+                  {(user.country || user.city) && ` · ${[user.city, user.country].filter(Boolean).join(', ')}`}
+                </ThemedText>
+                <ThemedText type="small" themeColor={user.current_routine?.source === 'admin' ? 'accent' : 'textSecondary'}>
+                  Rutina: {user.current_routine?.label ?? 'Sin rutina activa'}
+                </ThemedText>
+              </Pressable>
               <View style={styles.actionsRow}>
                 {user.role === 'trainer' && (
                   <PrimaryButton
@@ -222,27 +224,42 @@ export default function AdminUsuariosScreen() {
           onCancel={() => setConfirmingDeleteId(null)}
         />
 
-        <OptionPickerModal
+        <ListPickerModal
           visible={countryPickerVisible}
           title="País"
-          options={countries}
+          items={countries}
+          getId={(option) => option.id}
+          getLabel={(option) => option.name}
           onSelect={(option) => {
             setCountry(option);
             setCity(null);
             setCountryPickerVisible(false);
-            applyFilters({ countryId: option?.id, cityId: undefined });
+            applyFilters({ countryId: option.id, cityId: undefined });
+          }}
+          onSelectAll={() => {
+            setCountry(null);
+            setCity(null);
+            setCountryPickerVisible(false);
+            applyFilters({ countryId: undefined, cityId: undefined });
           }}
           onClose={() => setCountryPickerVisible(false)}
         />
 
-        <OptionPickerModal
+        <ListPickerModal
           visible={cityPickerVisible}
           title="Ciudad"
-          options={cities}
+          items={cities}
+          getId={(option) => option.id}
+          getLabel={(option) => option.name}
           onSelect={(option) => {
             setCity(option);
             setCityPickerVisible(false);
-            applyFilters({ cityId: option?.id });
+            applyFilters({ cityId: option.id });
+          }}
+          onSelectAll={() => {
+            setCity(null);
+            setCityPickerVisible(false);
+            applyFilters({ cityId: undefined });
           }}
           onClose={() => setCityPickerVisible(false)}
         />
@@ -268,5 +285,5 @@ const styles = StyleSheet.create({
   input: { borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.two },
   userCard: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
   actionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, marginTop: Spacing.one },
-  warn: { color: '#C9564A' },
+  warn: { color: '#FF4D5E' },
 });

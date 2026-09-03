@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             AchievementSeeder::class,
             ChallengeTemplateSeeder::class,
             FoodItemSeeder::class,
+            ProductSeeder::class,
         ]);
     }
 }

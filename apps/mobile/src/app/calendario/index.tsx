@@ -223,5 +223,5 @@ const styles = StyleSheet.create({
   input: { flex: 1, borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
   addButton: { borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.one },
   disabled: { opacity: 0.5 },
-  error: { color: '#C9564A' },
+  error: { color: '#FF4D5E' },
 });

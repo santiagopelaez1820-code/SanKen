@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
@@ -15,8 +15,10 @@ interface ProgressRingProps {
   color?: 'accent' | 'accentSecondary';
   size?: number;
   strokeWidth?: number;
-  label: string;
-  valueLabel: string;
+  label?: string;
+  valueLabel?: string;
+  /** Reemplaza el texto central por otro contenido (ej. avatar) — el ring sigue midiendo `value/max`. */
+  centerContent?: ReactNode;
 }
 
 export function ProgressRing({
@@ -27,6 +29,7 @@ export function ProgressRing({
   strokeWidth = 10,
   label,
   valueLabel,
+  centerContent,
 }: ProgressRingProps) {
   const theme = useTheme();
   const pct = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
@@ -77,14 +80,18 @@ export function ProgressRing({
           />
         </Svg>
         <View style={styles.centerLabel}>
-          <ThemedText type="smallBold" style={styles.value}>
-            {valueLabel}
-          </ThemedText>
+          {centerContent ?? (
+            <ThemedText type="smallBold" style={styles.value}>
+              {valueLabel}
+            </ThemedText>
+          )}
         </View>
       </View>
-      <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
-        {label}
-      </ThemedText>
+      {!!label && (
+        <ThemedText type="small" themeColor="textSecondary" style={styles.label}>
+          {label}
+        </ThemedText>
+      )}
     </View>
   );
 }

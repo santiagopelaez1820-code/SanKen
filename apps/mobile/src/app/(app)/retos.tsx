@@ -291,11 +291,17 @@ const styles = StyleSheet.create({
     ...CardShadow,
   },
   eyebrow: { letterSpacing: 1 },
-  progressBlock: { gap: Spacing.one },
-  progressRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  progressBlock: { gap: Spacing.one, backgroundColor: 'transparent' },
+  progressRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent' },
   progressTrack: { height: 8, borderRadius: 4, overflow: 'hidden' },
   progressFill: { height: '100%', borderRadius: 4 },
-  leaderboard: { gap: Spacing.one, borderTopWidth: 1, borderColor: 'rgba(128,128,128,0.2)', paddingTop: Spacing.two },
+  leaderboard: {
+    gap: Spacing.one,
+    borderTopWidth: 1,
+    borderColor: 'rgba(128,128,128,0.2)',
+    paddingTop: Spacing.two,
+    backgroundColor: 'transparent',
+  },
   listRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -303,5 +309,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.one,
     borderRadius: Spacing.two,
   },
-  error: { color: '#C9564A' },
+  error: { color: '#FF4D5E' },
 });

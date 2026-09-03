@@ -16,7 +16,7 @@ import {
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import { ExercisePickerModal } from '@/components/trainer/exercise-picker-modal';
+import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { OptionCard } from '@/components/ui/option-card';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
@@ -192,10 +192,10 @@ export default function AdminRutinasScreen() {
               Sexo
             </ThemedText>
             <ThemedView style={styles.optionRow}>
-              <ThemedView style={{ flex: 1 }}>
+              <ThemedView style={{ flex: 1, backgroundColor: 'transparent' }}>
                 <OptionCard label="Hombre" selected={form.sex === 'male'} onPress={() => setForm({ ...form, sex: 'male' })} />
               </ThemedView>
-              <ThemedView style={{ flex: 1 }}>
+              <ThemedView style={{ flex: 1, backgroundColor: 'transparent' }}>
                 <OptionCard
                   label="Mujer"
                   selected={form.sex === 'female'}
@@ -291,9 +291,14 @@ export default function AdminRutinasScreen() {
         </ScrollView>
       </SafeAreaView>
 
-      <ExercisePickerModal
+      <ListPickerModal
         visible={pickerSlot !== null}
-        exercises={exercises}
+        title="Elegir ejercicio"
+        items={exercises}
+        getId={(exercise) => exercise.id}
+        getLabel={(exercise) => exercise.name}
+        getSubtitle={(exercise) => `${exercise.primary_muscle.name} · ${exercise.equipment}`}
+        searchPlaceholder="Nombre del ejercicio…"
         onSelect={handlePickExercise}
         onClose={() => setPickerSlot(null)}
       />
@@ -324,10 +329,10 @@ const styles = StyleSheet.create({
   },
   pageTitle: { fontSize: 28, lineHeight: 34 },
   card: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.two },
-  optionRow: { flexDirection: 'row', gap: Spacing.two },
-  optionList: { gap: Spacing.two },
-  actionsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two },
+  optionRow: { flexDirection: 'row', gap: Spacing.two, backgroundColor: 'transparent' },
+  optionList: { gap: Spacing.two, backgroundColor: 'transparent' },
+  actionsRow: { flexDirection: 'row', gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
   templateCard: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.two },
-  templateActionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
-  error: { color: '#C9564A' },
+  templateActionsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, backgroundColor: 'transparent' },
+  error: { color: '#FF4D5E' },
 });

@@ -55,7 +55,12 @@ export function OnboardingPage() {
   const user = useAuthStore((state) => state.user)
   const setOnboardingCompleted = useAuthStore((state) => state.setOnboardingCompleted)
 
-  const { data: questions, isLoading } = useQuery({
+  const {
+    data: questions,
+    isLoading,
+    isError: questionsFailed,
+    refetch: retryQuestions,
+  } = useQuery({
     queryKey: ["onboarding", "questions"],
     queryFn: () => api.get<OnboardingQuestions>("/onboarding/questions"),
   })
@@ -81,6 +86,22 @@ export function OnboardingPage() {
     const current = answers.goals ?? []
     const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value]
     setAnswer("goals", next)
+  }
+
+  if (questionsFailed) {
+    return (
+      <main className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background px-4 text-center text-foreground">
+        <p className="text-sm text-muted-foreground">
+          No pudimos cargar el cuestionario. Si tu sesión expiró, iniciá sesión de nuevo.
+        </p>
+        <div className="flex gap-2">
+          <Button onClick={() => retryQuestions()}>Reintentar</Button>
+          <Button variant="ghost" onClick={() => navigate("/login")}>
+            Ir al login
+          </Button>
+        </div>
+      </main>
+    )
   }
 
   if (isLoading || !questions) {

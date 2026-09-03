@@ -160,10 +160,20 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     marginTop: Spacing.two,
   },
+  // Mismo mecanismo que `spacer` más abajo: sin `backgroundColor`
+  // `ThemedView` pinta `theme.background`, distinto al de la card
+  // `backgroundElement` que lo contiene — dejaba un rectángulo claro
+  // detrás de la fila de botones Chat/Pausar/Finalizar.
   buttonRow: {
     flexDirection: 'row',
     gap: Spacing.two,
     marginTop: Spacing.one,
+    backgroundColor: 'transparent',
   },
-  spacer: { marginTop: Spacing.two },
+  // Este spacer envuelve el botón dentro de una card `backgroundElement` —
+  // sin este override, `ThemedView` pinta `theme.background` (el fondo
+  // general de la página, distinto al de la card) y deja un rectángulo del
+  // color equivocado alrededor del botón. Mismo mecanismo que en
+  // app/(app)/index.tsx.
+  spacer: { marginTop: Spacing.two, backgroundColor: 'transparent' },
 });

@@ -9,6 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAdminStore } from '@/store/admin-store';
@@ -54,7 +55,15 @@ function ChipRow({
   );
 }
 
-const EMPTY_FORM = { name: '', primary_muscle_id: '', equipment: 'barbell', level: 'beginner', type: 'compound' };
+const EMPTY_FORM = {
+  name: '',
+  primary_muscle_id: '',
+  equipment: 'barbell',
+  level: 'beginner',
+  type: 'compound',
+  instructions: '',
+  alternative_exercise_id: '',
+};
 
 /**
  * El admin elige el archivo desde su dispositivo (expo-document-picker) —
@@ -134,6 +143,7 @@ export default function AdminEjerciciosScreen() {
     useAdminStore();
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [alternativePickerVisible, setAlternativePickerVisible] = useState(false);
 
   useEffect(() => {
     loadExercises();
@@ -147,11 +157,19 @@ export default function AdminEjerciciosScreen() {
       equipment: exercise.equipment,
       level: exercise.level,
       type: exercise.type,
+      instructions: exercise.instructions ?? '',
+      alternative_exercise_id: exercise.alternatives[0] ? String(exercise.alternatives[0].id) : '',
     });
   };
 
+  const selectedAlternative = exercises.find((e) => String(e.id) === form.alternative_exercise_id);
+
   const submit = async () => {
-    const payload = { ...form, primary_muscle_id: Number(form.primary_muscle_id) };
+    const payload = {
+      ...form,
+      primary_muscle_id: Number(form.primary_muscle_id),
+      alternative_exercise_id: form.alternative_exercise_id ? Number(form.alternative_exercise_id) : null,
+    };
     if (editingId) {
       await updateExercise(editingId, payload);
     } else {
@@ -186,6 +204,22 @@ export default function AdminEjerciciosScreen() {
             <ChipRow options={EQUIPMENT_OPTIONS} value={form.equipment} onChange={(equipment) => setForm({ ...form, equipment })} />
             <ChipRow options={LEVEL_OPTIONS} value={form.level} onChange={(level) => setForm({ ...form, level })} />
             <ChipRow options={TYPE_OPTIONS} value={form.type} onChange={(type) => setForm({ ...form, type })} />
+            <TextInput
+              value={form.instructions}
+              onChangeText={(instructions) => setForm({ ...form, instructions })}
+              placeholder="Instrucciones (opcional)"
+              placeholderTextColor={theme.textSecondary}
+              multiline
+              numberOfLines={3}
+              style={[styles.input, styles.textarea, { borderColor: theme.backgroundSelected, color: theme.text }]}
+            />
+            <Pressable
+              onPress={() => setAlternativePickerVisible(true)}
+              style={[styles.input, { borderColor: theme.backgroundSelected, justifyContent: 'center' }]}>
+              <ThemedText type="small" themeColor={selectedAlternative ? 'text' : 'textSecondary'}>
+                {selectedAlternative ? `Alternativa (A/B): ${selectedAlternative.name}` : 'Sin ejercicio alternativo (A/B)'}
+              </ThemedText>
+            </Pressable>
             <View style={styles.actionsRow}>
               <PrimaryButton
                 label={editingId ? 'Guardar cambios' : 'Crear'}
@@ -215,6 +249,7 @@ export default function AdminEjerciciosScreen() {
                 <Pressable onPress={() => startEdit(exercise)} style={styles.exerciseInfo}>
                   <ThemedText type="small" themeColor={exercise.is_active ? 'text' : 'textSecondary'}>
                     {exercise.name} · {exercise.primary_muscle.name} · {exercise.equipment}
+                    {exercise.alternatives[0] && ` · alt: ${exercise.alternatives[0].name}`}
                     {!exercise.is_active && ' · inactivo'}
                   </ThemedText>
                 </Pressable>
@@ -233,6 +268,25 @@ export default function AdminEjerciciosScreen() {
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />
         </ScrollView>
       </SafeAreaView>
+
+      <ListPickerModal
+        visible={alternativePickerVisible}
+        title="Ejercicio alternativo (A/B)"
+        items={exercises.filter((e) => e.id !== editingId)}
+        getId={(exercise) => exercise.id}
+        getLabel={(exercise) => exercise.name}
+        getSubtitle={(exercise) => `${exercise.primary_muscle.name} · ${exercise.equipment}`}
+        searchPlaceholder="Nombre del ejercicio…"
+        onSelect={(exercise) => {
+          setForm((prev) => ({ ...prev, alternative_exercise_id: String(exercise.id) }));
+          setAlternativePickerVisible(false);
+        }}
+        onSelectAll={() => {
+          setForm((prev) => ({ ...prev, alternative_exercise_id: '' }));
+          setAlternativePickerVisible(false);
+        }}
+        onClose={() => setAlternativePickerVisible(false)}
+      />
     </ThemedView>
   );
 }
@@ -251,6 +305,7 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 28, lineHeight: 34 },
   card: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.two },
   input: { borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.two },
+  textarea: { minHeight: 72, textAlignVertical: 'top' },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.one },
   chip: { borderWidth: 1, borderRadius: Spacing.two, paddingVertical: Spacing.half, paddingHorizontal: Spacing.two },
   actionsRow: { flexDirection: 'row', gap: Spacing.two },
@@ -265,6 +320,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   exerciseInfo: { flex: 1 },
-  videoRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two },
-  error: { color: '#C9564A' },
+  videoRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
+  error: { color: '#FF4D5E' },
 });

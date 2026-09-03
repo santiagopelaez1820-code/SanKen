@@ -264,5 +264,5 @@ const styles = StyleSheet.create({
   question: { gap: Spacing.two, marginBottom: Spacing.four },
   optionsList: { gap: Spacing.two, marginTop: Spacing.three },
   actions: { gap: Spacing.two, marginTop: 'auto' },
-  error: { color: '#C9564A', marginBottom: Spacing.two },
+  error: { color: '#FF4D5E', marginBottom: Spacing.two },
 });

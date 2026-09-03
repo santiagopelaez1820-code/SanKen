@@ -10,6 +10,7 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { parseDecimalInput } from '@/lib/number-input';
 import { useBodyMeasurementsStore } from '@/store/body-measurements-store';
 
 const MIN_POINTS_FOR_CHART = 3;
@@ -38,7 +39,7 @@ export default function MeasurementsScreen() {
   }, [load]);
 
   const handleSubmit = async () => {
-    const weight = Number(weightInput.replace(',', '.'));
+    const weight = parseDecimalInput(weightInput);
     if (!weightInput || Number.isNaN(weight) || weight < 1 || weight > 999) {
       setFormError('Ingresa un peso válido.');
       return;
@@ -185,5 +186,5 @@ const styles = StyleSheet.create({
     padding: Spacing.three,
     marginBottom: Spacing.two,
   },
-  error: { color: '#C9564A' },
+  error: { color: '#FF4D5E' },
 });

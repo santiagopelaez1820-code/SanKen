@@ -23,11 +23,7 @@ class AdminReportController extends Controller
 
         return response()->json([
             'data' => ReportResource::collection($reports->items()),
-            'meta' => [
-                'current_page' => $reports->currentPage(),
-                'last_page' => $reports->lastPage(),
-                'total' => $reports->total(),
-            ],
+            'meta' => $this->paginationMeta($reports),
         ]);
     }
 

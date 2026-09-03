@@ -10,6 +10,8 @@ interface UserRepositoryInterface
 
     public function findByEmail(string $email): ?User;
 
+    public function findByFirebaseUid(string $firebaseUid): ?User;
+
     public function count(): int;
 
     /**

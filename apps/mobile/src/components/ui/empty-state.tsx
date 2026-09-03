@@ -54,11 +54,17 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
 }
 
 const styles = StyleSheet.create({
+  // EmptyState se usa dentro de cards con fondos distintos al de la
+  // página (backgroundElement, tintes de acento, etc.) — sin
+  // `backgroundColor: 'transparent'` en los Views puramente de layout,
+  // quedaba un rectángulo del fondo general de la app encima del fondo
+  // real de la card que lo contiene.
   container: {
     alignItems: 'center',
     gap: Spacing.two,
     paddingVertical: Spacing.five,
     paddingHorizontal: Spacing.four,
+    backgroundColor: 'transparent',
   },
   iconCircle: {
     width: 48,
@@ -73,5 +79,6 @@ const styles = StyleSheet.create({
   actionWrap: {
     marginTop: Spacing.one,
     minWidth: 160,
+    backgroundColor: 'transparent',
   },
 });

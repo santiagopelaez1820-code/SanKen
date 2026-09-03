@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Image, StyleSheet } from 'react-native';
+import { Image, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,7 +11,9 @@ export default function AdminScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <Image source={require('@/assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+        <Pressable onPress={() => router.push('/')}>
+          <Image source={require('@/assets/images/logo.png')} style={styles.logo} resizeMode="contain" />
+        </Pressable>
         <ThemedText type="title" style={styles.title}>
           Super Admin
         </ThemedText>

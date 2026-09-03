@@ -24,11 +24,7 @@ class AdminPrSubmissionController extends Controller
 
         return response()->json([
             'data' => PrSubmissionResource::collection($submissions->items()),
-            'meta' => [
-                'current_page' => $submissions->currentPage(),
-                'last_page' => $submissions->lastPage(),
-                'total' => $submissions->total(),
-            ],
+            'meta' => $this->paginationMeta($submissions),
         ]);
     }
 

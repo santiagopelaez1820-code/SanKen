@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    /*
+    | Login social (Google/Facebook vía Firebase Authentication). El backend
+    | nunca ve la contraseña del proveedor — solo verifica el Firebase ID
+    | Token con el Admin SDK usando esta service account. Sin
+    | FIREBASE_CREDENTIALS configurado, FirebaseTokenVerifier falla cerrado
+    | (ver App\Infrastructure\Firebase\FirebaseTokenVerifier).
+    */
+    'firebase' => [
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'credentials' => env('FIREBASE_CREDENTIALS'),
+    ],
+
 ];

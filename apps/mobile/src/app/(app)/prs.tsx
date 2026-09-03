@@ -13,10 +13,11 @@ import { Badge, type BadgeVariant } from '@/components/ui/badge';
 import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
-import { ExercisePickerModal } from '@/components/trainer/exercise-picker-modal';
+import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { BottomTabInset, CardShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
+import { parseDecimalInput } from '@/lib/number-input';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
 import { useExerciseRankingsStore } from '@/store/exercise-rankings-store';
 import { usePersonalRecordsStore } from '@/store/personal-records-store';
@@ -182,7 +183,7 @@ export default function PersonalRecordsScreen() {
   }, [load, loadExercises, loadSubmissions]);
 
   const handleSubmitPrSubmission = async () => {
-    const weight = Number(submissionWeightInput.replace(',', '.'));
+    const weight = parseDecimalInput(submissionWeightInput);
     const reps = Number(submissionRepsInput);
 
     if (!selectedSubmissionExercise) {
@@ -208,7 +209,7 @@ export default function PersonalRecordsScreen() {
 
   const handleSubmit = async () => {
     setConfirmation(null);
-    const weight = Number(weightInput.replace(',', '.'));
+    const weight = parseDecimalInput(weightInput);
     const reps = Number(repsInput);
 
     if (!selectedExercise) {
@@ -503,9 +504,14 @@ export default function PersonalRecordsScreen() {
           }
         />
 
-        <ExercisePickerModal
+        <ListPickerModal
           visible={pickerVisible}
-          exercises={exercises}
+          title="Elegir ejercicio"
+          items={exercises}
+          getId={(exercise) => exercise.id}
+          getLabel={(exercise) => exercise.name}
+          getSubtitle={(exercise) => `${exercise.primary_muscle.name} · ${exercise.equipment}`}
+          searchPlaceholder="Nombre del ejercicio…"
           onSelect={(exercise) => {
             setSelectedExercise(exercise);
             setPickerVisible(false);
@@ -513,9 +519,14 @@ export default function PersonalRecordsScreen() {
           onClose={() => setPickerVisible(false)}
         />
 
-        <ExercisePickerModal
+        <ListPickerModal
           visible={rankingPickerVisible}
-          exercises={exercises}
+          title="Elegir ejercicio"
+          items={exercises}
+          getId={(exercise) => exercise.id}
+          getLabel={(exercise) => exercise.name}
+          getSubtitle={(exercise) => `${exercise.primary_muscle.name} · ${exercise.equipment}`}
+          searchPlaceholder="Nombre del ejercicio…"
           onSelect={(exercise) => {
             setRankingExerciseItem(exercise);
             setRankingExercise(exercise.id);
@@ -524,9 +535,14 @@ export default function PersonalRecordsScreen() {
           onClose={() => setRankingPickerVisible(false)}
         />
 
-        <ExercisePickerModal
+        <ListPickerModal
           visible={submissionPickerVisible}
-          exercises={exercises}
+          title="Elegir ejercicio"
+          items={exercises}
+          getId={(exercise) => exercise.id}
+          getLabel={(exercise) => exercise.name}
+          getSubtitle={(exercise) => `${exercise.primary_muscle.name} · ${exercise.equipment}`}
+          searchPlaceholder="Nombre del ejercicio…"
           onSelect={(exercise) => {
             setSelectedSubmissionExercise(exercise);
             setSubmissionPickerVisible(false);
@@ -557,7 +573,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     marginBottom: Spacing.three,
   },
-  field: { gap: Spacing.one },
+  field: { gap: Spacing.one, backgroundColor: 'transparent' },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -588,7 +604,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     backgroundColor: 'transparent',
   },
-  formRowField: { flex: 1 },
+  formRowField: { flex: 1, backgroundColor: 'transparent' },
   confirmationBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -626,16 +642,22 @@ const styles = StyleSheet.create({
   },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   rankNumber: { width: 16, textAlign: 'center' },
-  submissionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.one },
+  submissionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.one,
+    backgroundColor: 'transparent',
+  },
   videoLink: { alignSelf: 'flex-end' },
-  error: { color: '#C9564A' },
+  error: { color: '#FF4D5E' },
   rankingCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,
     gap: Spacing.two,
     marginTop: Spacing.three,
   },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two },
+  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.two, backgroundColor: 'transparent' },
   chip: {
     borderWidth: 1,
     borderRadius: Spacing.three,

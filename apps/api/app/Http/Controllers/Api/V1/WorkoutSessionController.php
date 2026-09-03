@@ -48,11 +48,7 @@ class WorkoutSessionController extends Controller
 
         return response()->json([
             'data' => WorkoutSessionResource::collection($sessions->items()),
-            'meta' => [
-                'current_page' => $sessions->currentPage(),
-                'last_page' => $sessions->lastPage(),
-                'total' => $sessions->total(),
-            ],
+            'meta' => $this->paginationMeta($sessions),
         ]);
     }
 

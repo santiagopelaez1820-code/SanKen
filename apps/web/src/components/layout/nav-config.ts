@@ -12,8 +12,10 @@ import {
   LayoutDashboard,
   MessageCircle,
   Newspaper,
+  Package,
   ScrollText,
   Shield,
+  ShoppingCart,
   Trophy,
   Users,
   UserSquare2,
@@ -72,6 +74,8 @@ export function buildNavSections(user: User | null): NavSection[] {
         { label: "Panel", path: "/admin", icon: Shield },
         { label: "Usuarios", path: "/admin/users", icon: Users },
         { label: "Ejercicios", path: "/admin/exercises", icon: Dumbbell },
+        { label: "Productos", path: "/admin/products", icon: Package },
+        { label: "Pedidos", path: "/admin/orders", icon: ShoppingCart },
         { label: "Plantillas de rutina", path: "/admin/routine-templates", icon: ClipboardList },
         { label: "Plantillas de retos", path: "/admin/challenge-templates", icon: Flag },
         { label: "Solicitudes de PR", path: "/admin/pr-submissions", icon: Trophy },
@@ -84,4 +88,13 @@ export function buildNavSections(user: User | null): NavSection[] {
   }
 
   return sections
+}
+
+/** Etiqueta de la sección actual para el TopBar — cae a "SanKen" si la ruta no matchea ningún item de nav. */
+export function findNavLabel(sections: NavSection[], pathname: string): string {
+  for (const section of sections) {
+    const match = section.items.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`))
+    if (match) return match.label
+  }
+  return "SanKen"
 }

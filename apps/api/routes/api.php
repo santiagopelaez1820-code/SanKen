@@ -4,7 +4,9 @@ use App\Http\Controllers\Api\V1\Admin\AdminAuditLogController;
 use App\Http\Controllers\Api\V1\Admin\AdminChallengeTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminExerciseController;
 use App\Http\Controllers\Api\V1\Admin\AdminNewsController;
+use App\Http\Controllers\Api\V1\Admin\AdminOrderController;
 use App\Http\Controllers\Api\V1\Admin\AdminPrSubmissionController;
+use App\Http\Controllers\Api\V1\Admin\AdminProductController;
 use App\Http\Controllers\Api\V1\Admin\AdminReportController;
 use App\Http\Controllers\Api\V1\Admin\AdminRoutineTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminStatsController;
@@ -25,8 +27,10 @@ use App\Http\Controllers\Api\V1\MyTrainerController;
 use App\Http\Controllers\Api\V1\NutritionController;
 use App\Http\Controllers\Api\V1\NutritionPlanController;
 use App\Http\Controllers\Api\V1\OnboardingController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\PingController;
 use App\Http\Controllers\Api\V1\PrSubmissionController;
+use App\Http\Controllers\Api\V1\ProductController;
 use App\Http\Controllers\Api\V1\PushController;
 use App\Http\Controllers\Api\V1\RankingController;
 use App\Http\Controllers\Api\V1\ReportController;
@@ -50,6 +54,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             ->middleware('throttle:5,1')
             ->name('login');
 
+        Route::post('/social', [AuthController::class, 'socialLogin'])
+            ->middleware('throttle:5,1')
+            ->name('social');
+
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
             ->middleware('throttle:5,1')
             ->name('forgot-password');
@@ -69,6 +77,12 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
             Route::get('/me', [AuthController::class, 'me'])->name('me');
+            Route::post('/me/avatar', [AuthController::class, 'updateAvatar'])
+                ->middleware('throttle:writes')
+                ->name('me.avatar.store');
+            Route::delete('/me/avatar', [AuthController::class, 'deleteAvatar'])
+                ->middleware('throttle:writes')
+                ->name('me.avatar.destroy');
             Route::post('/email/resend', [EmailVerificationController::class, 'resend'])
                 ->middleware('throttle:3,5')
                 ->name('email.resend');
@@ -96,6 +110,15 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
     Route::middleware('auth:sanctum')->get('/exercises', [ExerciseController::class, 'index'])->name('exercises.index');
     Route::middleware('auth:sanctum')->get('/exercises/{exercise}/rankings', [ExerciseRankingController::class, 'index'])->name('exercises.rankings');
+
+    Route::middleware('auth:sanctum')->prefix('products')->name('products.')->group(function () {
+        Route::get('/', [ProductController::class, 'index'])->name('index');
+        Route::get('/{product}', [ProductController::class, 'show'])->name('show');
+    });
+
+    Route::middleware('auth:sanctum')->prefix('orders')->name('orders.')->group(function () {
+        Route::post('/', [OrderController::class, 'store'])->middleware('throttle:writes')->name('store');
+    });
 
     Route::middleware('auth:sanctum')->prefix('routines')->name('routines.')->group(function () {
         Route::get('/active', [RoutineController::class, 'active'])->name('active');
@@ -278,6 +301,21 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::post('/', [AdminNewsController::class, 'store'])->middleware('throttle:writes')->name('store');
             Route::patch('/{news}', [AdminNewsController::class, 'update'])->middleware('throttle:writes')->name('update');
             Route::delete('/{news}', [AdminNewsController::class, 'destroy'])->middleware('throttle:writes')->name('destroy');
+        });
+
+        Route::prefix('products')->name('products.')->group(function () {
+            Route::get('/', [AdminProductController::class, 'index'])->name('index');
+            Route::post('/', [AdminProductController::class, 'store'])->middleware('throttle:writes')->name('store');
+            Route::patch('/{product}', [AdminProductController::class, 'update'])->middleware('throttle:writes')->name('update');
+            Route::delete('/{product}', [AdminProductController::class, 'destroy'])->middleware('throttle:writes')->name('destroy');
+            Route::post('/{product}/image', [AdminProductController::class, 'uploadImage'])->middleware('throttle:writes')->name('image.store');
+            Route::delete('/{product}/image', [AdminProductController::class, 'deleteImage'])->middleware('throttle:writes')->name('image.destroy');
+        });
+
+        Route::prefix('orders')->name('orders.')->group(function () {
+            Route::get('/', [AdminOrderController::class, 'index'])->name('index');
+            Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
+            Route::patch('/{order}/status', [AdminOrderController::class, 'updateStatus'])->middleware('throttle:writes')->name('status.update');
         });
 
         Route::get('/stats', [AdminStatsController::class, 'index'])->name('stats');

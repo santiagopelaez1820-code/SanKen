@@ -33,7 +33,7 @@ export function RoutineDayEditor({
   return (
     <ThemedView type="backgroundElement" style={styles.card}>
       <ThemedView style={styles.headerRow}>
-        <ThemedView style={{ flex: 1 }}>
+        <ThemedView style={{ flex: 1, backgroundColor: 'transparent' }}>
           <TextField label="Nombre del día" value={day.label} onChangeText={onChangeLabel} placeholder="Ej. Push" />
         </ThemedView>
         {canRemove && (
@@ -112,13 +112,13 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     marginTop: Spacing.two,
   },
-  headerRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two },
-  removeLink: { color: '#C9564A' },
+  headerRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two, backgroundColor: 'transparent' },
+  removeLink: { color: '#FF4D5E' },
   exerciseRow: {
     borderRadius: Spacing.three,
     padding: Spacing.two,
     gap: Spacing.two,
   },
-  fieldsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two },
-  fieldThird: { flex: 1 },
+  fieldsRow: { flexDirection: 'row', alignItems: 'flex-end', gap: Spacing.two, backgroundColor: 'transparent' },
+  fieldThird: { flex: 1, backgroundColor: 'transparent' },
 });

@@ -5,37 +5,42 @@ export function AchievementsList({ achievements }: { achievements: Achievement[]
   const unlockedCount = achievements.filter((a) => a.unlocked).length
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading text-sm font-medium text-foreground">Logros</h2>
+    <div className="sank-surface rounded-2 p-4">
+      <div className="d-flex align-items-center justify-content-between mb-1">
+        <h2 className="sank-eyebrow mb-0">Logros</h2>
         {achievements.length > 0 && (
-          <span className="font-heading text-sm font-bold tabular-nums text-primary">
+          <span className="fw-bold sank-tabular-nums" style={{ color: "var(--sanken-cyan-light)" }}>
             {unlockedCount}/{achievements.length}
           </span>
         )}
       </div>
 
       {achievements.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">Todavía no hay logros disponibles.</p>
+        <p className="small text-body-secondary mt-3 mb-0">Todavía no hay logros disponibles.</p>
       ) : (
-        <div className="mt-4 flex gap-3 overflow-x-auto pb-1">
+        <div className="sank-scroll-x gap-3 mt-3 pb-1">
           {achievements.map((achievement) => (
             <div
               key={achievement.code}
               title={achievement.description}
-              className={`flex min-w-24 shrink-0 flex-col items-center gap-1.5 rounded-lg border px-2 py-3 text-center ${
-                achievement.unlocked
-                  ? "border-primary/25 bg-primary/8"
-                  : "border-border bg-background opacity-50"
-              }`}
+              className="d-flex flex-column align-items-center gap-1 rounded-3 text-center flex-shrink-0"
+              style={{
+                minWidth: 96,
+                padding: "0.75rem 0.5rem",
+                border: achievement.unlocked ? "1px solid rgba(0, 184, 217, 0.3)" : "1px solid var(--bs-border-color)",
+                background: achievement.unlocked ? "var(--sanken-cyan-dim)" : "transparent",
+                opacity: achievement.unlocked ? 1 : 0.5,
+              }}
             >
               {achievement.unlocked ? (
-                <Trophy className="size-6 text-primary" />
+                <Trophy size={22} color="var(--sanken-cyan)" />
               ) : (
-                <Lock className="size-6 text-muted-foreground" />
+                <Lock size={22} className="text-body-secondary" />
               )}
-              <p className="text-xs font-medium text-foreground">{achievement.name}</p>
-              <p className="text-[10px] text-muted-foreground">+{achievement.xp_bonus} XP</p>
+              <p className="small fw-medium mb-0">{achievement.name}</p>
+              <p className="mb-0 text-body-secondary" style={{ fontSize: "0.65rem" }}>
+                +{achievement.xp_bonus} XP
+              </p>
             </div>
           ))}
         </div>

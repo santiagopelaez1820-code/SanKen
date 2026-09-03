@@ -23,11 +23,7 @@ class AdminAuditLogController extends Controller
 
         return response()->json([
             'data' => AuditLogResource::collection($activities->items()),
-            'meta' => [
-                'current_page' => $activities->currentPage(),
-                'last_page' => $activities->lastPage(),
-                'total' => $activities->total(),
-            ],
+            'meta' => $this->paginationMeta($activities),
         ]);
     }
 }

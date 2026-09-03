@@ -310,5 +310,5 @@ const styles = StyleSheet.create({
   searchButton: { borderRadius: Spacing.two, paddingHorizontal: Spacing.three, justifyContent: 'center' },
   disabled: { opacity: 0.5 },
   planErrorBlock: { gap: Spacing.two, alignItems: 'flex-start', backgroundColor: 'transparent' },
-  error: { color: '#C9564A' },
+  error: { color: '#FF4D5E' },
 });

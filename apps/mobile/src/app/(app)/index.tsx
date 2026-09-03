@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Dumbbell, Menu } from 'lucide-react-native';
 import { estimateWorkoutMinutes } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { AchievementsRow } from '@/components/dashboard/achievements-row';
+import { ChallengesRow } from '@/components/dashboard/challenges-row';
 import { PerformanceHero } from '@/components/dashboard/performance-hero';
-import { RecentPRsRow } from '@/components/dashboard/recent-prs-row';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -25,6 +25,13 @@ import { useFeedStore } from '@/store/feed-store';
 import { useGamificationStore } from '@/store/gamification-store';
 import { findNextDay, useRoutineStore } from '@/store/routine-store';
 import { useWorkoutStore } from '@/store/workout-store';
+
+function greeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Buenos días';
+  if (hour < 19) return 'Buenas tardes';
+  return 'Buenas noches';
+}
 
 export default function HomeScreen() {
   const theme = useTheme();
@@ -72,9 +79,17 @@ export default function HomeScreen() {
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <ThemedView style={styles.header}>
-          <ThemedText type="title" style={styles.title}>
-            Hola, {user?.name.split(' ')[0]}
-          </ThemedText>
+          <ThemedView style={{ backgroundColor: 'transparent' }}>
+            <ThemedText type="small" themeColor="textSecondary" style={styles.greetingLabel}>
+              {greeting().toUpperCase()}
+            </ThemedText>
+            <ThemedText type="title" style={styles.title}>
+              {user?.name.split(' ')[0]}
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              ¿Listo para entrenar?
+            </ThemedText>
+          </ThemedView>
           <Pressable
             onPress={() => setMoreMenuVisible(true)}
             style={[styles.menuButton, { backgroundColor: theme.backgroundElement }]}>
@@ -85,8 +100,30 @@ export default function HomeScreen() {
           </Pressable>
         </ThemedView>
 
-        <Animated.View entering={FadeInUp.delay(0).duration(320)}>
-          <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
+        <Animated.View entering={FadeInUp.duration(360)}>
+          <ThemedView
+            type="backgroundElement"
+            style={[styles.brandCard, { borderColor: `${theme.accent}30` }, glowShadow(theme.accent)]}>
+            <LinearGradient
+              colors={[`${theme.accent}33`, `${theme.accent}00`]}
+              start={{ x: 0.15, y: 0 }}
+              end={{ x: 0.85, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            <Image source={require('@/assets/images/logo-full.png')} style={styles.brandLogo} resizeMode="contain" />
+            <ThemedView style={styles.brandSloganRow}>
+              {['ENTRENA', 'PROGRESA', 'SUPÉRATE'].map((word, i) => (
+                <ThemedView key={word} style={styles.brandSloganItem}>
+                  {i > 0 && (
+                    <ThemedView style={[styles.brandDot, { backgroundColor: theme.accent }]} />
+                  )}
+                  <ThemedText type="small" style={[styles.brandSloganWord, { color: theme.accent }]}>
+                    {word}
+                  </ThemedText>
+                </ThemedView>
+              ))}
+            </ThemedView>
+          </ThemedView>
         </Animated.View>
 
         {error && (
@@ -95,7 +132,7 @@ export default function HomeScreen() {
           </ThemedText>
         )}
 
-        {isLoading && <Skeleton height={140} borderRadius={Spacing.four} />}
+        {isLoading && <Skeleton height={200} borderRadius={Spacing.four} />}
 
         {hasNoRoutine && !isLoading && (
           <ThemedView type="backgroundElement" style={styles.card}>
@@ -108,20 +145,39 @@ export default function HomeScreen() {
         )}
 
         {day && (
-          <Animated.View entering={FadeInUp.delay(60).duration(320)}>
+          <Animated.View entering={FadeInUp.delay(0).duration(320)}>
             <ThemedView
               style={[
                 styles.todayCard,
-                { backgroundColor: `${theme.accentSecondary}14`, borderColor: `${theme.accentSecondary}40` },
-                glowShadow(theme.accentSecondary),
+                { backgroundColor: `${theme.accent}12`, borderColor: `${theme.accent}35` },
+                glowShadow(theme.accent),
               ]}>
-              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accentSecondary }]}>
+              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accent }]}>
                 ENTRENAMIENTO DE HOY
               </ThemedText>
-              <ThemedText type="subtitle">{day.label}</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {day.exercises.length} ejercicios · ~{estimateWorkoutMinutes(day)} min
+              <ThemedText type="title" style={styles.todayTitle}>
+                {day.label}
               </ThemedText>
+
+              <ThemedView style={styles.todayStats}>
+                <ThemedView style={styles.todayStat}>
+                  <ThemedText type="title" style={styles.todayStatValue}>
+                    {estimateWorkoutMinutes(day)}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                    MIN
+                  </ThemedText>
+                </ThemedView>
+                <ThemedView style={styles.todayStat}>
+                  <ThemedText type="title" style={styles.todayStatValue}>
+                    {day.exercises.length}
+                  </ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                    EJERCICIOS
+                  </ThemedText>
+                </ThemedView>
+              </ThemedView>
+
               <ThemedView style={styles.spacer} />
               <PrimaryButton label="Comenzar" onPress={() => router.push('/workout/precheck')} />
               <ThemedView style={styles.buttonGap} />
@@ -134,19 +190,13 @@ export default function HomeScreen() {
           </Animated.View>
         )}
 
-        {!isLoadingStats && (
-          <Animated.View entering={FadeInUp.delay(120).duration(320)}>
-            <RecentPRsRow records={stats?.recent_personal_records ?? []} />
-          </Animated.View>
-        )}
+        <Animated.View entering={FadeInUp.delay(60).duration(320)}>
+          <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
+        </Animated.View>
 
-        {!isLoadingGamification && (
-          <Animated.View entering={FadeInUp.delay(180).duration(320)}>
-            <AchievementsRow
-              achievements={[...(summary?.unlocked_achievements ?? []), ...(summary?.locked_achievements ?? [])]}
-            />
-          </Animated.View>
-        )}
+        <Animated.View entering={FadeInUp.delay(120).duration(320)}>
+          <ChallengesRow />
+        </Animated.View>
 
         <ConfirmDialog
           visible={confirmingSkip}
@@ -194,6 +244,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: 'transparent',
   },
+  greetingLabel: {
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
   title: {
     fontSize: 30,
     lineHeight: 36,
@@ -214,8 +268,41 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1.5,
   },
+  brandCard: {
+    alignItems: 'center',
+    gap: Spacing.three,
+    borderRadius: Spacing.four,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.five,
+    overflow: 'hidden',
+  },
+  brandLogo: { width: 192, height: 131 },
+  brandSloganRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  brandSloganItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  brandSloganWord: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 2,
+    marginHorizontal: Spacing.one,
+  },
+  brandDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 1.5,
+  },
   centerText: { textAlign: 'center' },
-  error: { color: '#C9564A', textAlign: 'center' },
+  error: { color: '#FF4D5E', textAlign: 'center' },
   card: {
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.three,
@@ -228,10 +315,37 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.four,
     borderWidth: 1,
   },
+  todayTitle: {
+    fontSize: 26,
+    lineHeight: 31,
+    marginBottom: Spacing.three,
+  },
+  todayStats: {
+    flexDirection: 'row',
+    gap: Spacing.five,
+    backgroundColor: 'transparent',
+  },
+  todayStat: {
+    backgroundColor: 'transparent',
+  },
+  todayStatValue: {
+    fontSize: 24,
+    lineHeight: 28,
+  },
+  todayStatLabel: {
+    letterSpacing: 0.5,
+    fontSize: 11,
+  },
   eyebrow: {
     letterSpacing: 1,
     marginBottom: Spacing.one,
   },
-  spacer: { height: Spacing.three },
-  buttonGap: { height: Spacing.two },
+  // `ThemedView` sin `type` pinta `theme.background` (el fondo general de
+  // la app) por default — correcto para un contenedor de pantalla, pero
+  // acá son simples espaciadores DENTRO de la card cian traslúcida
+  // (`todayCard`). Sin este override quedaba un rectángulo del color de
+  // fondo general de la app, mal encajado, arriba y abajo de "Comenzar" —
+  // el mismo mecanismo que causaba el rectángulo reportado.
+  spacer: { height: Spacing.three, backgroundColor: 'transparent' },
+  buttonGap: { height: Spacing.two, backgroundColor: 'transparent' },
 });

@@ -6,4 +6,36 @@
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
   --font-serif: Georgia, 'Times New Roman', serif;
+  /* Mismo valor que Colors.light.accent en constants/theme.ts */
+  --focus-ring-color: #0093ad;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Mismo valor que Colors.dark.accent en constants/theme.ts */
+    --focus-ring-color: #00b8d9;
+  }
+}
+
+/*
+ * React Native Web le da `tabindex` a todo Pressable/TouchableOpacity para
+ * que sea navegable por teclado, pero no le define un estilo de foco
+ * propio — el navegador cae al anillo por defecto (`outline: auto`), que
+ * SIEMPRE es un rectángulo recto sin importar el `border-radius` visual
+ * del componente. Es el "cuadro" que aparece alrededor de botones y otros
+ * elementos interactivos en toda la app en web. Esto reemplaza ese
+ * default, una sola vez acá, por un anillo que sí sigue el radio de cada
+ * elemento (requiere que el nodo con `tabindex` tenga su propio
+ * `borderRadius`, no solo un hijo visual — ver primary-button.tsx) y
+ * usa `:focus-visible` en vez de `:focus` para que solo se muestre con
+ * teclado (Tab), nunca al hacer click con el mouse — se verificó que el
+ * navegador ya distingue esto correctamente para estos elementos.
+ */
+[tabindex]:focus {
+  outline: none;
+}
+
+[tabindex]:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
 }

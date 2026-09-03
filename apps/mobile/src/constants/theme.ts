@@ -7,34 +7,41 @@ import '@/global.css';
 
 import { Platform } from 'react-native';
 
-// Paleta de marca SANKEN — "Power Ascend": negro + lima + cyan.
-// accent (lima) = progreso/positivo/CTAs; accentSecondary (cyan) = entrenamiento/actividad.
+// Paleta de marca SANKEN mobile — "Dark Performance": negro azulado profundo
+// + cian como acento único de identidad. NO es la misma paleta que la web
+// (esa quedó negro+naranja): mobile pidió explícitamente abandonar
+// negro+dorado/naranja por esta nueva base. El cian se usa con moderación:
+// nunca como fondo extenso, solo CTAs, progreso, logros y detalles de marca.
 export const Colors = {
   light: {
-    text: '#0A0A0A',
-    background: '#FAFAFA',
-    backgroundElement: '#F0F0F0',
-    backgroundSelected: '#E5E5E5',
-    textSecondary: '#6B6B6B',
-    accent: '#CFFF36',
-    accentSecondary: '#0EA5C4',
+    text: '#0B0B0B',
+    background: '#F5F7FA',
+    backgroundElement: '#E9EDF1',
+    backgroundSelected: '#DCE3E9',
+    card: '#FFFFFF',
+    cardElevated: '#FFFFFF',
+    textSecondary: '#5B6670',
+    accent: '#0093AD',
+    accentSecondary: '#00B8D9',
     border: 'rgba(0, 0, 0, 0.10)',
-    success: '#16A34A',
-    warning: '#D97706',
-    error: '#DC2626',
+    success: '#1CA97F',
+    warning: '#C97F0E',
+    error: '#E23C4C',
   },
   dark: {
-    text: '#FAFAFA',
-    background: '#0A0A0A',
-    backgroundElement: '#161616',
-    backgroundSelected: '#242424',
-    textSecondary: '#A3A3A3',
-    accent: '#CFFF36',
-    accentSecondary: '#20EAFF',
+    text: '#F5F7FA',
+    background: '#080C10',
+    backgroundElement: '#111820',
+    backgroundSelected: '#1D2732',
+    card: '#151D26',
+    cardElevated: '#1D2732',
+    textSecondary: '#9AA6B2',
+    accent: '#00B8D9',
+    accentSecondary: '#00D4FF',
     border: 'rgba(255, 255, 255, 0.10)',
-    success: '#22C55E',
-    warning: '#F59E0B',
-    error: '#EF4444',
+    success: '#20C997',
+    warning: '#FFB020',
+    error: '#FF4D5E',
   },
 } as const;
 

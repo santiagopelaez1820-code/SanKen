@@ -9,12 +9,14 @@ import type {
   AuditLogEntry,
   ChallengeTemplate,
   ChallengeTemplatePayload,
+  ManualRoutinePayload,
   MuscleGroupOption,
   NewsPromotion,
   PrSubmission,
   PrSubmissionStatus,
   Report,
   ReportStatus,
+  Routine,
   RoutineTemplatePayload,
 } from '@sanken/core';
 
@@ -33,6 +35,7 @@ interface ExerciseFormPayload {
   level: string;
   type: string;
   instructions?: string;
+  alternative_exercise_id?: number | null;
 }
 
 interface AdminStoreState {
@@ -55,6 +58,16 @@ interface AdminStoreState {
   activateUser: (id: number) => Promise<void>;
   deactivateUser: (id: number) => Promise<void>;
   deleteUser: (id: number) => Promise<void>;
+
+  /** Rutina personalizada (asignada por Super Admin) del usuario en `userDetail` — null si todavía no tiene una (usa la rutina general). */
+  adminRoutineForEdit: Routine | null;
+  isLoadingAdminRoutine: boolean;
+  isSubmittingAdminRoutine: boolean;
+  adminRoutineError: string | null;
+  loadAdminRoutineForEdit: (userId: number) => Promise<void>;
+  /** POST si el usuario no tenía rutina personalizada, PATCH si ya tenía una (mismo criterio que apps/web RoutineEditorPage scope="admin"). */
+  saveAdminRoutine: (userId: number, payload: ManualRoutinePayload) => Promise<Routine | null>;
+  revertToGeneralRoutine: (userId: number) => Promise<boolean>;
 
   exercises: AdminExercise[];
   muscleGroups: MuscleGroupOption[];
@@ -155,6 +168,56 @@ export const useAdminStore = create<AdminStoreState>((set, get) => ({
     await api.delete(`/admin/users/${id}`);
   },
 
+  adminRoutineForEdit: null,
+  isLoadingAdminRoutine: false,
+  isSubmittingAdminRoutine: false,
+  adminRoutineError: null,
+  loadAdminRoutineForEdit: async (userId) => {
+    set({ isLoadingAdminRoutine: true, adminRoutineError: null });
+    try {
+      const routine = await api.get<Routine | null>(`/admin/users/${userId}/routine`);
+      set({ adminRoutineForEdit: routine, isLoadingAdminRoutine: false });
+    } catch (err) {
+      set({
+        isLoadingAdminRoutine: false,
+        adminRoutineError: err instanceof Error ? err.message : 'No se pudo cargar la rutina.',
+      });
+    }
+  },
+  saveAdminRoutine: async (userId, payload) => {
+    set({ isSubmittingAdminRoutine: true, adminRoutineError: null });
+    try {
+      const existing = get().adminRoutineForEdit;
+      const routine = existing
+        ? await api.patch<Routine>(`/admin/routines/${existing.id}`, payload)
+        : await api.post<Routine>(`/admin/users/${userId}/routine`, payload);
+      set({ isSubmittingAdminRoutine: false });
+      await get().loadUserDetail(userId);
+      return routine;
+    } catch (err) {
+      set({
+        isSubmittingAdminRoutine: false,
+        adminRoutineError: err instanceof Error ? err.message : 'No se pudo guardar la rutina.',
+      });
+      return null;
+    }
+  },
+  revertToGeneralRoutine: async (userId) => {
+    set({ isSubmittingAdminRoutine: true, adminRoutineError: null });
+    try {
+      await api.delete(`/admin/users/${userId}/routine`);
+      set({ isSubmittingAdminRoutine: false, adminRoutineForEdit: null });
+      await get().loadUserDetail(userId);
+      return true;
+    } catch (err) {
+      set({
+        isSubmittingAdminRoutine: false,
+        adminRoutineError: err instanceof Error ? err.message : 'No se pudo volver a la rutina general.',
+      });
+      return false;
+    }
+  },
+
   exercises: [],
   muscleGroups: [],
   isLoadingExercises: false,
@@ -181,13 +244,12 @@ export const useAdminStore = create<AdminStoreState>((set, get) => ({
   },
   uploadExerciseVideo: async (id, asset) => {
     const formData = new FormData();
-    // React Native's fetch acepta este shape de objeto para archivos —
-    // distinto de File/Blob (usado en web), por eso el `as unknown as Blob`.
-    formData.append('video', {
-      uri: asset.uri,
-      name: asset.name,
-      type: asset.mimeType ?? 'video/mp4',
-    } as unknown as Blob);
+    // El shape clásico { uri, name, type } no funciona: desde SDK 53 Expo
+    // reemplaza `fetch` global por su propio runtime en todas las
+    // plataformas, y su FormData solo reconoce Blob real (o string) — ver
+    // el mismo comentario en auth-store.ts::updateAvatar.
+    const blob = await fetch(asset.uri).then((r) => r.blob());
+    formData.append('video', blob, asset.name);
     await api.post(`/admin/exercises/${id}/video`, formData);
     await get().loadExercises();
   },

@@ -281,12 +281,12 @@ export function AdminRoutineTemplatesPage() {
           <div className="mt-4 space-y-4">
             {form.days.map((day, dayIndex) => (
               <div key={dayIndex} className="rounded-lg border border-border p-3">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <input
                     placeholder={`Día ${dayIndex + 1} (ej. Empuje)`}
                     value={day.label}
                     onChange={(e) => updateDay(dayIndex, { label: e.target.value })}
-                    className={`flex-1 ${inputClass}`}
+                    className={`min-w-0 flex-1 ${inputClass}`}
                   />
                   <Button variant="destructive" size="sm" onClick={() => removeDay(dayIndex)} disabled={form.days.length <= 1}>
                     Quitar día
@@ -398,7 +398,12 @@ export function AdminRoutineTemplatesPage() {
                 </Button>
               </>
             ) : (
-              <Button size="sm" onClick={() => createMutation.mutate()} disabled={!isFormValid(form) || createMutation.isPending}>
+              <Button
+                size="sm"
+                className="h-auto w-full whitespace-normal py-2 text-center sm:w-auto"
+                onClick={() => createMutation.mutate()}
+                disabled={!isFormValid(form) || createMutation.isPending}
+              >
                 Crear (queda inactiva hasta que la actives)
               </Button>
             )}
@@ -416,8 +421,11 @@ export function AdminRoutineTemplatesPage() {
                 </p>
                 <ul className="mt-1 divide-y divide-border">
                   {group.map((template) => (
-                    <li key={template.id} className="flex items-center justify-between gap-3 py-2.5">
-                      <div>
+                    <li
+                      key={template.id}
+                      className="flex flex-col gap-2 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+                    >
+                      <div className="min-w-0">
                         <p className="text-sm text-foreground">
                           {template.name ?? `Plantilla #${template.id}`}
                           {template.is_active ? (
@@ -430,7 +438,7 @@ export function AdminRoutineTemplatesPage() {
                           {template.split_type} · {template.days.length} días · {template.days.reduce((n, d) => n + d.exercises.length, 0)} ejercicios
                         </p>
                       </div>
-                      <div className="flex flex-wrap gap-1.5">
+                      <div className="flex flex-shrink-0 flex-wrap gap-1.5">
                         <Button variant="outline" size="sm" onClick={() => startEdit(template)}>
                           Editar
                         </Button>

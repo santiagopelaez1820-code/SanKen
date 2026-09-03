@@ -14,17 +14,17 @@ class NutritionPlanMealItemResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        $factor = (float) $this->quantity_grams / 100;
         $foodItem = $this->foodItem;
+        $macros = $foodItem->macrosFor((float) $this->quantity_grams);
 
         return [
             'id' => $this->id,
             'food_item' => new FoodItemResource($foodItem),
             'quantity_grams' => (float) $this->quantity_grams,
-            'calories' => round((float) $foodItem->calories_per_100g * $factor, 1),
-            'protein_g' => round((float) $foodItem->protein_per_100g * $factor, 1),
-            'carbs_g' => round((float) $foodItem->carbs_per_100g * $factor, 1),
-            'fat_g' => round((float) $foodItem->fat_per_100g * $factor, 1),
+            'calories' => round($macros['calories'], 1),
+            'protein_g' => round($macros['protein_g'], 1),
+            'carbs_g' => round($macros['carbs_g'], 1),
+            'fat_g' => round($macros['fat_g'], 1),
         ];
     }
 }

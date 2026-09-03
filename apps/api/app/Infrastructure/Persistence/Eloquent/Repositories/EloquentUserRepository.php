@@ -17,6 +17,11 @@ class EloquentUserRepository implements UserRepositoryInterface
         return User::query()->where('email', $email)->first();
     }
 
+    public function findByFirebaseUid(string $firebaseUid): ?User
+    {
+        return User::query()->where('firebase_uid', $firebaseUid)->first();
+    }
+
     public function count(): int
     {
         return User::query()->count();

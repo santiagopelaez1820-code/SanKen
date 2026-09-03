@@ -84,5 +84,5 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     gap: Spacing.three,
   },
-  error: { color: '#C9564A' },
+  error: { color: '#FF4D5E' },
 });

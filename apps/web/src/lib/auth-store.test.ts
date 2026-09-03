@@ -6,6 +6,7 @@ const user: User = {
   id: 1,
   name: "Test",
   email: "test@example.com",
+  avatar_url: null,
   role: "user",
   two_factor_enabled: false,
   is_public_profile: false,

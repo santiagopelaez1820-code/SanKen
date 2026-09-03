@@ -73,12 +73,29 @@ export function PrimaryButton({
           disabled={disabled || loading}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
+          // El `borderRadius` real del botón vive en el `LinearGradient` de
+          // abajo (es el que necesita recortar el degradé), pero en web
+          // `Pressable` es el elemento que de verdad recibe el foco del
+          // teclado (React Native Web lo renderiza como un <div
+          // tabindex="0">). Sin un borderRadius acá TAMBIÉN, el navegador
+          // no tiene forma de saber que el botón es redondeado y dibuja su
+          // anillo de foco por defecto como un rectángulo recto que corta
+          // las esquinas — el cuadro visible alrededor de "Comenzar" y de
+          // cualquier otro botón sólido (Entrar, Registrar, Crear, etc.).
+          style={styles.pressableShape}
           {...props}>
           <LinearGradient
             colors={[glowColor, `${glowColor}D9`]}
             start={{ x: 0, y: 0 }}
             end={{ x: 0, y: 1 }}
-            style={[styles.base, styles.solid, { shadowColor: glowColor }, style as object]}>
+            // `backgroundColor` acá no se ve (el gradiente lo tapa) pero es
+            // necesario para Android: `elevation` calcula el contorno de la
+            // sombra a partir del background+borderRadius del View. Sin un
+            // backgroundColor propio, el gradiente se pinta encima de un
+            // View "transparente" y Android cae a una sombra RECTANGULAR
+            // por fuera de las esquinas redondeadas del botón — el cuadro
+            // visible detrás de botones redondeados en varias pantallas.
+            style={[styles.base, styles.solid, { backgroundColor: glowColor, shadowColor: glowColor }, style as object]}>
             {content}
           </LinearGradient>
         </Pressable>
@@ -105,6 +122,10 @@ export function PrimaryButton({
 }
 
 const styles = StyleSheet.create({
+  pressableShape: {
+    alignSelf: 'stretch',
+    borderRadius: Spacing.three,
+  },
   base: {
     flexDirection: 'row',
     gap: Spacing.one,

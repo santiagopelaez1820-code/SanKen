@@ -39,29 +39,34 @@ export function ChallengeLeaderboard({ challengeId }: { challengeId: number }) {
   }, [challengeId])
 
   if (entries === null) {
-    return <Skeleton className="h-20 w-full" />
+    return <Skeleton style={{ height: 80, width: "100%" }} />
   }
 
   if (entries.length === 0) {
-    return <p className="text-sm text-muted-foreground">Todavía nadie tiene progreso en este reto.</p>
+    return <p className="small text-body-secondary mb-0">Todavía nadie tiene progreso en este reto.</p>
   }
 
   return (
-    <ul className="divide-y divide-border">
+    <ul className="list-unstyled mb-0">
       {entries.map((entry) => (
         <li
           key={entry.user_id}
           className={cn(
-            "flex items-center justify-between py-2.5 text-sm",
-            entry.is_viewer && "-mx-2 rounded-lg bg-primary/5 px-2 font-medium"
+            "d-flex align-items-center justify-content-between py-2 px-2 rounded-1",
+            entry.is_viewer && "fw-semibold"
           )}
+          style={entry.is_viewer ? { background: "var(--sanken-cyan-dim)" } : undefined}
         >
-          <span className="flex items-center gap-3">
-            <span className="w-6 text-right text-xs text-muted-foreground">{entry.rank}</span>
-            <span className="text-foreground">{entry.user_name}</span>
-            {entry.completed && <span className="text-xs text-primary">✓</span>}
+          <span className="d-flex align-items-center gap-3">
+            <span className="text-body-secondary sank-tabular-nums" style={{ width: 20, textAlign: "right", fontSize: "0.75rem" }}>
+              {entry.rank}
+            </span>
+            <span className="small">{entry.user_name}</span>
+            {entry.completed && <span className="small" style={{ color: "var(--sanken-cyan)" }}>✓</span>}
           </span>
-          <span className="font-medium text-primary">{entry.progress_value.toLocaleString("es-AR")}</span>
+          <span className="small fw-semibold sank-tabular-nums" style={{ color: "var(--sanken-cyan-light)" }}>
+            {entry.progress_value.toLocaleString("es-AR")}
+          </span>
         </li>
       ))}
     </ul>

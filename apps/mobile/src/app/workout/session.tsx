@@ -326,7 +326,7 @@ export default function WorkoutSessionScreen() {
                   <Stepper value={repsInput} onChange={setRepsInput} step={1} unit="reps" />
                 </ThemedView>
               </ThemedView>
-              <ThemedView>
+              <ThemedView style={styles.rpeBlock}>
                 <ThemedText type="small" themeColor="textSecondary" style={styles.stepperLabel}>
                   RPE (opcional)
                 </ThemedText>
@@ -401,7 +401,11 @@ const styles = StyleSheet.create({
   heroTile: { flex: 1, borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.half },
   heroValue: { fontSize: 32, lineHeight: 36 },
   stickyFooter: { borderTopWidth: 1, padding: Spacing.four, paddingTop: Spacing.three },
-  swapBlock: { gap: Spacing.one },
+  // Estos, a diferencia de muscleRow/heroRow arriba, no tenían
+  // `backgroundColor: 'transparent'` — como viven dentro de `heroCard`
+  // (tinte de accentSecondary), sin el override quedaban con un
+  // rectángulo del color de fondo general de la app encima del tinte.
+  swapBlock: { gap: Spacing.one, backgroundColor: 'transparent' },
   prBanner: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -421,10 +425,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   doneText: { textAlign: 'center' },
-  inputsRow: { flexDirection: 'row', gap: Spacing.three },
-  inputHalf: { flex: 1 },
+  inputsRow: { flexDirection: 'row', gap: Spacing.three, backgroundColor: 'transparent' },
+  inputHalf: { flex: 1, backgroundColor: 'transparent' },
+  rpeBlock: { backgroundColor: 'transparent' },
   stepperLabel: { marginBottom: Spacing.one },
-  error: { color: '#C9564A', textAlign: 'center' },
+  error: { color: '#FF4D5E', textAlign: 'center' },
   feedbackRow: { flexDirection: 'row', gap: Spacing.three, alignSelf: 'stretch' },
   feedbackHalf: { flex: 1 },
 });

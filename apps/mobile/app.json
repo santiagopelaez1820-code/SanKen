@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "SanKen",
-    "slug": "sanken",
+    "slug": "kennethsanken",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -12,8 +12,9 @@
     },
     "android": {
       "package": "com.sanken.mobile",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
-        "backgroundColor": "#050505",
+        "backgroundColor": "#080C10",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -29,7 +30,7 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#050505",
+          "backgroundColor": "#080C10",
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
@@ -37,7 +38,7 @@
       [
         "expo-notifications",
         {
-          "color": "#CFFF36"
+          "color": "#00B8D9"
         }
       ],
       [
@@ -47,7 +48,15 @@
           "barcodeScannerEnabled": true
         }
       ],
-      "expo-video"
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "SanKen usa tus fotos para que elijas una foto de perfil.",
+          "cameraPermission": false
+        }
+      ],
+      "expo-video",
+      "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -56,9 +65,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "c4488862-6197-451f-819d-86f1b63cafc6"
+        "projectId": "b830c06f-7e0d-4278-a435-4b24c8a23193"
       }
     },
-    "owner": "santiago.pelaez"
+    "owner": "kennethsankens-team"
   }
 }

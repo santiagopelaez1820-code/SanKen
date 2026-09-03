@@ -1,19 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
-import type { VariantProps } from "class-variance-authority"
 import { motion } from "framer-motion"
 import { Dumbbell } from "lucide-react"
 import { getWorkoutSessionStatus, WORKOUT_SESSION_STATUS_LABEL, type WorkoutSession } from "@sanken/core"
 import { api } from "@/lib/api"
-import { Badge, badgeVariants } from "@/components/ui/badge"
+import { SankBadge, type SankBadgeVariant } from "@/components/ui/SankBadge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { fadeInUp, staggerContainer } from "@/lib/motion"
 
-const STATUS_BADGE_VARIANT: Record<
-  ReturnType<typeof getWorkoutSessionStatus>,
-  VariantProps<typeof badgeVariants>["variant"]
-> = {
+const STATUS_BADGE_VARIANT: Record<ReturnType<typeof getWorkoutSessionStatus>, SankBadgeVariant> = {
   completed: "success",
-  active: "accent2",
+  active: "cyan",
   skipped: "neutral",
   cancelled: "warning",
 }
@@ -33,18 +29,19 @@ export function WorkoutHistoryList() {
   const sessions = data?.data ?? []
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5">
-      <h2 className="font-heading text-sm font-medium text-foreground">Historial de entrenamientos</h2>
+    <div className="sank-surface rounded-2 p-4 h-100">
+      <h2 className="sank-eyebrow mb-1">Historial de entrenamientos</h2>
 
-      {isLoading && <Skeleton className="mt-4 h-20 w-full" />}
+      {isLoading && <Skeleton style={{ height: 160, width: "100%" }} className="mt-3" />}
 
       {!isLoading && sessions.length === 0 && (
-        <p className="mt-4 text-sm text-muted-foreground">Todavía no hay entrenamientos registrados.</p>
+        <p className="mt-3 small text-body-secondary mb-0">Todavía no hay entrenamientos registrados.</p>
       )}
 
       {!isLoading && sessions.length > 0 && (
         <motion.ul
-          className="mt-3 divide-y divide-border"
+          className="mt-2 list-unstyled mb-0"
+          style={{ maxHeight: 420, overflowY: "auto" }}
           variants={staggerContainer(0.04)}
           initial="hidden"
           animate="show"
@@ -55,21 +52,24 @@ export function WorkoutHistoryList() {
               <motion.li
                 key={session.id}
                 variants={fadeInUp}
-                className="flex items-center gap-3 rounded-lg py-2.5 transition-colors hover:bg-muted/50"
+                className="d-flex align-items-center gap-3 rounded-1 py-2"
               >
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted">
-                  <Dumbbell className="size-4 text-muted-foreground" />
+                <div
+                  className="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                  style={{ width: 34, height: 34, background: "var(--sanken-charcoal)" }}
+                >
+                  <Dumbbell size={15} className="text-body-secondary" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm text-foreground">{session.routine_day_label ?? "Sesión libre"}</p>
-                  <p className="text-xs text-muted-foreground">
+                <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                  <p className="small text-truncate mb-0">{session.routine_day_label ?? "Sesión libre"}</p>
+                  <p className="text-body-secondary mb-0" style={{ fontSize: "0.72rem" }}>
                     {formatDate(session.performed_at)} · {session.exercises.length} ejercicios
                     {session.completed && session.duration_minutes !== null
                       ? ` · ${session.duration_minutes} min`
                       : ""}
                   </p>
                 </div>
-                <Badge variant={STATUS_BADGE_VARIANT[status]}>{WORKOUT_SESSION_STATUS_LABEL[status]}</Badge>
+                <SankBadge variant={STATUS_BADGE_VARIANT[status]}>{WORKOUT_SESSION_STATUS_LABEL[status]}</SankBadge>
               </motion.li>
             )
           })}

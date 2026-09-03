@@ -16,7 +16,7 @@ export default function AppLayout() {
     if (!token || !user) return;
     loadFeed();
     subscribeToFeed();
-    registerForPushNotificationsAsync();
+    registerForPushNotificationsAsync({ silent: true });
   }, [token, user, loadFeed, subscribeToFeed]);
 
   if (!token || !user) {

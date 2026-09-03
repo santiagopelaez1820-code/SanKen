@@ -6,7 +6,9 @@ import {
   FileText,
   Flag,
   Newspaper,
+  Package,
   ScrollText,
+  ShoppingCart,
   Trophy,
   Users,
 } from "lucide-react"
@@ -16,6 +18,8 @@ const TILES = [
   { label: "Usuarios", to: "/admin/users", icon: Users },
   { label: "Ejercicios", to: "/admin/exercises", icon: Dumbbell },
   { label: "Rutinas generales", to: "/admin/routine-templates", icon: ClipboardList },
+  { label: "Productos", to: "/admin/products", icon: Package },
+  { label: "Pedidos", to: "/admin/orders", icon: ShoppingCart },
   { label: "Reportes", to: "/admin/reports", icon: FileText },
   { label: "PR pendientes", to: "/admin/pr-submissions", icon: Trophy },
   { label: "Retos", to: "/admin/challenge-templates", icon: Flag },
@@ -28,13 +32,13 @@ export function AdminPage() {
   return (
     <main className="px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <div className="flex items-center gap-3">
+        <Link to="/dashboard" className="flex items-center gap-3 text-decoration-none">
           <img src="/logo.png" alt="" className="h-9 w-9" />
           <div>
             <p className="text-xs font-semibold tracking-widest text-primary uppercase">Super Admin</p>
             <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">SANKEN</h1>
           </div>
-        </div>
+        </Link>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {TILES.map((tile) => (

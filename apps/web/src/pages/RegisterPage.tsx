@@ -2,11 +2,15 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { Form, Alert } from "react-bootstrap"
 import { Link, useNavigate } from "react-router-dom"
-import { ApiError, type AuthPayload } from "@sanken/core"
+import { ApiError, isTwoFactorChallenge, type AuthPayload, type TwoFactorChallengeResponse } from "@sanken/core"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
-import { Button } from "@/components/ui/button"
+import { SankButton } from "@/components/ui/SankButton"
+import { GoogleIcon } from "@/components/ui/GoogleIcon"
+import { AuthLayout } from "@/components/layout/AuthLayout"
+import { describeSocialAuthError, signInWithGoogle, SocialAuthCancelledError } from "@/lib/social-auth"
 
 const registerSchema = z
   .object({
@@ -25,7 +29,41 @@ type RegisterFormValues = z.infer<typeof registerSchema>
 export function RegisterPage() {
   const navigate = useNavigate()
   const setSession = useAuthStore((state) => state.setSession)
+  const setPendingChallenge = useAuthStore((state) => state.setPendingChallenge)
   const [serverError, setServerError] = useState<string | null>(null)
+  const [isSubmittingGoogle, setIsSubmittingGoogle] = useState(false)
+
+  const handleGoogleSubmit = async () => {
+    setServerError(null)
+    setIsSubmittingGoogle(true)
+    try {
+      const { idToken } = await signInWithGoogle()
+      await api.bootstrapCsrf()
+      const response = await api.post<AuthPayload | TwoFactorChallengeResponse>("/auth/social", {
+        id_token: idToken,
+        provider: "google",
+      })
+
+      if (isTwoFactorChallenge(response)) {
+        setPendingChallenge(response.challenge_token)
+        navigate("/login/verify")
+        return
+      }
+
+      setSession(response.token, response.user)
+      navigate(response.user.role === "trainer" ? "/trainer" : "/dashboard", { replace: true })
+    } catch (err) {
+      if (err instanceof SocialAuthCancelledError) {
+        // El usuario cerró el popup a propósito — no es un error para mostrar.
+      } else if (err instanceof ApiError) {
+        setServerError(err.body.message)
+      } else {
+        setServerError(describeSocialAuthError(err))
+      }
+    } finally {
+      setIsSubmittingGoogle(false)
+    }
+  }
 
   const {
     register,
@@ -46,84 +84,82 @@ export function RegisterPage() {
   }
 
   return (
-    <main className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background px-6 text-foreground">
-      <img src="/logo-full.png" alt="SANKEN" className="h-auto w-64" />
+    <AuthLayout>
+      <Form onSubmit={handleSubmit(onSubmit)} className="d-flex flex-column gap-3" noValidate>
+        <Form.Group controlId="name">
+          <Form.Label className="small fw-medium">Nombre</Form.Label>
+          <Form.Control type="text" autoComplete="name" isInvalid={!!errors.name} {...register("name")} />
+          <Form.Control.Feedback type="invalid">{errors.name?.message}</Form.Control.Feedback>
+        </Form.Group>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="w-full max-w-sm space-y-4 rounded-xl border border-border bg-card p-6"
-      >
-        <div className="space-y-1.5">
-          <label htmlFor="name" className="text-sm font-medium">
-            Nombre
-          </label>
-          <input
-            id="name"
-            type="text"
-            autoComplete="name"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            {...register("name")}
-          />
-          {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
-        </div>
+        <Form.Group controlId="email">
+          <Form.Label className="small fw-medium">Correo</Form.Label>
+          <Form.Control type="email" autoComplete="email" isInvalid={!!errors.email} {...register("email")} />
+          <Form.Control.Feedback type="invalid">{errors.email?.message}</Form.Control.Feedback>
+        </Form.Group>
 
-        <div className="space-y-1.5">
-          <label htmlFor="email" className="text-sm font-medium">
-            Correo
-          </label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            {...register("email")}
-          />
-          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-        </div>
-
-        <div className="space-y-1.5">
-          <label htmlFor="password" className="text-sm font-medium">
-            Contraseña
-          </label>
-          <input
-            id="password"
+        <Form.Group controlId="password">
+          <Form.Label className="small fw-medium">Contraseña</Form.Label>
+          <Form.Control
             type="password"
             autoComplete="new-password"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            isInvalid={!!errors.password}
             {...register("password")}
           />
-          {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
-        </div>
+          <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback>
+        </Form.Group>
 
-        <div className="space-y-1.5">
-          <label htmlFor="password_confirmation" className="text-sm font-medium">
-            Confirmar contraseña
-          </label>
-          <input
-            id="password_confirmation"
+        <Form.Group controlId="password_confirmation">
+          <Form.Label className="small fw-medium">Confirmar contraseña</Form.Label>
+          <Form.Control
             type="password"
             autoComplete="new-password"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            isInvalid={!!errors.password_confirmation}
             {...register("password_confirmation")}
           />
-          {errors.password_confirmation && (
-            <p className="text-xs text-destructive">{errors.password_confirmation.message}</p>
-          )}
+          <Form.Control.Feedback type="invalid">{errors.password_confirmation?.message}</Form.Control.Feedback>
+        </Form.Group>
+
+        {serverError && (
+          <Alert variant="danger" className="py-2 small mb-0">
+            {serverError}
+          </Alert>
+        )}
+
+        <SankButton
+          type="submit"
+          disabled={isSubmitting || isSubmittingGoogle}
+          loading={isSubmitting}
+          className="w-100 justify-content-center"
+        >
+          {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
+        </SankButton>
+
+        <div className="d-flex align-items-center gap-2">
+          <div style={{ height: 1, flex: 1, background: "var(--bs-border-color)" }} />
+          <span className="small text-body-secondary">O</span>
+          <div style={{ height: 1, flex: 1, background: "var(--bs-border-color)" }} />
         </div>
 
-        {serverError && <p className="text-sm text-destructive">{serverError}</p>}
+        <SankButton
+          type="button"
+          variant="secondary"
+          disabled={isSubmitting || isSubmittingGoogle}
+          loading={isSubmittingGoogle}
+          iconStart={!isSubmittingGoogle ? <GoogleIcon /> : undefined}
+          onClick={handleGoogleSubmit}
+          className="w-100 justify-content-center"
+        >
+          {isSubmittingGoogle ? "Continuando con Google…" : "Continuar con Google"}
+        </SankButton>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
-          {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
-        </Button>
-
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-center small text-body-secondary mb-0">
           ¿Ya tenés cuenta?{" "}
-          <Link to="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+          <Link to="/login" className="fw-medium" style={{ color: "var(--sanken-cyan-light)" }}>
             Iniciá sesión
           </Link>
         </p>
-      </form>
-    </main>
+      </Form>
+    </AuthLayout>
   )
 }
