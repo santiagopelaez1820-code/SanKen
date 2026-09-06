@@ -4,6 +4,7 @@ namespace App\Application\Onboarding\Actions;
 
 use App\Events\OnboardingCompleted;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CompleteOnboardingAction
@@ -41,12 +42,23 @@ class CompleteOnboardingAction
             ]);
         }
 
-        $user->onboardingResponse->forceFill([
-            'completed' => true,
-            'completed_at' => now(),
-        ])->save();
+        // Transaccion: OnboardingCompleted dispara la generacion de la rutina
+        // de forma SINCRONA (GenerateRoutineOnOnboardingCompleted -> dispatchSync).
+        // RoutineTemplate::activeFrequencyDays() (usado para validar
+        // frequency_days) no filtra por sexo/nivel, asi que un usuario puede
+        // enviar una combinacion sexo+frecuencia+nivel para la que ningun
+        // admin activo una plantilla — sin la transaccion, eso marcaba el
+        // onboarding como completado y despues explotaba con un 500 sin
+        // manejar (ver catch en OnboardingController::complete()), dejando
+        // al usuario "completado" pero sin rutina.
+        DB::transaction(function () use ($user) {
+            $user->onboardingResponse->forceFill([
+                'completed' => true,
+                'completed_at' => now(),
+            ])->save();
 
-        event(new OnboardingCompleted($user));
+            event(new OnboardingCompleted($user));
+        });
 
         return $user->fresh(['profile', 'onboardingResponse']);
     }

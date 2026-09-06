@@ -6,6 +6,8 @@ import { AppShell } from "@/components/layout/AppShell"
 import { LoginPage } from "@/pages/LoginPage"
 import { RegisterPage } from "@/pages/RegisterPage"
 import { LoginVerifyPage } from "@/pages/LoginVerifyPage"
+import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage"
+import { ResetPasswordPage } from "@/pages/ResetPasswordPage"
 import { OnboardingPage } from "@/pages/OnboardingPage"
 import { LocationSurveyPage } from "@/pages/LocationSurveyPage"
 import { DashboardPage } from "@/pages/DashboardPage"
@@ -38,6 +40,13 @@ import { AdminAuditLogPage } from "@/pages/AdminAuditLogPage"
 import { AdminProductsPage } from "@/pages/AdminProductsPage"
 import { AdminOrdersPage } from "@/pages/AdminOrdersPage"
 import { AdminOrderDetailPage } from "@/pages/AdminOrderDetailPage"
+import { StorePage } from "@/pages/StorePage"
+import { ProductDetailPage } from "@/pages/ProductDetailPage"
+import { CartPage } from "@/pages/CartPage"
+import { CheckoutPage } from "@/pages/CheckoutPage"
+import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage"
+import { MyOrdersPage } from "@/pages/MyOrdersPage"
+import { MyOrderDetailPage } from "@/pages/MyOrderDetailPage"
 
 function App() {
   return (
@@ -45,6 +54,8 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login/verify" element={<LoginVerifyPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route
         path="/onboarding"
         element={
@@ -82,6 +93,15 @@ function App() {
         <Route path="/workout/precheck" element={<WorkoutPrecheckPage />} />
         <Route path="/workout/session/:sessionId" element={<WorkoutSessionPage />} />
         <Route path="/feed" element={<FeedPage />} />
+
+        <Route path="/store" element={<StorePage />} />
+        <Route path="/store/cart" element={<CartPage />} />
+        <Route path="/store/checkout" element={<CheckoutPage />} />
+        <Route path="/store/confirmation/:orderId" element={<OrderConfirmationPage />} />
+        <Route path="/store/:productId" element={<ProductDetailPage />} />
+
+        <Route path="/pedidos" element={<MyOrdersPage />} />
+        <Route path="/pedidos/:orderId" element={<MyOrderDetailPage />} />
 
         <Route
           path="/trainer"

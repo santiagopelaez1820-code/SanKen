@@ -17,6 +17,7 @@ class OrderApiTest extends TestCase
             'customer_name' => 'Juan Pérez',
             'customer_email' => 'juan@example.com',
             'customer_phone' => '3000000000',
+            'customer_whatsapp' => '3000000000',
             'department' => 'Antioquia',
             'city' => 'Medellín',
             'address' => 'Calle 10 # 20-30',
@@ -117,6 +118,22 @@ class OrderApiTest extends TestCase
         $this->actingAs($user, 'sanctum')->postJson('/api/v1/orders', $this->checkoutPayload([
             ['product_id' => $product->id, 'quantity' => 51],
         ]))->assertStatus(422);
+    }
+
+    /**
+     * El regex de teléfono antes solo exigía 7-20 caracteres del set
+     * [0-9 -], sin exigir que alguno fuera realmente un dígito — un valor
+     * como "-------" (puros guiones) pasaba la validación.
+     */
+    public function test_it_rejects_a_phone_with_no_actual_digits(): void
+    {
+        $user = User::factory()->create();
+        $product = Product::factory()->create();
+
+        $this->actingAs($user, 'sanctum')->postJson('/api/v1/orders', $this->checkoutPayload(
+            [['product_id' => $product->id, 'quantity' => 1]],
+            ['customer_phone' => '-------', 'customer_whatsapp' => '-------'],
+        ))->assertStatus(422)->assertJsonValidationErrors(['customer_phone', 'customer_whatsapp']);
     }
 
     /**

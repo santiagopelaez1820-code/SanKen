@@ -23,9 +23,17 @@ interface LevelUpCelebrationProps {
   onDismiss: () => void;
 }
 
+/**
+ * Pese al nombre, también cubre "desbloqueaste un logro sin subir de nivel"
+ * (ej. el logro de cantidad de entrenamientos o de PRs, cuyo bonus de XP no
+ * alcanza para cruzar el próximo nivel) — antes esta celebración solo se
+ * mostraba con `leveled_up=true`, así que esos logros quedaban desbloqueados
+ * en el backend (con su XP ya otorgado) pero invisibles para el usuario.
+ */
 export function LevelUpCelebration({ result, onDismiss }: LevelUpCelebrationProps) {
   const theme = useTheme();
-  const visible = Boolean(result?.leveled_up);
+  const hasAchievements = (result?.achievements_unlocked.length ?? 0) > 0;
+  const visible = Boolean(result?.leveled_up || hasAchievements);
 
   // API Animated nativa de RN (no Reanimated/Moti): esas dependencias
   // arrastran una resolución web/SSR que rompe el render de expo-router en
@@ -70,16 +78,24 @@ export function LevelUpCelebration({ result, onDismiss }: LevelUpCelebrationProp
           ))}
 
           <ThemedText type="small" themeColor="textSecondary">
-            ¡SUBISTE DE NIVEL!
+            {result.leveled_up ? '¡SUBISTE DE NIVEL!' : '¡LOGRO DESBLOQUEADO!'}
           </ThemedText>
-          <ThemedText type="title" themeColor="accent" style={styles.level}>
-            Nivel {result.new_level}
-          </ThemedText>
+          {result.leveled_up ? (
+            <ThemedText type="title" themeColor="accent" style={styles.level}>
+              Nivel {result.new_level}
+            </ThemedText>
+          ) : (
+            <ThemedText type="subtitle" themeColor="accent" style={styles.achievementTitle}>
+              {result.achievements_unlocked.length === 1
+                ? result.achievements_unlocked[0].name
+                : `${result.achievements_unlocked.length} logros nuevos`}
+            </ThemedText>
+          )}
           <ThemedText type="small" themeColor="textSecondary">
             +{result.xp_awarded} XP
           </ThemedText>
 
-          {result.achievements_unlocked.length > 0 && (
+          {hasAchievements && (
             <ThemedView style={styles.achievements}>
               {result.achievements_unlocked.map((achievement) => (
                 <ThemedView key={achievement.code} style={[styles.achievementRow, { borderColor: theme.backgroundSelected }]}>
@@ -129,6 +145,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   level: { fontSize: 36, lineHeight: 42 },
+  achievementTitle: { fontSize: 24, lineHeight: 30, textAlign: 'center' },
   achievements: {
     alignSelf: 'stretch',
     gap: Spacing.one,

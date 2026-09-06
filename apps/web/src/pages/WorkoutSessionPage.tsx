@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Navigate, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { CheckCircle2, Dumbbell, RefreshCw, TrendingUp, Trophy } from "lucide-react"
+import { CheckCircle2, Dumbbell, Info, RefreshCw, TrendingUp, Trophy } from "lucide-react"
 import type { GamificationEventResult, LoggedWorkoutSet, WorkoutExercise, WorkoutSession } from "@sanken/core"
 import { ApiError } from "@sanken/core"
 import { api } from "@/lib/api"
@@ -266,6 +266,13 @@ export function WorkoutSessionPage() {
             />
           ))}
         </div>
+
+        {session.readiness_adjusted && session.readiness_note && (
+          <div className="flex items-start gap-2 rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm text-foreground">
+            <Info className="mt-0.5 size-4 shrink-0 text-warning" />
+            <p>{session.readiness_note}</p>
+          </div>
+        )}
 
         <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-secondary-accent/10 via-card to-primary/8 p-6">
           <div className="pointer-events-none absolute -top-14 -right-14 size-40 rounded-full bg-primary/12 blur-3xl" />

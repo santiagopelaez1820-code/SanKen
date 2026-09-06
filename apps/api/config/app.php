@@ -56,6 +56,14 @@ return [
 
     'frontend_url' => env('FRONTEND_URL'),
 
+    /**
+     * Línea de WhatsApp de atención de SanKen — a donde va el botón
+     * "Contactar con SanKen" del cliente (ver OrderWhatsAppMessageBuilder).
+     * En formato internacional sin '+' (ej. 573001234567). Vacío = el
+     * botón simplemente no aparece, no es un error.
+     */
+    'support_whatsapp_number' => env('SUPPORT_WHATSAPP_NUMBER'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

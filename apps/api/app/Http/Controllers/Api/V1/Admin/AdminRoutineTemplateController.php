@@ -27,6 +27,7 @@ class AdminRoutineTemplateController extends Controller
             ->with(self::EAGER)
             ->orderBy('sex')
             ->orderBy('frequency_days')
+            ->orderBy('level')
             ->orderByDesc('is_active')
             ->get();
 
@@ -65,10 +66,10 @@ class AdminRoutineTemplateController extends Controller
 
     /**
      * Activa esta plantilla y desactiva cualquier otra con el mismo
-     * sexo+frecuencia, dentro de una transacción — es el único lugar que
-     * garantiza "a lo sumo una plantilla activa por sexo+frecuencia" (la
-     * columna ya no tiene un unique constraint que lo haga por sí solo,
-     * ver migración 2026_08_18_000003).
+     * sexo+frecuencia+nivel, dentro de una transacción — es el único lugar
+     * que garantiza "a lo sumo una plantilla activa por combo" (la columna ya
+     * no tiene un unique constraint que lo haga por sí solo, ver migraciones
+     * 2026_08_18_000003 y 2026_09_05_000005).
      */
     public function activate(RoutineTemplate $routineTemplate): JsonResponse
     {
@@ -76,6 +77,7 @@ class AdminRoutineTemplateController extends Controller
             RoutineTemplate::query()
                 ->where('sex', $routineTemplate->sex)
                 ->where('frequency_days', $routineTemplate->frequency_days)
+                ->where('level', $routineTemplate->level)
                 ->where('id', '!=', $routineTemplate->id)
                 ->update(['is_active' => false]);
 
@@ -86,16 +88,17 @@ class AdminRoutineTemplateController extends Controller
     }
 
     /**
-     * Bloqueada si es la única plantilla activa para su sexo+frecuencia —
-     * si se permitiera, el próximo onboarding de ese segmento fallaría con
+     * Bloqueada si es la única plantilla activa para su sexo+frecuencia+nivel
+     * — si se permitiera, el próximo onboarding de ese segmento fallaría con
      * un 500 en TemplateRoutineGenerator (RuntimeException: "No hay
-     * plantilla de rutina para sexo=[...] frecuencia=[...]").
+     * plantilla de rutina para sexo=[...] frecuencia=[...] nivel=[...]").
      */
     public function deactivate(RoutineTemplate $routineTemplate): JsonResponse
     {
         $isOnlyActiveOne = RoutineTemplate::query()
             ->where('sex', $routineTemplate->sex)
             ->where('frequency_days', $routineTemplate->frequency_days)
+            ->where('level', $routineTemplate->level)
             ->where('is_active', true)
             ->where('id', '!=', $routineTemplate->id)
             ->doesntExist();
@@ -103,7 +106,7 @@ class AdminRoutineTemplateController extends Controller
         abort_if(
             $isOnlyActiveOne,
             422,
-            "No podés desactivar la única plantilla activa para sexo={$routineTemplate->sex} y frecuencia={$routineTemplate->frequency_days} días — activá un reemplazo primero.",
+            "No podés desactivar la única plantilla activa para sexo={$routineTemplate->sex}, frecuencia={$routineTemplate->frequency_days} días y nivel={$routineTemplate->level} — activá un reemplazo primero.",
         );
 
         $routineTemplate->update(['is_active' => false]);

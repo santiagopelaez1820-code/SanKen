@@ -23,6 +23,8 @@ const baseSession: WorkoutSession = {
   sleep_quality: null,
   energy_level: null,
   muscle_soreness: null,
+  readiness_adjusted: false,
+  readiness_note: null,
   notes: null,
   exercises: [
     {

@@ -5,6 +5,7 @@ import { useColorScheme } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { ToastHost } from '@/components/ui/toast';
 import { useAuthStore } from '@/store/auth-store';
 
 SplashScreen.preventAutoHideAsync();
@@ -38,6 +39,7 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding" />
           <Stack.Screen name="workout" />
         </Stack>
+        <ToastHost />
       </ThemeProvider>
     </GestureHandlerRootView>
   );

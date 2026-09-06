@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import { Flame } from 'lucide-react-native';
 import type { DashboardStats, GamificationSummary } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
@@ -47,13 +46,10 @@ export function PerformanceHero({ stats, gamification, isLoading }: PerformanceH
           {gamification?.total_xp ?? 0} / {gamification?.xp_for_next_level ?? 100} XP
         </ThemedText>
 
+        {/* La racha ya no se repite acá — `StreakWidget` (Home) la muestra
+            con su propia fila semanal cuando hay una activa; duplicarla acá
+            como número suelto era ruido, no información nueva. */}
         <ThemedView style={styles.statsRow}>
-          <ThemedView style={styles.statItem}>
-            <Flame size={16} color={theme.accent} />
-            <ThemedText type="smallBold" style={styles.statValue}>
-              {stats?.current_streak_days ?? 0}
-            </ThemedText>
-          </ThemedView>
           <ThemedView style={styles.statItem}>
             <ThemedText type="smallBold" style={styles.statValue}>
               {stats?.total_hours ?? 0} h

@@ -16,6 +16,7 @@ class DuplicateRoutineTemplateAction
                 'name' => trim(($source->name ?: "{$source->frequency_days} días").' (copia)'),
                 'sex' => $source->sex,
                 'frequency_days' => $source->frequency_days,
+                'level' => $source->level,
                 'split_type' => $source->split_type,
                 'is_active' => false,
             ]);

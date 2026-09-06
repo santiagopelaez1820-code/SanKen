@@ -43,9 +43,10 @@ export default function CartScreen() {
         ) : (
           <>
             <FlatList
+              style={styles.list}
               data={items}
               keyExtractor={(item) => String(item.product.id)}
-              contentContainerStyle={styles.list}
+              contentContainerStyle={styles.listContent}
               renderItem={({ item }) => (
                 <CartItemRow
                   item={item}
@@ -58,7 +59,7 @@ export default function CartScreen() {
 
             <ThemedView type="backgroundElement" style={styles.summary}>
               <ThemedView style={styles.summaryRow}>
-                <ThemedText type="smallBold">Subtotal</ThemedText>
+                <ThemedText type="smallBold">Subtotal (COP)</ThemedText>
                 <ThemedText type="smallBold" themeColor="accent">
                   {formatCurrency(subtotal)}
                 </ThemedText>
@@ -97,7 +98,12 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   title: { fontSize: 26, lineHeight: 32 },
-  list: { gap: Spacing.two, paddingBottom: Spacing.three },
+  // El FlatList necesita flex:1 explícito para acotarse dentro de la
+  // columna y hacer scroll interno — sin esto trataba de crecer para
+  // mostrar todos los items sin límite, empujando el resumen (subtotal +
+  // botones) fuera de la pantalla en vez de dejarlo siempre a la vista.
+  list: { flex: 1 },
+  listContent: { gap: Spacing.two, paddingBottom: Spacing.three },
   summary: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.two },
   summaryRow: {
     flexDirection: 'row',

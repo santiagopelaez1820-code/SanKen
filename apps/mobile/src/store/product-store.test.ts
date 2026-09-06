@@ -19,6 +19,7 @@ const product: Product = {
   image: null,
   category: 'creatine',
   price: '79900.00',
+  created_at: '2026-01-01T00:00:00Z',
 };
 
 beforeEach(() => {

@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'expo-image';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ShoppingBag } from 'lucide-react-native';
+import { ShoppingBag, ShoppingCart } from 'lucide-react-native';
 import { formatCurrency } from '@sanken/core';
 
 import { CATEGORY_LABELS } from '@/components/store/category-chips';
+import { isNewProduct } from '@/components/store/product-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ErrorState } from '@/components/ui/error-state';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Stepper } from '@/components/ui/stepper';
@@ -17,19 +19,34 @@ import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useCartStore } from '@/store/cart-store';
 import { useProductStore } from '@/store/product-store';
+import { useToastStore } from '@/store/toast-store';
 
 export default function ProductDetailScreen() {
   const theme = useTheme();
   const { productId } = useLocalSearchParams<{ productId: string }>();
   const id = Number(productId);
 
-  const { currentProduct, isLoadingProduct, loadProduct } = useProductStore();
+  const { currentProduct, isLoadingProduct, productError, loadProduct } = useProductStore();
   const addItem = useCartStore((s) => s.addItem);
+  const itemCount = useCartStore((s) => s.getItemCount());
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (id) loadProduct(id);
   }, [id, loadProduct]);
+
+  // Antes esta pantalla se quedaba en el skeleton para siempre si la carga
+  // fallaba: la condición solo miraba `!currentProduct`, nunca `productError`
+  // — sin conexión, el usuario veía un loader infinito sin ninguna salida.
+  if (productError) {
+    return (
+      <ThemedView style={styles.root}>
+        <SafeAreaView style={styles.safeArea}>
+          <ErrorState message={productError} onRetry={() => loadProduct(id)} />
+        </SafeAreaView>
+      </ThemedView>
+    );
+  }
 
   if (isLoadingProduct || !currentProduct) {
     return (
@@ -46,15 +63,33 @@ export default function ProductDetailScreen() {
 
   const handleAdd = () => {
     addItem(product, quantity);
-    router.push('/store/cart');
+    useToastStore.getState().show(`✓ ${product.name} agregado`, 'success');
+    // Vuelve a 1 para que agregar de nuevo no arrastre sin querer la
+    // cantidad anterior — el usuario sigue viendo este mismo producto.
+    setQuantity(1);
   };
 
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-          ← Tienda
-        </ThemedText>
+        <View style={styles.topBar}>
+          <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
+            ← Tienda
+          </ThemedText>
+          <Pressable
+            onPress={() => router.push('/store/cart')}
+            accessibilityLabel="Ver carrito"
+            style={[styles.cartButton, { backgroundColor: theme.backgroundElement }]}>
+            <ShoppingCart size={22} color={theme.text} />
+            {itemCount > 0 && (
+              <ThemedView style={[styles.cartBadge, { backgroundColor: theme.accent }]}>
+                <ThemedText type="small" style={styles.cartBadgeText}>
+                  {itemCount > 9 ? '9+' : itemCount}
+                </ThemedText>
+              </ThemedView>
+            )}
+          </Pressable>
+        </View>
 
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={[styles.imageWrap, { backgroundColor: theme.backgroundElement }]}>
@@ -62,6 +97,13 @@ export default function ProductDetailScreen() {
               <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" transition={150} />
             ) : (
               <ShoppingBag size={48} color={theme.textSecondary} />
+            )}
+            {isNewProduct(product.created_at) && (
+              <ThemedView style={[styles.newBadge, { backgroundColor: theme.accent }]}>
+                <ThemedText type="small" style={styles.newBadgeText}>
+                  🆕 Nuevo
+                </ThemedText>
+              </ThemedView>
             )}
           </View>
 
@@ -104,6 +146,33 @@ const styles = StyleSheet.create({
     paddingBottom: BottomTabInset,
     gap: Spacing.three,
   },
+  topBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  cartButton: {
+    // 44x44: mismo mínimo táctil que el botón de carrito de la Store
+    // (store/index.tsx) — no achicarlo solo porque comparte fila con el
+    // link de volver.
+    width: 44,
+    height: 44,
+    borderRadius: Spacing.three,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  cartBadgeText: { color: '#050505', fontWeight: '700', fontSize: 10 },
   scrollContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   imageWrap: {
     width: '100%',
@@ -115,6 +184,15 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   image: { width: '100%', height: '100%' },
+  newBadge: {
+    position: 'absolute',
+    top: Spacing.two,
+    left: Spacing.two,
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: 3,
+  },
+  newBadgeText: { color: '#050505', fontWeight: '700', fontSize: 11 },
   category: { textTransform: 'uppercase', letterSpacing: 0.5 },
   name: { fontSize: 26, lineHeight: 32 },
   price: { fontSize: 24, lineHeight: 30 },

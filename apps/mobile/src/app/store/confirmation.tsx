@@ -27,6 +27,11 @@ export default function OrderConfirmationScreen() {
           Tu pedido #{String(orderId ?? '').padStart(6, '0')} quedó registrado y está pendiente de confirmación.
         </ThemedText>
         <PrimaryButton label="Volver a la tienda" onPress={() => router.replace('/store')} />
+        <PrimaryButton
+          label="Ver mis pedidos"
+          variant="ghost"
+          onPress={() => router.push(orderId ? `/pedidos/${orderId}` : '/pedidos')}
+        />
       </SafeAreaView>
     </ThemedView>
   );

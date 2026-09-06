@@ -10,9 +10,17 @@ export interface Product {
   image: string | null;
   category: ProductCategory;
   price: string;
+  created_at: string;
 }
 
-export type OrderStatus = 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type OrderStatus =
+  | 'pending'
+  | 'confirming'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'problem'
+  | 'cancelled';
 
 export interface OrderItem {
   id: number;
@@ -23,7 +31,12 @@ export interface OrderItem {
   subtotal: string;
 }
 
-/** GET /admin/orders, GET /admin/orders/{id}, POST /orders (respuesta). */
+/**
+ * GET /orders, GET /orders/{id}, POST /orders (respuesta) — vista del
+ * propio cliente. Nunca trae `admin_notes` (eso es exclusivo de
+ * AdminOrder, ver types/admin.ts) ni el link de WhatsApp hacia el
+ * cliente (ese es para que el superadmin lo use, no al revés).
+ */
 export interface Order {
   id: number;
   user_id: number;
@@ -31,6 +44,7 @@ export interface Order {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  customer_whatsapp: string;
   department: string;
   city: string;
   address: string;
@@ -38,8 +52,15 @@ export interface Order {
   subtotal: string;
   shipping_cost: string | null;
   total: string;
+  tracking_number: string | null;
+  carrier: string | null;
+  /** Mensaje que el superadmin dejó para este pedido (ej. detalle de un problema) — visible para el cliente. */
+  customer_message: string | null;
   items: OrderItem[];
   created_at: string;
+  updated_at: string;
+  /** Link wa.me hacia la línea de atención de SanKen, ya con el pedido en el mensaje — null si no hay número configurado. */
+  support_whatsapp_url: string | null;
 }
 
 /**
@@ -51,6 +72,7 @@ export interface CreateOrderPayload {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
+  customer_whatsapp: string;
   department: string;
   city: string;
   address: string;

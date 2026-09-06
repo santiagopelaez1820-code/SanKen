@@ -11,19 +11,24 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ChallengesRow } from '@/components/dashboard/challenges-row';
 import { PerformanceHero } from '@/components/dashboard/performance-hero';
+import { StreakWidget } from '@/components/dashboard/streak-widget';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoreMenu } from '@/components/layout/more-menu';
-import { BottomTabInset, CardShadow, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
+import { apiDateKey, toDateKey } from '@/lib/calendar-grid';
 import { useAuthStore } from '@/store/auth-store';
 import { useDashboardStore } from '@/store/dashboard-store';
 import { useFeedStore } from '@/store/feed-store';
 import { useGamificationStore } from '@/store/gamification-store';
+import { findNearestChallenge, useRetosStore } from '@/store/retos-store';
 import { findNextDay, useRoutineStore } from '@/store/routine-store';
+import { useWorkoutHistoryStore } from '@/store/workout-history-store';
 import { useWorkoutStore } from '@/store/workout-store';
 
 function greeting() {
@@ -41,6 +46,8 @@ export default function HomeScreen() {
   const resumeWorkout = useWorkoutStore((s) => s.resume);
   const { stats, isLoadingStats, loadStats } = useDashboardStore();
   const { summary, isLoading: isLoadingGamification, loadSummary } = useGamificationStore();
+  const { sessions, load: loadHistory } = useWorkoutHistoryStore();
+  const { challenges, load: loadChallenges } = useRetosStore();
   const [confirmingSkip, setConfirmingSkip] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
   const [moreMenuVisible, setMoreMenuVisible] = useState(false);
@@ -49,7 +56,9 @@ export default function HomeScreen() {
     load();
     loadStats();
     loadSummary();
-  }, [load, loadStats, loadSummary]);
+    loadHistory();
+    loadChallenges();
+  }, [load, loadStats, loadSummary, loadHistory, loadChallenges]);
 
   useEffect(() => {
     // Si la app se cerró a mitad de un entrenamiento, retoma esa sesión en
@@ -62,6 +71,15 @@ export default function HomeScreen() {
   }, []);
 
   const day = findNextDay(routine, nextDayId);
+
+  // "Ya entrenaste hoy" se deriva del historial real (no de si `day`/`nextDayId`
+  // ya rotó al próximo entrenamiento) — un split de 4 días rota el día
+  // siguiente apenas se completa uno, así que sin esto la Home seguiría
+  // mostrando "Comenzar" para el día ya entrenado en vez de felicitar al
+  // usuario por el que sí completó.
+  const todayKey = toDateKey(new Date());
+  const todaysSession = sessions.find((s) => s.completed && !s.cancelled && apiDateKey(s.performed_at) === todayKey);
+  const nearestChallenge = findNearestChallenge(challenges);
 
   const handleSkip = async () => {
     setIsSkipping(true);
@@ -126,10 +144,10 @@ export default function HomeScreen() {
           </ThemedView>
         </Animated.View>
 
-        {error && (
-          <ThemedText type="small" style={styles.error}>
-            {error}
-          </ThemedText>
+        {error && !isLoading && (
+          <ThemedView type="backgroundElement" style={styles.card}>
+            <ErrorState message={error} onRetry={load} />
+          </ThemedView>
         )}
 
         {isLoading && <Skeleton height={200} borderRadius={Spacing.four} />}
@@ -144,25 +162,28 @@ export default function HomeScreen() {
           </ThemedView>
         )}
 
-        {day && (
+        {todaysSession ? (
           <Animated.View entering={FadeInUp.delay(0).duration(320)}>
             <ThemedView
               style={[
                 styles.todayCard,
-                { backgroundColor: `${theme.accent}12`, borderColor: `${theme.accent}35` },
-                glowShadow(theme.accent),
+                { backgroundColor: `${theme.success}12`, borderColor: `${theme.success}35` },
+                glowShadow(theme.success),
               ]}>
-              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accent }]}>
+              <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.success }]}>
                 ENTRENAMIENTO DE HOY
               </ThemedText>
               <ThemedText type="title" style={styles.todayTitle}>
-                {day.label}
+                ¡Excelente trabajo! 💪
+              </ThemedText>
+              <ThemedText type="small" themeColor="textSecondary" style={styles.completedSubtitle}>
+                {todaysSession.routine_day_label ?? 'Entrenamiento'} completado
               </ThemedText>
 
               <ThemedView style={styles.todayStats}>
                 <ThemedView style={styles.todayStat}>
                   <ThemedText type="title" style={styles.todayStatValue}>
-                    {estimateWorkoutMinutes(day)}
+                    {todaysSession.duration_minutes ?? 0}
                   </ThemedText>
                   <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
                     MIN
@@ -170,29 +191,83 @@ export default function HomeScreen() {
                 </ThemedView>
                 <ThemedView style={styles.todayStat}>
                   <ThemedText type="title" style={styles.todayStatValue}>
-                    {day.exercises.length}
+                    {todaysSession.exercises.length}
                   </ThemedText>
                   <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
                     EJERCICIOS
                   </ThemedText>
                 </ThemedView>
               </ThemedView>
-
-              <ThemedView style={styles.spacer} />
-              <PrimaryButton label="Comenzar" onPress={() => router.push('/workout/precheck')} />
-              <ThemedView style={styles.buttonGap} />
-              <PrimaryButton
-                label="Saltar entrenamiento"
-                variant="ghost"
-                onPress={() => setConfirmingSkip(true)}
-              />
             </ThemedView>
+          </Animated.View>
+        ) : (
+          day && (
+            <Animated.View entering={FadeInUp.delay(0).duration(320)}>
+              <ThemedView
+                style={[
+                  styles.todayCard,
+                  { backgroundColor: `${theme.accent}12`, borderColor: `${theme.accent}35` },
+                  glowShadow(theme.accent),
+                ]}>
+                <ThemedText type="smallBold" style={[styles.eyebrow, { color: theme.accent }]}>
+                  ENTRENAMIENTO DE HOY
+                </ThemedText>
+                <ThemedText type="title" style={styles.todayTitle}>
+                  {day.label}
+                </ThemedText>
+
+                <ThemedView style={styles.todayStats}>
+                  <ThemedView style={styles.todayStat}>
+                    <ThemedText type="title" style={styles.todayStatValue}>
+                      {estimateWorkoutMinutes(day)}
+                    </ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                      MIN
+                    </ThemedText>
+                  </ThemedView>
+                  <ThemedView style={styles.todayStat}>
+                    <ThemedText type="title" style={styles.todayStatValue}>
+                      {day.exercises.length}
+                    </ThemedText>
+                    <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                      EJERCICIOS
+                    </ThemedText>
+                  </ThemedView>
+                </ThemedView>
+
+                <ThemedView style={styles.spacer} />
+                <PrimaryButton label="Comenzar" onPress={() => router.push('/workout/precheck')} />
+                <ThemedView style={styles.buttonGap} />
+                <PrimaryButton
+                  label="Saltar entrenamiento"
+                  variant="ghost"
+                  onPress={() => setConfirmingSkip(true)}
+                />
+              </ThemedView>
+            </Animated.View>
+          )
+        )}
+
+        {(stats?.current_streak_days ?? 0) > 0 && (
+          <Animated.View entering={FadeInUp.delay(40).duration(320)}>
+            <StreakWidget streakDays={stats?.current_streak_days ?? 0} sessions={sessions} />
           </Animated.View>
         )}
 
         <Animated.View entering={FadeInUp.delay(60).duration(320)}>
           <PerformanceHero stats={stats} gamification={summary} isLoading={isLoadingStats || isLoadingGamification} />
         </Animated.View>
+
+        {nearestChallenge && (
+          <Animated.View entering={FadeInUp.delay(90).duration(280)}>
+            <ThemedView
+              style={[styles.challengeBanner, { backgroundColor: `${theme.accent}14`, borderColor: `${theme.accent}35` }]}>
+              <ThemedText type="small" style={{ color: theme.accent }}>
+                🎯 Te falta 1 entrenamiento para completar “{nearestChallenge.title}”.
+              </ThemedText>
+            </ThemedView>
+          </Animated.View>
+        )}
 
         <Animated.View entering={FadeInUp.delay(120).duration(320)}>
           <ChallengesRow />
@@ -302,7 +377,6 @@ const styles = StyleSheet.create({
     borderRadius: 1.5,
   },
   centerText: { textAlign: 'center' },
-  error: { color: '#FF4D5E', textAlign: 'center' },
   card: {
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.three,
@@ -319,6 +393,16 @@ const styles = StyleSheet.create({
     fontSize: 26,
     lineHeight: 31,
     marginBottom: Spacing.three,
+  },
+  completedSubtitle: {
+    marginTop: -Spacing.two,
+    marginBottom: Spacing.three,
+  },
+  challengeBanner: {
+    borderRadius: Spacing.three,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
   },
   todayStats: {
     flexDirection: 'row',

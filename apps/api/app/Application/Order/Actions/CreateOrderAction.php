@@ -2,6 +2,7 @@
 
 namespace App\Application\Order\Actions;
 
+use App\Domain\Order\OrderStatusCatalog;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -24,19 +25,20 @@ class CreateOrderAction
     ) {}
 
     /**
-     * @param array{customer_name:string,customer_email:string,customer_phone:string,department:string,city:string,address:string,additional_info?:string|null,items:array<int,array{product_id:int,quantity:int}>} $data
+     * @param array{customer_name:string,customer_email:string,customer_phone:string,customer_whatsapp:string,department:string,city:string,address:string,additional_info?:string|null,items:array<int,array{product_id:int,quantity:int}>} $data
      */
     public function execute(User $user, array $data): Order
     {
-        return DB::transaction(function () use ($user, $data) {
+        $order = DB::transaction(function () use ($user, $data) {
             [$itemsData, $subtotal] = $this->buildItems($data['items']);
 
             $order = Order::query()->create([
                 'user_id' => $user->id,
-                'status' => 'pending',
+                'status' => OrderStatusCatalog::PENDING,
                 'customer_name' => $data['customer_name'],
                 'customer_email' => $data['customer_email'],
                 'customer_phone' => $data['customer_phone'],
+                'customer_whatsapp' => $data['customer_whatsapp'],
                 'department' => $data['department'],
                 'city' => $data['city'],
                 'address' => $data['address'],
@@ -50,12 +52,17 @@ class CreateOrderAction
 
             $order->items()->createMany($itemsData);
 
-            $order = $order->load('items');
-
-            $this->notifyOrderCreated->execute($order);
-
-            return $order;
+            return $order->load('items');
         });
+
+        // Fuera de la transacción a propósito: si NotifyOrderCreatedAction
+        // fallara acá adentro, revertiría el pedido que ya se dio por
+        // creado. El pedido debe quedar persistido pase lo que pase con la
+        // notificación (ver NotifyOrderCreatedAction, que además envuelve
+        // todo en try/catch por su cuenta).
+        $this->notifyOrderCreated->execute($order);
+
+        return $order;
     }
 
     /**

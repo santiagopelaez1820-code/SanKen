@@ -3,6 +3,7 @@
 namespace Tests\Feature\Workout;
 
 use App\Models\Exercise;
+use App\Models\OnboardingResponse;
 use App\Models\Routine;
 use App\Models\RoutineDay;
 use App\Models\RoutineExercise;
@@ -79,6 +80,74 @@ class WorkoutSessionTest extends TestCase
         $response->assertCreated()
             ->assertJsonPath('data.routine_day_id', null)
             ->assertJsonCount(0, 'data.exercises');
+    }
+
+    public function test_a_poor_precheck_trims_the_sessions_exercises_according_to_level(): void
+    {
+        $user = User::factory()->create();
+        OnboardingResponse::query()->create(['user_id' => $user->id, 'level' => 'beginner']);
+        $day = $this->makeActiveRoutineWithOneDay($user);
+        $day->exercises->first()->update([
+            'suggested_weight_kg' => 100,
+            'suggested_reps_per_set' => [10, 10, 10],
+        ]);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/workout-sessions', [
+            'routine_day_id' => $day->id,
+            'sleep_quality' => 1,
+            'energy_level' => 1,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.readiness_adjusted', true)
+            ->assertJsonPath('data.exercises.0.target_sets', 2)
+            ->assertJsonPath('data.exercises.0.suggested_reps_per_set', [10, 10])
+            ->assertJsonPath('data.exercises.0.target_rpe', '6.5');
+
+        $this->assertEquals(80.0, (float) $response->json('data.exercises.0.suggested_weight_kg'));
+        $note = $response->json('data.readiness_note');
+        $this->assertStringContainsString('dormiste poco', $note);
+        $this->assertStringContainsString('tenés poca energía', $note);
+
+        // La rutina de base no se toca — la próxima sesión vuelve a partir de los valores completos.
+        $this->assertEquals(100.0, (float) $day->exercises->first()->fresh()->suggested_weight_kg);
+        $this->assertSame(3, $day->exercises->first()->fresh()->target_sets);
+    }
+
+    public function test_a_good_precheck_leaves_the_session_unadjusted(): void
+    {
+        $user = User::factory()->create();
+        OnboardingResponse::query()->create(['user_id' => $user->id, 'level' => 'beginner']);
+        $day = $this->makeActiveRoutineWithOneDay($user);
+        $day->exercises->first()->update(['suggested_weight_kg' => 100]);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/workout-sessions', [
+            'routine_day_id' => $day->id,
+            'sleep_quality' => 5,
+            'energy_level' => 5,
+            'muscle_soreness' => 1,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.readiness_adjusted', false)
+            ->assertJsonPath('data.readiness_note', null)
+            ->assertJsonPath('data.exercises.0.target_sets', 3);
+
+        $this->assertEquals(100.0, (float) $response->json('data.exercises.0.suggested_weight_kg'));
+    }
+
+    public function test_skipping_the_precheck_entirely_leaves_the_session_unadjusted(): void
+    {
+        $user = User::factory()->create();
+        $day = $this->makeActiveRoutineWithOneDay($user);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/workout-sessions', [
+            'routine_day_id' => $day->id,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.readiness_adjusted', false)
+            ->assertJsonPath('data.exercises.0.target_sets', 3);
     }
 
     public function test_user_cannot_start_a_session_from_another_users_routine_day(): void

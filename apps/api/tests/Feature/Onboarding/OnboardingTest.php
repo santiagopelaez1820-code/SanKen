@@ -297,4 +297,41 @@ class OnboardingTest extends TestCase
         // /auth/me debe reflejar el onboarding como completado.
         $client->getJson('/api/v1/auth/me')->assertJsonPath('data.onboarding_completed', true);
     }
+
+    public function test_completing_onboarding_fails_cleanly_when_no_template_matches_the_users_combo(): void
+    {
+        // RoutineTemplate::activeFrequencyDays() (usado para validar
+        // frequency_days) no filtra por sexo/nivel — si la combinación
+        // exacta que eligió el usuario no tiene plantilla activa (acá,
+        // desactivada a propósito para simular ese hueco), completar el
+        // onboarding no debe tirar un 500 sin manejar ni marcar el
+        // onboarding como completado a medias.
+        $this->seed(MuscleGroupSeeder::class);
+        $this->seed(ExerciseSeeder::class);
+        $this->seed(RoutineTemplateSeeder::class);
+
+        \App\Models\RoutineTemplate::query()
+            ->where('sex', 'male')
+            ->where('frequency_days', 4)
+            ->where('level', 'intermediate')
+            ->update(['is_active' => false]);
+
+        $user = User::factory()->create();
+        $client = $this->actingAs($user, 'sanctum');
+
+        $client->postJson('/api/v1/onboarding', [
+            'age' => 28,
+            'sex' => 'male',
+            'height_cm' => 178,
+            'weight_kg' => 82.5,
+            'level' => 'intermediate',
+            'goals' => ['gain_muscle'],
+            'frequency_days' => 4,
+        ]);
+
+        $response = $client->postJson('/api/v1/onboarding/complete');
+
+        $response->assertStatus(422);
+        $this->assertDatabaseHas('onboarding_responses', ['user_id' => $user->id, 'completed' => false]);
+    }
 }

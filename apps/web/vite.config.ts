@@ -14,6 +14,10 @@ export default defineConfig({
   },
   server: {
     port: 5173,
+    // host:true (== --host 0.0.0.0) para que otros dispositivos de la LAN
+    // puedan abrir la web usando la IP local del PC (ver scripts/start-sanken.ps1
+    // y AUTOSTART.md) — sin esto Vite solo escucha en localhost.
+    host: true,
   },
   test: {
     environment: 'jsdom',

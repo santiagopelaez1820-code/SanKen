@@ -8,6 +8,7 @@ import { getWorkoutSessionStatus, WORKOUT_SESSION_STATUS_LABEL, type WorkoutSess
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Badge, type BadgeVariant } from '@/components/ui/badge';
+import { ErrorState } from '@/components/ui/error-state';
 import { Icon } from '@/components/ui/icon';
 import { BottomTabInset, CardShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -87,11 +88,7 @@ export default function HistoryScreen() {
             isLoading || isLoadingMore ? <ActivityIndicator style={styles.spinner} /> : null
           }
         />
-        {error && (
-          <ThemedText type="small" style={styles.error}>
-            {error}
-          </ThemedText>
-        )}
+        {error && !isLoading && sessions.length === 0 && <ErrorState message={error} onRetry={load} />}
       </SafeAreaView>
     </ThemedView>
   );
@@ -130,5 +127,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   spinner: { marginVertical: Spacing.three },
-  error: { color: '#FF4D5E', textAlign: 'center', paddingHorizontal: Spacing.four, paddingBottom: Spacing.two },
 });

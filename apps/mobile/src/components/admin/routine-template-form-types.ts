@@ -1,4 +1,9 @@
-import type { AdminRoutineTemplate, RoutineSplitType, RoutineTemplatePayload } from '@sanken/core';
+import type {
+  AdminRoutineTemplate,
+  RoutineSplitType,
+  RoutineTemplateLevel,
+  RoutineTemplatePayload,
+} from '@sanken/core';
 
 export interface TemplateExerciseFormValues {
   exercise_id: number;
@@ -36,6 +41,18 @@ export const SPLIT_OPTIONS: { value: RoutineSplitType; label: string }[] = [
   { value: 'ppl_upper_lower', label: 'PPL + Upper/Lower' },
 ];
 
+export const LEVEL_OPTIONS: { value: RoutineTemplateLevel; label: string }[] = [
+  { value: 'beginner', label: 'Principiante' },
+  { value: 'intermediate', label: 'Intermedio' },
+  { value: 'advanced', label: 'Avanzado' },
+];
+
+export const LEVEL_LABELS: Record<RoutineTemplateLevel, string> = {
+  beginner: 'Principiante',
+  intermediate: 'Intermedio',
+  advanced: 'Avanzado',
+};
+
 export function templateToDays(template: AdminRoutineTemplate): TemplateDayFormValues[] {
   return [...template.days]
     .sort((a, b) => a.day_order - b.day_order)
@@ -58,6 +75,7 @@ export function buildTemplatePayload(
   name: string,
   sex: 'male' | 'female',
   frequencyDays: string,
+  level: RoutineTemplateLevel,
   splitType: RoutineSplitType,
   days: TemplateDayFormValues[],
 ): RoutineTemplatePayload | null {
@@ -70,6 +88,7 @@ export function buildTemplatePayload(
     name: name.trim() || null,
     sex,
     frequency_days: frequency,
+    level,
     split_type: splitType,
     days: days.map((day, dayIndex) => ({
       day_order: dayIndex + 1,

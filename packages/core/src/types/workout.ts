@@ -49,6 +49,10 @@ export interface WorkoutSession {
   sleep_quality: number | null;
   energy_level: number | null;
   muscle_soreness: number | null;
+  /** true si el precheck (sueño/energía/dolor) hizo que se recorten series/peso/RPE de esta sesión puntual — ver SessionReadinessAdjuster. */
+  readiness_adjusted: boolean;
+  /** Explicación en español de por qué se ajustó, lista para mostrar tal cual — null cuando readiness_adjusted es false. */
+  readiness_note: string | null;
   notes: string | null;
   exercises: WorkoutExercise[];
 }

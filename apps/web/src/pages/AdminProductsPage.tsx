@@ -1,6 +1,6 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { AdminProduct, ProductCategory } from "@sanken/core"
+import { formatCurrency, type AdminProduct, type ProductCategory } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -40,6 +40,7 @@ export function AdminProductsPage() {
   const queryClient = useQueryClient()
   const [form, setForm] = useState<ProductFormState>(EMPTY_FORM)
   const [editingId, setEditingId] = useState<number | null>(null)
+  const formSectionRef = useRef<HTMLElement | null>(null)
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["admin", "products"],
@@ -90,6 +91,7 @@ export function AdminProductsPage() {
       price: product.price,
       dropi_reference: product.dropi_reference ?? "",
     })
+    formSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }
 
   const cancelEdit = () => {
@@ -102,7 +104,7 @@ export function AdminProductsPage() {
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Productos</h1>
 
-        <section className="rounded-xl border border-border bg-card p-5">
+        <section ref={formSectionRef} className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium">{editingId ? "Editar producto" : "Nuevo producto"}</h2>
           <div className="mt-3 grid grid-cols-2 gap-3">
             <input
@@ -123,7 +125,7 @@ export function AdminProductsPage() {
               ))}
             </select>
             <input
-              placeholder="Precio"
+              placeholder="Precio (COP)"
               type="number"
               min="0"
               value={form.price}
@@ -182,27 +184,28 @@ export function AdminProductsPage() {
               {products?.map((product) => (
                 <li key={product.id} className="flex flex-col gap-2 py-2.5">
                   <div className="flex items-center justify-between gap-3">
-                    <button
-                      onClick={() => startEdit(product)}
-                      className={`min-w-0 flex-1 text-left text-sm ${product.active ? "" : "opacity-50"}`}
-                    >
+                    <div className={`min-w-0 flex-1 text-sm ${product.active ? "" : "opacity-50"}`}>
                       {product.name}
                       <span className="ml-1 text-xs text-muted-foreground">
-                        · {CATEGORY_LABELS[product.category]} · ${product.price}
+                        · {CATEGORY_LABELS[product.category]} · {formatCurrency(product.price)}
                       </span>
                       <Badge variant={product.active ? "success" : "neutral"} className="ml-2">
                         {product.active ? "Activo" : "Inactivo"}
                       </Badge>
-                    </button>
-                    <Button
-                      variant={product.active ? "destructive" : "outline"}
-                      size="sm"
-                      className="flex-shrink-0"
-                      onClick={() => toggleActiveMutation.mutate({ id: product.id, active: product.active })}
-                      disabled={toggleActiveMutation.isPending}
-                    >
-                      {product.active ? "Desactivar" : "Activar"}
-                    </Button>
+                    </div>
+                    <div className="flex flex-shrink-0 gap-2">
+                      <Button variant="outline" size="sm" onClick={() => startEdit(product)}>
+                        Editar
+                      </Button>
+                      <Button
+                        variant={product.active ? "destructive" : "outline"}
+                        size="sm"
+                        onClick={() => toggleActiveMutation.mutate({ id: product.id, active: product.active })}
+                        disabled={toggleActiveMutation.isPending}
+                      >
+                        {product.active ? "Desactivar" : "Activar"}
+                      </Button>
+                    </div>
                   </div>
                   <ProductImageControls product={product} />
                 </li>

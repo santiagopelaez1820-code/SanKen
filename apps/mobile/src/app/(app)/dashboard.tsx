@@ -9,6 +9,7 @@ import type { ProgressMetric, VolumeRange } from '@sanken/core';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Icon } from '@/components/ui/icon';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -95,11 +96,7 @@ export default function DashboardScreen() {
             Progreso
           </ThemedText>
 
-          {statsError && (
-            <ThemedText type="small" style={styles.error}>
-              {statsError}
-            </ThemedText>
-          )}
+          {statsError && !isLoadingStats && <ErrorState message={statsError} onRetry={loadStats} />}
 
           <ThemedView style={styles.tileGrid}>
             <Animated.View entering={FadeInUp.delay(0).duration(280)} style={styles.tileWrap}>
@@ -305,7 +302,6 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   pageTitle: { fontSize: 28, lineHeight: 34, marginBottom: Spacing.one },
-  error: { color: '#FF4D5E' },
   tileGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',

@@ -24,6 +24,10 @@ export interface DashboardStats {
   total_sets: number;
   total_volume_kg: number;
   current_streak_days: number;
+  /** Sesiones completadas de por vida (no fechas únicas — dos entrenamientos el mismo día cuentan 2). */
+  total_workouts: number;
+  /** Retos completados de por vida — a diferencia de GET /challenges (solo período activo), esto es historia completa. */
+  completed_challenges: number;
   recent_personal_records: PersonalRecordSummary[];
 }
 

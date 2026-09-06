@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use App\Domain\Order\OrderStatusCatalog;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Order extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
     protected $fillable = [
         'user_id',
@@ -17,6 +21,7 @@ class Order extends Model
         'customer_name',
         'customer_email',
         'customer_phone',
+        'customer_whatsapp',
         'department',
         'city',
         'address',
@@ -24,6 +29,10 @@ class Order extends Model
         'subtotal',
         'shipping_cost',
         'total',
+        'tracking_number',
+        'carrier',
+        'customer_message',
+        'admin_notes',
     ];
 
     protected function casts(): array
@@ -45,43 +54,32 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    /**
-     * Mensaje listo para reenviar por WhatsApp/correo cuando exista ese
-     * canal (ver NotifyOrderCreatedAction) — hoy solo se deja en el log.
-     * Método puro (sin I/O) para poder testearlo sin mockear nada.
-     */
-    public function toNotificationText(): string
+    public function statusLabel(): string
     {
-        $lines = [
-            '🛒 NUEVO PEDIDO SANKEN',
-            '',
-            'Pedido: #'.str_pad((string) $this->id, 6, '0', STR_PAD_LEFT),
-            '',
-            'Cliente:',
-            $this->customer_name,
-            '',
-            'Teléfono:',
-            $this->customer_phone,
-            '',
-        ];
-
-        foreach ($this->items as $item) {
-            $lines[] = 'Producto:';
-            $lines[] = $item->product_name;
-            $lines[] = 'Cantidad:';
-            $lines[] = (string) $item->quantity;
-            $lines[] = '';
-        }
-
-        $lines[] = 'Total:';
-        $lines[] = '$'.number_format((float) $this->total, 0, ',', '.');
-        $lines[] = '';
-        $lines[] = 'Dirección:';
-        $lines[] = $this->address;
-        $lines[] = '';
-        $lines[] = 'Ciudad:';
-        $lines[] = "{$this->city}, {$this->department}";
-
-        return implode("\n", $lines);
+        return OrderStatusCatalog::label($this->status);
     }
+
+    /**
+     * Número de pedido formateado (#000042) — antes duplicado por separado
+     * en NewOrderNotification y OrderWhatsAppMessageBuilder.
+     */
+    public function orderNumber(): string
+    {
+        return str_pad((string) $this->id, 6, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Solo se registran los campos de seguimiento (no datos del cliente,
+     * eso no aporta al historial de "qué le pasó a este pedido") —
+     * mismo criterio que User::getActivitylogOptions().
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('order')
+            ->logOnly(['status', 'tracking_number', 'carrier', 'customer_message', 'admin_notes'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
+
 }

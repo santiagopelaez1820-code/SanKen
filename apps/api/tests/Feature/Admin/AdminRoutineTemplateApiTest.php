@@ -32,6 +32,7 @@ class AdminRoutineTemplateApiTest extends TestCase
             'name' => 'Rutina 3 días de prueba',
             'sex' => 'male',
             'frequency_days' => 3,
+            'level' => 'intermediate',
             'split_type' => 'full_body',
             'days' => [
                 [
@@ -155,6 +156,25 @@ class AdminRoutineTemplateApiTest extends TestCase
         );
     }
 
+    public function test_activating_a_template_does_not_deactivate_a_sibling_with_a_different_level(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $client = $this->actingAs($admin, 'sanctum');
+        $intermediate = $client->postJson('/api/v1/admin/routine-templates', $this->samplePayload())->json('data');
+        $client->patchJson("/api/v1/admin/routine-templates/{$intermediate['id']}/activate");
+        $advanced = $client->postJson(
+            '/api/v1/admin/routine-templates',
+            $this->samplePayload(['level' => 'advanced']),
+        )->json('data');
+
+        $response = $client->patchJson("/api/v1/admin/routine-templates/{$advanced['id']}/activate");
+
+        $response->assertOk();
+        // Mismo sexo+frecuencia, nivel distinto: activar uno no debe apagar al otro.
+        $this->assertTrue(RoutineTemplate::find($intermediate['id'])->is_active);
+        $this->assertTrue(RoutineTemplate::find($advanced['id'])->is_active);
+    }
+
     public function test_cannot_deactivate_the_only_active_template_for_a_sex_and_frequency(): void
     {
         $admin = User::factory()->create(['role' => 'super_admin']);
@@ -166,6 +186,26 @@ class AdminRoutineTemplateApiTest extends TestCase
 
         $response->assertStatus(422);
         $this->assertTrue(RoutineTemplate::find($template['id'])->is_active);
+    }
+
+    public function test_cannot_deactivate_the_only_active_template_for_its_level_even_if_another_level_is_active(): void
+    {
+        $admin = User::factory()->create(['role' => 'super_admin']);
+        $client = $this->actingAs($admin, 'sanctum');
+        $intermediate = $client->postJson('/api/v1/admin/routine-templates', $this->samplePayload())->json('data');
+        $client->patchJson("/api/v1/admin/routine-templates/{$intermediate['id']}/activate");
+        $advanced = $client->postJson(
+            '/api/v1/admin/routine-templates',
+            $this->samplePayload(['level' => 'advanced']),
+        )->json('data');
+        $client->patchJson("/api/v1/admin/routine-templates/{$advanced['id']}/activate");
+
+        // El nivel "advanced" activo para el mismo sexo+frecuencia NO cuenta
+        // como reemplazo del "intermediate" — son combos distintos.
+        $response = $client->patchJson("/api/v1/admin/routine-templates/{$intermediate['id']}/deactivate");
+
+        $response->assertStatus(422);
+        $this->assertTrue(RoutineTemplate::find($intermediate['id'])->is_active);
     }
 
     public function test_can_deactivate_when_another_template_is_still_active_for_that_sex_and_frequency(): void

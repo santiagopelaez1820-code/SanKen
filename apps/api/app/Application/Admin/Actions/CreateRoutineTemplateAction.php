@@ -28,6 +28,7 @@ class CreateRoutineTemplateAction
                 'name' => $data['name'] ?? null,
                 'sex' => $data['sex'],
                 'frequency_days' => $data['frequency_days'],
+                'level' => $data['level'],
                 'split_type' => $data['split_type'],
                 'is_active' => false,
             ]);

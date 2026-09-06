@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ResetPasswordNotification;
 use Database\Factories\UserFactory;
 use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Contracts\Auth\MustVerifyEmail as MustVerifyEmailContract;
@@ -75,6 +76,25 @@ class User extends Authenticatable implements MustVerifyEmailContract
         ];
     }
 
+    /**
+     * Reemplaza el correo de "olvidé mi contraseña" por defecto de Laravel
+     * (en inglés, sin marca) por ResetPasswordNotification — mismo criterio
+     * que usa VerifyEmail::createUrlUsing() en AppServiceProvider: la API no
+     * sirve HTML, así que el link apunta al frontend (FRONTEND_URL) para que
+     * el usuario pueda escribir la contraseña nueva ahí.
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $frontendUrl = config('app.frontend_url');
+        $query = http_build_query(['token' => $token, 'email' => $this->email]);
+
+        $resetUrl = $frontendUrl
+            ? rtrim($frontendUrl, '/')."/reset-password?{$query}"
+            : url("/reset-password?{$query}");
+
+        $this->notify(new ResetPasswordNotification($resetUrl));
+    }
+
     public function profile(): HasOne
     {
         return $this->hasOne(UserProfile::class);
@@ -113,6 +133,11 @@ class User extends Authenticatable implements MustVerifyEmailContract
     public function personalRecords(): HasMany
     {
         return $this->hasMany(PersonalRecord::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 
     public function trainerClients(): HasMany

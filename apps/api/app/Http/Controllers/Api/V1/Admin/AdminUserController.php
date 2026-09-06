@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ChangeUserRoleRequest;
+use App\Http\Requests\Admin\UpdateUserRequest;
 use App\Http\Resources\AdminUserResource;
 use App\Http\Resources\PersonalRecordResource;
 use App\Models\PersonalRecord;
@@ -73,6 +74,19 @@ class AdminUserController extends Controller
                 'personal_records' => PersonalRecordResource::collection($personalRecords)->resolve(),
             ],
         ]);
+    }
+
+    /**
+     * Edición básica de contacto (nombre/email) — no toca role, ban, ni
+     * activación, cada una de esas tiene su propio endpoint más restringido.
+     */
+    public function update(UpdateUserRequest $request, User $user): JsonResponse
+    {
+        Gate::authorize('update', $user);
+
+        $user->update($request->validated());
+
+        return response()->json(['data' => new AdminUserResource($user)]);
     }
 
     public function changeRole(ChangeUserRoleRequest $request, User $user): JsonResponse

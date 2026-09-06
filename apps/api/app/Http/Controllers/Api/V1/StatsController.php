@@ -10,6 +10,7 @@ use App\Http\Requests\Stats\RegisterPersonalRecordRequest;
 use App\Http\Requests\Stats\VolumeQueryRequest;
 use App\Http\Resources\PersonalRecordResource;
 use App\Models\BodyMeasurement;
+use App\Models\ChallengeParticipant;
 use App\Models\PersonalRecord;
 use App\Models\UserStatsDaily;
 use App\Models\WorkoutSession;
@@ -49,11 +50,29 @@ class StatsController extends Controller
                 ->limit(5)
                 ->get();
 
+            // `count(workoutDates)` no sirve para esto: son fechas únicas (para
+            // la racha), no sesiones — un día con 2 entrenamientos cuenta 1 acá.
+            $totalWorkouts = WorkoutSession::query()
+                ->where('user_id', $user->id)
+                ->where('completed', true)
+                ->count();
+
+            // A diferencia de GET /challenges (que solo devuelve retos del
+            // período activo), esto cuenta TODA la historia del usuario — es
+            // la única forma honesta de mostrar "N retos completados" en el
+            // perfil sin inventar un número que se resetea cada semana/mes.
+            $completedChallenges = ChallengeParticipant::query()
+                ->where('user_id', $user->id)
+                ->where('completed', true)
+                ->count();
+
             return [
                 'total_hours' => round((float) ($totals->training_minutes ?? 0) / 60, 1),
                 'total_sets' => (int) ($totals->total_sets ?? 0),
                 'total_volume_kg' => round((float) ($totals->total_volume_kg ?? 0), 2),
                 'current_streak_days' => $streak,
+                'total_workouts' => $totalWorkouts,
+                'completed_challenges' => $completedChallenges,
                 'recent_personal_records' => PersonalRecordResource::collection($recentPrs)->resolve(),
             ];
         });

@@ -56,8 +56,8 @@ const auditEntry: AuditLogEntry = {
 };
 
 const routineTemplate: AdminRoutineTemplate = {
-  id: 1, name: 'Full Body 3 días', sex: 'male', frequency_days: 3, split_type: 'full_body', is_active: false,
-  days: [],
+  id: 1, name: 'Full Body 3 días', sex: 'male', frequency_days: 3, level: 'intermediate', split_type: 'full_body',
+  is_active: false, days: [],
 };
 
 const adminRoutine: Routine = {

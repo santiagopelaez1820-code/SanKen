@@ -30,9 +30,13 @@ interface AuthState {
   isUploadingAvatar: boolean;
   avatarError: string | null;
 
+  isSubmittingForgotPassword: boolean;
+
   hydrate: () => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   login: (payload: LoginPayload) => Promise<void>;
+  /** No inicia sesión — solo dispara el correo de recuperación. Devuelve el mensaje del backend para mostrarlo en pantalla. */
+  forgotPassword: (email: string) => Promise<string>;
   loginWithGoogle: () => Promise<void>;
   challenge2fa: (code: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -70,6 +74,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   isUploadingAvatar: false,
   avatarError: null,
+
+  isSubmittingForgotPassword: false,
 
   hydrate: async () => {
     const token = await tokenStorage.get();
@@ -172,6 +178,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ user, token, isSubmitting: false, pendingChallenge: null });
     } catch (err) {
       set({ isSubmitting: false, error: readErrorMessage(err) });
+      throw err;
+    }
+  },
+
+  forgotPassword: async (email: string): Promise<string> => {
+    set({ isSubmittingForgotPassword: true, error: null });
+    try {
+      const response = await api.post<{ message: string }>('/auth/forgot-password', { email });
+      set({ isSubmittingForgotPassword: false });
+      return response.message;
+    } catch (err) {
+      set({ isSubmittingForgotPassword: false, error: readErrorMessage(err) });
       throw err;
     }
   },

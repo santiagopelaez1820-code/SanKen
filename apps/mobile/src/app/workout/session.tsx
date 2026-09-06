@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Redirect, router } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { CheckCircle2, Dumbbell, RefreshCw, Trophy } from 'lucide-react-native';
+import { CheckCircle2, Dumbbell, Info, RefreshCw, Trophy } from 'lucide-react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -17,7 +17,12 @@ import { SetTrackerTable } from '@/components/ui/set-tracker-table';
 import { Stepper } from '@/components/ui/stepper';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useDashboardStore } from '@/store/dashboard-store';
+import { useGamificationStore } from '@/store/gamification-store';
+import { useRetosStore } from '@/store/retos-store';
 import { useRoutineStore } from '@/store/routine-store';
+import { useToastStore } from '@/store/toast-store';
+import { useWorkoutHistoryStore } from '@/store/workout-history-store';
 import { useWorkoutStore } from '@/store/workout-store';
 
 const ADVANCE_DELAY_MS = 900;
@@ -40,6 +45,10 @@ export default function WorkoutSessionScreen() {
     reset,
   } = useWorkoutStore();
   const refreshRoutine = useRoutineStore((s) => s.load);
+  const refreshStats = useDashboardStore((s) => s.loadStats);
+  const refreshGamification = useGamificationStore((s) => s.loadSummary);
+  const refreshChallenges = useRetosStore((s) => s.load);
+  const refreshHistory = useWorkoutHistoryStore((s) => s.load);
 
   const [weightInput, setWeightInput] = useState<number | null>(null);
   const [repsInput, setRepsInput] = useState<number | null>(null);
@@ -119,12 +128,37 @@ export default function WorkoutSessionScreen() {
     // (ver el useEffect de nextSetIndex más arriba) — no hace falta limpiarlo acá.
     setRpeInput(null);
     setRestingUntil(Date.now() + (workoutExercise?.rest_seconds ?? 90) * 1000);
+    useToastStore.getState().show('✓ Serie registrada', 'success');
+  };
+
+  const handleRestFinished = () => {
+    setRestingUntil(null);
+    useToastStore.getState().show('🔔 ¡Descanso terminado! Prepárate para la siguiente serie.');
   };
 
   const handleFeedback = async (completedAsPlanned: boolean) => {
     await submitFeedback(completedAsPlanned);
     // Recién acá el peso sugerido de la próxima sesión ya está calculado.
     refreshRoutine();
+    // La Home no se vuelve a montar al volver con router.replace('/') (el
+    // grupo (app) ya estaba en memoria) — sin este refresh explícito se
+    // vería la racha/XP/retos desactualizados hasta el próximo cold start.
+    // Es exactamente lo que ya hace el backend con AggregateDailyStatsAction
+    // y RecalculateChallengeProgressAction al completar la sesión: acá solo
+    // le pedimos al cliente que relea ese estado ya recalculado.
+    const streakBefore = useDashboardStore.getState().stats?.current_streak_days ?? 0;
+    await refreshStats();
+    const streakAfter = useDashboardStore.getState().stats?.current_streak_days ?? 0;
+    // >= 2 a propósito: el día 1 todavía no es "una racha" para el usuario,
+    // solo "entrenaste hoy" (que ya festeja esta misma pantalla) — avisar
+    // desde el día 2 evita un toast redundante en cada primer entrenamiento.
+    if (streakAfter > streakBefore && streakAfter >= 2) {
+      useToastStore.getState().show(`🔥 ¡Nueva racha de ${streakAfter} días!`, 'success');
+    }
+
+    refreshGamification();
+    refreshChallenges();
+    refreshHistory();
   };
 
   if (session.completed) {
@@ -139,6 +173,11 @@ export default function WorkoutSessionScreen() {
             <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
               ¿Pudiste completar el entrenamiento tal como estaba planeado?
             </ThemedText>
+            {error && (
+              <ThemedText type="small" style={styles.error}>
+                {error}
+              </ThemedText>
+            )}
             <ThemedView style={styles.feedbackRow}>
               <ThemedView style={styles.feedbackHalf}>
                 <PrimaryButton label="Sí" loading={isSubmitting} onPress={() => handleFeedback(true)} />
@@ -203,6 +242,16 @@ export default function WorkoutSessionScreen() {
               />
             ))}
           </ThemedView>
+
+          {session.readiness_adjusted && session.readiness_note && (
+            <ThemedView
+              style={[styles.readinessBanner, { backgroundColor: `${theme.warning}14`, borderColor: `${theme.warning}40` }]}>
+              <Icon icon={Info} size={16} color={theme.warning} />
+              <ThemedText type="small" style={styles.readinessText}>
+                {session.readiness_note}
+              </ThemedText>
+            </ThemedView>
+          )}
 
           <ThemedView
             style={[styles.heroCard, { backgroundColor: `${theme.accentSecondary}0F`, borderColor: `${theme.accentSecondary}30` }]}>
@@ -345,6 +394,7 @@ export default function WorkoutSessionScreen() {
             restingUntil={restingUntil}
             totalSeconds={workoutExercise?.rest_seconds ?? 90}
             onSkip={() => setRestingUntil(null)}
+            onFinish={handleRestFinished}
           />
         </ScrollView>
 
@@ -393,6 +443,15 @@ const styles = StyleSheet.create({
   eyebrow: { textTransform: 'uppercase', letterSpacing: 0.5 },
   progressBar: { flexDirection: 'row', gap: 6, backgroundColor: 'transparent' },
   progressSegment: { flex: 1, height: 6, borderRadius: 3 },
+  readinessBanner: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.two,
+    borderRadius: Spacing.three,
+    borderWidth: 1,
+    padding: Spacing.three,
+  },
+  readinessText: { flex: 1 },
   heroCard: { borderRadius: Spacing.four, borderWidth: 1, padding: Spacing.four, gap: Spacing.half },
   muscleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.one, backgroundColor: 'transparent' },
   exerciseName: { fontSize: 28, lineHeight: 34 },

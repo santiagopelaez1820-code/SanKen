@@ -1,5 +1,5 @@
 import type { PersonalRecordSummary } from './stats';
-import type { ProductCategory } from './store';
+import type { Order, OrderStatus, ProductCategory } from './store';
 import type { UserRole } from './user';
 
 export type CurrentRoutineSource = 'engine' | 'trainer' | 'admin';
@@ -140,12 +140,15 @@ export interface AdminRoutineTemplateDay {
 
 export type RoutineSplitType = 'full_body' | 'upper_lower' | 'push_pull_legs' | 'bro_split' | 'ppl_upper_lower';
 
-/** GET/POST/PATCH /admin/routine-templates — "rutina general" que el motor asigna automáticamente por sexo+frecuencia (ver TemplateRoutineGenerator). */
+export type RoutineTemplateLevel = 'beginner' | 'intermediate' | 'advanced';
+
+/** GET/POST/PATCH /admin/routine-templates — "rutina general" que el motor asigna automáticamente por sexo+frecuencia+nivel (ver TemplateRoutineGenerator). */
 export interface AdminRoutineTemplate {
   id: number;
   name: string | null;
   sex: 'male' | 'female';
   frequency_days: number;
+  level: RoutineTemplateLevel;
   split_type: RoutineSplitType;
   is_active: boolean;
   days: AdminRoutineTemplateDay[];
@@ -169,6 +172,7 @@ export interface RoutineTemplatePayload {
   name?: string | null;
   sex?: 'male' | 'female';
   frequency_days?: number;
+  level?: RoutineTemplateLevel;
   split_type?: RoutineSplitType;
   days?: RoutineTemplateDayPayload[];
 }
@@ -197,4 +201,26 @@ export interface ProductPayload {
   price?: number;
   active?: boolean;
   dropi_reference?: string | null;
+}
+
+/**
+ * GET/PATCH /admin/orders/{id} — igual que Order pero con lo que solo el
+ * superadmin puede ver: notas internas, el link de WhatsApp hacia el
+ * cliente, y el historial de cambios (reutiliza AuditLogEntry, mismo
+ * formato que /admin/audit-logs).
+ */
+export interface AdminOrder extends Omit<Order, 'support_whatsapp_url'> {
+  admin_notes: string | null;
+  /** Link wa.me hacia el cliente, con el mensaje según el estado actual ya armado — null si el pedido no tiene WhatsApp válido. */
+  whatsapp_url: string | null;
+  history: AuditLogEntry[];
+}
+
+/** Payload de PATCH /admin/orders/{id} — todos los campos son opcionales (edición parcial). */
+export interface OrderTrackingPayload {
+  status?: OrderStatus;
+  tracking_number?: string | null;
+  carrier?: string | null;
+  customer_message?: string | null;
+  admin_notes?: string | null;
 }

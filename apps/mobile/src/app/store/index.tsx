@@ -10,6 +10,7 @@ import { ProductCard } from '@/components/store/product-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -18,7 +19,7 @@ import { useProductStore } from '@/store/product-store';
 
 export default function StoreScreen() {
   const theme = useTheme();
-  const { products, isLoadingProducts, loadProducts } = useProductStore();
+  const { products, isLoadingProducts, productsError, loadProducts } = useProductStore();
   // La hidratación del carrito corre una sola vez en store/_layout.tsx
   // (compartido por todas las pantallas de /store), no acá.
   const itemCount = useCartStore((s) => s.getItemCount());
@@ -66,6 +67,12 @@ export default function StoreScreen() {
             <Skeleton height={140} borderRadius={Spacing.four} />
             <Skeleton height={220} borderRadius={Spacing.four} />
           </View>
+        ) : productsError && products.length === 0 ? (
+          // Antes un error de red acá caía en el ListEmptyComponent de la
+          // grilla ("No hay productos en esta categoría") — un mensaje
+          // engañoso que hacía parecer que la tienda estaba vacía en vez de
+          // avisar que la carga falló.
+          <ErrorState message={productsError} onRetry={loadProducts} />
         ) : (
           <FlatList
             data={filtered}

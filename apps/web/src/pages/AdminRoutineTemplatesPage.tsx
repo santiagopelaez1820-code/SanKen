@@ -1,6 +1,12 @@
 import { useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { AdminRoutineTemplate, ExerciseCatalogItem, RoutineSplitType, RoutineTemplatePayload } from "@sanken/core"
+import type {
+  AdminRoutineTemplate,
+  ExerciseCatalogItem,
+  RoutineSplitType,
+  RoutineTemplateLevel,
+  RoutineTemplatePayload,
+} from "@sanken/core"
 import { ApiError } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
@@ -24,6 +30,7 @@ interface TemplateFormState {
   name: string
   sex: "male" | "female"
   frequency_days: string
+  level: RoutineTemplateLevel
   split_type: RoutineSplitType
   days: DayFormRow[]
 }
@@ -42,11 +49,20 @@ const EMPTY_FORM: TemplateFormState = {
   name: "",
   sex: "male",
   frequency_days: "3",
+  level: "intermediate",
   split_type: "full_body",
   days: [{ ...EMPTY_DAY }],
 }
 
 const SPLIT_OPTIONS: RoutineSplitType[] = ["full_body", "upper_lower", "push_pull_legs", "bro_split", "ppl_upper_lower"]
+
+const LEVEL_OPTIONS: RoutineTemplateLevel[] = ["beginner", "intermediate", "advanced"]
+
+const LEVEL_LABELS: Record<RoutineTemplateLevel, string> = {
+  beginner: "Principiante",
+  intermediate: "Intermedio",
+  advanced: "Avanzado",
+}
 
 const selectClass = "rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
 const inputClass = "rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
@@ -56,6 +72,7 @@ function templateToForm(template: AdminRoutineTemplate): TemplateFormState {
     name: template.name ?? "",
     sex: template.sex,
     frequency_days: String(template.frequency_days),
+    level: template.level,
     split_type: template.split_type,
     days: template.days.map((day) => ({
       label: day.label,
@@ -75,6 +92,7 @@ function buildPayload(form: TemplateFormState): RoutineTemplatePayload {
     name: form.name.trim() || null,
     sex: form.sex,
     frequency_days: Number(form.frequency_days),
+    level: form.level,
     split_type: form.split_type,
     days: form.days.map((day, dayIndex) => ({
       day_order: dayIndex + 1,
@@ -223,7 +241,7 @@ export function AdminRoutineTemplatesPage() {
 
   const grouped = new Map<string, AdminRoutineTemplate[]>()
   for (const t of templates ?? []) {
-    const key = `${t.sex}-${t.frequency_days}`
+    const key = `${t.sex}-${t.frequency_days}-${t.level}`
     grouped.set(key, [...(grouped.get(key) ?? []), t])
   }
 
@@ -233,8 +251,8 @@ export function AdminRoutineTemplatesPage() {
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Rutinas generales</h1>
 
         <p className="text-sm text-muted-foreground">
-          Estas son las plantillas que el motor asigna automáticamente a cada usuario según su sexo y la frecuencia
-          de entrenamiento que eligió en el onboarding. Editar una plantilla no modifica el historial de
+          Estas son las plantillas que el motor asigna automáticamente a cada usuario según su sexo, la frecuencia
+          de entrenamiento y el nivel que eligió en el onboarding. Editar una plantilla no modifica el historial de
           entrenamientos ya realizados por nadie — solo afecta a quién reciba esta plantilla de ahora en adelante.
         </p>
 
@@ -266,9 +284,20 @@ export function AdminRoutineTemplatesPage() {
               className={inputClass}
             />
             <select
+              value={form.level}
+              onChange={(e) => setForm({ ...form, level: e.target.value as RoutineTemplateLevel })}
+              className={selectClass}
+            >
+              {LEVEL_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {LEVEL_LABELS[opt]}
+                </option>
+              ))}
+            </select>
+            <select
               value={form.split_type}
               onChange={(e) => setForm({ ...form, split_type: e.target.value as RoutineSplitType })}
-              className={`col-span-2 ${selectClass}`}
+              className={selectClass}
             >
               {SPLIT_OPTIONS.map((opt) => (
                 <option key={opt} value={opt}>
@@ -417,7 +446,8 @@ export function AdminRoutineTemplatesPage() {
             Array.from(grouped.entries()).map(([key, group]) => (
               <div key={key} className="mb-4 last:mb-0">
                 <p className="text-xs font-medium tracking-wide text-muted-foreground">
-                  {group[0].sex === "male" ? "Hombre" : "Mujer"} · {group[0].frequency_days} días
+                  {group[0].sex === "male" ? "Hombre" : "Mujer"} · {group[0].frequency_days} días ·{" "}
+                  {LEVEL_LABELS[group[0].level]}
                 </p>
                 <ul className="mt-1 divide-y divide-border">
                   {group.map((template) => (

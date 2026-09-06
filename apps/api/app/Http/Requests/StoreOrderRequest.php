@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\PhoneFormat;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -25,7 +26,11 @@ class StoreOrderRequest extends FormRequest
         return [
             'customer_name' => ['required', 'string', 'max:150'],
             'customer_email' => ['required', 'email', 'max:255'],
-            'customer_phone' => ['required', 'string', 'max:30'],
+            'customer_phone' => ['required', 'string', 'max:30', 'regex:'.PhoneFormat::REGEX],
+            // El checkbox "mi WhatsApp es el mismo que mi celular" es UX
+            // pura del cliente (mobile/web) — acá siempre se exige un valor
+            // explícito, ya resuelto por la app antes de enviar el request.
+            'customer_whatsapp' => ['required', 'string', 'max:30', 'regex:'.PhoneFormat::REGEX],
             'department' => ['required', 'string', 'max:150'],
             'city' => ['required', 'string', 'max:150'],
             'address' => ['required', 'string', 'max:255'],

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { WorkoutSession } from '@sanken/core';
 
 import { api } from '@/lib/api';
+import { useToastStore } from '@/store/toast-store';
 
 interface PageMeta {
   current_page: number;
@@ -28,12 +29,22 @@ export const useWorkoutHistoryStore = create<WorkoutHistoryStoreState>((set, get
   error: null,
 
   load: async () => {
+    const hadSessions = get().sessions.length > 0;
     set({ isLoading: true, error: null });
     try {
       const envelope = await api.getWithMeta<WorkoutSession[]>('/workout-sessions');
       set({ sessions: envelope.data, meta: (envelope.meta as unknown as PageMeta) ?? null, isLoading: false });
     } catch (err) {
-      set({ isLoading: false, error: err instanceof Error ? err.message : 'No se pudo cargar tu historial.' });
+      const message = err instanceof Error ? err.message : 'No se pudo cargar tu historial.';
+      // Si ya había sesiones cargadas, la pantalla de Historial no muestra el
+      // ErrorState (solo aparece cuando la lista está vacía) — sin este toast,
+      // una recarga fallida (por ejemplo el refreshHistory() al completar un
+      // entrenamiento) quedaba sin ningún aviso, mostrando la lista vieja
+      // como si la recarga hubiera funcionado.
+      if (hadSessions) {
+        useToastStore.getState().show(message);
+      }
+      set({ isLoading: false, error: message });
     }
   },
 

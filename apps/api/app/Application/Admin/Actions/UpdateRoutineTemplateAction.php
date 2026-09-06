@@ -26,7 +26,7 @@ class UpdateRoutineTemplateAction
     public function execute(RoutineTemplate $template, array $data): RoutineTemplate
     {
         return DB::transaction(function () use ($template, $data) {
-            $template->update(array_intersect_key($data, array_flip(['name', 'sex', 'frequency_days', 'split_type'])));
+            $template->update(array_intersect_key($data, array_flip(['name', 'sex', 'frequency_days', 'level', 'split_type'])));
 
             if (array_key_exists('days', $data)) {
                 $template->days()->delete();

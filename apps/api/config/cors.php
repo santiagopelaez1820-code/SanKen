@@ -32,7 +32,14 @@ return [
         'http://localhost:8081',
     ],
 
-    'allowed_origins_patterns' => [],
+    // Acceso desde la LAN (ver scripts/start-sanken.ps1 y AUTOSTART.md): la IP
+    // que asigna el router puede cambiar, así que en vez de hardcodear una IP
+    // se permite cualquier host de rango privado típico en los puertos que
+    // usan la web (5173) y la vista web de Expo (8081).
+    'allowed_origins_patterns' => [
+        '#^http://192\.168\.\d{1,3}\.\d{1,3}:(5173|8081)$#',
+        '#^http://10\.\d{1,3}\.\d{1,3}\.\d{1,3}:(5173|8081)$#',
+    ],
 
     'allowed_headers' => ['*'],
 

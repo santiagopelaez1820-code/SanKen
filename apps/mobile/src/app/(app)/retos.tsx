@@ -2,11 +2,14 @@ import { useEffect } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { Flame } from 'lucide-react-native';
+import { Flag, Flame } from 'lucide-react-native';
 import type { Challenge } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ChallengeCompleteCelebration } from '@/components/gamification/challenge-complete-celebration';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { CardShadow, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -192,7 +195,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
 }
 
 export default function RetosScreen() {
-  const { challenges, isLoading, error, load, closeLeaderboard } = useRetosStore();
+  const { challenges, isLoading, error, load, closeLeaderboard, justCompleted, dismissCelebration } = useRetosStore();
 
   useEffect(() => {
     load();
@@ -208,24 +211,23 @@ export default function RetosScreen() {
 
   return (
     <ThemedView style={styles.root}>
+      <ChallengeCompleteCelebration challenge={justCompleted} onDismiss={dismissCelebration} />
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
           <ThemedText type="title" style={styles.pageTitle}>
             Retos
           </ThemedText>
 
-          {error && (
-            <ThemedText type="small" style={styles.error}>
-              {error}
-            </ThemedText>
-          )}
+          {error && !isLoading && <ErrorState message={error} onRetry={load} />}
 
           {isLoading && <Skeleton height={140} borderRadius={Spacing.four} />}
 
-          {!isLoading && sorted.length === 0 && (
-            <ThemedText type="small" themeColor="textSecondary">
-              No hay retos activos en este momento.
-            </ThemedText>
+          {!isLoading && !error && sorted.length === 0 && (
+            <EmptyState
+              icon={Flag}
+              title="No hay retos activos en este momento"
+              description="Vuelve pronto — se generan nuevos retos cada semana y cada mes."
+            />
           )}
 
           {current && (
@@ -309,5 +311,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.one,
     borderRadius: Spacing.two,
   },
-  error: { color: '#FF4D5E' },
 });

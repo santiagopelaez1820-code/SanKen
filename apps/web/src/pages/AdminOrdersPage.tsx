@@ -1,41 +1,30 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
-import { formatCurrency, type Order, type OrderStatus } from "@sanken/core"
+import { formatCurrency, type AdminOrder } from "@sanken/core"
 import { api } from "@/lib/api"
+import { ORDER_STATUS_BADGE_VARIANT, ORDER_STATUS_LABELS } from "@/lib/order-status"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 
-export const STATUS_LABELS: Record<OrderStatus, string> = {
-  pending: "Pendiente",
-  confirmed: "Confirmado",
-  processing: "Procesando",
-  shipped: "Enviado",
-  delivered: "Entregado",
-  cancelled: "Cancelado",
-}
-
-export const STATUS_BADGE_VARIANT: Record<
-  OrderStatus,
-  "neutral" | "default" | "warning" | "accent2" | "success" | "error"
-> = {
-  pending: "neutral",
-  confirmed: "default",
-  processing: "warning",
-  shipped: "accent2",
-  delivered: "success",
-  cancelled: "error",
-}
-
-const STATUS_FILTERS = ["all", "pending", "confirmed", "processing", "shipped", "delivered", "cancelled"] as const
+const STATUS_FILTERS = [
+  "all",
+  "pending",
+  "confirming",
+  "processing",
+  "shipped",
+  "delivered",
+  "problem",
+  "cancelled",
+] as const
 
 export function AdminOrdersPage() {
   const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]>("all")
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["admin", "orders", status],
-    queryFn: () => api.get<Order[]>(`/admin/orders${status === "all" ? "" : `?status=${status}`}`),
+    queryFn: () => api.get<AdminOrder[]>(`/admin/orders${status === "all" ? "" : `?status=${status}`}`),
   })
 
   return (
@@ -51,7 +40,7 @@ export function AdminOrdersPage() {
               variant={status === option ? "default" : "outline"}
               onClick={() => setStatus(option)}
             >
-              {option === "all" ? "Todos" : STATUS_LABELS[option]}
+              {option === "all" ? "Todos" : ORDER_STATUS_LABELS[option]}
             </Button>
           ))}
         </div>
@@ -70,7 +59,7 @@ export function AdminOrdersPage() {
                     <span className="font-medium">
                       #{String(order.id).padStart(6, "0")} — {order.customer_name}
                     </span>
-                    <Badge variant={STATUS_BADGE_VARIANT[order.status]}>{STATUS_LABELS[order.status]}</Badge>
+                    <Badge variant={ORDER_STATUS_BADGE_VARIANT[order.status]}>{ORDER_STATUS_LABELS[order.status]}</Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">
                     {new Date(order.created_at).toLocaleDateString()} ·{" "}

@@ -117,6 +117,8 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     });
 
     Route::middleware('auth:sanctum')->prefix('orders')->name('orders.')->group(function () {
+        Route::get('/', [OrderController::class, 'index'])->name('index');
+        Route::get('/{order}', [OrderController::class, 'show'])->name('show');
         Route::post('/', [OrderController::class, 'store'])->middleware('throttle:writes')->name('store');
     });
 
@@ -251,6 +253,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::middleware(['auth:sanctum', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
         Route::get('/users/{user}', [AdminUserController::class, 'show'])->name('users.show');
+        Route::patch('/users/{user}', [AdminUserController::class, 'update'])->middleware('throttle:writes')->name('users.update');
         Route::patch('/users/{user}/ban', [AdminUserController::class, 'ban'])->middleware('throttle:writes')->name('users.ban');
         Route::patch('/users/{user}/verify-trainer', [AdminUserController::class, 'verifyTrainer'])->middleware('throttle:writes')->name('users.verify-trainer');
         Route::patch('/users/{user}/role', [AdminUserController::class, 'changeRole'])->middleware('throttle:writes')->name('users.role');
@@ -315,7 +318,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::prefix('orders')->name('orders.')->group(function () {
             Route::get('/', [AdminOrderController::class, 'index'])->name('index');
             Route::get('/{order}', [AdminOrderController::class, 'show'])->name('show');
-            Route::patch('/{order}/status', [AdminOrderController::class, 'updateStatus'])->middleware('throttle:writes')->name('status.update');
+            Route::patch('/{order}', [AdminOrderController::class, 'update'])->middleware('throttle:writes')->name('update');
         });
 
         Route::get('/stats', [AdminStatsController::class, 'index'])->name('stats');

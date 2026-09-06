@@ -68,6 +68,12 @@ export default function LoginScreen() {
                 autoComplete="password"
               />
 
+              <Link href="/forgot-password" style={styles.forgotPasswordLink}>
+                <ThemedText type="small" themeColor="textSecondary">
+                  ¿Olvidaste tu <ThemedText type="linkPrimary">contraseña</ThemedText>?
+                </ThemedText>
+              </Link>
+
               {error && (
                 <ThemedText type="small" style={styles.error}>
                   {error}
@@ -124,6 +130,7 @@ const styles = StyleSheet.create({
   },
   error: { color: '#FF4D5E' },
   footerLink: { marginTop: Spacing.two },
+  forgotPasswordLink: { alignSelf: 'flex-end' },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',

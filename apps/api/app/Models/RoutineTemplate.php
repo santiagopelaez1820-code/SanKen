@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RoutineTemplate extends Model
 {
-    protected $fillable = ['name', 'sex', 'frequency_days', 'split_type', 'is_active'];
+    protected $fillable = ['name', 'sex', 'frequency_days', 'level', 'split_type', 'is_active'];
 
     protected function casts(): array
     {

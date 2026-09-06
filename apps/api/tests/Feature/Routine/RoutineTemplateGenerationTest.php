@@ -25,11 +25,11 @@ class RoutineTemplateGenerationTest extends TestCase
         $this->seed(RoutineTemplateSeeder::class);
     }
 
-    private function completeOnboardingFor(User $user, string $sex, int $frequencyDays): void
+    private function completeOnboardingFor(User $user, string $sex, int $frequencyDays, string $level = 'intermediate'): void
     {
         $user->profile()->create(['age' => 28, 'sex' => $sex, 'height_cm' => 175, 'weight_kg' => 75]);
         $user->onboardingResponse()->create([
-            'level' => 'intermediate', 'goals' => ['gain_muscle'], 'frequency_days' => $frequencyDays,
+            'level' => $level, 'goals' => ['gain_muscle'], 'frequency_days' => $frequencyDays,
             'completed' => true, 'completed_at' => now(),
         ]);
     }
@@ -46,6 +46,26 @@ class RoutineTemplateGenerationTest extends TestCase
             'female 5 days' => ['female', 5],
             'female 6 days' => ['female', 6],
         ];
+    }
+
+    /**
+     * Las 24 plantillas reales (sexo x frecuencia x nivel) — a diferencia de
+     * sexFrequencyCombos() (que fija level=intermediate), este provider
+     * habria detectado si RoutineTemplateBeginnerSeeder o
+     * RoutineTemplateAdvancedSeeder hubieran quedado incompletos.
+     */
+    public static function sexFrequencyLevelCombos(): array
+    {
+        $combos = [];
+        foreach (['male', 'female'] as $sex) {
+            foreach ([3, 4, 5, 6] as $frequencyDays) {
+                foreach (['beginner', 'intermediate', 'advanced'] as $level) {
+                    $combos["{$sex} {$frequencyDays} days {$level}"] = [$sex, $frequencyDays, $level];
+                }
+            }
+        }
+
+        return $combos;
     }
 
     /** @dataProvider sexFrequencyCombos */
@@ -73,6 +93,40 @@ class RoutineTemplateGenerationTest extends TestCase
                 $this->assertNotEmpty($exercise['exercise']['name']);
             }
         }
+    }
+
+    /** @dataProvider sexFrequencyLevelCombos */
+    public function test_generates_a_routine_for_every_sex_frequency_and_level_combination(string $sex, int $frequencyDays, string $level): void
+    {
+        $this->seedCatalog();
+        $user = User::factory()->create();
+        $this->completeOnboardingFor($user, $sex, $frequencyDays, $level);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/routines/generate');
+
+        $response->assertCreated()
+            ->assertJsonPath('data.source', 'engine')
+            ->assertJsonCount($frequencyDays, 'data.days');
+    }
+
+    public function test_beginner_and_advanced_templates_use_different_exercises_for_the_same_sex_and_frequency(): void
+    {
+        $this->seedCatalog();
+
+        $beginner = User::factory()->create();
+        $this->completeOnboardingFor($beginner, 'male', 3, 'beginner');
+        $beginnerRoutine = $this->actingAs($beginner, 'sanctum')->postJson('/api/v1/routines/generate')->json('data');
+
+        $advanced = User::factory()->create();
+        $this->completeOnboardingFor($advanced, 'male', 3, 'advanced');
+        $advancedRoutine = $this->actingAs($advanced, 'sanctum')->postJson('/api/v1/routines/generate')->json('data');
+
+        $beginnerExerciseIds = collect($beginnerRoutine['days'])
+            ->flatMap(fn ($day) => collect($day['exercises'])->pluck('exercise.id'));
+        $advancedExerciseIds = collect($advancedRoutine['days'])
+            ->flatMap(fn ($day) => collect($day['exercises'])->pluck('exercise.id'));
+
+        $this->assertNotSame($beginnerExerciseIds->sort()->values()->all(), $advancedExerciseIds->sort()->values()->all());
     }
 
     public function test_generation_is_fast_and_does_not_require_a_queue_worker(): void

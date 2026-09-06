@@ -27,6 +27,8 @@ class WorkoutSessionResource extends JsonResource
             'sleep_quality' => $this->sleep_quality,
             'energy_level' => $this->energy_level,
             'muscle_soreness' => $this->muscle_soreness,
+            'readiness_adjusted' => $this->readiness_adjusted,
+            'readiness_note' => $this->readiness_note,
             'notes' => $this->notes,
             'exercises' => WorkoutExerciseResource::collection($this->whenLoaded('exercises')),
         ];

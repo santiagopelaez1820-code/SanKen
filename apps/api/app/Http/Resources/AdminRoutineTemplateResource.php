@@ -19,6 +19,7 @@ class AdminRoutineTemplateResource extends JsonResource
             'name' => $this->name,
             'sex' => $this->sex,
             'frequency_days' => $this->frequency_days,
+            'level' => $this->level,
             'split_type' => $this->split_type,
             'is_active' => $this->is_active,
             'days' => AdminRoutineTemplateDayResource::collection($this->whenLoaded('days')),

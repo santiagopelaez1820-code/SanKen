@@ -323,6 +323,26 @@ body {
   }
 }
 
+/**
+ * Barra pegada al fondo del viewport mientras se hace scroll (ej. resumen
+ * del carrito) — así el subtotal y el botón de continuar siempre quedan a
+ * la vista sin importar cuántos productos haya en la lista de arriba.
+ * `bottom` deja espacio para el BottomNav fijo (64px + margen) en mobile;
+ * en desktop (lg+) el BottomNav no existe (d-lg-none), así que pega abajo
+ * del todo con un margen chico. Necesita fondo sólido explícito: al ser
+ * sticky, el contenido de la lista sigue haciendo scroll por debajo.
+ */
+.sank-sticky-bottom-bar {
+  position: sticky;
+  bottom: 76px;
+  z-index: 10;
+  background: var(--sanken-black-2);
+
+  @include media-breakpoint-up(lg) {
+    bottom: 16px;
+  }
+}
+
 // Scrollbar horizontal fina para carruseles/listas nativas en móvil.
 .sank-scroll-x {
   display: flex;

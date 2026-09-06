@@ -10,6 +10,15 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { useCartStore } from '@/store/cart-store';
+import { useToastStore } from '@/store/toast-store';
+
+const NEW_PRODUCT_WINDOW_DAYS = 14;
+
+/** "Nuevo" solo mientras el producto sea reciente de verdad — se deriva de `created_at`, nunca de un flag manual. */
+export function isNewProduct(createdAt: string): boolean {
+  const ageMs = Date.now() - new Date(createdAt).getTime();
+  return ageMs >= 0 && ageMs <= NEW_PRODUCT_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+}
 
 interface ProductCardProps {
   product: Product;
@@ -29,6 +38,13 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
             <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" transition={150} />
           ) : (
             <ShoppingBag size={28} color={theme.textSecondary} />
+          )}
+          {isNewProduct(product.created_at) && (
+            <ThemedView style={[styles.newBadge, { backgroundColor: theme.accent }]}>
+              <ThemedText type="small" style={styles.newBadgeText}>
+                🆕 Nuevo
+              </ThemedText>
+            </ThemedView>
           )}
         </View>
 
@@ -50,6 +66,7 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
           onPress={(e) => {
             e.stopPropagation();
             addItem(product, 1);
+            useToastStore.getState().show(`✓ ${product.name} agregado`, 'success');
           }}
         />
       </ThemedView>
@@ -71,6 +88,15 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.one,
   },
   image: { width: '100%', height: '100%' },
+  newBadge: {
+    position: 'absolute',
+    top: Spacing.one,
+    left: Spacing.one,
+    borderRadius: Spacing.two,
+    paddingHorizontal: Spacing.one,
+    paddingVertical: 2,
+  },
+  newBadgeText: { color: '#050505', fontWeight: '700', fontSize: 10 },
   description: { minHeight: 34 },
   price: { marginTop: Spacing.one },
   addButton: { paddingVertical: Spacing.two, marginTop: Spacing.one },

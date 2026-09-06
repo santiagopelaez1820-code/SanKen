@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Camera, LogOut, Settings } from 'lucide-react-native';
+import { Camera, LogOut, Package, Settings } from 'lucide-react-native';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -97,9 +97,9 @@ export default function ProfileScreen() {
             <ThemedView type="backgroundElement" style={styles.statsCard}>
               <StatCell value={stats?.current_streak_days ?? 0} label="Racha" />
               <View style={[styles.divider, { backgroundColor: theme.border }]} />
-              <StatCell value={stats?.total_sets ?? 0} label="Series" />
+              <StatCell value={stats?.total_workouts ?? 0} label="Entrenamientos" />
               <View style={[styles.divider, { backgroundColor: theme.border }]} />
-              <StatCell value={`${stats?.total_hours ?? 0}h`} label="Horas" />
+              <StatCell value={stats?.completed_challenges ?? 0} label="Retos" />
             </ThemedView>
           </Animated.View>
 
@@ -118,6 +118,14 @@ export default function ProfileScreen() {
           )}
 
           <Animated.View entering={FadeInUp.delay(220).duration(320)} style={styles.actions}>
+            <Pressable
+              onPress={() => router.push('/pedidos')}
+              style={[styles.actionRow, { backgroundColor: theme.backgroundElement }]}>
+              <Icon icon={Package} size={18} color={theme.text} />
+              <ThemedText type="default" style={styles.actionLabel}>
+                Mis pedidos
+              </ThemedText>
+            </Pressable>
             <Pressable
               onPress={() => router.push('/settings')}
               style={[styles.actionRow, { backgroundColor: theme.backgroundElement }]}>

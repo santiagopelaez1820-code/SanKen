@@ -3,7 +3,7 @@ import type { Challenge, ChallengeLeaderboardResponse } from '@sanken/core';
 
 import { api } from '@/lib/api';
 import { getEcho } from '@/lib/echo';
-import { useRetosStore } from './retos-store';
+import { findNearestChallenge, useRetosStore } from './retos-store';
 
 jest.mock('@/lib/api', () => ({
   api: { get: jest.fn(), post: jest.fn() },
@@ -31,7 +31,14 @@ const challenge: Challenge = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  useRetosStore.setState({ challenges: [], isLoading: false, error: null, activeChallengeId: null, leaderboard: null });
+  useRetosStore.setState({
+    challenges: [],
+    isLoading: false,
+    error: null,
+    activeChallengeId: null,
+    leaderboard: null,
+    justCompleted: null,
+  });
 });
 
 describe('load', () => {
@@ -51,6 +58,68 @@ describe('load', () => {
     await useRetosStore.getState().load();
 
     expect(useRetosStore.getState().error).toBe('network down');
+  });
+});
+
+describe('load — celebración de reto completado', () => {
+  it('no marca justCompleted en el primer load, aunque el reto ya venga completado', async () => {
+    mockedApi.get.mockResolvedValueOnce([{ ...challenge, joined: true, completed: true, progress_value: 5 }]);
+
+    await useRetosStore.getState().load();
+
+    expect(useRetosStore.getState().justCompleted).toBeNull();
+  });
+
+  it('marca justCompleted cuando un reto pasa de no completado a completado entre dos loads', async () => {
+    mockedApi.get.mockResolvedValueOnce([{ ...challenge, joined: true, completed: false, progress_value: 4 }]);
+    await useRetosStore.getState().load();
+
+    const completed = { ...challenge, joined: true, completed: true, progress_value: 5 };
+    mockedApi.get.mockResolvedValueOnce([completed]);
+    await useRetosStore.getState().load();
+
+    expect(useRetosStore.getState().justCompleted).toEqual(completed);
+  });
+
+  it('no marca justCompleted si ningún reto cambió de estado', async () => {
+    const inProgress = { ...challenge, joined: true, completed: false, progress_value: 3 };
+    mockedApi.get.mockResolvedValueOnce([inProgress]);
+    await useRetosStore.getState().load();
+
+    mockedApi.get.mockResolvedValueOnce([{ ...inProgress, progress_value: 4 }]);
+    await useRetosStore.getState().load();
+
+    expect(useRetosStore.getState().justCompleted).toBeNull();
+  });
+
+  it('dismissCelebration limpia justCompleted', async () => {
+    useRetosStore.setState({ justCompleted: { ...challenge, completed: true } });
+
+    useRetosStore.getState().dismissCelebration();
+
+    expect(useRetosStore.getState().justCompleted).toBeNull();
+  });
+});
+
+describe('findNearestChallenge', () => {
+  it('devuelve el reto unido, no completado, al que le falta exactamente 1 unidad', () => {
+    const near = { ...challenge, joined: true, completed: false, progress_value: 4, criteria: { metric: 'workouts_count' as const, target: 5 } };
+    const far = { ...challenge, id: 2, joined: true, completed: false, progress_value: 1, criteria: { metric: 'workouts_count' as const, target: 5 } };
+
+    expect(findNearestChallenge([far, near])).toEqual(near);
+  });
+
+  it('devuelve null si ninguno está a 1 unidad de completarse', () => {
+    const far = { ...challenge, joined: true, completed: false, progress_value: 1 };
+
+    expect(findNearestChallenge([far])).toBeNull();
+  });
+
+  it('ignora retos no unidos o ya completados', () => {
+    const notJoined = { ...challenge, joined: false, completed: false, progress_value: 4 };
+    const alreadyDone = { ...challenge, id: 2, joined: true, completed: true, progress_value: 5 };
+
+    expect(findNearestChallenge([notJoined, alreadyDone])).toBeNull();
   });
 });
 

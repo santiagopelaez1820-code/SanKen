@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Stats;
 
+use App\Models\Challenge;
+use App\Models\ChallengeParticipant;
 use App\Models\Exercise;
 use App\Models\Routine;
 use App\Models\RoutineDay;
@@ -59,6 +61,8 @@ class DashboardTest extends TestCase
                 'total_sets' => 0,
                 'total_volume_kg' => 0,
                 'current_streak_days' => 0,
+                'total_workouts' => 0,
+                'completed_challenges' => 0,
                 'recent_personal_records' => [],
             ],
         ]);
@@ -109,6 +113,39 @@ class DashboardTest extends TestCase
         $this->assertDatabaseCount('user_stats_daily', 1);
         $response = $client->getJson('/api/v1/stats/dashboard');
         $response->assertJsonPath('data.total_sets', 1);
+    }
+
+    public function test_dashboard_counts_lifetime_completed_workouts_and_challenges(): void
+    {
+        $user = User::factory()->create();
+        [$day] = $this->makeRoutineDayWithOneExercise($user);
+        $client = $this->actingAs($user, 'sanctum');
+
+        // Dos sesiones completadas el mismo día -- total_workouts cuenta
+        // sesiones, no fechas únicas (a diferencia de current_streak_days,
+        // que en este caso seguiría dando 1).
+        $session1 = $client->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
+        $client->postJson("/api/v1/workout-sessions/{$session1['id']}/complete", [])->assertOk();
+        $session2 = $client->postJson('/api/v1/workout-sessions', [])->json('data');
+        $client->postJson("/api/v1/workout-sessions/{$session2['id']}/complete", [])->assertOk();
+
+        // Reto de una semana pasada, ya fuera del rango que devuelve
+        // GET /challenges -- por eso completed_challenges necesita su propio
+        // conteo en vez de derivarse de esa lista.
+        $challenge = Challenge::query()->create([
+            'code' => 'weekly_test', 'title' => 'Reto de prueba', 'description' => 'Test',
+            'type' => 'weekly', 'criteria' => ['metric' => 'workouts_count', 'target' => 1],
+            'starts_at' => now()->subWeek()->toDateString(), 'ends_at' => now()->subWeek()->toDateString(),
+        ]);
+        ChallengeParticipant::query()->create([
+            'challenge_id' => $challenge->id, 'user_id' => $user->id, 'progress_value' => 1, 'completed' => true,
+        ]);
+
+        $response = $client->getJson('/api/v1/stats/dashboard');
+
+        $response->assertOk();
+        $response->assertJsonPath('data.total_workouts', 2);
+        $response->assertJsonPath('data.completed_challenges', 1);
     }
 
     public function test_dashboard_only_reflects_the_authenticated_users_data(): void

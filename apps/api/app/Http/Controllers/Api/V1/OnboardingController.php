@@ -13,6 +13,7 @@ use App\Models\RoutineTemplate;
 use App\Models\State;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use RuntimeException;
 
 class OnboardingController extends Controller
 {
@@ -135,7 +136,17 @@ class OnboardingController extends Controller
 
     public function complete(Request $request, CompleteOnboardingAction $action): JsonResponse
     {
-        $user = $action->execute($request->user());
+        // RuntimeException = TemplateRoutineGenerator no encontro plantilla
+        // para la combinacion sexo+frecuencia+nivel del usuario (ver el
+        // comentario en CompleteOnboardingAction) — mismo idioma que
+        // NutritionPlanController::store() para el mismo tipo de falla.
+        try {
+            $user = $action->execute($request->user());
+        } catch (RuntimeException) {
+            return response()->json([
+                'message' => 'No hay una rutina disponible todavía para tu combinación de sexo, frecuencia y nivel. Contactá soporte.',
+            ], 422);
+        }
 
         return response()->json([
             'data' => new OnboardingResource($user),

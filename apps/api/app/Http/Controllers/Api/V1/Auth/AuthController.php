@@ -173,8 +173,17 @@ class AuthController extends Controller
         );
 
         if ($status !== Password::PASSWORD_RESET) {
+            // No hay archivos de idioma en esta app (todo el resto de mensajes
+            // vive directo en español en el código) — __($status) devolvería
+            // el string en inglés de Laravel, el único lugar que rompería
+            // ese criterio. Se mapea a mano en su lugar.
             throw ValidationException::withMessages([
-                'email' => [__($status)],
+                'email' => [match ($status) {
+                    Password::INVALID_TOKEN => 'Este enlace de recuperación no es válido o ya expiró.',
+                    Password::INVALID_USER => 'No existe una cuenta con ese correo.',
+                    Password::RESET_THROTTLED => 'Espera un momento antes de volver a intentarlo.',
+                    default => 'No se pudo restablecer la contraseña.',
+                }],
             ]);
         }
 

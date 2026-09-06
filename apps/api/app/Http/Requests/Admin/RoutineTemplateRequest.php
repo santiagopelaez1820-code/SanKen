@@ -13,7 +13,7 @@ use Illuminate\Validation\Rule;
  * No valida `is_active` a propósito: esa columna solo la cambian los
  * endpoints dedicados activate()/deactivate(), nunca este formulario
  * genérico — así la garantía de "una sola plantilla activa por
- * sexo+frecuencia" vive en un solo lugar.
+ * sexo+frecuencia+nivel" vive en un solo lugar.
  */
 class RoutineTemplateRequest extends FormRequest
 {
@@ -33,6 +33,7 @@ class RoutineTemplateRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:150'],
             'sex' => [$sometimesOnUpdate, 'string', Rule::in(['male', 'female'])],
             'frequency_days' => [$sometimesOnUpdate, 'integer', 'min:1', 'max:7'],
+            'level' => [$sometimesOnUpdate, 'string', Rule::in(['beginner', 'intermediate', 'advanced'])],
             'split_type' => [
                 $sometimesOnUpdate, 'string',
                 Rule::in(['full_body', 'upper_lower', 'push_pull_legs', 'bro_split', 'ppl_upper_lower']),

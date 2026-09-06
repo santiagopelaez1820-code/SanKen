@@ -9,6 +9,8 @@ import {
   buildTemplatePayload,
   EMPTY_TEMPLATE_DAY,
   EMPTY_TEMPLATE_EXERCISE,
+  LEVEL_LABELS,
+  LEVEL_OPTIONS,
   SPLIT_OPTIONS,
   templateToDays,
   type TemplateDayFormValues,
@@ -25,7 +27,13 @@ import { useAdminStore } from '@/store/admin-store';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const EMPTY_FORM = { name: '', sex: 'male' as 'male' | 'female', frequencyDays: '3', splitType: 'full_body' as const };
+const EMPTY_FORM = {
+  name: '',
+  sex: 'male' as 'male' | 'female',
+  frequencyDays: '3',
+  level: 'intermediate' as const,
+  splitType: 'full_body' as const,
+};
 
 interface PickerSlot {
   dayIndex: number;
@@ -73,6 +81,7 @@ export default function AdminRutinasScreen() {
       name: template.name ?? '',
       sex: template.sex,
       frequencyDays: String(template.frequency_days),
+      level: template.level as 'intermediate',
       splitType: template.split_type as 'full_body',
     });
     setDays(templateToDays(template));
@@ -130,7 +139,7 @@ export default function AdminRutinasScreen() {
   }
 
   async function handleSave() {
-    const payload = buildTemplatePayload(form.name, form.sex, form.frequencyDays, form.splitType, days);
+    const payload = buildTemplatePayload(form.name, form.sex, form.frequencyDays, form.level, form.splitType, days);
     if (!payload) {
       setFormError('Cada día necesita un nombre y al menos un ejercicio elegido.');
       return;
@@ -176,8 +185,8 @@ export default function AdminRutinasScreen() {
             Rutinas generales
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
-            Plantillas que el motor asigna automáticamente según sexo y frecuencia elegida en el onboarding. Editar
-            una no toca el historial de entrenamientos ya hechos por nadie.
+            Plantillas que el motor asigna automáticamente según sexo, frecuencia y nivel elegidos en el onboarding.
+            Editar una no toca el historial de entrenamientos ya hechos por nadie.
           </ThemedText>
 
           <ThemedView type="backgroundElement" style={styles.card}>
@@ -210,6 +219,21 @@ export default function AdminRutinasScreen() {
               onChangeText={(frequencyDays) => setForm({ ...form, frequencyDays })}
               keyboardType="number-pad"
             />
+
+            <ThemedText type="small" themeColor="textSecondary">
+              Nivel
+            </ThemedText>
+            <ThemedView style={styles.optionRow}>
+              {LEVEL_OPTIONS.map((opt) => (
+                <ThemedView key={opt.value} style={{ flex: 1, backgroundColor: 'transparent' }}>
+                  <OptionCard
+                    label={opt.label}
+                    selected={form.level === opt.value}
+                    onPress={() => setForm({ ...form, level: opt.value as 'intermediate' })}
+                  />
+                </ThemedView>
+              ))}
+            </ThemedView>
 
             <ThemedText type="small" themeColor="textSecondary">
               Split
@@ -271,7 +295,7 @@ export default function AdminRutinasScreen() {
               <Pressable onPress={() => startEdit(template)}>
                 <ThemedText type="small">
                   {template.name ?? `Plantilla #${template.id}`} · {template.sex === 'male' ? 'Hombre' : 'Mujer'} ·{' '}
-                  {template.frequency_days} días
+                  {template.frequency_days} días · {LEVEL_LABELS[template.level]}
                 </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {template.is_active ? '● Activa' : '○ Inactiva'}

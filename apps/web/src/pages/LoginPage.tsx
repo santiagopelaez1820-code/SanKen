@@ -106,6 +106,14 @@ export function LoginPage() {
           <Form.Control.Feedback type="invalid">{errors.password?.message}</Form.Control.Feedback>
         </Form.Group>
 
+        <Link
+          to="/forgot-password"
+          className="small align-self-end"
+          style={{ color: "var(--sanken-cyan-light)", marginTop: "-0.5rem" }}
+        >
+          ¿Olvidaste tu contraseña?
+        </Link>
+
         {serverError && (
           <Alert variant="danger" className="py-2 small mb-0">
             {serverError}

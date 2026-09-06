@@ -32,13 +32,14 @@ final class TemplateRoutineGenerator implements RoutineGeneratorInterface
         $template = RoutineTemplate::query()
             ->where('sex', $profile->sex)
             ->where('frequency_days', $profile->frequencyDays)
+            ->where('level', $profile->level)
             ->where('is_active', true)
             ->with(['days.exercises.exercise.primaryMuscle'])
             ->first();
 
         if (! $template) {
             throw new RuntimeException(
-                "No hay plantilla de rutina para sexo=[{$profile->sex}] frecuencia=[{$profile->frequencyDays}]."
+                "No hay plantilla de rutina para sexo=[{$profile->sex}] frecuencia=[{$profile->frequencyDays}] nivel=[{$profile->level}]."
             );
         }
 
