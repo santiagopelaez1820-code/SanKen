@@ -20,7 +20,6 @@ class WorkoutSession extends Model
         'sleep_quality',
         'energy_level',
         'muscle_soreness',
-        'readiness_adjusted',
         'readiness_note',
         'notes',
     ];
@@ -31,10 +30,15 @@ class WorkoutSession extends Model
             'performed_at' => 'date',
             'completed' => 'boolean',
             'completed_as_planned' => 'boolean',
-            'readiness_adjusted' => 'boolean',
             'skipped_at' => 'datetime',
             'cancelled_at' => 'datetime',
         ];
+    }
+
+    /** Derivado de readiness_note en vez de una columna aparte — ver la migration que agrega readiness_note. */
+    public function getReadinessAdjustedAttribute(): bool
+    {
+        return $this->readiness_note !== null;
     }
 
     public function user(): BelongsTo

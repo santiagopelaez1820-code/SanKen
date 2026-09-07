@@ -22,78 +22,7 @@ class RoutineTemplateBeginnerSeeder extends Seeder
     public function run(): void
     {
         $this->loadExerciseIds();
-
-        $pushA = $this->pushA();
-        $pullA = $this->pullA();
-        $legsMaleA = $this->legsMaleA();
-        $legsFemaleA = $this->legsFemaleA();
-        $upperMaleA = $this->upperMaleA();
-        $lowerMaleA = $this->lowerMaleA();
-        $upperMaleB = $this->upperMaleB();
-        $lowerMaleB = $this->lowerMaleB();
-        $lowerFemaleA = $this->lowerFemaleA();
-        $upperFemaleA = $this->upperFemaleA();
-        $lowerFemaleB = $this->lowerFemaleB();
-
-        // -------- 3 días (push_pull_legs) --------
-        $this->makeTemplate('male', 3, self::LEVEL, 'push_pull_legs', [
-            ['Empuje', $pushA],
-            ['Tirón', $pullA],
-            ['Pierna', $legsMaleA],
-        ]);
-        $this->makeTemplate('female', 3, self::LEVEL, 'push_pull_legs', [
-            ['Empuje', $pushA],
-            ['Tirón', $pullA],
-            ['Pierna', $legsFemaleA],
-        ]);
-
-        // -------- 4 días (upper_lower) --------
-        $this->makeTemplate('male', 4, self::LEVEL, 'upper_lower', [
-            ['Tren Superior A', $upperMaleA],
-            ['Tren Inferior A', $lowerMaleA],
-            ['Tren Superior B', $upperMaleB],
-            ['Tren Inferior B', $lowerMaleB],
-        ]);
-        $this->makeTemplate('female', 4, self::LEVEL, 'upper_lower', [
-            ['Tren Inferior A', $lowerFemaleA],
-            ['Tren Superior', $upperFemaleA],
-            ['Tren Inferior B', $lowerFemaleB],
-            ['Tren Superior', $upperMaleB],
-        ]);
-
-        // -------- 5 días (híbrido PPL + Upper/Lower) --------
-        $this->makeTemplate('male', 5, self::LEVEL, 'ppl_upper_lower', [
-            ['Empuje', $pushA],
-            ['Tirón', $pullA],
-            ['Pierna', $legsMaleA],
-            ['Tren Superior', $upperMaleA],
-            ['Tren Inferior', $lowerMaleA],
-        ]);
-        $this->makeTemplate('female', 5, self::LEVEL, 'ppl_upper_lower', [
-            ['Tren Inferior', $legsFemaleA],
-            ['Tren Superior', $upperFemaleA],
-            ['Tren Inferior', $lowerFemaleB],
-            ['Tren Superior', $upperMaleB],
-            ['Tren Inferior', $legsFemaleA],
-        ]);
-
-        // -------- 6 días (PPL x2) --------
-        $this->makeTemplate('male', 6, self::LEVEL, 'push_pull_legs', [
-            ['Empuje A', $pushA],
-            ['Tirón A', $pullA],
-            ['Pierna A', $legsMaleA],
-            ['Empuje B', $this->swap($pushA)],
-            ['Tirón B', $this->swap($pullA)],
-            ['Pierna B', $this->swap($legsMaleA)],
-        ]);
-        $this->makeTemplate('female', 6, self::LEVEL, 'push_pull_legs', [
-            ['Empuje A', $pushA],
-            ['Tirón A', $pullA],
-            ['Pierna A', $legsFemaleA],
-            ['Empuje B', $this->swap($pushA)],
-            ['Tirón B', $this->swap($pullA)],
-            ['Pierna B', $lowerFemaleB],
-        ]);
+        $this->seedAllCombos(self::LEVEL);
     }
 
     // ---- Bloques de día ----

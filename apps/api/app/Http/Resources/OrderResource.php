@@ -23,6 +23,22 @@ class OrderResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            ...$this->baseFields(),
+            'support_whatsapp_url' => app(OrderWhatsAppMessageBuilder::class)->buildSupportUrl($this->resource),
+        ];
+    }
+
+    /**
+     * Campos comunes a esta vista y a AdminOrderResource (que extiende esta
+     * clase) — antes cada una repetía el mismo mapeo de ~18 campos por
+     * separado, con el riesgo de que un campo nuevo se agregara en una vista
+     * y se olvidara en la otra.
+     *
+     * @return array<string, mixed>
+     */
+    protected function baseFields(): array
+    {
+        return [
             'id' => $this->id,
             'user_id' => $this->user_id,
             'status' => $this->status,
@@ -43,7 +59,6 @@ class OrderResource extends JsonResource
             'items' => OrderItemResource::collection($this->whenLoaded('items')),
             'created_at' => $this->created_at->toIso8601String(),
             'updated_at' => $this->updated_at->toIso8601String(),
-            'support_whatsapp_url' => app(OrderWhatsAppMessageBuilder::class)->buildSupportUrl($this->resource),
         ];
     }
 }

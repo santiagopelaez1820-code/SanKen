@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Domain\Order\Services\OrderWhatsAppMessageBuilder;
 use App\Domain\Routine\Contracts\RoutineGeneratorInterface;
 use App\Domain\Routine\TemplateRoutineGenerator;
 use App\Events\OnboardingCompleted;
@@ -38,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
         // Domain/Routine/RoutineGenerator.php) queda intacto y con tests
         // propios pasando, pero ya no esta bindeado a la interfaz.
         $this->app->bind(RoutineGeneratorInterface::class, TemplateRoutineGenerator::class);
+
+        // Sin estado propio (solo arma strings a partir del Order que recibe
+        // cada llamada) — singleton para no reinstanciarlo por cada fila de
+        // OrderResource/AdminOrderResource al listar pedidos.
+        $this->app->singleton(OrderWhatsAppMessageBuilder::class);
     }
 
     /**

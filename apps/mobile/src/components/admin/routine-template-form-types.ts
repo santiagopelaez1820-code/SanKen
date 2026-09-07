@@ -1,8 +1,10 @@
-import type {
-  AdminRoutineTemplate,
-  RoutineSplitType,
-  RoutineTemplateLevel,
-  RoutineTemplatePayload,
+import {
+  ROUTINE_TEMPLATE_LEVEL_LABELS,
+  ROUTINE_TEMPLATE_LEVELS,
+  type AdminRoutineTemplate,
+  type RoutineSplitType,
+  type RoutineTemplateLevel,
+  type RoutineTemplatePayload,
 } from '@sanken/core';
 
 export interface TemplateExerciseFormValues {
@@ -41,17 +43,14 @@ export const SPLIT_OPTIONS: { value: RoutineSplitType; label: string }[] = [
   { value: 'ppl_upper_lower', label: 'PPL + Upper/Lower' },
 ];
 
-export const LEVEL_OPTIONS: { value: RoutineTemplateLevel; label: string }[] = [
-  { value: 'beginner', label: 'Principiante' },
-  { value: 'intermediate', label: 'Intermedio' },
-  { value: 'advanced', label: 'Avanzado' },
-];
+// Nivel: única fuente en @sanken/core (ver ROUTINE_TEMPLATE_LEVEL_LABELS) —
+// acá solo se adapta a la forma {value,label}[] que ya usaban los <Picker>
+// de esta pantalla, para no tocar el resto del archivo.
+export const LEVEL_OPTIONS: { value: RoutineTemplateLevel; label: string }[] = ROUTINE_TEMPLATE_LEVELS.map(
+  (value) => ({ value, label: ROUTINE_TEMPLATE_LEVEL_LABELS[value] }),
+);
 
-export const LEVEL_LABELS: Record<RoutineTemplateLevel, string> = {
-  beginner: 'Principiante',
-  intermediate: 'Intermedio',
-  advanced: 'Avanzado',
-};
+export const LEVEL_LABELS = ROUTINE_TEMPLATE_LEVEL_LABELS;
 
 export function templateToDays(template: AdminRoutineTemplate): TemplateDayFormValues[] {
   return [...template.days]

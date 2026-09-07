@@ -22,4 +22,5 @@ export * from './lib/routine';
 export * from './lib/workout-session';
 export * from './lib/currency';
 export * from './lib/order-status';
+export * from './lib/routine-template';
 export * from './realtime/echo';

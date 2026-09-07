@@ -30,15 +30,23 @@ return [
     'allowed_origins' => [
         env('FRONTEND_URL', 'http://localhost:5173'),
         'http://localhost:8081',
+        // Dominio ngrok reservado (estable, no cambia entre reinicios) usado
+        // para que la APK y la web funcionen desde cualquier red, no solo la
+        // LAN de esta PC — ver scripts/start-sanken-wsl.sh.
+        'https://wielder-freeware-starship.ngrok-free.dev',
     ],
 
     // Acceso desde la LAN (ver scripts/start-sanken.ps1 y AUTOSTART.md): la IP
     // que asigna el router puede cambiar, así que en vez de hardcodear una IP
     // se permite cualquier host de rango privado típico en los puertos que
     // usan la web (5173) y la vista web de Expo (8081).
+    // El túnel de Cloudflare (scripts/start-sanken.ps1) sirve la web con una
+    // URL https://algo.trycloudflare.com nueva cada vez que arranca — no se
+    // puede hardcodear, así que se permite el subdominio genérico.
     'allowed_origins_patterns' => [
         '#^http://192\.168\.\d{1,3}\.\d{1,3}:(5173|8081)$#',
         '#^http://10\.\d{1,3}\.\d{1,3}\.\d{1,3}:(5173|8081)$#',
+        '#^https://[a-z0-9-]+\.trycloudflare\.com$#',
     ],
 
     'allowed_headers' => ['*'],

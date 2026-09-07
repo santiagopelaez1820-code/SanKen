@@ -26,10 +26,17 @@ class AdminOrderController extends Controller
         ];
     }
 
+    /**
+     * El listado (AdminOrdersPage) nunca renderiza `history` — solo el
+     * detalle lo usa. Antes index() eager-cargaba `activities.causer` igual
+     * que show(), así que cada carga del listado disparaba 2 queries extra
+     * y serializaba el historial completo de auditoría de CADA pedido para
+     * un dato que la pantalla de lista descarta.
+     */
     public function index(Request $request): JsonResponse
     {
         $orders = Order::query()
-            ->with(self::eager())
+            ->with('items')
             ->when($request->query('status'), fn ($query, $status) => $query->where('status', $status))
             ->orderByDesc('created_at')
             ->get();

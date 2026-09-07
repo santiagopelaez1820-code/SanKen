@@ -15,6 +15,11 @@ use App\Models\Order;
  */
 class OrderWhatsAppMessageBuilder
 {
+    /** Normalizar config('app.support_whatsapp_number') es el mismo trabajo en cada fila de un listado de pedidos — se cachea una vez por instancia (que además es singleton, ver AppServiceProvider). */
+    private ?string $normalizedSupportPhone = null;
+
+    private bool $supportPhoneResolved = false;
+
     /**
      * Mensaje del superadmin hacia el cliente sobre el estado de su pedido.
      */
@@ -52,7 +57,7 @@ class OrderWhatsAppMessageBuilder
      */
     public function buildSupportUrl(Order $order): ?string
     {
-        $phone = $this->normalizePhone(config('app.support_whatsapp_number'));
+        $phone = $this->supportPhone();
         if (! $phone) {
             return null;
         }
@@ -62,53 +67,72 @@ class OrderWhatsAppMessageBuilder
         return $this->waMeUrl($phone, $message);
     }
 
+    /**
+     * config('app.support_whatsapp_number') no cambia entre pedidos — sin
+     * este cache, listar 50 pedidos normalizaba (regex + substr) el mismo
+     * número fijo 50 veces por request.
+     */
+    private function supportPhone(): ?string
+    {
+        if (! $this->supportPhoneResolved) {
+            $this->normalizedSupportPhone = $this->normalizePhone(config('app.support_whatsapp_number'));
+            $this->supportPhoneResolved = true;
+        }
+
+        return $this->normalizedSupportPhone;
+    }
+
+    /**
+     * Saludo + cuerpo + firma — las 5 plantillas de estado comparten este
+     * mismo armazón y solo difieren en el cuerpo (y, deliveredTemplate,
+     * en el cierre). Antes cada método retipeaba "Hola {name} 👋" y
+     * "Equipo SanKen 💪" por separado.
+     */
+    private function wrap(string $name, string $body, string $closing = 'Equipo SanKen 💪'): string
+    {
+        return "Hola {$name} 👋\n\n{$body}\n\n{$closing}";
+    }
+
     private function confirmingTemplate(string $name, string $number): string
     {
-        return "Hola {$name} 👋\n\n"
-            ."Estamos confirmando tu pedido #{$number} de SanKen.\n\n"
-            .'Te mantendremos informado sobre cualquier actualización.'
-            ."\n\nEquipo SanKen 💪";
+        return $this->wrap(
+            $name,
+            "Estamos confirmando tu pedido #{$number} de SanKen.\n\nTe mantendremos informado sobre cualquier actualización.",
+        );
     }
 
     private function shippedTemplate(string $name, string $number, Order $order): string
     {
-        $lines = ["Hola {$name} 👋", '', "Tu pedido #{$number} ya está en camino 🚚"];
+        $body = "Tu pedido #{$number} ya está en camino 🚚";
 
         if ($order->carrier || $order->tracking_number) {
-            $lines[] = '';
-            if ($order->carrier) {
-                $lines[] = "Transportadora: {$order->carrier}";
-            }
-            if ($order->tracking_number) {
-                $lines[] = "Guía: {$order->tracking_number}";
-            }
+            $body .= "\n\n";
+            $body .= implode("\n", array_filter([
+                $order->carrier ? "Transportadora: {$order->carrier}" : null,
+                $order->tracking_number ? "Guía: {$order->tracking_number}" : null,
+            ]));
         }
 
-        $lines[] = '';
-        $lines[] = 'Cualquier duda estamos atentos.';
-        $lines[] = '';
-        $lines[] = 'Equipo SanKen 💪';
-
-        return implode("\n", $lines);
+        return $this->wrap($name, "{$body}\n\nCualquier duda estamos atentos.");
     }
 
     private function deliveredTemplate(string $name, string $number): string
     {
-        return "Hola {$name} 👋\n\n"
-            ."¡Tu pedido #{$number} ha sido entregado! 📦\n\n"
-            ."Esperamos que disfrutes tus productos.\n\n"
-            .'Gracias por comprar en SanKen 💪';
+        return $this->wrap(
+            $name,
+            "¡Tu pedido #{$number} ha sido entregado! 📦\n\nEsperamos que disfrutes tus productos.",
+            'Gracias por comprar en SanKen 💪',
+        );
     }
 
     private function problemTemplate(string $name, string $number, Order $order): string
     {
         $adminLine = $order->customer_message ? "\n\n{$order->customer_message}" : '';
 
-        return "Hola {$name} 👋\n\n"
-            ."Somos SanKen.\n\n"
-            ."Tenemos un inconveniente con tu pedido #{$number} y queremos ayudarte a solucionarlo.{$adminLine}\n\n"
-            ."Por favor respóndenos por este medio.\n\n"
-            .'Equipo SanKen 💪';
+        return $this->wrap(
+            $name,
+            "Somos SanKen.\n\nTenemos un inconveniente con tu pedido #{$number} y queremos ayudarte a solucionarlo.{$adminLine}\n\nPor favor respóndenos por este medio.",
+        );
     }
 
     /** Para pending/processing/cancelled — un aviso genérico con el estado actual y el mensaje del admin si hay uno cargado. */
@@ -117,12 +141,10 @@ class OrderWhatsAppMessageBuilder
         $status = OrderStatusCatalog::label($order->status);
         $extra = $order->customer_message ? "\n\n{$order->customer_message}" : '';
 
-        return "Hola {$name} 👋\n\n"
-            ."Somos SanKen.\n\n"
-            ."Tenemos una actualización sobre tu pedido #{$number}.\n\n"
-            ."Estado actual: {$status}{$extra}\n\n"
-            ."Si tienes alguna pregunta, estamos atentos.\n\n"
-            .'Equipo SanKen 💪';
+        return $this->wrap(
+            $name,
+            "Somos SanKen.\n\nTenemos una actualización sobre tu pedido #{$number}.\n\nEstado actual: {$status}{$extra}\n\nSi tienes alguna pregunta, estamos atentos.",
+        );
     }
 
     private function firstName(string $fullName): string

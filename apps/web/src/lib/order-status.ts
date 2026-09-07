@@ -1,10 +1,10 @@
-import { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS, type OrderStatus } from "@sanken/core"
+import { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS, ORDER_STATUSES, type OrderStatus } from "@sanken/core"
 
-// ORDER_STATUS_LABELS/ORDER_STATUS_FLOW ahora viven en @sanken/core (una
-// sola fuente para web y mobile) — re-exportados acá para no tener que
-// tocar el import path en cada página/componente que ya los usa desde
-// "@/lib/order-status".
-export { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS }
+// ORDER_STATUS_LABELS/ORDER_STATUS_FLOW/ORDER_STATUSES ahora viven en
+// @sanken/core (una sola fuente para web y mobile) — re-exportados acá para
+// no tener que tocar el import path en cada página/componente que ya los
+// usa desde "@/lib/order-status".
+export { ORDER_STATUS_FLOW, ORDER_STATUS_LABELS, ORDER_STATUSES }
 
 /** Para el Badge de Tailwind que usa el panel admin (AdminOrdersPage/AdminOrderDetailPage). */
 export const ORDER_STATUS_BADGE_VARIANT: Record<

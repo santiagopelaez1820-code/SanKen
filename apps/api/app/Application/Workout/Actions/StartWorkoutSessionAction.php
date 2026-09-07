@@ -29,7 +29,6 @@ class StartWorkoutSessionAction
             'energy_level' => $precheck['energy_level'] ?? null,
             'muscle_soreness' => $precheck['muscle_soreness'] ?? null,
             'completed' => false,
-            'readiness_adjusted' => ! $adjustment->isNeutral(),
             'readiness_note' => $adjustment->note,
         ]);
 
@@ -49,18 +48,24 @@ class StartWorkoutSessionAction
         // completos.
         if ($routineDay) {
             foreach ($routineDay->exercises as $routineExercise) {
-                $targetSets = $this->readinessAdjuster->applySets($routineExercise->target_sets, $adjustment);
+                $adjusted = $this->readinessAdjuster->adjustExercise(
+                    $routineExercise->target_sets,
+                    $routineExercise->suggested_reps_per_set,
+                    $routineExercise->suggested_weight_kg,
+                    $routineExercise->target_rpe,
+                    $adjustment,
+                );
 
                 $session->exercises()->create([
                     'exercise_id' => $routineExercise->exercise_id,
                     'order' => $routineExercise->order,
                     'all_sets_completed' => false,
-                    'target_sets' => $targetSets,
+                    'target_sets' => $adjusted['targetSets'],
                     'target_reps' => $routineExercise->target_reps,
                     'rest_seconds' => $routineExercise->rest_seconds,
-                    'target_rpe' => $this->readinessAdjuster->applyRpe($routineExercise->target_rpe, $adjustment),
-                    'suggested_weight_kg' => $this->readinessAdjuster->applyWeight($routineExercise->suggested_weight_kg, $adjustment),
-                    'suggested_reps_per_set' => $this->readinessAdjuster->applyRepsPerSet($routineExercise->suggested_reps_per_set, $targetSets),
+                    'target_rpe' => $adjusted['rpe'],
+                    'suggested_weight_kg' => $adjusted['weightKg'],
+                    'suggested_reps_per_set' => $adjusted['repsPerSet'],
                 ]);
             }
         }

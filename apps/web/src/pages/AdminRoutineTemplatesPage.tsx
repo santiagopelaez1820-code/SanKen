@@ -7,7 +7,7 @@ import type {
   RoutineTemplateLevel,
   RoutineTemplatePayload,
 } from "@sanken/core"
-import { ApiError } from "@sanken/core"
+import { ApiError, ROUTINE_TEMPLATE_LEVEL_LABELS, ROUTINE_TEMPLATE_LEVELS } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
@@ -56,13 +56,10 @@ const EMPTY_FORM: TemplateFormState = {
 
 const SPLIT_OPTIONS: RoutineSplitType[] = ["full_body", "upper_lower", "push_pull_legs", "bro_split", "ppl_upper_lower"]
 
-const LEVEL_OPTIONS: RoutineTemplateLevel[] = ["beginner", "intermediate", "advanced"]
-
-const LEVEL_LABELS: Record<RoutineTemplateLevel, string> = {
-  beginner: "Principiante",
-  intermediate: "Intermedio",
-  advanced: "Avanzado",
-}
+// Nivel: única fuente en @sanken/core (ver ROUTINE_TEMPLATE_LEVEL_LABELS) —
+// antes esta lista/labels vivían retipeadas acá y en el equivalente mobile.
+const LEVEL_OPTIONS: RoutineTemplateLevel[] = ROUTINE_TEMPLATE_LEVELS
+const LEVEL_LABELS = ROUTINE_TEMPLATE_LEVEL_LABELS
 
 const selectClass = "rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
 const inputClass = "rounded-lg border border-input bg-background px-2 py-1.5 text-sm"

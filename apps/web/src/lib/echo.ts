@@ -1,6 +1,7 @@
 import Pusher from "pusher-js"
 import { createEcho } from "@sanken/core"
 import { useAuthStore } from "@/lib/auth-store"
+import { resolveApiBaseUrl } from "@/lib/api"
 
 /**
  * Instancia perezosa: se crea recién cuando algo la pide (ChallengeLeaderboard),
@@ -22,7 +23,10 @@ export function getEcho() {
       host: import.meta.env.VITE_REVERB_HOST ?? "localhost",
       port: Number(import.meta.env.VITE_REVERB_PORT ?? 8080),
       scheme: (import.meta.env.VITE_REVERB_SCHEME ?? "http") as "http" | "https",
-      apiBaseUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8000",
+      // Mismo criterio que apps/web/src/lib/api.ts: derivar del host de la
+      // pagina en vez de un VITE_API_URL vacio cayendo a "localhost" fijo,
+      // que rompia /broadcasting/auth (NAT hairpin) para quien entra por LAN.
+      apiBaseUrl: resolveApiBaseUrl(),
       token,
       pusherClient: Pusher,
     })

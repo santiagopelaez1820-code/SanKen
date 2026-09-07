@@ -44,42 +44,50 @@ final class SessionReadinessAdjuster
 
         $strong = count($reasons) >= 2;
 
-        [$setsDelta, $weightMultiplier, $rpeDelta] = match ($level) {
-            'beginner' => $strong ? [-1, 0.80, -1.5] : [-1, 0.90, -1.0],
-            'advanced' => $strong ? [-1, 0.90, -1.0] : [0, 0.95, -0.5],
-            default => $strong ? [-1, 0.85, -1.0] : [0, 0.92, -0.5], // intermediate
+        // El 4to elemento (`$changes`) describe qué cambió en criollo, a la
+        // par de setsDelta/weightMultiplier/rpeDelta en el mismo lugar donde
+        // se decide — así buildNote() no tiene que re-derivar "hubo cambio
+        // de series" a partir del signo de setsDelta por separado.
+        [$setsDelta, $weightMultiplier, $rpeDelta, $changes] = match ($level) {
+            'beginner' => $strong ? [-1, 0.80, -1.5, 'series y peso'] : [-1, 0.90, -1.0, 'series y peso'],
+            'advanced' => $strong ? [-1, 0.90, -1.0, 'series y peso'] : [0, 0.95, -0.5, 'peso'],
+            default => $strong ? [-1, 0.85, -1.0, 'series y peso'] : [0, 0.92, -0.5, 'peso'], // intermediate
         };
 
         return new SessionAdjustment(
             setsDelta: $setsDelta,
             weightMultiplier: $weightMultiplier,
             rpeDelta: $rpeDelta,
-            note: $this->buildNote($reasons, $setsDelta),
+            note: $this->buildNote($reasons, $changes),
         );
     }
 
-    public function applySets(int $targetSets, SessionAdjustment $adjustment): int
-    {
-        return max(1, $targetSets + $adjustment->setsDelta);
-    }
-
     /**
+     * Aplica el ajuste a los 4 valores de un ejercicio JUNTOS, en vez de 4
+     * métodos sueltos que el caller tenía que invocar en el orden correcto
+     * (con el riesgo real de pasarle a applyRepsPerSet el targetSets
+     * original en vez del ya ajustado). targetRepsPerSet se recorta acá
+     * mismo contra el targetSets YA ajustado, sin que el caller tenga que
+     * encadenar el resultado de un método al siguiente.
+     *
      * @param  int[]|null  $repsPerSet
-     * @return int[]|null
+     * @return array{targetSets: int, repsPerSet: int[]|null, weightKg: float|null, rpe: float|null}
      */
-    public function applyRepsPerSet(?array $repsPerSet, int $newTargetSets): ?array
-    {
-        return $repsPerSet === null ? null : array_slice($repsPerSet, 0, $newTargetSets);
-    }
+    public function adjustExercise(
+        int $targetSets,
+        ?array $repsPerSet,
+        ?float $weightKg,
+        ?float $rpe,
+        SessionAdjustment $adjustment,
+    ): array {
+        $newTargetSets = max(1, $targetSets + $adjustment->setsDelta);
 
-    public function applyWeight(?float $weightKg, SessionAdjustment $adjustment): ?float
-    {
-        return $weightKg === null ? null : round($weightKg * $adjustment->weightMultiplier, 2);
-    }
-
-    public function applyRpe(?float $rpe, SessionAdjustment $adjustment): ?float
-    {
-        return $rpe === null ? null : max(self::MIN_RPE, $rpe + $adjustment->rpeDelta);
+        return [
+            'targetSets' => $newTargetSets,
+            'repsPerSet' => $repsPerSet === null ? null : array_slice($repsPerSet, 0, $newTargetSets),
+            'weightKg' => $weightKg === null ? null : round($weightKg * $adjustment->weightMultiplier, 2),
+            'rpe' => $rpe === null ? null : max(self::MIN_RPE, $rpe + $adjustment->rpeDelta),
+        ];
     }
 
     /**
@@ -108,10 +116,8 @@ final class SessionReadinessAdjuster
     /**
      * @param  string[]  $reasons
      */
-    private function buildNote(array $reasons, int $setsDelta): string
+    private function buildNote(array $reasons, string $changes): string
     {
-        $changes = $setsDelta < 0 ? 'series y peso' : 'peso';
-
         return 'Ajustamos tu entrenamiento de hoy porque '.$this->joinReasons($reasons)
             .": bajamos {$changes} un poco para cuidarte. En tu próxima sesión volvés a tu plan normal.";
     }

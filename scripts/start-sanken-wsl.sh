@@ -14,6 +14,8 @@ API_DIR="$HOME/sanken/api"
 LOG_DIR="$HOME/sanken/logs"
 AUTOSTART_LOG="$LOG_DIR/autostart.log"
 CLOUDFLARED="$HOME/.local/bin/cloudflared"
+NGROK="$HOME/.local/bin/ngrok"
+NGROK_API_DOMAIN="wielder-freeware-starship.ngrok-free.dev"
 
 mkdir -p "$LOG_DIR"
 
@@ -39,14 +41,20 @@ log "===================================================="
 log "SanKen AutoStart (WSL) iniciado"
 
 # --- 1. Sincronizar código apps/api: Windows (fuente real, git) -> WSL (donde corre PHP) ---
-# Nunca toca vendor/, node_modules/, storage/, bootstrap/cache/ ni .env — así
-# no se pisa nada de la config local de esta copia ni hace falta reinstalar
-# dependencias en cada arranque.
+# Nunca toca vendor/, node_modules/, storage/, bootstrap/cache/, .env ni
+# public/storage — así no se pisa nada de la config local de esta copia, no
+# hace falta reinstalar dependencias en cada arranque, y el symlink de
+# storage (ver 1b) no se borra en cada sync solo porque OneDrive nunca lo
+# tuvo del lado Windows (--delete lo interpretaba como "hay que borrarlo").
+# Esto pasó de verdad: el symlink se recreaba bien corriendo este script
+# completo, pero un rsync manual suelto (sin este exclude) durante una
+# sesión de arreglos lo volvía a romper sin que nada lo recreara después.
 if [ -d "$REPO_API_WIN" ]; then
   log "Sincronizando código apps/api (Windows -> WSL)..."
   if rsync -a --delete \
       --exclude "vendor/" --exclude "node_modules/" --exclude "storage/" \
       --exclude "bootstrap/cache/" --exclude ".env" --exclude "database/database.sqlite" \
+      --exclude "public/storage" \
       "$REPO_API_WIN/" "$API_DIR/" >>"$AUTOSTART_LOG" 2>&1; then
     log "Código sincronizado OK"
   else
@@ -145,9 +153,38 @@ else
   fi
 fi
 
-# --- 6. Túneles Cloudflare (quick tunnels, sin cuenta configurada -> URL
-# aleatoria cada vez, se captura y se guarda en un archivo para que Windows
-# la lea). Se tunelean API (8000) y Web (5173) por separado. ---
+# --- 6a. Tunel estable de la API (ngrok, dominio reservado) — a diferencia
+# de los quick tunnels de Cloudflare, esta URL NO cambia entre reinicios, asi
+# que es la que se hornea en el APK (EAS env "preview" -> EXPO_PUBLIC_API_URL)
+# para que funcione desde cualquier red, no solo la LAN de esta PC.
+if [ -x "$NGROK" ]; then
+  if pgrep -f "ngrok http .*$NGROK_API_DOMAIN" >/dev/null 2>&1; then
+    echo "https://$NGROK_API_DOMAIN" >"$LOG_DIR/tunnel-api-url.txt"
+    log "Tunel API (ngrok): OK (ya estaba corriendo) -> https://$NGROK_API_DOMAIN"
+  else
+    log "Tunel API (ngrok): iniciando -> https://$NGROK_API_DOMAIN ..."
+    : >"$LOG_DIR/ngrok-api.log"
+    daemonize "$LOG_DIR/ngrok-api.log" "$NGROK" http 8000 --url "https://$NGROK_API_DOMAIN" --log=stdout --log-level=info
+    ok=0
+    for _ in $(seq 1 20); do
+      if grep -q "started tunnel" "$LOG_DIR/ngrok-api.log" 2>/dev/null; then ok=1; break; fi
+      sleep 1
+    done
+    if [ "$ok" = "1" ]; then
+      echo "https://$NGROK_API_DOMAIN" >"$LOG_DIR/tunnel-api-url.txt"
+      log "Tunel API (ngrok): OK -> https://$NGROK_API_DOMAIN"
+    else
+      rm -f "$LOG_DIR/tunnel-api-url.txt"
+      log "ERROR: tunel API (ngrok) no arranco a tiempo — revisar $LOG_DIR/ngrok-api.log"
+    fi
+  fi
+else
+  log "AVISO: ngrok no encontrado en $NGROK — omito el tunel estable de la API"
+fi
+
+# --- 6b. Tunel de Cloudflare para la Web (quick tunnel, sin cuenta -> URL
+# aleatoria cada vez) — para demos puntuales de la web completa, ver el
+# informe de start-sanken.ps1 sobre la limitacion de VITE_API_URL. ---
 start_tunnel() {
   local name="$1" port="$2" logfile="$3" urlfile="$4"
   if pgrep -f "cloudflared tunnel --url http://localhost:$port" >/dev/null 2>&1; then
@@ -173,10 +210,9 @@ start_tunnel() {
 }
 
 if [ -x "$CLOUDFLARED" ]; then
-  start_tunnel "API" 8000 "$LOG_DIR/cloudflared-api.log" "$LOG_DIR/tunnel-api-url.txt"
   start_tunnel "Web" 5173 "$LOG_DIR/cloudflared-web.log" "$LOG_DIR/tunnel-web-url.txt"
 else
-  log "AVISO: cloudflared no encontrado en $CLOUDFLARED — omito túneles"
+  log "AVISO: cloudflared no encontrado en $CLOUDFLARED — omito el túnel de la web"
 fi
 
 log "SanKen AutoStart (WSL) terminado"

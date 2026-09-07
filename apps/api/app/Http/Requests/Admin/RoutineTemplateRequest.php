@@ -33,7 +33,10 @@ class RoutineTemplateRequest extends FormRequest
             'name' => ['nullable', 'string', 'max:150'],
             'sex' => [$sometimesOnUpdate, 'string', Rule::in(['male', 'female'])],
             'frequency_days' => [$sometimesOnUpdate, 'integer', 'min:1', 'max:7'],
-            'level' => [$sometimesOnUpdate, 'string', Rule::in(['beginner', 'intermediate', 'advanced'])],
+            // Mismo config que usa OnboardingRequest para el nivel del
+            // usuario — un solo lugar para agregar/renombrar niveles en vez
+            // de mantener el array sincronizado en dos Requests distintos.
+            'level' => [$sometimesOnUpdate, 'string', Rule::in(config('onboarding.levels'))],
             'split_type' => [
                 $sometimesOnUpdate, 'string',
                 Rule::in(['full_body', 'upper_lower', 'push_pull_legs', 'bro_split', 'ppl_upper_lower']),

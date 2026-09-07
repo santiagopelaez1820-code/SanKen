@@ -3,21 +3,12 @@ import { Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { formatCurrency, type AdminOrder } from "@sanken/core"
 import { api } from "@/lib/api"
-import { ORDER_STATUS_BADGE_VARIANT, ORDER_STATUS_LABELS } from "@/lib/order-status"
+import { ORDER_STATUS_BADGE_VARIANT, ORDER_STATUS_LABELS, ORDER_STATUSES } from "@/lib/order-status"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 
-const STATUS_FILTERS = [
-  "all",
-  "pending",
-  "confirming",
-  "processing",
-  "shipped",
-  "delivered",
-  "problem",
-  "cancelled",
-] as const
+const STATUS_FILTERS = ["all", ...ORDER_STATUSES] as const
 
 export function AdminOrdersPage() {
   const [status, setStatus] = useState<(typeof STATUS_FILTERS)[number]>("all")

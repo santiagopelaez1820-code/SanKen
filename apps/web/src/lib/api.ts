@@ -8,7 +8,7 @@ import { readCookie } from "@/lib/cookies"
 // "localhost:8000" (evita el problema de NAT hairpin al autoconectarse a la
 // propia IP de LAN) y una IP de LAN resuelve a esa misma IP, sin necesidad
 // de reescribir el .env cada vez que cambia la red (ver scripts/start-sanken.ps1).
-function resolveApiBaseUrl(): string {
+export function resolveApiBaseUrl(): string {
   const configured = import.meta.env.VITE_API_URL
   if (configured) return configured
   return `http://${window.location.hostname}:8000`

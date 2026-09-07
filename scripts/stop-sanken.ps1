@@ -30,7 +30,7 @@ foreach ($name in "web", "mobile") {
 }
 
 Write-Host "Deteniendo Laravel/Queue/Reverb/tuneles (WSL)..."
-$wslCmd = 'pkill -f "artisan serve" 2>/dev/null; pkill -f "artisan queue:listen" 2>/dev/null; pkill -f "artisan reverb:start" 2>/dev/null; pkill -f "cloudflared tunnel --url" 2>/dev/null; rm -f ~/sanken/logs/tunnel-api-url.txt ~/sanken/logs/tunnel-web-url.txt; echo "WSL: procesos detenidos"'
+$wslCmd = 'pkill -f "artisan serve" 2>/dev/null; pkill -f "artisan queue:listen" 2>/dev/null; pkill -f "artisan reverb:start" 2>/dev/null; pkill -f "cloudflared tunnel --url" 2>/dev/null; pkill -f "ngrok http" 2>/dev/null; rm -f ~/sanken/logs/tunnel-api-url.txt ~/sanken/logs/tunnel-web-url.txt; echo "WSL: procesos detenidos"'
 wsl.exe -d $WslDistro -e bash -lc $wslCmd
 
 Write-Host ""

@@ -14,6 +14,6 @@ class OrderPolicy
      */
     public function view(User $user, Order $order): bool
     {
-        return $user->is($order->user) || $user->role === 'super_admin';
+        return $user->is($order->user) || $user->isAdmin();
     }
 }

@@ -77,18 +77,33 @@ $action = New-ScheduledTaskAction -Execute "powershell.exe" `
 $userTrigger = "$env:COMPUTERNAME\$env:USERNAME"
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User $userTrigger
 
+# RunLevel Highest: start-sanken.ps1 necesita administrador para configurar
+# el port proxy 8000 (Windows -> WSL, ver el comentario en start-sanken.ps1)
+# cada vez que arranca, no solo la primera. Con el usuario logueado siendo
+# administrador, una tarea programada con Highest corre elevada SOLA, sin
+# pedir UAC (a diferencia de doble-clickear un .exe) -- es el mecanismo
+# soportado para esto, no un workaround.
+$principal = New-ScheduledTaskPrincipal -UserId $userTrigger -RunLevel Highest -LogonType Interactive
+
 $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
   -StartWhenAvailable -ExecutionTimeLimit (New-TimeSpan -Hours 0) -MultipleInstances IgnoreNew
 
 try {
-  Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
+  Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Principal $principal -Settings $settings `
     -Description "Levanta el entorno de desarrollo de SanKen (WSL/MySQL/Redis/Laravel/Queue/Web/Mobile/Tunel) unos 60s despues de iniciar sesion." `
     -ErrorAction Stop | Out-Null
 
   Write-Host ""
   Write-Host "Tarea '$TaskName' instalada: se va a ejecutar unos 60s despues de que inicies sesion en Windows."
-  Write-Host "Para probarla ya mismo sin reiniciar: Start-ScheduledTask -TaskName '$TaskName'"
   Write-Host "Para desinstalarla: Unregister-ScheduledTask -TaskName '$TaskName' -Confirm:`$false"
+
+  if ($isAdmin) {
+    # La corremos ya mismo (elevada, gracias al RunLevel Highest de arriba)
+    # para que el port proxy 8000 quede configurado ahora, sin esperar al
+    # proximo login.
+    Write-Host "Ejecutandola ahora mismo para aplicar el port proxy 8000 (tarda ~60s por el WaitSeconds interno)..."
+    Start-ScheduledTask -TaskName $TaskName
+  }
 } catch {
   Write-Host ""
   Write-Host "ERROR: no se pudo registrar la tarea programada: $($_.Exception.Message)"

@@ -3,21 +3,11 @@ import { Link, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { formatCurrency, type AdminOrder, type OrderStatus, type OrderTrackingPayload } from "@sanken/core"
 import { api } from "@/lib/api"
-import { ORDER_STATUS_BADGE_VARIANT, ORDER_STATUS_LABELS } from "@/lib/order-status"
+import { ORDER_STATUS_BADGE_VARIANT, ORDER_STATUS_LABELS, ORDER_STATUSES } from "@/lib/order-status"
 import { OrderTimeline } from "@/components/admin/OrderTimeline"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
-
-const STATUS_OPTIONS: OrderStatus[] = [
-  "pending",
-  "confirming",
-  "processing",
-  "shipped",
-  "delivered",
-  "problem",
-  "cancelled",
-]
 
 interface TrackingForm {
   status: OrderStatus
@@ -238,7 +228,7 @@ export function AdminOrderDetailPage() {
                 onChange={(e) => setForm({ ...form, status: e.target.value as OrderStatus })}
                 className="mt-1 w-full rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
               >
-                {STATUS_OPTIONS.map((option) => (
+                {ORDER_STATUSES.map((option) => (
                   <option key={option} value={option}>
                     {ORDER_STATUS_LABELS[option]}
                   </option>
