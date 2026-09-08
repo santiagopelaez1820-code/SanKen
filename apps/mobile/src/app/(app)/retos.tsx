@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Flag, Flame } from 'lucide-react-native';
@@ -11,8 +11,11 @@ import { ChallengeCompleteCelebration } from '@/components/gamification/challeng
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { CardShadow, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTutorial } from '@/hooks/use-tutorial';
+import { useAuthStore } from '@/store/auth-store';
 import { useRetosStore } from '@/store/retos-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -195,6 +198,7 @@ function ChallengeCard({ challenge }: { challenge: Challenge }) {
 }
 
 export default function RetosScreen() {
+  const userId = useAuthStore((s) => s.user?.id);
   const { challenges, isLoading, error, load, closeLeaderboard, justCompleted, dismissCelebration } = useRetosStore();
 
   useEffect(() => {
@@ -202,6 +206,28 @@ export default function RetosScreen() {
     return () => closeLeaderboard();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const titleRef = useRef<View>(null);
+  const tutorial = useTutorial(
+    'retos',
+    [
+      {
+        ref: titleRef,
+        title: 'Retos SanKen',
+        description: 'Desafíos semanales y mensuales para mantenerte motivado, con tabla de posiciones en vivo.',
+      },
+      {
+        title: 'Unite y trackeá tu progreso',
+        description: 'Al unirte a un reto, tu avance se calcula solo con cada entrenamiento que ya registrás.',
+      },
+      {
+        title: '¡Celebralo al completarlo!',
+        description: 'Cuando cumplas el objetivo vas a ver una celebración especial 🎉 y quedás en el ranking.',
+      },
+    ],
+    !isLoading,
+    userId,
+  );
 
   const sorted = [...challenges].sort(
     (a, b) => new Date(a.ends_at).getTime() - new Date(b.ends_at).getTime(),
@@ -214,9 +240,11 @@ export default function RetosScreen() {
       <ChallengeCompleteCelebration challenge={justCompleted} onDismiss={dismissCelebration} />
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-          <ThemedText type="title" style={styles.pageTitle}>
-            Retos
-          </ThemedText>
+          <View ref={titleRef}>
+            <ThemedText type="title" style={styles.pageTitle}>
+              Retos
+            </ThemedText>
+          </View>
 
           {error && !isLoading && <ErrorState message={error} onRetry={load} />}
 
@@ -243,6 +271,8 @@ export default function RetosScreen() {
           ))}
         </ScrollView>
       </SafeAreaView>
+
+      <TutorialOverlay tutorial={tutorial} />
     </ThemedView>
   );
 }

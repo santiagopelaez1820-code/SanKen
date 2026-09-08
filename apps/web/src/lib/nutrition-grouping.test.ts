@@ -12,6 +12,9 @@ const food: FoodItem = {
   protein_per_100g: 0.3,
   carbs_per_100g: 14,
   fat_per_100g: 0.2,
+  serving_size_grams: null,
+  serving_unit_singular: null,
+  serving_unit_plural: null,
 }
 
 function makeMeal(overrides: Partial<MealLog>): MealLog {

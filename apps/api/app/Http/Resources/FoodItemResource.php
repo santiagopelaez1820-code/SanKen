@@ -24,6 +24,9 @@ class FoodItemResource extends JsonResource
             'protein_per_100g' => (float) $this->protein_per_100g,
             'carbs_per_100g' => (float) $this->carbs_per_100g,
             'fat_per_100g' => (float) $this->fat_per_100g,
+            'serving_size_grams' => $this->serving_size_grams !== null ? (float) $this->serving_size_grams : null,
+            'serving_unit_singular' => $this->serving_unit_singular,
+            'serving_unit_plural' => $this->serving_unit_plural,
         ];
     }
 }

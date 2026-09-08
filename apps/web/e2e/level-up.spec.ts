@@ -53,6 +53,22 @@ async function authedPost(page: Page, path: string, data: unknown) {
   return JSON.parse(result.text || 'null')
 }
 
+let userId: number
+
+// Este spec prueba el modal de subida de nivel, no el tutorial guiado -- lo
+// marcamos como ya visto en localStorage (clave por usuario+sección, ver
+// tutorial-storage.ts) antes de la primera navegación para no depender de
+// que el clic en "Comenzar" en /dashboard (tras el reload de la línea
+// ~124) le gane la carrera a la apertura automática del tutorial, que si
+// no lo bloquearía con su overlay de pantalla completa (ver useTutorial).
+async function dismissTutorials(page: Page) {
+  await page.addInitScript((id) => {
+    for (const section of ['inicio', 'nutricion', 'tienda', 'retos', 'calendario', 'chat', 'mi-entrenador']) {
+      localStorage.setItem(`sanken_tutorial_seen_${id}_${section}`, '1')
+    }
+  }, userId)
+}
+
 async function authedGet(page: Page, path: string) {
   const token = await authToken(page)
   const result = await page.evaluate(
@@ -84,7 +100,8 @@ test.beforeAll(async () => {
   // Completar onboarding acá (no via UI) porque, sin onboarding_completed,
   // RequireAuth manda al login posterior a /onboarding en vez de /dashboard
   // — este spec asume que el primer login ya entra directo.
-  const { data } = (await res.json()) as { data: { token: string } }
+  const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
+  userId = data.user.id
   const headers = { Authorization: `Bearer ${data.token}` }
   await ctx.post(`${API_URL}/onboarding`, {
     data: {
@@ -99,6 +116,7 @@ test.beforeAll(async () => {
 })
 
 test('completar un entrenamiento que cruza un nivel muestra el modal de subida de nivel', async ({ page }) => {
+  await dismissTutorials(page)
   await page.goto('/login')
   await page.fill('#email', EMAIL)
   await page.fill('#password', PASSWORD)

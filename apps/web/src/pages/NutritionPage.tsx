@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type {
   DailyNutritionSummary,
@@ -8,15 +8,19 @@ import type {
   NutritionPlan,
   NutritionTargets,
 } from "@sanken/core"
-import { ApiError } from "@sanken/core"
+import { ApiError, foodCategoryIcon, formatFoodQuantity, formatFoodQuantityLabel } from "@sanken/core"
 import { api } from "@/lib/api"
+import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
 import { StatTile } from "@/components/dashboard/StatTile"
+import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay"
+import { useTutorial } from "@/hooks/use-tutorial"
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER, groupMealsByType } from "@/lib/nutrition-grouping"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export function NutritionPage() {
   const queryClient = useQueryClient()
+  const userId = useAuthStore((s) => s.user?.id)
   const [query, setQuery] = useState("")
   const [searchResults, setSearchResults] = useState<FoodItem[] | null>(null)
   const [isSearching, setIsSearching] = useState(false)
@@ -47,6 +51,32 @@ export function NutritionPage() {
   })
   const planMissing = planError instanceof ApiError && planError.status === 404
   const planLoadFailed = Boolean(planError) && !planMissing
+
+  const tileGridRef = useRef<HTMLElement>(null)
+  const planCardRef = useRef<HTMLElement>(null)
+  const addFoodRef = useRef<HTMLElement>(null)
+  const tutorial = useTutorial(
+    "nutricion",
+    [
+      {
+        target: tileGridRef,
+        title: "Tus objetivos diarios",
+        description: "Calculamos tus calorías y macros según tu perfil y tus objetivos de entrenamiento.",
+      },
+      {
+        target: planCardRef,
+        title: "Plan de comidas personalizado",
+        description: 'Te armamos un plan con porciones en unidades reales, como "2 huevos" en vez de solo gramos.',
+      },
+      {
+        target: addFoodRef,
+        title: "Registrá lo que comés",
+        description: "Buscá el alimento por nombre para sumarlo a tu día.",
+      },
+    ],
+    !!targets,
+    userId
+  )
 
   const generatePlanMutation = useMutation({
     mutationFn: () => api.post<NutritionPlan>("/nutrition/plan"),
@@ -106,6 +136,19 @@ export function NutritionPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["nutrition", "meals"] }),
   })
 
+  const selectFood = (food: FoodItem) => {
+    setPendingFood(food)
+    setGrams(food.serving_size_grams ? String(food.serving_size_grams) : "100")
+  }
+
+  const adjustGrams = (delta: number) => {
+    setGrams((prev) => {
+      const step = pendingFood?.serving_size_grams ? pendingFood.serving_size_grams / 2 : 10
+      const next = Math.max(step, (Number(prev) || 0) + delta)
+      return String(Math.round(next * 10) / 10)
+    })
+  }
+
   const search = async () => {
     if (!query.trim()) return
     setIsSearching(true)
@@ -133,7 +176,7 @@ export function NutritionPage() {
         )}
 
         {targets && (
-          <section className="grid grid-cols-2 gap-4 sm:grid-cols-5">
+          <section ref={tileGridRef} className="grid grid-cols-2 gap-4 sm:grid-cols-5">
             <StatTile label="Calorías" value={`${targets.calories} kcal`} />
             <StatTile label="Proteína" value={`${targets.protein_g} g`} />
             <StatTile label="Carbohidratos" value={`${targets.carbs_g} g`} />
@@ -150,7 +193,7 @@ export function NutritionPage() {
         )}
 
         {!profileIncomplete && (
-          <section className="rounded-xl border border-border bg-card p-5">
+          <section ref={planCardRef} className="rounded-xl border border-border bg-card p-5">
             <div className="flex items-center justify-between">
               <h2 className="font-heading text-sm font-medium">Plan alimenticio personalizado</h2>
               {plan && (
@@ -199,13 +242,14 @@ export function NutritionPage() {
                     <ul className="mt-1 flex flex-col gap-1">
                       {meal.items.map((item) => (
                         <li key={item.id} className="text-sm">
-                          <div className="flex items-center justify-between">
-                            <span>
-                              {item.food_item.name} · {item.quantity_grams}g · {item.calories} kcal
+                          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                            <span className="min-w-0 flex-1">
+                              {foodCategoryIcon(item.food_item.category)} {item.food_item.name} ·{" "}
+                              {formatFoodQuantityLabel(item.food_item, item.quantity_grams)} · {item.calories} kcal
                             </span>
                             <button
                               onClick={() => startSubstituting(item.id)}
-                              className="text-xs text-muted-foreground hover:text-foreground"
+                              className="shrink-0 text-xs text-muted-foreground hover:text-foreground"
                             >
                               Sustituir
                             </button>
@@ -255,7 +299,8 @@ export function NutritionPage() {
                                         disabled={substituteMutation.isPending}
                                         className="w-full rounded-lg p-1 text-left text-xs hover:bg-muted"
                                       >
-                                        {food.name} · {food.calories_per_100g} kcal/100g
+                                        {foodCategoryIcon(food.category)} {food.name} · {food.calories_per_100g}{" "}
+                                        kcal/100g
                                       </button>
                                     </li>
                                   ))}
@@ -273,7 +318,7 @@ export function NutritionPage() {
           </section>
         )}
 
-        <section className="rounded-xl border border-border bg-card p-5">
+        <section ref={addFoodRef} className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium">Agregar comida</h2>
           <div className="mt-2 flex gap-2">
             <input
@@ -299,12 +344,21 @@ export function NutritionPage() {
               {searchResults.map((food) => (
                 <li key={food.id}>
                   <button
-                    onClick={() => setPendingFood(food)}
+                    onClick={() => selectFood(food)}
                     className="w-full rounded-lg p-2 text-left text-sm hover:bg-muted"
                   >
-                    <span className="font-medium">{food.name}</span>
+                    <span className="font-medium">
+                      {foodCategoryIcon(food.category)} {food.name}
+                    </span>
                     {food.brand && <span className="text-muted-foreground"> · {food.brand}</span>}
-                    <span className="block text-xs text-muted-foreground">{food.calories_per_100g} kcal/100g</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {food.calories_per_100g} kcal/100g
+                      {food.serving_size_grams
+                        ? ` · ${formatFoodQuantity(food, food.serving_size_grams).servings} ≈ ${
+                            formatFoodQuantity(food, food.serving_size_grams).grams
+                          }`
+                        : ""}
+                    </span>
                   </button>
                 </li>
               ))}
@@ -312,19 +366,40 @@ export function NutritionPage() {
           )}
 
           {pendingFood && (
-            <div className="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-dashed border-border p-3">
+            <div className="mt-3 flex flex-wrap items-end gap-4 rounded-lg border border-dashed border-border p-3">
               <div>
-                <p className="text-sm font-medium">{pendingFood.name}</p>
-                <label className="text-xs text-muted-foreground" htmlFor="grams">
-                  Gramos
-                </label>
-                <input
-                  id="grams"
-                  type="number"
-                  value={grams}
-                  onChange={(e) => setGrams(e.target.value)}
-                  className="block w-24 rounded-lg border border-input bg-background px-2 py-1 text-sm"
-                />
+                <p className="text-sm font-medium">
+                  {foodCategoryIcon(pendingFood.category)} {pendingFood.name}
+                </p>
+                <span className="text-xs text-muted-foreground">Cantidad</span>
+                <div className="mt-1 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => adjustGrams(-(pendingFood.serving_size_grams ? pendingFood.serving_size_grams / 2 : 10))}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-input text-sm hover:bg-muted"
+                    aria-label="Reducir cantidad"
+                  >
+                    −
+                  </button>
+                  <input
+                    id="grams"
+                    type="number"
+                    value={grams}
+                    onChange={(e) => setGrams(e.target.value)}
+                    className="w-20 rounded-lg border border-input bg-background px-2 py-1 text-center text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => adjustGrams(pendingFood.serving_size_grams ? pendingFood.serving_size_grams / 2 : 10)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-input text-sm hover:bg-muted"
+                    aria-label="Aumentar cantidad"
+                  >
+                    +
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {formatFoodQuantityLabel(pendingFood, Number(grams) || 0)}
+                </p>
               </div>
               <div>
                 <label className="text-xs text-muted-foreground" htmlFor="meal-type">
@@ -363,13 +438,14 @@ export function NutritionPage() {
             )}
             <ul className="mt-2 flex flex-col gap-1">
               {groups[type].map((meal) => (
-                <li key={meal.id} className="flex items-center justify-between text-sm">
-                  <span>
-                    {meal.food_item.name} · {meal.quantity_grams}g · {meal.calories} kcal
+                <li key={meal.id} className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-sm">
+                  <span className="min-w-0 flex-1">
+                    {foodCategoryIcon(meal.food_item.category)} {meal.food_item.name} ·{" "}
+                    {formatFoodQuantityLabel(meal.food_item, meal.quantity_grams)} · {meal.calories} kcal
                   </span>
                   <button
                     onClick={() => deleteMutation.mutate(meal.id)}
-                    className="text-xs text-muted-foreground hover:text-destructive"
+                    className="shrink-0 text-xs text-muted-foreground hover:text-destructive"
                   >
                     Eliminar
                   </button>
@@ -379,6 +455,8 @@ export function NutritionPage() {
           </section>
         ))}
       </div>
+
+      <TutorialOverlay tutorial={tutorial} />
     </main>
   )
 }

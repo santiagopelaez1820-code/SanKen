@@ -2,9 +2,11 @@
 
 namespace Tests\Feature\Nutrition;
 
+use App\Domain\Nutrition\Services\NutritionPlanTemplateCatalog;
 use App\Models\FoodItem;
 use App\Models\NutritionPlan;
 use App\Models\User;
+use Database\Seeders\FoodItemSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -101,6 +103,39 @@ class NutritionPlanApiTest extends TestCase
 
         $this->assertDatabaseCount('nutrition_plans', 1);
         $this->assertDatabaseCount('nutrition_plan_meals', 4);
+    }
+
+    /**
+     * Con el catálogo real sembrado (no el mínimo de seedCuratedCatalog), el
+     * plan generado tiene que usar los alimentos del plan curado que le
+     * corresponde a este usuario+objetivo (NutritionPlanTemplateCatalog),
+     * no una elección al azar -- esto es lo que hace que dos usuarios con
+     * datos distintos dejen de ver la misma combinación de comidas.
+     */
+    public function test_generating_a_plan_uses_the_curated_template_for_the_users_goal(): void
+    {
+        $this->seed(FoodItemSeeder::class);
+        $user = User::factory()->create();
+        $this->completeProfileFor($user, goals: ['lose_fat']);
+
+        $expectedTemplate = NutritionPlanTemplateCatalog::pickForUser($user->id, 'lose_fat');
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/nutrition/plan');
+
+        $response->assertCreated();
+        $meals = collect($response->json('data.meals'))->keyBy('meal_type');
+
+        foreach ($expectedTemplate['meals'] as $mealType => $categories) {
+            $itemNames = collect($meals[$mealType]['items'])->pluck('food_item.name')->all();
+
+            foreach ($categories as $expectedFoodName) {
+                $this->assertContains(
+                    $expectedFoodName,
+                    $itemNames,
+                    "meal={$mealType} no tiene \"{$expectedFoodName}\" (plan curado de lose_fat)",
+                );
+            }
+        }
     }
 
     // --- consultar plan ---

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,14 +7,19 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { StatTile } from '@/components/ui/stat-tile';
+import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTutorial } from '@/hooks/use-tutorial';
+import { foodCategoryIcon, formatFoodQuantityLabel } from '@sanken/core';
 import { MEAL_TYPE_LABELS, MEAL_TYPE_ORDER, groupMealsByType } from '@/lib/nutrition-grouping';
+import { useAuthStore } from '@/store/auth-store';
 import { useNutritionStore } from '@/store/nutrition-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function NutricionScreen() {
   const theme = useTheme();
+  const userId = useAuthStore((s) => s.user?.id);
   const {
     targets,
     isLoadingTargets,
@@ -41,6 +46,32 @@ export default function NutricionScreen() {
 
   const [substitutingItemId, setSubstitutingItemId] = useState<number | null>(null);
   const [substituteQuery, setSubstituteQuery] = useState('');
+
+  const tileGridRef = useRef<View>(null);
+  const planCardRef = useRef<View>(null);
+  const actionsRowRef = useRef<View>(null);
+  const tutorial = useTutorial(
+    'nutricion',
+    [
+      {
+        ref: tileGridRef,
+        title: 'Tus objetivos diarios',
+        description: 'Calculamos tus calorías y macros según tu perfil y tus objetivos de entrenamiento.',
+      },
+      {
+        ref: planCardRef,
+        title: 'Plan de comidas personalizado',
+        description: 'Te armamos un plan con porciones en unidades reales, como "2 huevos" en vez de solo gramos.',
+      },
+      {
+        ref: actionsRowRef,
+        title: 'Registrá lo que comés',
+        description: 'Buscá el alimento por nombre o escaneá su código de barras para sumarlo a tu día.',
+      },
+    ],
+    !isLoadingTargets,
+    userId,
+  );
 
   useEffect(() => {
     loadTargets();
@@ -73,7 +104,7 @@ export default function NutricionScreen() {
           )}
 
           {!isLoadingTargets && targets && (
-            <ThemedView style={styles.tileGrid}>
+            <ThemedView ref={tileGridRef} style={styles.tileGrid}>
               <StatTile label="Calorías" value={`${targets.calories} kcal`} />
               <StatTile label="Proteína" value={`${targets.protein_g} g`} />
               <StatTile label="Carbohidratos" value={`${targets.carbs_g} g`} />
@@ -90,7 +121,7 @@ export default function NutricionScreen() {
           )}
 
           {!profileIncomplete && (
-            <ThemedView type="backgroundElement" style={styles.card}>
+            <ThemedView ref={planCardRef} type="backgroundElement" style={styles.card}>
               <View style={styles.planHeaderRow}>
                 <ThemedText type="smallBold">Plan alimenticio personalizado</ThemedText>
                 {plan && (
@@ -141,10 +172,11 @@ export default function NutricionScreen() {
                   {meal.items.map((item) => (
                     <ThemedView key={item.id} style={styles.planItemBlock}>
                       <ThemedView style={styles.mealRow}>
-                        <ThemedText type="small">
-                          {item.food_item.name} · {item.quantity_grams}g · {item.calories} kcal
+                        <ThemedText type="small" style={styles.mealRowText}>
+                          {foodCategoryIcon(item.food_item.category)} {item.food_item.name} ·{' '}
+                          {formatFoodQuantityLabel(item.food_item, item.quantity_grams)} · {item.calories} kcal
                         </ThemedText>
-                        <Pressable onPress={() => startSubstituting(item.id)}>
+                        <Pressable onPress={() => startSubstituting(item.id)} hitSlop={8}>
                           <ThemedText type="small" themeColor="textSecondary">
                             Sustituir
                           </ThemedText>
@@ -190,7 +222,7 @@ export default function NutricionScreen() {
                                 setSubstitutingItemId(null);
                               }}>
                               <ThemedText type="small">
-                                {food.name} · {food.calories_per_100g} kcal/100g
+                                {foodCategoryIcon(food.category)} {food.name} · {food.calories_per_100g} kcal/100g
                               </ThemedText>
                             </Pressable>
                           ))}
@@ -203,7 +235,7 @@ export default function NutricionScreen() {
             </ThemedView>
           )}
 
-          <View style={styles.actionsRow}>
+          <View ref={actionsRowRef} style={styles.actionsRow}>
             <View style={styles.actionButton}>
               <PrimaryButton label="Buscar alimento" onPress={() => router.push('/nutricion/buscar')} />
             </View>
@@ -230,10 +262,11 @@ export default function NutricionScreen() {
               )}
               {groups[type].map((meal) => (
                 <ThemedView key={meal.id} style={styles.mealRow}>
-                  <ThemedText type="small">
-                    {meal.food_item.name} · {meal.quantity_grams}g · {meal.calories} kcal
+                  <ThemedText type="small" style={styles.mealRowText}>
+                    {foodCategoryIcon(meal.food_item.category)} {meal.food_item.name} ·{' '}
+                    {formatFoodQuantityLabel(meal.food_item, meal.quantity_grams)} · {meal.calories} kcal
                   </ThemedText>
-                  <Pressable onPress={() => deleteMeal(meal.id)}>
+                  <Pressable onPress={() => deleteMeal(meal.id)} hitSlop={8}>
                     <ThemedText type="small" themeColor="textSecondary">
                       Eliminar
                     </ThemedText>
@@ -246,6 +279,8 @@ export default function NutricionScreen() {
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />
         </ScrollView>
       </SafeAreaView>
+
+      <TutorialOverlay tutorial={tutorial} />
     </ThemedView>
   );
 }
@@ -280,10 +315,13 @@ const styles = StyleSheet.create({
   },
   mealRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: Spacing.one,
     backgroundColor: 'transparent',
   },
+  mealRowText: { flex: 1, flexShrink: 1, minWidth: 160 },
   planHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',

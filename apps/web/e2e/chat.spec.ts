@@ -10,7 +10,8 @@ async function registerUser(ctx: APIRequestContext, name: string, email: string)
     data: { name, email, password: PASSWORD, password_confirmation: PASSWORD },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
-  return ((await res.json()) as { data: { token: string } }).data.token
+  const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
+  return { token: data.token, id: data.user.id }
 }
 
 // Sin esto, RequireAuth manda al login posterior a /onboarding en vez de
@@ -34,6 +35,19 @@ async function login(page: Page, email: string) {
   await page.click('button[type=submit]')
 }
 
+// Este spec prueba chat, no el tutorial guiado -- lo marcamos como ya visto
+// en localStorage antes de la primera navegación para no depender de que el
+// clic en "Chatear" en /my-trainer le gane la carrera a la apertura
+// automática del tutorial, que si no lo bloquearía con su overlay de
+// pantalla completa (ver useTutorial).
+async function dismissTutorials(page: Page, userId: number) {
+  await page.addInitScript((id) => {
+    for (const section of ['inicio', 'nutricion', 'tienda', 'retos', 'calendario', 'chat', 'mi-entrenador']) {
+      localStorage.setItem(`sanken_tutorial_seen_${id}_${section}`, '1')
+    }
+  }, userId)
+}
+
 // Un solo login por UI por usuario en este archivo (throttle:5,1 en
 // /auth/login — ver la nota en challenges.spec.ts sobre por qué eso importa).
 test('un mensaje enviado por el entrenador llega en vivo al cliente, que lo ve desde "Mi entrenador"', async ({ browser }) => {
@@ -44,8 +58,8 @@ test('un mensaje enviado por el entrenador llega en vivo al cliente, que lo ve d
   const clientEmail = `e2e-chat-client-${RUN_ID}@sanken.app`
   const trainerName = `Coach Chat ${RUN_ID}`
 
-  const trainerToken = await registerUser(ctx, trainerName, trainerEmail)
-  const clientToken = await registerUser(ctx, `Cliente Chat ${RUN_ID}`, clientEmail)
+  const { token: trainerToken } = await registerUser(ctx, trainerName, trainerEmail)
+  const { token: clientToken, id: clientId } = await registerUser(ctx, `Cliente Chat ${RUN_ID}`, clientEmail)
   await completeOnboarding(ctx, trainerToken)
   await completeOnboarding(ctx, clientToken)
 
@@ -64,6 +78,8 @@ test('un mensaje enviado por el entrenador llega en vivo al cliente, que lo ve d
   await ctx.dispose()
 
   const trainerPage = await (await browser.newContext()).newPage()
+  // /trainer no tiene tutorial guiado (fuera de alcance, panel interno) --
+  // no hace falta dismissTutorials acá.
   await login(trainerPage, trainerEmail)
   await trainerPage.waitForURL(/\/trainer$/) // los entrenadores entran directo a /trainer, no a /dashboard
   await trainerPage.getByText(`Cliente Chat ${RUN_ID}`).click()
@@ -71,6 +87,7 @@ test('un mensaje enviado por el entrenador llega en vivo al cliente, que lo ve d
   await trainerPage.waitForURL(/\/chat\/\d+$/)
 
   const clientPage = await (await browser.newContext()).newPage()
+  await dismissTutorials(clientPage, clientId)
   await login(clientPage, clientEmail)
   await clientPage.waitForURL(/\/dashboard$/)
   await clientPage.goto('/my-trainer')

@@ -9,7 +9,8 @@ async function registerUser(ctx: APIRequestContext, name: string, email: string)
     data: { name, email, password: PASSWORD, password_confirmation: PASSWORD },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
-  return ((await res.json()) as { data: { token: string } }).data.token
+  const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
+  return { token: data.token, id: data.user.id }
 }
 
 async function authedPost(ctx: APIRequestContext, token: string, path: string, data: unknown = {}) {
@@ -35,6 +36,20 @@ async function login(page: Page, email: string) {
   await expect(page).toHaveURL(/\/dashboard$/)
 }
 
+// Este spec prueba nutrición, no el tutorial guiado -- lo marcamos como ya
+// visto en localStorage (clave por usuario+sección, ver tutorial-storage.ts)
+// antes de la primera navegación para no depender de que un clic real (ej.
+// el link "Nutrición" en /dashboard) le gane la carrera a la apertura
+// automática del tutorial (500ms tras cargar datos, ver useTutorial), que
+// si no bloquearía el clic con su overlay de pantalla completa.
+async function dismissTutorials(page: Page, userId: number) {
+  await page.addInitScript((id) => {
+    for (const section of ['inicio', 'nutricion', 'tienda', 'retos', 'calendario', 'chat', 'mi-entrenador']) {
+      localStorage.setItem(`sanken_tutorial_seen_${id}_${section}`, '1')
+    }
+  }, userId)
+}
+
 // La búsqueda pega contra Open Food Facts real (sin API key, mismo enfoque
 // que OpenFoodFactsClient — ver plan Sprint 12) así que usamos un término
 // común ("banana") que consistentemente devuelve resultados en vez de
@@ -51,10 +66,11 @@ test('completar el perfil habilita los objetivos, y registrar una comida por bú
 
   const name = `Nutri Test ${RUN_ID}`
   const email = `e2e-nutrition-${RUN_ID}@sanken.app`
-  const token = await registerUser(ctx, name, email)
+  const { token, id } = await registerUser(ctx, name, email)
   await completeOnboarding(ctx, token)
   await ctx.dispose()
 
+  await dismissTutorials(page, id)
   await login(page, email)
   await page.getByRole('link', { name: 'Nutrición' }).click()
   await expect(page).toHaveURL(/\/nutrition$/)
@@ -74,6 +90,6 @@ test('completar el perfil habilita los objetivos, y registrar una comida por bú
   await page.getByRole('button', { name: 'Registrar' }).click()
 
   const lunchSection = page.locator('section').filter({ hasText: 'Almuerzo' })
-  await expect(lunchSection.getByText('150g')).toBeVisible()
+  await expect(lunchSection.getByText('150 g')).toBeVisible()
   await expect(page.getByText(/Hoy llevás/)).not.toContainText('0 kcal')
 })

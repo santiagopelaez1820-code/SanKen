@@ -1,17 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { useTutorial } from '@/hooks/use-tutorial';
+import { useAuthStore } from '@/store/auth-store';
 import { useChatStore } from '@/store/chat-store';
 import { useMyTrainerStore } from '@/store/my-trainer-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function MiEntrenadorScreen() {
+  const userId = useAuthStore((s) => s.user?.id);
   const { trainers, isLoading, error, load } = useMyTrainerStore();
   const { openConversationForTrainerClient } = useChatStore();
   const [openingId, setOpeningId] = useState<number | null>(null);
@@ -19,6 +23,24 @@ export default function MiEntrenadorScreen() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const titleRef = useRef<View>(null);
+  const tutorial = useTutorial(
+    'mi-entrenador',
+    [
+      {
+        ref: titleRef,
+        title: 'Tu entrenador asignado',
+        description: 'Acá ves quién es tu entrenador y podés escribirle directamente cuando quieras.',
+      },
+      {
+        title: '¿Dudas sobre tu rutina o nutrición?',
+        description: 'Escribile por acá — te va a responder directo en el chat.',
+      },
+    ],
+    !isLoading,
+    userId,
+  );
 
   const openChat = async (trainerClientId: number) => {
     setOpeningId(trainerClientId);
@@ -34,9 +56,11 @@ export default function MiEntrenadorScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-          <ThemedText type="title" style={styles.pageTitle}>
-            Mi entrenador
-          </ThemedText>
+          <View ref={titleRef}>
+            <ThemedText type="title" style={styles.pageTitle}>
+              Mi entrenador
+            </ThemedText>
+          </View>
 
           {isLoading && (
             <Skeleton height={56} borderRadius={Spacing.three} />
@@ -79,6 +103,8 @@ export default function MiEntrenadorScreen() {
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />
         </ScrollView>
       </SafeAreaView>
+
+      <TutorialOverlay tutorial={tutorial} />
     </ThemedView>
   );
 }

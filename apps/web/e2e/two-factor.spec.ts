@@ -1,4 +1,4 @@
-import { test, expect, request as pwRequest } from '@playwright/test'
+import { test, expect, request as pwRequest, type Page } from '@playwright/test'
 import { execSync } from 'node:child_process'
 
 const API_URL = 'http://localhost:8000/api/v1'
@@ -6,6 +6,21 @@ const API_URL = 'http://localhost:8000/api/v1'
 // así que en vez de reusar+limpiar un fixture, cada corrida registra el suyo.
 const EMAIL = `e2e-2fa-${Date.now()}@sanken.app`
 const PASSWORD = 'E2eTwoFa123!'
+let userId: number
+
+// Este spec prueba 2FA, no el tutorial guiado -- lo marcamos como ya visto
+// en localStorage (clave por usuario+sección, ver tutorial-storage.ts) antes
+// de la primera navegación para no depender de que el clic en
+// "Configuración" en /dashboard le gane la carrera a la apertura automática
+// del tutorial, que si no lo bloquearía con su overlay de pantalla completa
+// (ver useTutorial).
+async function dismissTutorials(page: Page) {
+  await page.addInitScript((id) => {
+    for (const section of ['inicio', 'nutricion', 'tienda', 'retos', 'calendario', 'chat', 'mi-entrenador']) {
+      localStorage.setItem(`sanken_tutorial_seen_${id}_${section}`, '1')
+    }
+  }, userId)
+}
 
 function currentOtp(secret: string): string {
   return execSync(
@@ -30,7 +45,8 @@ test.beforeAll(async () => {
 
   // Sin onboarding completo, RequireAuth manda al usuario a /onboarding en
   // vez de /dashboard tras el login — este spec asume que entra directo.
-  const { data } = (await res.json()) as { data: { token: string } }
+  const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
+  userId = data.user.id
   const headers = { Authorization: `Bearer ${data.token}` }
   await ctx.post(`${API_URL}/onboarding`, {
     data: {
@@ -45,6 +61,7 @@ test.beforeAll(async () => {
 })
 
 test('activar, desafiar en el login, y desactivar 2FA de punta a punta', async ({ page }) => {
+  await dismissTutorials(page)
   await page.goto('/login')
   await page.fill('#email', EMAIL)
   await page.fill('#password', PASSWORD)

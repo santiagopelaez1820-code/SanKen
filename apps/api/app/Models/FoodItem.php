@@ -16,6 +16,9 @@ class FoodItem extends Model
         'protein_per_100g',
         'carbs_per_100g',
         'fat_per_100g',
+        'serving_size_grams',
+        'serving_unit_singular',
+        'serving_unit_plural',
         'source',
         'source_id',
     ];
@@ -27,6 +30,7 @@ class FoodItem extends Model
             'protein_per_100g' => 'decimal:2',
             'carbs_per_100g' => 'decimal:2',
             'fat_per_100g' => 'decimal:2',
+            'serving_size_grams' => 'decimal:2',
         ];
     }
 

@@ -18,6 +18,12 @@ export interface FoodItem {
   protein_per_100g: number;
   carbs_per_100g: number;
   fat_per_100g: number;
+  /** Peso típico de una unidad natural de este alimento (p.ej. 1 huevo = 50g). Null si no aplica (productos de Open Food Facts). */
+  serving_size_grams: number | null;
+  /** p.ej. "huevo" */
+  serving_unit_singular: string | null;
+  /** p.ej. "huevos" */
+  serving_unit_plural: string | null;
 }
 
 export interface MealLog {

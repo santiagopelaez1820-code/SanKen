@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -12,13 +12,17 @@ import { ThemedView } from '@/components/themed-view';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
+import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTutorial } from '@/hooks/use-tutorial';
+import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useProductStore } from '@/store/product-store';
 
 export default function StoreScreen() {
   const theme = useTheme();
+  const userId = useAuthStore((s) => s.user?.id);
   const { products, isLoadingProducts, productsError, loadProducts } = useProductStore();
   // La hidratación del carrito corre una sola vez en store/_layout.tsx
   // (compartido por todas las pantallas de /store), no acá.
@@ -29,6 +33,32 @@ export default function StoreScreen() {
     loadProducts();
   }, [loadProducts]);
 
+  const headerRef = useRef<View>(null);
+  const headerListRef = useRef<View>(null);
+  const cartButtonRef = useRef<View>(null);
+  const tutorial = useTutorial(
+    'tienda',
+    [
+      {
+        ref: headerRef,
+        title: 'SanKen Store',
+        description: 'Suplementos y merch pensados para tu entrenamiento, con envío a todo el país.',
+      },
+      {
+        ref: headerListRef,
+        title: 'Explorá por categoría',
+        description: 'Filtrá por categoría o mirá los productos destacados arriba de la lista.',
+      },
+      {
+        ref: cartButtonRef,
+        title: 'Tu carrito',
+        description: 'Sumá productos acá y confirmá tu pedido cuando quieras.',
+      },
+    ],
+    !isLoadingProducts,
+    userId,
+  );
+
   const featured = useMemo(() => products.slice(0, 5), [products]);
   const filtered = useMemo(
     () => (category ? products.filter((p) => p.category === category) : products),
@@ -38,7 +68,7 @@ export default function StoreScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.header}>
+        <View ref={headerRef} style={styles.header}>
           <View>
             <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
               SANKEN
@@ -48,6 +78,7 @@ export default function StoreScreen() {
             </ThemedText>
           </View>
           <Pressable
+            ref={cartButtonRef}
             onPress={() => router.push('/store/cart')}
             accessibilityLabel="Ver carrito"
             style={[styles.cartButton, { backgroundColor: theme.backgroundElement }]}>
@@ -81,7 +112,7 @@ export default function StoreScreen() {
             columnWrapperStyle={styles.column}
             contentContainerStyle={styles.listContent}
             ListHeaderComponent={
-              <View style={styles.headerList}>
+              <View ref={headerListRef} style={styles.headerList}>
                 {featured.length > 0 && (
                   <View style={styles.section}>
                     <ThemedText type="smallBold">Destacados</ThemedText>
@@ -115,6 +146,8 @@ export default function StoreScreen() {
           />
         )}
       </SafeAreaView>
+
+      <TutorialOverlay tutorial={tutorial} />
     </ThemedView>
   );
 }

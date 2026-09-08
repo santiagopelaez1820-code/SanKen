@@ -1,24 +1,50 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Container } from "react-bootstrap"
 import { Flag } from "lucide-react"
 import type { Challenge } from "@sanken/core"
 import { api } from "@/lib/api"
+import { useAuthStore } from "@/lib/auth-store"
 import { ChallengeCard } from "@/components/challenges/ChallengeCard"
 import { ChallengeHero } from "@/components/challenges/ChallengeHero"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SankEmptyState } from "@/components/ui/SankEmptyState"
+import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay"
+import { useTutorial } from "@/hooks/use-tutorial"
 import { fadeInUp, staggerContainer } from "@/lib/motion"
 
 export function ChallengesPage() {
   const [expandedId, setExpandedId] = useState<number | null>(null)
   const queryClient = useQueryClient()
+  const userId = useAuthStore((s) => s.user?.id)
 
   const { data: challenges, isLoading } = useQuery({
     queryKey: ["challenges"],
     queryFn: () => api.get<Challenge[]>("/challenges"),
   })
+
+  const titleRef = useRef<HTMLDivElement>(null)
+  const tutorial = useTutorial(
+    "retos",
+    [
+      {
+        target: titleRef,
+        title: "Retos SanKen",
+        description: "Desafíos semanales y mensuales para mantenerte motivado, con tabla de posiciones en vivo.",
+      },
+      {
+        title: "Unite y trackeá tu progreso",
+        description: "Al unirte a un reto, tu avance se calcula solo con cada entrenamiento que ya registrás.",
+      },
+      {
+        title: "¡Celebralo al completarlo!",
+        description: "Cuando cumplas el objetivo vas a quedar marcado como completado y en el ranking.",
+      },
+    ],
+    !isLoading,
+    userId
+  )
 
   const join = async (challengeId: number) => {
     await api.post(`/challenges/${challengeId}/join`)
@@ -34,7 +60,7 @@ export function ChallengesPage() {
   return (
     <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1080 }}>
       <motion.div className="d-flex flex-column gap-4" variants={staggerContainer()} initial="hidden" animate="show">
-        <motion.div variants={fadeInUp}>
+        <motion.div ref={titleRef} variants={fadeInUp}>
           <p className="sank-eyebrow sank-eyebrow--cyan mb-1">Comunidad</p>
           <h1 className="display-5 sank-stat mb-0">Retos</h1>
         </motion.div>
@@ -76,6 +102,8 @@ export function ChallengesPage() {
           </motion.div>
         )}
       </motion.div>
+
+      <TutorialOverlay tutorial={tutorial} />
     </Container>
   )
 }

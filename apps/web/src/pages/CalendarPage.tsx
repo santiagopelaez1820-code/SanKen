@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import type { CalendarEvent, CalendarResponse } from "@sanken/core"
 import { api } from "@/lib/api"
+import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { monthGrid, toDateKey, toMonthKey } from "@/lib/calendar-grid"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay"
+import { useTutorial } from "@/hooks/use-tutorial"
 
 const WEEKDAY_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
 
@@ -23,6 +26,7 @@ export function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [reminderTitle, setReminderTitle] = useState("")
   const queryClient = useQueryClient()
+  const userId = useAuthStore((s) => s.user?.id)
 
   const monthKey = toMonthKey(monthStart)
 
@@ -58,12 +62,36 @@ export function CalendarPage() {
 
   const selectedEvents = selectedDate ? (eventsByDate.get(selectedDate) ?? []) : []
 
+  const monthNavRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
+  const tutorial = useTutorial(
+    "calendario",
+    [
+      {
+        target: monthNavRef,
+        title: "Navegá tu historial",
+        description: "Movete entre meses para ver tus entrenamientos pasados y los que tenés planeados.",
+      },
+      {
+        target: gridRef,
+        title: "Qué significa cada punto",
+        description: "Los puntos de color marcan entrenamientos completados, planeados y tus recordatorios.",
+      },
+      {
+        title: "Agregá tus propios recordatorios",
+        description: "Hacé clic en cualquier día para ver el detalle y sumar un recordatorio personal.",
+      },
+    ],
+    !isLoading,
+    userId
+  )
+
   return (
     <main className="px-6 py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Calendario</h1>
 
-        <div className="flex items-center justify-between">
+        <div ref={monthNavRef} className="flex items-center justify-between">
           <Button
             variant="outline"
             size="sm"
@@ -89,7 +117,7 @@ export function CalendarPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
+        <div ref={gridRef} className="grid grid-cols-7 gap-1">
           {grid.map((date) => {
             const dateKey = toDateKey(date)
             const dayEvents = eventsByDate.get(dateKey) ?? []
@@ -172,6 +200,8 @@ export function CalendarPage() {
           </div>
         )}
       </div>
+
+      <TutorialOverlay tutorial={tutorial} />
     </main>
   )
 }

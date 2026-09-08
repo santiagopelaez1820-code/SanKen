@@ -1,4 +1,4 @@
-import { test, expect, request as pwRequest, type APIRequestContext } from '@playwright/test'
+import { test, expect, request as pwRequest, type APIRequestContext, type Page } from '@playwright/test'
 import { execSync } from 'node:child_process'
 
 const API_URL = 'http://localhost:8000/api/v1'
@@ -14,7 +14,8 @@ async function registerUser(ctx: APIRequestContext, name: string, email: string)
     data: { name, email, password: 'Rankings123!', password_confirmation: 'Rankings123!' },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
-  return ((await res.json()) as { data: { token: string } }).data.token
+  const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
+  return { token: data.token, id: data.user.id }
 }
 
 async function authedPost(ctx: APIRequestContext, token: string, path: string, data: unknown = {}) {
@@ -27,6 +28,19 @@ async function authedGet(ctx: APIRequestContext, token: string, path: string) {
   const res = await ctx.get(`${API_URL}${path}`, { headers: { Authorization: `Bearer ${token}` } })
   if (!res.ok()) throw new Error(`GET ${path} failed: ${res.status()} ${await res.text()}`)
   return res.json()
+}
+
+// Este spec prueba rankings, no el tutorial guiado -- lo marcamos como ya
+// visto en localStorage antes de la primera navegación para no depender de
+// que el clic en "Rankings" en /dashboard le gane la carrera a la apertura
+// automática del tutorial, que si no lo bloquearía con su overlay de
+// pantalla completa (ver useTutorial).
+async function dismissTutorials(page: Page, userId: number) {
+  await page.addInitScript((id) => {
+    for (const section of ['inicio', 'nutricion', 'tienda', 'retos', 'calendario', 'chat', 'mi-entrenador']) {
+      localStorage.setItem(`sanken_tutorial_seen_${id}_${section}`, '1')
+    }
+  }, userId)
 }
 
 async function completeOnboardingAndLogVolume(
@@ -70,8 +84,8 @@ test('el ranking de ciudad muestra a ambos usuarios ordenados por volumen, con l
   const nameB = `Atleta Dos ${RUN_ID}`
   const emailA = `e2e-rankings-a-${RUN_ID}@sanken.app`
   const emailB = `e2e-rankings-b-${RUN_ID}@sanken.app`
-  const tokenA = await registerUser(ctx, nameA, emailA)
-  const tokenB = await registerUser(ctx, nameB, emailB)
+  const { token: tokenA, id: idA } = await registerUser(ctx, nameA, emailA)
+  const { token: tokenB } = await registerUser(ctx, nameB, emailB)
 
   // Misma ciudad (id=1, sembrada en la DB de dev), volúmenes distintos y
   // determinísticos: A entrena más peso que B, así el orden es predecible.
@@ -82,6 +96,7 @@ test('el ranking de ciudad muestra a ambos usuarios ordenados por volumen, con l
 
   await ctx.dispose()
 
+  await dismissTutorials(page, idA)
   await page.goto('/login')
   await page.fill('#email', emailA)
   await page.fill('#password', 'Rankings123!')

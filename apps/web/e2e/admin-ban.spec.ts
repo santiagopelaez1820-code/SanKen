@@ -10,7 +10,8 @@ async function registerUser(ctx: APIRequestContext, name: string, email: string)
     data: { name, email, password: PASSWORD, password_confirmation: PASSWORD },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
-  return ((await res.json()) as { data: { token: string } }).data.token
+  const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
+  return { token: data.token, id: data.user.id }
 }
 
 // El admin necesita llegar a /dashboard (y de ahí a /admin) tras loguearse;
@@ -41,6 +42,19 @@ async function login(page: Page, email: string) {
   await page.click('button[type=submit]')
 }
 
+// Este spec prueba el baneo de admin, no el tutorial guiado -- lo marcamos
+// como ya visto en localStorage antes de la primera navegación para no
+// depender de que el clic en "Super Admin" en /dashboard le gane la carrera
+// a la apertura automática del tutorial, que si no lo bloquearía con su
+// overlay de pantalla completa (ver useTutorial).
+async function dismissTutorials(page: Page, userId: number) {
+  await page.addInitScript((id) => {
+    for (const section of ['inicio', 'nutricion', 'tienda', 'retos', 'calendario', 'chat', 'mi-entrenador']) {
+      localStorage.setItem(`sanken_tutorial_seen_${id}_${section}`, '1')
+    }
+  }, userId)
+}
+
 test('un admin banea a un usuario, y ese usuario ya no puede volver a loguearse', async ({ page, browser }) => {
   const ctx = await pwRequest.newContext()
 
@@ -49,11 +63,12 @@ test('un admin banea a un usuario, y ese usuario ya no puede volver a loguearse'
   const adminEmail = `e2e-ban-admin-${RUN_ID}@sanken.app`
 
   await registerUser(ctx, targetName, targetEmail)
-  const adminToken = await registerUser(ctx, `Admin ${RUN_ID}`, adminEmail)
+  const { token: adminToken, id: adminId } = await registerUser(ctx, `Admin ${RUN_ID}`, adminEmail)
   await completeOnboarding(ctx, adminToken)
   promoteToAdmin(adminEmail)
   await ctx.dispose()
 
+  await dismissTutorials(page, adminId)
   await login(page, adminEmail)
   await expect(page).toHaveURL(/\/dashboard$/)
 

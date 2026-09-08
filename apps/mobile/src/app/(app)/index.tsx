@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
-import { Image, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, type View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
@@ -18,8 +18,10 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoreMenu } from '@/components/layout/more-menu';
+import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { BottomTabInset, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTutorial } from '@/hooks/use-tutorial';
 import { api } from '@/lib/api';
 import { apiDateKey, toDateKey } from '@/lib/calendar-grid';
 import { useAuthStore } from '@/store/auth-store';
@@ -51,6 +53,30 @@ export default function HomeScreen() {
   const [confirmingSkip, setConfirmingSkip] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
   const [moreMenuVisible, setMoreMenuVisible] = useState(false);
+
+  const brandCardRef = useRef<View>(null);
+  const menuButtonRef = useRef<View>(null);
+  const tutorial = useTutorial(
+    'inicio',
+    [
+      {
+        ref: brandCardRef,
+        title: '¡Bienvenido a SanKen! 👋',
+        description: 'Este es tu punto de partida: acá vas a ver tu entrenamiento del día, tu racha y tu progreso general.',
+      },
+      {
+        ref: menuButtonRef,
+        title: 'Todo lo demás está acá',
+        description: 'Desde este menú accedés a Nutrición, Calendario, Chat, Mi Entrenador y más opciones.',
+      },
+      {
+        title: 'Explorá la barra inferior',
+        description: 'Progreso, Tienda, Retos y tu Perfil están siempre a un toque de distancia, abajo de la pantalla.',
+      },
+    ],
+    !isLoading,
+    user?.id,
+  );
 
   useEffect(() => {
     load();
@@ -109,6 +135,7 @@ export default function HomeScreen() {
             </ThemedText>
           </ThemedView>
           <Pressable
+            ref={menuButtonRef}
             onPress={() => setMoreMenuVisible(true)}
             style={[styles.menuButton, { backgroundColor: theme.backgroundElement }]}>
             <Menu size={20} color={theme.text} />
@@ -120,6 +147,7 @@ export default function HomeScreen() {
 
         <Animated.View entering={FadeInUp.duration(360)}>
           <ThemedView
+            ref={brandCardRef}
             type="backgroundElement"
             style={[styles.brandCard, { borderColor: `${theme.accent}30` }, glowShadow(theme.accent)]}>
             <LinearGradient
@@ -291,6 +319,8 @@ export default function HomeScreen() {
         onClose={() => setMoreMenuVisible(false)}
         unreadFeedCount={unreadFeedCount}
       />
+
+      <TutorialOverlay tutorial={tutorial} />
     </ThemedView>
   );
 }

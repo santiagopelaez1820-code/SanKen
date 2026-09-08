@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,9 +7,12 @@ import type { CalendarEvent } from '@sanken/core';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTutorial } from '@/hooks/use-tutorial';
 import { monthGrid, toDateKey } from '@/lib/calendar-grid';
+import { useAuthStore } from '@/store/auth-store';
 import { useCalendarioStore } from '@/store/calendario-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -29,6 +32,7 @@ function eventColor(
 
 export default function CalendarioScreen() {
   const theme = useTheme();
+  const userId = useAuthStore((s) => s.user?.id);
   const { month, events, isLoading, error, setMonth, load, addReminder, deleteReminder } = useCalendarioStore();
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [reminderTitle, setReminderTitle] = useState('');
@@ -37,6 +41,30 @@ export default function CalendarioScreen() {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const monthNavRef = useRef<View>(null);
+  const gridRef = useRef<View>(null);
+  const tutorial = useTutorial(
+    'calendario',
+    [
+      {
+        ref: monthNavRef,
+        title: 'Navegá tu historial',
+        description: 'Movete entre meses para ver tus entrenamientos pasados y los que tenés planeados.',
+      },
+      {
+        ref: gridRef,
+        title: 'Qué significa cada punto',
+        description: 'Los puntos de color marcan entrenamientos completados, planeados y tus recordatorios.',
+      },
+      {
+        title: 'Agregá tus propios recordatorios',
+        description: 'Tocá cualquier día para ver el detalle y sumar un recordatorio personal.',
+      },
+    ],
+    !isLoading,
+    userId,
+  );
 
   const eventsByDate = useMemo(() => {
     const map = new Map<string, CalendarEvent[]>();
@@ -60,7 +88,7 @@ export default function CalendarioScreen() {
             Calendario
           </ThemedText>
 
-          <View style={styles.monthNav}>
+          <View ref={monthNavRef} style={styles.monthNav}>
             <Pressable
               onPress={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
               style={[styles.navButton, { borderColor: theme.backgroundSelected }]}>
@@ -84,7 +112,7 @@ export default function CalendarioScreen() {
             ))}
           </View>
 
-          <View style={styles.grid}>
+          <View ref={gridRef} style={styles.grid}>
             {grid.map((date) => {
               const dateKey = toDateKey(date);
               const dayEvents = eventsByDate.get(dateKey) ?? [];
@@ -183,6 +211,8 @@ export default function CalendarioScreen() {
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />
         </ScrollView>
       </SafeAreaView>
+
+      <TutorialOverlay tutorial={tutorial} />
     </ThemedView>
   );
 }

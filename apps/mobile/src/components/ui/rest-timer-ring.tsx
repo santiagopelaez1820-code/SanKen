@@ -26,13 +26,18 @@ interface RestTimerRingProps {
 export function RestTimerRing({ restingUntil, totalSeconds, onSkip, onFinish }: RestTimerRingProps) {
   const [remaining, setRemaining] = useState(totalSeconds);
   const [isPaused, setIsPaused] = useState(false);
-  const finishedRef = useRef(false);
+
+  // Siempre la versión más nueva de onFinish, sin que el interval de abajo
+  // tenga que reprogramarse si su identidad cambia entre renders.
+  const onFinishRef = useRef(onFinish);
+  useEffect(() => {
+    onFinishRef.current = onFinish;
+  }, [onFinish]);
 
   useEffect(() => {
     if (restingUntil === null) return;
     setRemaining(totalSeconds);
     setIsPaused(false);
-    finishedRef.current = false;
   }, [restingUntil, totalSeconds]);
 
   useEffect(() => {
@@ -40,12 +45,23 @@ export function RestTimerRing({ restingUntil, totalSeconds, onSkip, onFinish }: 
     // `remaining` NO va en las deps a propósito: si lo estuviera, el efecto
     // se reprograma en cada tick (cada segundo) porque `remaining` cambia,
     // destruyendo y recreando el interval en vez de dejarlo correr una sola
-    // vez por período de descanso. El propio callback se autodetiene al
-    // llegar a 0 en vez de depender de que el efecto se vuelva a ejecutar.
+    // vez por período de descanso.
+    //
+    // onFinish se dispara ACÁ ADENTRO (no en un efecto aparte que mira
+    // `remaining`) a propósito: un efecto separado que compara `remaining`
+    // contra 0 lee ese estado ANTES de que el reset de arriba (setRemaining)
+    // se aplique de verdad (setState es asíncrono) — al arrancar el
+    // descanso de la serie 2, ese efecto veía el `remaining` viejo, todavía
+    // en 0 desde que terminó el descanso de la serie 1, y llamaba a
+    // onFinish() de nuevo al instante, cortando el timer nuevo antes de que
+    // se llegara a ver (confirmado probando la app: el conteo solo aparecía
+    // después de la primera serie). Acá adentro `prev` es siempre el valor
+    // real y actual, no hay lectura cruzada entre efectos.
     const id = setInterval(() => {
       setRemaining((prev) => {
         if (prev <= 1) {
           clearInterval(id);
+          onFinishRef.current?.();
           return 0;
         }
         return prev - 1;
@@ -53,15 +69,6 @@ export function RestTimerRing({ restingUntil, totalSeconds, onSkip, onFinish }: 
     }, 1000);
     return () => clearInterval(id);
   }, [restingUntil, isPaused]);
-
-  useEffect(() => {
-    if (restingUntil === null || finishedRef.current || remaining > 0) return;
-    finishedRef.current = true;
-    onFinish?.();
-    // onFinish intencionalmente fuera de deps — es un callback del padre, no
-    // queremos reprogramar el efecto si su identidad cambia entre renders.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remaining, restingUntil]);
 
   if (restingUntil === null) return null;
 

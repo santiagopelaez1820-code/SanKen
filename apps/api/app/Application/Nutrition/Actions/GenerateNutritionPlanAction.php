@@ -2,6 +2,7 @@
 
 namespace App\Application\Nutrition\Actions;
 
+use App\Domain\Nutrition\Services\NutritionPlanTemplateCatalog;
 use App\Domain\Nutrition\Services\NutritionTargetCalculator;
 use App\Models\FoodItem;
 use App\Models\NutritionPlan;
@@ -15,9 +16,16 @@ use RuntimeException;
  * Genera (o regenera, reemplazando el anterior) el plan alimenticio opt-in
  * de un usuario: reparte sus objetivos diarios (NutritionTargetCalculator)
  * entre 4 comidas según config('nutrition.meal_split_ratio'), y arma cada
- * comida con alimentos del catálogo curado (food_items source='manual')
- * según config('nutrition.meal_categories'). Solo usa el catálogo curado,
- * nunca productos de Open Food Facts (marcas/porciones no controladas).
+ * comida con alimentos del catálogo curado (food_items source='manual').
+ * Solo usa el catálogo curado, nunca productos de Open Food Facts (marcas/
+ * porciones no controladas).
+ *
+ * Qué alimento entra en cada comida sale de NutritionPlanTemplateCatalog
+ * (20 planes curados según el objetivo primario del usuario, elegidos de
+ * forma estable por usuario) en vez de elegirse al azar — así dos usuarios
+ * con datos distintos no terminan viendo la misma combinación de comidas.
+ * Las CANTIDADES siguen calculándose exactamente igual que siempre
+ * (gramsForMacro/FIXED_PORTION_GRAMS), eso no cambió.
  */
 class GenerateNutritionPlanAction
 {
@@ -65,7 +73,11 @@ class GenerateNutritionPlanAction
             $trainedToday,
         );
 
-        return DB::transaction(function () use ($user, $targets) {
+        // Mismo criterio que NutritionTargetCalculator: solo la meta
+        // primaria (primer elemento) decide qué plan curado se usa.
+        $template = NutritionPlanTemplateCatalog::pickForUser($user->id, $onboarding->goals[0] ?? '');
+
+        return DB::transaction(function () use ($user, $targets, $template) {
             // Un usuario tiene a lo sumo un plan (unique en user_id):
             // regenerar reemplaza el anterior por completo, cascade borra
             // sus meals/items.
@@ -92,19 +104,37 @@ class GenerateNutritionPlanAction
                     'target_fat_g' => (int) round($targets['fat_g'] * $ratio),
                 ]);
 
-                $this->fillMeal($meal, $mealType);
+                $this->fillMeal($meal, $mealType, $template['meals'][$mealType] ?? []);
             }
 
             return $plan->load('meals.items.foodItem');
         });
     }
 
-    private function fillMeal(NutritionPlanMeal $meal, string $mealType): void
+    /**
+     * @param  array<string, string>  $templateFoodNames  categoría -> nombre del FoodItem elegido para esta comida en el plan curado (vacío si no hay plantilla para el objetivo del usuario).
+     */
+    private function fillMeal(NutritionPlanMeal $meal, string $mealType, array $templateFoodNames): void
     {
         $categories = config("nutrition.meal_categories.{$mealType}", []);
 
         foreach ($categories as $category) {
-            $food = FoodItem::query()
+            $food = null;
+
+            // Primero el alimento que indica el plan curado para esta
+            // categoría; si no existe en el catálogo (no debería pasar,
+            // pero un catálogo desactualizado no tiene por qué tumbar la
+            // generación) o no hay plantilla para el objetivo del usuario,
+            // cae al azar de siempre dentro de la misma categoría.
+            if (isset($templateFoodNames[$category])) {
+                $food = FoodItem::query()
+                    ->where('source', 'manual')
+                    ->where('category', $category)
+                    ->where('name', $templateFoodNames[$category])
+                    ->first();
+            }
+
+            $food ??= FoodItem::query()
                 ->where('source', 'manual')
                 ->where('category', $category)
                 ->inRandomOrder()

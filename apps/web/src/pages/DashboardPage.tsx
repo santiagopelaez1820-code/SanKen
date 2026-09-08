@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { motion } from "framer-motion"
 import { Container } from "react-bootstrap"
@@ -9,6 +10,8 @@ import { PerformanceHero } from "@/components/dashboard/PerformanceHero"
 import { RecentPRsRow } from "@/components/dashboard/RecentPRsRow"
 import { AchievementsList } from "@/components/dashboard/AchievementsList"
 import { DashboardChallengesRow } from "@/components/dashboard/DashboardChallengesRow"
+import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay"
+import { useTutorial } from "@/hooks/use-tutorial"
 import { fadeInUp, staggerContainer } from "@/lib/motion"
 
 function greeting() {
@@ -31,6 +34,30 @@ export function DashboardPage() {
     queryFn: () => api.get<GamificationSummary>("/gamification"),
   })
 
+  const brandCardRef = useRef<HTMLDivElement>(null)
+  const nextWorkoutRef = useRef<HTMLDivElement>(null)
+  const tutorial = useTutorial(
+    "inicio",
+    [
+      {
+        target: brandCardRef,
+        title: "¡Bienvenido a SanKen! 👋",
+        description: "Este es tu punto de partida: acá vas a ver tu entrenamiento del día, tu racha y tu progreso general.",
+      },
+      {
+        target: nextWorkoutRef,
+        title: "Tu entrenamiento de hoy",
+        description: "Acá vas a ver la rutina del día y un botón para arrancarla directo.",
+      },
+      {
+        title: "Todo lo demás está en el menú",
+        description: "Desde el menú lateral accedés a Nutrición, Calendario, Chat, Retos, Tienda y más.",
+      },
+    ],
+    !isLoading,
+    user?.id
+  )
+
   return (
     <Container fluid className="px-3 px-md-4 py-4 py-md-5" style={{ maxWidth: 1080 }}>
       <motion.div className="d-flex flex-column gap-4" variants={staggerContainer()} initial="hidden" animate="show">
@@ -42,6 +69,7 @@ export function DashboardPage() {
 
         <motion.div variants={fadeInUp}>
           <div
+            ref={brandCardRef}
             className="d-flex flex-column align-items-center text-center position-relative overflow-hidden"
             style={{
               borderRadius: 24,
@@ -73,7 +101,7 @@ export function DashboardPage() {
           </div>
         </motion.div>
 
-        <motion.div variants={fadeInUp}>
+        <motion.div variants={fadeInUp} ref={nextWorkoutRef}>
           <NextWorkoutCard />
         </motion.div>
 
@@ -98,6 +126,8 @@ export function DashboardPage() {
           />
         </motion.div>
       </motion.div>
+
+      <TutorialOverlay tutorial={tutorial} />
     </Container>
   )
 }

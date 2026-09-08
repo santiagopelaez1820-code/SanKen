@@ -23,6 +23,9 @@ const food: FoodItem = {
   protein_per_100g: 6.3,
   carbs_per_100g: 57.5,
   fat_per_100g: 30.9,
+  serving_size_grams: null,
+  serving_unit_singular: null,
+  serving_unit_plural: null,
 };
 
 const proteinFood: FoodItem = {
@@ -35,6 +38,9 @@ const proteinFood: FoodItem = {
   protein_per_100g: 31,
   carbs_per_100g: 0,
   fat_per_100g: 3.6,
+  serving_size_grams: 150,
+  serving_unit_singular: 'pechuga',
+  serving_unit_plural: 'pechugas',
 };
 
 const plan: NutritionPlan = {

@@ -1,31 +1,59 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
+import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useTutorial } from '@/hooks/use-tutorial';
+import { useAuthStore } from '@/store/auth-store';
 import { useChatStore } from '@/store/chat-store';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ChatInboxScreen() {
   const theme = useTheme();
+  const userId = useAuthStore((s) => s.user?.id);
   const { conversations, isLoadingInbox, inboxError, loadInbox } = useChatStore();
 
   useEffect(() => {
     loadInbox();
   }, [loadInbox]);
 
+  const titleRef = useRef<View>(null);
+  const tutorial = useTutorial(
+    'chat',
+    [
+      {
+        ref: titleRef,
+        title: 'Chat con tu entrenador',
+        description: 'Acá hablás directo con tu entrenador asignado, en tiempo real.',
+      },
+      {
+        title: 'Tus conversaciones',
+        description: 'Cuando tengas conversaciones activas, las vas a ver listadas acá con los mensajes sin leer marcados.',
+      },
+      {
+        title: '¿Todavía no escribiste a nadie?',
+        description: 'Andá a "Mi entrenador" y tocá "Chatear" para empezar una conversación.',
+      },
+    ],
+    !isLoadingInbox,
+    userId,
+  );
+
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-          <ThemedText type="title" style={styles.pageTitle}>
-            Chat
-          </ThemedText>
+          <View ref={titleRef}>
+            <ThemedText type="title" style={styles.pageTitle}>
+              Chat
+            </ThemedText>
+          </View>
 
           {isLoadingInbox && (
             <Skeleton height={72} borderRadius={Spacing.three} />
@@ -66,6 +94,8 @@ export default function ChatInboxScreen() {
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />
         </ScrollView>
       </SafeAreaView>
+
+      <TutorialOverlay tutorial={tutorial} />
     </ThemedView>
   );
 }

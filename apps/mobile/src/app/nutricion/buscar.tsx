@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { FoodItem } from '@sanken/core';
+import { foodCategoryIcon, formatFoodQuantity } from '@sanken/core';
 
 import { LogMealForm } from '@/components/nutrition/log-meal-form';
 import { ThemedText } from '@/components/themed-text';
@@ -71,21 +72,27 @@ export default function BuscarAlimentoScreen() {
             </ThemedText>
           )}
 
-          {searchResults.map((food) => (
-            <Pressable key={food.id} onPress={() => setPendingFood(food)}>
-              <ThemedView type="backgroundElement" style={styles.resultRow}>
-                <ThemedText type="small">{food.name}</ThemedText>
-                {food.brand && (
-                  <ThemedText type="small" themeColor="textSecondary">
-                    {food.brand}
+          {searchResults.map((food) => {
+            const serving = food.serving_size_grams ? formatFoodQuantity(food, food.serving_size_grams) : null;
+            return (
+              <Pressable key={food.id} onPress={() => setPendingFood(food)}>
+                <ThemedView type="backgroundElement" style={styles.resultRow}>
+                  <ThemedText type="small">
+                    {foodCategoryIcon(food.category)} {food.name}
                   </ThemedText>
-                )}
-                <ThemedText type="small" themeColor="textSecondary">
-                  {food.calories_per_100g} kcal/100g
-                </ThemedText>
-              </ThemedView>
-            </Pressable>
-          ))}
+                  {food.brand && (
+                    <ThemedText type="small" themeColor="textSecondary">
+                      {food.brand}
+                    </ThemedText>
+                  )}
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {food.calories_per_100g} kcal/100g
+                    {serving?.servings ? ` · ${serving.servings} ≈ ${serving.grams}` : ''}
+                  </ThemedText>
+                </ThemedView>
+              </Pressable>
+            );
+          })}
 
           {pendingFood && <LogMealForm food={pendingFood} onLogged={handleLogged} />}
 
