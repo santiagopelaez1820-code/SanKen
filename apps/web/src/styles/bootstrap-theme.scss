@@ -9,6 +9,24 @@
 @import "./sanken-variables";
 @import "bootstrap/scss/bootstrap";
 
+// ---------------------------------------------------------------------------
+// Modo claro/oscuro real.
+//
+// Los $sanken-* de sanken-variables.scss (y con ellos $body-bg, $card-bg,
+// $input-bg, etc.) son SASS -- Bootstrap los usa para COMPILAR el CSS de sus
+// componentes (.form-control, .card, .dropdown-menu...) con esos colores
+// HORNEADOS como valores fijos, no como var(). Eso significa que ni esas
+// clases ni --sanken-* cambian solas con el atributo data-bs-theme: hace
+// falta reescribir manualmente, acá y en cada .tsx que use var(--sanken-*)
+// directo, la mitad clara de la paleta.
+//
+// $sanken-* siguen alimentando :root (y por lo tanto el HTML/CSS compilado
+// de Bootstrap) con la paleta OSCURA de marca sin tocarla -- es el modo
+// default. Acá solo se agrega la mitad CLARA, sobre las mismas --sanken-*
+// (para el código propio) y --bs-* de mayor alcance que si son dinámicas
+// (para lo poco de Bootstrap que las usa en runtime). El resto (por
+// componente) se corrige en las reglas de abajo.
+// ---------------------------------------------------------------------------
 :root,
 [data-bs-theme="dark"] {
   --sanken-black: #{$sanken-black};
@@ -20,15 +38,76 @@
   --sanken-white: #{$sanken-white};
   --sanken-cyan: #{$sanken-cyan};
   --sanken-cyan-light: #{$sanken-cyan-light};
+  --sanken-cyan-deep: #{$sanken-cyan-deep};
   --sanken-cyan-dim: #{$sanken-cyan-dim};
+  // Texto/ícono sobre una superficie de acento cyan (botón primario, FAB,
+  // link activo del rail, badges de contador) — SIEMPRE oscuro fijo, en los
+  // dos modos: el cyan nunca es lo bastante oscuro para necesitar texto
+  // claro encima. No usar --sanken-black acá: esa SÍ se invierte por modo
+  // (es el rol "fondo de página"), y usarla dejaría el texto casi invisible
+  // sobre el botón cyan en modo claro.
+  --sanken-on-accent: #0B0B0B;
+  // Overlay neutro para estados hover sobre una superficie oscura/clara —
+  // blanco translúcido en dark, negro translúcido en light (el mismo
+  // overlay blanco quedaría invisible sobre un fondo claro).
+  --sanken-overlay-hover: rgba(255, 255, 255, 0.06);
+  // Fondo semitransparente con blur de la bottom nav — mismo color que
+  // --sanken-black pero con alpha, no puede derivarse de la var sola.
+  --sanken-nav-blur-bg: rgba(8, 12, 16, 0.92);
+
+  // Bootstrap ya compila estos vía $body-bg/$body-color/etc, pero
+  // [data-bs-theme=dark] los redefine acá explícitamente por si algo (o
+  // alguien en el futuro) depende del atributo en vez de heredar de :root.
+  --bs-body-bg: #{$sanken-black};
+  --bs-body-color: #{$sanken-white};
+  --bs-emphasis-color: #{$sanken-white};
+  --bs-secondary-color: #{$sanken-gray-light};
+  --bs-secondary-bg: #{$sanken-charcoal};
+  --bs-tertiary-color: #{rgba($sanken-white, 0.6)};
+  --bs-tertiary-bg: #{$sanken-black-2};
+  --bs-border-color: #{$border-color};
+  --bs-link-color: #{$sanken-cyan-light};
+  --bs-link-hover-color: #{$sanken-cyan};
+  color-scheme: dark;
 }
 
-html {
-  color-scheme: dark;
+// Paleta clara — mismos ROLES que la oscura de arriba, mismos valores que
+// Colors.light en apps/mobile/src/constants/theme.ts y :root (sin .dark) en
+// src/index.css, para que los tres sistemas (mobile, web Tailwind, web
+// Bootstrap) coincidan en modo claro.
+[data-bs-theme="light"] {
+  --sanken-black: #F5F7FA; // fondo principal
+  --sanken-black-2: #FFFFFF; // superficie / card
+  --sanken-charcoal: #E9EDF1; // superficie elevada / hover / input
+  --sanken-charcoal-2: #DCE3E9; // borde / divisor sutil
+  --sanken-gray: #5B6670; // texto secundario
+  --sanken-gray-light: #7C8A96; // texto terciario
+  --sanken-white: #0B0B0B; // texto principal
+  --sanken-cyan: #0093AD; // acento de marca (más saturado que en dark para contraste AA sobre fondo claro)
+  --sanken-cyan-light: #00B8D9; // hover/glow del acento
+  --sanken-cyan-deep: #00708A; // active/pressed
+  --sanken-cyan-dim: rgba(0, 147, 173, 0.14); // fondo tenue para badges/rings
+  --sanken-on-accent: #0B0B0B; // mismo valor que en dark a propósito, ver comentario arriba
+  --sanken-overlay-hover: rgba(0, 0, 0, 0.05);
+  --sanken-nav-blur-bg: rgba(245, 247, 250, 0.85);
+
+  --bs-body-bg: #F5F7FA;
+  --bs-body-color: #0B0B0B;
+  --bs-emphasis-color: #0B0B0B;
+  --bs-secondary-color: #5B6670;
+  --bs-secondary-bg: #E9EDF1;
+  --bs-tertiary-color: rgba(11, 11, 11, 0.6);
+  --bs-tertiary-bg: #FFFFFF;
+  --bs-border-color: rgba(0, 0, 0, 0.1);
+  --bs-link-color: #0093AD;
+  --bs-link-hover-color: #00708A;
+  color-scheme: light;
 }
 
 body {
   min-height: 100svh;
+  background-color: var(--sanken-black);
+  color: var(--sanken-white);
 }
 
 // Cards con profundidad real en vez de bordes planos — dos capas de sombra
@@ -57,21 +136,22 @@ body {
 // mobile — no un gradiente suave de SaaS. La fuerza viene del contraste
 // duro negro/cyan, no de una simulación de "brillo".
 .btn-primary {
-  background: $sanken-cyan;
-  border-color: $sanken-cyan;
-  color: $sanken-black;
+  background: var(--sanken-cyan);
+  border-color: var(--sanken-cyan);
+  color: var(--sanken-on-accent);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 
   &:hover,
   &:focus-visible {
-    background: $sanken-cyan-light;
-    border-color: $sanken-cyan-light;
-    color: $sanken-black;
+    background: var(--sanken-cyan-light);
+    border-color: var(--sanken-cyan-light);
+    color: var(--sanken-on-accent);
   }
 
   &:active {
-    background: darken($sanken-cyan, 8%);
+    background: var(--sanken-cyan-deep);
+    border-color: var(--sanken-cyan-deep);
   }
 }
 
@@ -83,24 +163,24 @@ body {
 // SankButton variant="ghost" — texto siempre legible sobre cualquier fondo
 // oscuro (outline-secondary de Bootstrap usa $secondary, casi invisible).
 .sank-ghost-btn {
-  color: $sanken-gray-light !important;
+  color: var(--sanken-gray-light) !important;
 
   &:hover:not(:disabled),
   &:focus-visible:not(:disabled) {
-    color: $sanken-white !important;
-    background: rgba(255, 255, 255, 0.06) !important;
+    color: var(--sanken-white) !important;
+    background: var(--sanken-overlay-hover) !important;
   }
 }
 
 .btn-outline-primary {
-  color: $sanken-cyan-light;
+  color: var(--sanken-cyan-light);
   border-color: rgba(0, 184, 217, 0.5);
 
   &:hover,
   &:focus-visible {
-    background: $sanken-cyan-dim;
-    color: $sanken-cyan-light;
-    border-color: $sanken-cyan;
+    background: var(--sanken-cyan-dim);
+    color: var(--sanken-cyan-light);
+    border-color: var(--sanken-cyan);
   }
 }
 
@@ -115,7 +195,7 @@ body {
 .sank-skeleton {
   position: relative;
   overflow: hidden;
-  background: $sanken-charcoal;
+  background: var(--sanken-charcoal);
   border-radius: $border-radius;
 
   &::after {
@@ -123,7 +203,7 @@ body {
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
+    background: linear-gradient(90deg, transparent, var(--sanken-overlay-hover), transparent);
     animation: sank-shimmer 1.8s infinite;
   }
 }
@@ -136,20 +216,20 @@ body {
 // Navegación (Sidebar / Offcanvas) — indicador activo cyan discreto, sin
 // llenar el link entero de color.
 .sank-nav-link {
-  color: $sanken-gray-light;
+  color: var(--sanken-gray-light);
   transition: background-color 150ms ease-out, color 150ms ease-out;
   position: relative;
 
   &:hover,
   &:focus-visible {
-    color: $sanken-white;
-    background: rgba(255, 255, 255, 0.05);
+    color: var(--sanken-white);
+    background: var(--sanken-overlay-hover);
   }
 }
 
 .sank-nav-link-active {
-  color: $sanken-cyan-light;
-  background: $sanken-cyan-dim;
+  color: var(--sanken-cyan-light);
+  background: var(--sanken-cyan-dim);
   position: relative;
 
   &::before {
@@ -161,7 +241,7 @@ body {
     width: 3px;
     height: 1.1rem;
     border-radius: 0 2px 2px 0;
-    background: $sanken-cyan;
+    background: var(--sanken-cyan);
   }
 }
 
@@ -172,11 +252,11 @@ body {
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: $sanken-gray-light;
+  color: var(--sanken-gray-light);
 }
 
 .sank-eyebrow--cyan {
-  color: $sanken-cyan-light;
+  color: var(--sanken-cyan-light);
 }
 
 // Número hero — tipografía display, tabular, sin decoración. La escala es lo
@@ -201,8 +281,8 @@ body {
 // ---------------------------------------------------------------------------
 .sank-rail {
   width: 76px;
-  background: $sanken-black-2;
-  border-right: 1px solid $border-color;
+  background: var(--sanken-black-2);
+  border-right: 1px solid var(--bs-border-color);
 }
 
 .sank-rail-link {
@@ -211,26 +291,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: $sanken-gray-light;
+  color: var(--sanken-gray-light);
   border-radius: $border-radius-sm;
   position: relative;
   transition: color 150ms ease-out, background-color 150ms ease-out;
 
   &:hover,
   &:focus-visible {
-    color: $sanken-white;
-    background: rgba(255, 255, 255, 0.06);
+    color: var(--sanken-white);
+    background: var(--sanken-overlay-hover);
   }
 }
 
 .sank-rail-link-active {
-  color: $sanken-black;
-  background: $sanken-cyan;
+  color: var(--sanken-on-accent);
+  background: var(--sanken-cyan);
 
   &:hover,
   &:focus-visible {
-    color: $sanken-black;
-    background: $sanken-cyan-light;
+    color: var(--sanken-on-accent);
+    background: var(--sanken-cyan-light);
   }
 }
 
@@ -239,8 +319,8 @@ body {
   left: calc(100% + 10px);
   top: 50%;
   transform: translateY(-50%);
-  background: $sanken-charcoal;
-  color: $sanken-white;
+  background: var(--sanken-charcoal);
+  color: var(--sanken-white);
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
@@ -270,10 +350,10 @@ body {
   display: flex;
   align-items: stretch;
   height: 64px;
-  background: rgba(8, 12, 16, 0.92);
+  background: var(--sanken-nav-blur-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-top: 1px solid $border-color;
+  border-top: 1px solid var(--bs-border-color);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -284,7 +364,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  color: $sanken-gray;
+  color: var(--sanken-gray);
   font-size: 0.62rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -292,26 +372,26 @@ body {
   transition: color 150ms ease-out;
 
   &:hover {
-    color: $sanken-gray-light;
+    color: var(--sanken-gray-light);
   }
 }
 
 .sank-bottom-nav-link-active {
-  color: $sanken-cyan;
+  color: var(--sanken-cyan);
 }
 
 .sank-bottom-nav-fab {
   width: 52px;
   height: 52px;
   border-radius: 16px;
-  background: $sanken-cyan;
-  color: $sanken-black;
+  background: var(--sanken-cyan);
+  color: var(--sanken-on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: -30px;
   box-shadow: 0 6px 20px -4px rgba(0, 184, 217, 0.55);
-  border: 3px solid $sanken-black;
+  border: 3px solid var(--sanken-black);
   flex-shrink: 0;
 }
 
@@ -340,6 +420,58 @@ body {
 
   @include media-breakpoint-up(lg) {
     bottom: 16px;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Componentes de Bootstrap que SÍ se usan en el proyecto (Form.Control,
+// Card, Modal, Offcanvas, Nav — confirmado por grep de imports reales) y
+// que Bootstrap compila con el color de cada modo HORNEADO en la regla
+// (ej. `.form-control { background-color: #1D2732; }`, no
+// `var(--bs-input-bg, ...)`) — $input-bg/$card-bg/etc en
+// _sanken-variables.scss solo alimentan el modo oscuro (:root). Acá se pisa
+// puntualmente cada uno para modo claro; Dropdown/Tooltip/Popover/Toast/
+// Accordion/Pagination/Table no se usan en ningún lado, no hace falta
+// tocarlos.
+// ---------------------------------------------------------------------------
+[data-bs-theme="light"] {
+  .form-control {
+    color: var(--sanken-white);
+    background-color: var(--sanken-charcoal);
+
+    &::placeholder {
+      color: var(--sanken-gray);
+    }
+
+    &:focus {
+      color: var(--sanken-white);
+      background-color: var(--sanken-charcoal);
+    }
+
+    &:disabled {
+      background-color: var(--sanken-charcoal-2);
+    }
+  }
+
+  .card {
+    --bs-card-bg: var(--sanken-black-2);
+    --bs-card-border-color: var(--bs-border-color);
+  }
+
+  .modal-content {
+    --bs-modal-bg: var(--sanken-black-2);
+  }
+
+  .modal-backdrop {
+    --bs-backdrop-bg: var(--sanken-black);
+  }
+
+  .offcanvas {
+    --bs-offcanvas-bg: var(--sanken-black-2);
+  }
+
+  .nav {
+    --bs-nav-link-color: var(--sanken-gray-light);
   }
 }
 

@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { router } from 'expo-router';
-import { Image, Pressable, ScrollView, StyleSheet, type View } from 'react-native';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { Dumbbell, Menu } from 'lucide-react-native';
+import { Dumbbell, Menu, Moon, Sun } from 'lucide-react-native';
 import { estimateWorkoutMinutes } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
@@ -16,11 +16,12 @@ import { PrimaryButton } from '@/components/ui/primary-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { Icon } from '@/components/ui/icon';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MoreMenu } from '@/components/layout/more-menu';
 import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { BottomTabInset, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
+import { useResolvedColorScheme, useTheme } from '@/hooks/use-theme';
 import { useTutorial } from '@/hooks/use-tutorial';
 import { api } from '@/lib/api';
 import { apiDateKey, toDateKey } from '@/lib/calendar-grid';
@@ -30,6 +31,7 @@ import { useFeedStore } from '@/store/feed-store';
 import { useGamificationStore } from '@/store/gamification-store';
 import { findNearestChallenge, useRetosStore } from '@/store/retos-store';
 import { findNextDay, useRoutineStore } from '@/store/routine-store';
+import { useThemeStore } from '@/store/theme-store';
 import { useWorkoutHistoryStore } from '@/store/workout-history-store';
 import { useWorkoutStore } from '@/store/workout-store';
 
@@ -42,6 +44,8 @@ function greeting() {
 
 export default function HomeScreen() {
   const theme = useTheme();
+  const isDark = useResolvedColorScheme() === 'dark';
+  const setThemeMode = useThemeStore((s) => s.setMode);
   const user = useAuthStore((s) => s.user);
   const { routine, nextDayId, isLoading, hasNoRoutine, error, load } = useRoutineStore();
   const unreadFeedCount = useFeedStore((s) => s.unreadCount);
@@ -134,15 +138,23 @@ export default function HomeScreen() {
               ¿Listo para entrenar?
             </ThemedText>
           </ThemedView>
-          <Pressable
-            ref={menuButtonRef}
-            onPress={() => setMoreMenuVisible(true)}
-            style={[styles.menuButton, { backgroundColor: theme.backgroundElement }]}>
-            <Menu size={20} color={theme.text} />
-            {unreadFeedCount > 0 && (
-              <ThemedView style={[styles.menuBadge, { backgroundColor: theme.accent, borderColor: theme.background }]} />
-            )}
-          </Pressable>
+          <View style={styles.headerActions}>
+            <Pressable
+              onPress={() => setThemeMode(isDark ? 'light' : 'dark')}
+              style={[styles.menuButton, { backgroundColor: theme.backgroundElement }]}
+              accessibilityLabel={isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}>
+              <Icon icon={isDark ? Sun : Moon} size={20} color={theme.text} />
+            </Pressable>
+            <Pressable
+              ref={menuButtonRef}
+              onPress={() => setMoreMenuVisible(true)}
+              style={[styles.menuButton, { backgroundColor: theme.backgroundElement }]}>
+              <Menu size={20} color={theme.text} />
+              {unreadFeedCount > 0 && (
+                <ThemedView style={[styles.menuBadge, { backgroundColor: theme.accent, borderColor: theme.background }]} />
+              )}
+            </Pressable>
+          </View>
         </ThemedView>
 
         <Animated.View entering={FadeInUp.duration(360)}>
@@ -356,6 +368,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     lineHeight: 36,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+    backgroundColor: 'transparent',
   },
   menuButton: {
     width: 40,

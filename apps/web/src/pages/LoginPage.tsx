@@ -9,6 +9,7 @@ import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { SankButton } from "@/components/ui/SankButton"
 import { GoogleIcon } from "@/components/ui/GoogleIcon"
+import { PasswordFormControl } from "@/components/ui/PasswordFormControl"
 import { AuthLayout } from "@/components/layout/AuthLayout"
 import { describeSocialAuthError, signInWithGoogle, SocialAuthCancelledError } from "@/lib/social-auth"
 
@@ -97,8 +98,7 @@ export function LoginPage() {
 
         <Form.Group controlId="password">
           <Form.Label className="small fw-medium">Contraseña</Form.Label>
-          <Form.Control
-            type="password"
+          <PasswordFormControl
             autoComplete="current-password"
             isInvalid={!!errors.password}
             {...register("password")}
@@ -108,7 +108,7 @@ export function LoginPage() {
 
         <Link
           to="/forgot-password"
-          className="small align-self-end"
+          className="small align-self-center"
           style={{ color: "var(--sanken-cyan-light)", marginTop: "-0.5rem" }}
         >
           ¿Olvidaste tu contraseña?

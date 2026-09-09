@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Pressable, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
@@ -12,42 +12,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Icon } from '@/components/ui/icon';
 import { ProgressRing } from '@/components/ui/progress-ring';
+import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatTile } from '@/components/ui/stat-tile';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useDashboardStore } from '@/store/dashboard-store';
 import { useGamificationStore } from '@/store/gamification-store';
-
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { label: string; value: T }[];
-  value: T;
-  onChange: (value: T) => void;
-}) {
-  const theme = useTheme();
-
-  return (
-    <ThemedView type="backgroundElement" style={styles.segmented}>
-      {options.map((option) => {
-        const selected = option.value === value;
-        return (
-          <Pressable
-            key={option.value}
-            onPress={() => onChange(option.value)}
-            style={[styles.segment, selected && { backgroundColor: theme.backgroundSelected }]}>
-            <ThemedText type="small" themeColor={selected ? 'text' : 'textSecondary'}>
-              {option.label}
-            </ThemedText>
-          </Pressable>
-        );
-      })}
-    </ThemedView>
-  );
-}
 
 export default function DashboardScreen() {
   const { width } = useWindowDimensions();
@@ -322,16 +293,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     backgroundColor: 'transparent',
-  },
-  segmented: {
-    flexDirection: 'row',
-    borderRadius: Spacing.three,
-    padding: 2,
-  },
-  segment: {
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.two,
-    borderRadius: Spacing.two,
   },
   listRow: {
     flexDirection: 'row',

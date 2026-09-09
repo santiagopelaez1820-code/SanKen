@@ -4,6 +4,7 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxi
 import type { MuscleVolume, VolumeRange } from "@sanken/core"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { useResolvedTheme } from "@/hooks/use-resolved-theme"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const RANGES: { value: VolumeRange; label: string }[] = [
@@ -26,6 +27,15 @@ function ChartTooltip({ active, payload }: { active?: boolean; payload?: { paylo
 export function MuscleVolumeChart() {
   const [range, setRange] = useState<VolumeRange>("weekly")
   const [showTable, setShowTable] = useState(false)
+  // Recharts pinta estos colores como props SVG (fill/stroke), no como CSS
+  // -- no leen var(--sanken-*) ni reaccionan al atributo data-bs-theme por
+  // su cuenta, hay que resolverlos acá.
+  const isDark = useResolvedTheme() === "dark"
+  const gridStroke = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"
+  const axisStroke = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.12)"
+  const tickColor = isDark ? "#9AA6B2" : "#5B6670"
+  const cursorFill = isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"
+  const barColor = isDark ? "#00B8D9" : "#0093AD"
 
   const { data, isLoading } = useQuery({
     queryKey: ["stats", "volume", range],
@@ -69,18 +79,18 @@ export function MuscleVolumeChart() {
         {!isLoading && data && data.length > 0 && !showTable && (
           <ResponsiveContainer key={range} width="100%" height={260} debounce={200}>
             <BarChart data={data} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
               <XAxis
                 dataKey="muscle_group"
-                tick={{ fill: "#9AA6B2", fontSize: 12 }}
+                tick={{ fill: tickColor, fontSize: 12 }}
                 tickLine={false}
-                axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                axisLine={{ stroke: axisStroke }}
               />
-              <YAxis tick={{ fill: "#9AA6B2", fontSize: 12 }} tickLine={false} axisLine={false} width={56} />
-              <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(255,255,255,0.04)" }} />
+              <YAxis tick={{ fill: tickColor, fontSize: 12 }} tickLine={false} axisLine={false} width={56} />
+              <Tooltip content={<ChartTooltip />} cursor={{ fill: cursorFill }} />
               <Bar
                 dataKey="volume_kg"
-                fill="#00B8D9"
+                fill={barColor}
                 radius={[2, 2, 0, 0]}
                 maxBarSize={44}
                 isAnimationActive

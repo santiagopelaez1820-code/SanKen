@@ -1,9 +1,35 @@
-import { Bell } from "lucide-react"
+import { Bell, Moon, Sun } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
 import { useAuthStore } from "@/lib/auth-store"
 import { useFeed } from "@/hooks/use-feed"
 import { api } from "@/lib/api"
+import { useResolvedTheme } from "@/hooks/use-resolved-theme"
+import { useThemeStore } from "@/lib/theme-store"
 import { buildNavSections, findNavLabel } from "@/components/layout/nav-config"
+
+/**
+ * Toggle rápido claro/oscuro en el header, al lado de la campana de
+ * novedades -- a diferencia del selector de Ajustes (Automático/Claro/
+ * Oscuro), este es un solo clic entre los dos, como la mayoría de apps: no
+ * pasa por "Automático" en cada clic, solo alterna. "Automático" sigue
+ * disponible en Ajustes para quien lo prefiera.
+ */
+function ThemeToggleButton() {
+  const setMode = useThemeStore((state) => state.setMode)
+  const isDark = useResolvedTheme() === "dark"
+
+  return (
+    <button
+      type="button"
+      onClick={() => setMode(isDark ? "light" : "dark")}
+      className="d-flex align-items-center justify-content-center rounded-1 border-0 bg-transparent"
+      style={{ width: 36, height: 36, color: "var(--sanken-gray-light)" }}
+      aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+    >
+      {isDark ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  )
+}
 
 /** Barra superior persistente — reemplaza el header mobile-only anterior. Vive en desktop y mobile. */
 export function TopBar() {
@@ -47,6 +73,7 @@ export function TopBar() {
             />
           )}
         </Link>
+        <ThemeToggleButton />
         <Link
           to="/settings"
           className="d-flex align-items-center justify-content-center fw-bold overflow-hidden"

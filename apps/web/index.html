@@ -1,8 +1,31 @@
 <!doctype html>
-<html lang="en" class="dark" data-bs-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <script>
+      // Aplica el modo claro/oscuro ANTES del primer paint -- sin esto, la
+      // página siempre nacería oscura (el flash de un instante) y recién
+      // pasaría a claro cuando React montara y leyera la preferencia
+      // guardada. Misma clave/formato que zustand/persist usa en
+      // src/lib/theme-store.ts ("sanken-theme"), leída acá a mano porque
+      // este script corre antes de que cualquier JS de la app exista.
+      (function () {
+        try {
+          var raw = localStorage.getItem('sanken-theme');
+          var mode = raw ? JSON.parse(raw).state.mode : 'system';
+          var systemPrefersDark = !window.matchMedia || window.matchMedia('(prefers-color-scheme: dark)').matches;
+          var resolved = mode === 'light' || mode === 'dark' ? mode : systemPrefersDark ? 'dark' : 'light';
+          var root = document.documentElement;
+          if (resolved === 'dark') root.classList.add('dark');
+          root.setAttribute('data-bs-theme', resolved);
+          root.style.colorScheme = resolved;
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-bs-theme', 'dark');
+        }
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />

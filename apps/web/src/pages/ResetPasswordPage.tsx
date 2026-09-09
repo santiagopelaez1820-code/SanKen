@@ -8,6 +8,7 @@ import { ApiError } from "@sanken/core"
 import { api } from "@/lib/api"
 import { SankButton } from "@/components/ui/SankButton"
 import { AuthLayout } from "@/components/layout/AuthLayout"
+import { PasswordFormControl } from "@/components/ui/PasswordFormControl"
 
 const resetPasswordSchema = z
   .object({
@@ -88,8 +89,7 @@ export function ResetPasswordPage() {
 
         <Form.Group controlId="password">
           <Form.Label className="small fw-medium">Contraseña nueva</Form.Label>
-          <Form.Control
-            type="password"
+          <PasswordFormControl
             autoComplete="new-password"
             autoFocus
             isInvalid={!!errors.password}
@@ -100,8 +100,7 @@ export function ResetPasswordPage() {
 
         <Form.Group controlId="password_confirmation">
           <Form.Label className="small fw-medium">Confirma la contraseña</Form.Label>
-          <Form.Control
-            type="password"
+          <PasswordFormControl
             autoComplete="new-password"
             isInvalid={!!errors.password_confirmation}
             {...register("password_confirmation")}

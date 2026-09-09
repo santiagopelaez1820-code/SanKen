@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   },
   error: { color: '#FF4D5E' },
   footerLink: { marginTop: Spacing.two },
-  forgotPasswordLink: { alignSelf: 'flex-end' },
+  forgotPasswordLink: { alignSelf: 'center' },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',

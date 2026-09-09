@@ -61,8 +61,13 @@ export function NextWorkoutCard() {
     <div
       className="position-relative overflow-hidden rounded-2 sank-hairline"
       style={{
+        // El scrim de abajo usa color-mix con --sanken-black (no rgba(0,0,0,..)
+        // fijo) a propósito: en dark eso da casi el mismo negro translúcido
+        // de siempre (--sanken-black es casi negro puro), pero en light
+        // produce un degradado hacia un tono CLARO en vez de un scrim negro
+        // horneado que se vería fuera de lugar sobre un fondo claro.
         background: `
-          linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 100%),
+          linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--sanken-black) 65%, transparent) 100%),
           radial-gradient(120% 140% at 100% 0%, rgba(0, 184, 217, 0.22), transparent 55%),
           var(--sanken-black-2)`,
         boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 28px 60px -24px rgba(0,0,0,0.7)",

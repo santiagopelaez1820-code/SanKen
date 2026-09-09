@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Bell, Camera, Eye, MapPin, Shield, ShieldCheck, Trash2, UserCircle } from "lucide-react"
+import { Bell, Camera, Eye, MapPin, MonitorSmartphone, Shield, ShieldCheck, Trash2, UserCircle } from "lucide-react"
 import {
   ApiError,
   type OnboardingCity,
@@ -20,7 +20,16 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PasswordInput } from "@/components/ui/PasswordInput"
+import { useThemeStore, type ThemeMode } from "@/lib/theme-store"
 import { getExistingWebPushSubscription, isWebPushSupported, subscribeToWebPush, unsubscribeFromWebPush } from "@/lib/web-push"
+
+const THEME_MODE_OPTIONS: { label: string; value: ThemeMode }[] = [
+  { label: "Automático", value: "system" },
+  { label: "Claro", value: "light" },
+  { label: "Oscuro", value: "dark" },
+]
 
 const ROLE_LABEL: Record<User["role"], string> = {
   user: "Atleta",
@@ -40,6 +49,8 @@ type DisableFormValues = z.infer<typeof disableSchema>
 
 export function SettingsPage() {
   const queryClient = useQueryClient()
+  const themeMode = useThemeStore((s) => s.mode)
+  const setThemeMode = useThemeStore((s) => s.setMode)
   const { data: user, isLoading } = useQuery({
     queryKey: ["auth", "me"],
     queryFn: () => api.get<User>("/auth/me"),
@@ -459,11 +470,9 @@ export function SettingsPage() {
               <label htmlFor="password" className="text-xs font-medium text-muted-foreground">
                 Contraseña para desactivar
               </label>
-              <input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="current-password"
-                className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 {...disableForm.register("password")}
               />
               {disableForm.formState.errors.password && (
@@ -481,6 +490,23 @@ export function SettingsPage() {
               </Button>
             </form>
           )}
+        </Card>
+
+        <Card>
+          <div className="flex items-center gap-2">
+            <MonitorSmartphone className="size-4 text-primary" />
+            <h2 className="font-heading text-sm font-medium text-foreground">Apariencia</h2>
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">Elegí cómo se ve SanKen en este navegador.</p>
+          <Tabs value={themeMode} onValueChange={(value) => setThemeMode(value as ThemeMode)} className="mt-3">
+            <TabsList className="h-9 w-full">
+              {THEME_MODE_OPTIONS.map((option) => (
+                <TabsTrigger key={option.value} value={option.value} className="h-7">
+                  {option.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
         </Card>
 
         <Card>

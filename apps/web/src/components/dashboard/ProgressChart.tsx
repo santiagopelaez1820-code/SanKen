@@ -4,6 +4,7 @@ import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YA
 import type { ProgressMetric, ProgressPoint } from "@sanken/core"
 import { api } from "@/lib/api"
 import { cn } from "@/lib/utils"
+import { useResolvedTheme } from "@/hooks/use-resolved-theme"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const METRICS: { value: ProgressMetric; label: string; unit: string }[] = [
@@ -38,6 +39,14 @@ export function ProgressChart() {
   const [metric, setMetric] = useState<ProgressMetric>("weight")
   const [showTable, setShowTable] = useState(false)
   const activeMetric = METRICS.find((m) => m.value === metric)!
+  // Ver el comentario equivalente en MuscleVolumeChart.tsx: Recharts pinta
+  // estos colores como props SVG, no reaccionan solos al tema.
+  const isDark = useResolvedTheme() === "dark"
+  const gridStroke = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)"
+  const axisStroke = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.12)"
+  const tickColor = isDark ? "#9AA6B2" : "#5B6670"
+  const cursorStroke = isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.15)"
+  const lineColor = isDark ? "#00B8D9" : "#0093AD"
 
   const { data, isLoading } = useQuery({
     queryKey: ["stats", "progress", metric],
@@ -81,27 +90,27 @@ export function ProgressChart() {
         {!isLoading && data && data.length > 0 && !showTable && (
           <ResponsiveContainer key={metric} width="100%" height={280} debounce={200}>
             <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} vertical={false} />
               <XAxis
                 dataKey="date"
-                tick={{ fill: "#9AA6B2", fontSize: 12 }}
+                tick={{ fill: tickColor, fontSize: 12 }}
                 tickLine={false}
-                axisLine={{ stroke: "rgba(255,255,255,0.08)" }}
+                axisLine={{ stroke: axisStroke }}
               />
               <YAxis
-                tick={{ fill: "#9AA6B2", fontSize: 12 }}
+                tick={{ fill: tickColor, fontSize: 12 }}
                 tickLine={false}
                 axisLine={false}
                 width={56}
                 domain={["auto", "auto"]}
               />
-              <Tooltip content={<ChartTooltip unit={activeMetric.unit} />} cursor={{ stroke: "rgba(255,255,255,0.15)" }} />
+              <Tooltip content={<ChartTooltip unit={activeMetric.unit} />} cursor={{ stroke: cursorStroke }} />
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke="#00B8D9"
+                stroke={lineColor}
                 strokeWidth={2.5}
-                dot={{ r: 3, fill: "#00B8D9", strokeWidth: 0 }}
+                dot={{ r: 3, fill: lineColor, strokeWidth: 0 }}
                 activeDot={{ r: 5 }}
                 isAnimationActive
                 animationDuration={650}

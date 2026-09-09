@@ -9,6 +9,7 @@ import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { SankButton } from "@/components/ui/SankButton"
 import { GoogleIcon } from "@/components/ui/GoogleIcon"
+import { PasswordFormControl } from "@/components/ui/PasswordFormControl"
 import { AuthLayout } from "@/components/layout/AuthLayout"
 import { describeSocialAuthError, signInWithGoogle, SocialAuthCancelledError } from "@/lib/social-auth"
 
@@ -100,8 +101,7 @@ export function RegisterPage() {
 
         <Form.Group controlId="password">
           <Form.Label className="small fw-medium">Contraseña</Form.Label>
-          <Form.Control
-            type="password"
+          <PasswordFormControl
             autoComplete="new-password"
             isInvalid={!!errors.password}
             {...register("password")}
@@ -111,8 +111,7 @@ export function RegisterPage() {
 
         <Form.Group controlId="password_confirmation">
           <Form.Label className="small fw-medium">Confirmar contraseña</Form.Label>
-          <Form.Control
-            type="password"
+          <PasswordFormControl
             autoComplete="new-password"
             isInvalid={!!errors.password_confirmation}
             {...register("password_confirmation")}

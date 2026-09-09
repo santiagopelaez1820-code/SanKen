@@ -10,11 +10,16 @@ export type ThemedTextProps = TextProps & {
 
 export function ThemedText({ style, type = 'default', themeColor, ...rest }: ThemedTextProps) {
   const theme = useTheme();
+  // `linkPrimary` siempre destaca con el acento de marca (cyan) — antes
+  // tenía un naranja fijo (`#FF6A00`, resto de la paleta vieja) hardcodeado
+  // en `styles.linkPrimary`, que ganaba sobre `themeColor` y no cambiaba
+  // entre light/dark. Se resuelve acá para que sí lo haga.
+  const resolvedColor = type === 'linkPrimary' ? theme.accent : theme[themeColor ?? 'text'];
 
   return (
     <Text
       style={[
-        { color: theme[themeColor ?? 'text'] },
+        { color: resolvedColor },
         type === 'default' && styles.default,
         type === 'title' && styles.title,
         type === 'small' && styles.small,
@@ -64,7 +69,6 @@ const styles = StyleSheet.create({
   linkPrimary: {
     lineHeight: 30,
     fontSize: 14,
-    color: '#FF6A00',
   },
   code: {
     fontFamily: Fonts.mono,

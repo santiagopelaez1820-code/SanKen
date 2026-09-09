@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
-import { Bell, Eye, MapPin, Shield, ShieldCheck } from 'lucide-react-native';
+import { Bell, Eye, MapPin, MonitorSmartphone, Shield, ShieldCheck } from 'lucide-react-native';
 import type { OnboardingState, User } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
@@ -12,6 +12,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { OptionCard } from '@/components/ui/option-card';
+import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TextField } from '@/components/ui/text-field';
 import { ToggleRow } from '@/components/ui/toggle-row';
@@ -26,6 +27,13 @@ import {
 import { useAuthStore } from '@/store/auth-store';
 import { useOnboardingStore } from '@/store/onboarding-store';
 import { useSettingsStore } from '@/store/settings-store';
+import { useThemeStore } from '@/store/theme-store';
+
+const THEME_MODE_OPTIONS = [
+  { label: 'Automático', value: 'system' as const },
+  { label: 'Claro', value: 'light' as const },
+  { label: 'Oscuro', value: 'dark' as const },
+];
 
 const ROLE_LABEL: Record<User['role'], string> = {
   user: 'Atleta',
@@ -36,6 +44,8 @@ const ROLE_LABEL: Record<User['role'], string> = {
 export default function SettingsScreen() {
   const theme = useTheme();
   const { user, refreshMe } = useAuthStore();
+  const themeMode = useThemeStore((s) => s.mode);
+  const setThemeMode = useThemeStore((s) => s.setMode);
   const { questions, loadQuestions, states, isLoadingStates, loadStates, cities, isLoadingCities, loadCities } =
     useOnboardingStore();
 
@@ -339,6 +349,17 @@ export default function SettingsScreen() {
                 />
               </ThemedView>
             )}
+          </ThemedView>
+
+          <ThemedView type="backgroundElement" style={styles.card}>
+            <ThemedView style={styles.cardHeading}>
+              <Icon icon={MonitorSmartphone} size={16} color={theme.accent} />
+              <ThemedText type="default">Apariencia</ThemedText>
+            </ThemedView>
+            <ThemedText type="small" themeColor="textSecondary">
+              Elegí cómo se ve SanKen en este dispositivo.
+            </ThemedText>
+            <Segmented options={THEME_MODE_OPTIONS} value={themeMode} onChange={setThemeMode} />
           </ThemedView>
 
           <ThemedView type="backgroundElement" style={styles.card}>

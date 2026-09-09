@@ -1,4 +1,6 @@
+import { useEffect } from "react"
 import { Navigate, Route, Routes } from "react-router-dom"
+import { applyThemeToDocument, useThemeStore } from "@/lib/theme-store"
 import { RequireAuth } from "@/components/RequireAuth"
 import { RequireTrainer } from "@/components/RequireTrainer"
 import { RequireAdmin } from "@/components/RequireAdmin"
@@ -49,6 +51,21 @@ import { MyOrdersPage } from "@/pages/MyOrdersPage"
 import { MyOrderDetailPage } from "@/pages/MyOrderDetailPage"
 
 function App() {
+  const mode = useThemeStore((s) => s.mode)
+
+  useEffect(() => {
+    applyThemeToDocument(mode)
+
+    // En modo 'system', si el usuario cambia la preferencia del SO mientras
+    // la app está abierta (sin recargar), esto la sigue en vivo -- el
+    // script inline de index.html solo cubre la carga inicial.
+    if (mode !== "system" || !window.matchMedia) return
+    const media = window.matchMedia("(prefers-color-scheme: dark)")
+    const onChange = () => applyThemeToDocument("system")
+    media.addEventListener("change", onChange)
+    return () => media.removeEventListener("change", onChange)
+  }, [mode])
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
