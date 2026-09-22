@@ -38,6 +38,11 @@ class GenerateRoutineAction implements ShouldQueue
             frequencyDays: $this->user->onboardingResponse->frequency_days,
             equipmentAvailable: $this->user->onboardingResponse->equipment_available ?? [],
             sex: $this->user->profile->sex,
+            // Antes quedaba en el default (45) siempre -- el onboarding SÍ
+            // pregunta y guarda esto (session_minutes), pero nunca se leía
+            // acá. Sin esto RoutineVolumeCalculator nunca podía recortar por
+            // tiempo disponible (sección 12 del pedido).
+            sessionMinutes: $this->user->onboardingResponse->session_minutes ?? 45,
         );
 
         $pool = Exercise::query()

@@ -86,6 +86,43 @@ export interface AdminStats {
   retention_pct: number;
 }
 
+export type UsageAnalyticsPeriod = 'today' | 'week' | 'month';
+
+/**
+ * GET /admin/analytics/overview?period=. Los `active_*` (hoy/semana/mes)
+ * siempre vienen los tres juntos, sin importar `period` — el filtro solo
+ * escopea `new_users`/`sessions` (y sus `_change_pct`) al período elegido.
+ * Cualquier `_change_pct` es `null`, nunca 0 ni un valor inventado, cuando
+ * el período anterior no tiene base para comparar (0 en el denominador).
+ */
+export interface UsageAnalyticsOverview {
+  period: UsageAnalyticsPeriod;
+  active_today: number;
+  active_today_change_pct: number | null;
+  active_week: number;
+  active_week_change_pct: number | null;
+  active_month: number;
+  active_month_change_pct: number | null;
+  registered_users_total: number;
+  new_users: number;
+  new_users_change_pct: number | null;
+  sessions: number;
+  sessions_change_pct: number | null;
+}
+
+/** GET /admin/analytics/activity?period= — granularidad por hora si period=today, por día si week/month. */
+export interface UsageActivityPoint {
+  label: string;
+  date?: string;
+  value: number;
+}
+
+export interface UsageActivitySeries {
+  period: UsageAnalyticsPeriod;
+  granularity: 'hour' | 'day';
+  points: UsageActivityPoint[];
+}
+
 export interface AuditLogEntry {
   id: number;
   log_name: string | null;

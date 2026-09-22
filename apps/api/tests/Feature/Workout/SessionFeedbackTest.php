@@ -10,6 +10,7 @@ use App\Models\User;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -231,6 +232,13 @@ class SessionFeedbackTest extends TestCase
      */
     public function test_progressive_overload_carries_over_automatically_to_the_next_session_without_manual_input(): void
     {
+        // Sesión 2 tiene que caer en otro día calendario: con el desbloqueo
+        // diario, repetir el mismo routine_day_id el mismo día ya está
+        // bloqueado por el backend (ver DailyLockTest) — igual que en el uso
+        // real, "la próxima sesión" de este día del split solo puede volver
+        // a jugarse cuando la rotación lo trae de vuelta, en otra fecha.
+        Carbon::setTestNow(Carbon::parse('2026-01-01 10:00:00'));
+
         $user = User::factory()->create();
         [$day, $routineExercise] = $this->makeRoutineDayWithOneExercise($user);
         $client = $this->actingAs($user, 'sanctum');
@@ -246,11 +254,15 @@ class SessionFeedbackTest extends TestCase
         $this->assertEquals(100.0, (float) $routineExercise->fresh()->suggested_weight_kg);
         $this->assertSame([11, 11, 11], $routineExercise->fresh()->suggested_reps_per_set);
 
+        Carbon::setTestNow(Carbon::parse('2026-01-02 10:00:00'));
+
         // Sesión 2: el usuario NO configura nada — el snapshot debe traer ya el peso/reps actualizados.
         $session2 = $client->postJson('/api/v1/workout-sessions', ['routine_day_id' => $day->id])->json('data');
 
         $this->assertEquals(100.0, (float) $session2['exercises'][0]['suggested_weight_kg']);
         $this->assertSame([11, 11, 11], $session2['exercises'][0]['suggested_reps_per_set']);
+
+        Carbon::setTestNow();
     }
 
     public function test_warmup_sets_are_never_personal_records(): void

@@ -2,8 +2,10 @@
 
 namespace Tests\Feature\Routine;
 
+use App\Models\Exercise;
 use App\Models\PersonalRecord;
 use App\Models\Routine;
+use App\Models\RoutineExercise;
 use App\Models\User;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
@@ -28,12 +30,12 @@ class ExerciseSwapTest extends TestCase
         $this->seed(RoutineTemplateSeeder::class);
     }
 
-    private function readyUser(): User
+    private function readyUser(string $level = 'intermediate'): User
     {
         $user = User::factory()->create();
         $user->profile()->create(['age' => 28, 'sex' => 'male', 'height_cm' => 178, 'weight_kg' => 80]);
         $user->onboardingResponse()->create([
-            'level' => 'intermediate', 'goals' => ['gain_muscle'], 'frequency_days' => 3,
+            'level' => $level, 'goals' => ['gain_muscle'], 'frequency_days' => 3,
             'completed' => true, 'completed_at' => now(),
         ]);
 
@@ -47,14 +49,14 @@ class ExerciseSwapTest extends TestCase
         $client = $this->actingAs($user, 'sanctum');
 
         $routine = $client->postJson('/api/v1/routines/generate')->json('data');
-        // "Katana en polea" / "Rompecráneos..." — par 1:1 sin contaminación
-        // cruzada de otras plantillas (a diferencia de ejercicios como
-        // "Press inclinado en máquina", que al aparecer en varios bloques de
-        // día termina con más de una alternativa global válida).
-        $routineExercise = $routine['days'][0]['exercises'][6];
+        // No se fija un ejercicio puntual por índice/nombre: RoutineVolumeCalculator
+        // recorta cuántos ejercicios trae cada día según nivel/objetivo/tiempo,
+        // así que cuál cae en qué posición ya no es estable. Cualquiera con
+        // alternativa sirve para probar el round-trip.
+        $routineExercise = collect($routine['days'][0]['exercises'])->first(fn ($ex) => $ex['alternative'] !== null);
+        $this->assertNotNull($routineExercise, 'fixture assumption: al menos un ejercicio del día con alternativa');
         $original = $routineExercise['exercise']['name'];
         $alternative = $routineExercise['alternative']['name'];
-        $this->assertSame('Katana en polea', $original);
 
         $swapped = $client->postJson("/api/v1/routines/{$routine['id']}/exercises/{$routineExercise['id']}/swap")
             ->assertOk()
@@ -77,14 +79,28 @@ class ExerciseSwapTest extends TestCase
         $user = $this->readyUser();
         $client = $this->actingAs($user, 'sanctum');
 
-        $routine = $client->postJson('/api/v1/routines/generate')->json('data');
-        $withoutAlt = collect($routine['days'])
-            ->flatMap(fn ($day) => $day['exercises'])
-            ->first(fn ($ex) => $ex['alternative'] === null);
+        // Se arma el fixture a mano en vez de confiar en qué ejercicio del
+        // catálogo generado queda sin alternativa: exercise_alternatives es
+        // una relación global (no por plantilla), así que un ejercicio sin
+        // pareja EN un bloque puntual puede terminar con una de todos modos
+        // por aparecer emparejado en otro bloque/nivel -- y además
+        // RoutineVolumeCalculator recorta cuántos ejercicios trae cada día,
+        // corriendo el riesgo de dejar ese candidato afuera. Elegir acá
+        // mismo un Exercise sin ninguna alternativa vincula la prueba a la
+        // regla real (RoutineController::swapExercise) sin depender de cómo
+        // esté armado el contenido de las plantillas.
+        $routine = Routine::query()->create([
+            'user_id' => $user->id, 'source' => 'engine', 'goal' => 'gain_muscle',
+            'split_type' => 'full_body', 'frequency_days' => 1, 'duration_weeks' => 6, 'is_active' => true,
+        ]);
+        $day = $routine->days()->create(['day_order' => 1, 'label' => 'Día único', 'target_muscle_groups' => []]);
+        $exerciseWithoutAlt = Exercise::query()->whereDoesntHave('alternatives')->firstOrFail();
+        $routineExercise = RoutineExercise::query()->create([
+            'routine_day_id' => $day->id, 'exercise_id' => $exerciseWithoutAlt->id, 'order' => 1,
+            'target_sets' => 3, 'target_reps' => '8-12', 'rest_seconds' => 90, 'target_rpe' => 8.0,
+        ]);
 
-        $this->assertNotNull($withoutAlt, 'fixture assumption: debe existir al menos un ejercicio sin alternativa');
-
-        $client->postJson("/api/v1/routines/{$routine['id']}/exercises/{$withoutAlt['id']}/swap")
+        $client->postJson("/api/v1/routines/{$routine->id}/exercises/{$routineExercise->id}/swap")
             ->assertUnprocessable()
             ->assertJsonValidationErrors('exercise');
     }

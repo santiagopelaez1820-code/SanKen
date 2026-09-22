@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\Admin\AdminAnalyticsController;
 use App\Http\Controllers\Api\V1\Admin\AdminAuditLogController;
 use App\Http\Controllers\Api\V1\Admin\AdminChallengeTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminExerciseController;
@@ -323,5 +324,10 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
 
         Route::get('/stats', [AdminStatsController::class, 'index'])->name('stats');
         Route::get('/audit-logs', [AdminAuditLogController::class, 'index'])->name('audit-logs.index');
+
+        Route::prefix('analytics')->name('analytics.')->group(function () {
+            Route::get('/overview', [AdminAnalyticsController::class, 'overview'])->name('overview');
+            Route::get('/activity', [AdminAnalyticsController::class, 'activity'])->name('activity');
+        });
     });
 });

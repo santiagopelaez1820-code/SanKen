@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Application\Auth\Actions\AuthenticateUserAction;
+use App\Application\Auth\Actions\RecordUserSessionAction;
 use App\Application\Auth\Actions\RegisterUserAction;
 use App\Application\Auth\Actions\SocialLoginAction;
 use App\Domain\User\Contracts\UserRepositoryInterface;
@@ -24,10 +25,11 @@ class AuthController extends Controller
 {
     use ReplacesPublicFile;
 
-    public function register(RegisterRequest $request, RegisterUserAction $action): JsonResponse
+    public function register(RegisterRequest $request, RegisterUserAction $action, RecordUserSessionAction $recordSession): JsonResponse
     {
         $user = $action->execute($request->validated());
         $token = $user->createToken($request->userAgent() ?? 'api');
+        $recordSession->execute($user, $request);
 
         return response()->json([
             'data' => [
@@ -37,7 +39,7 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(LoginRequest $request, AuthenticateUserAction $action): JsonResponse
+    public function login(LoginRequest $request, AuthenticateUserAction $action, RecordUserSessionAction $recordSession): JsonResponse
     {
         $result = $action->execute(
             $request->string('email')->toString(),
@@ -54,6 +56,8 @@ class AuthController extends Controller
             ]);
         }
 
+        $recordSession->execute($result->token->accessToken->tokenable, $request);
+
         return response()->json([
             'data' => [
                 'user' => new UserResource($result->token->accessToken->tokenable),
@@ -68,7 +72,7 @@ class AuthController extends Controller
      * respuesta para los tres. El id_token de Firebase se verifica dentro
      * de SocialLoginAction, nunca se confía en nada más del body.
      */
-    public function socialLogin(SocialLoginRequest $request, SocialLoginAction $action): JsonResponse
+    public function socialLogin(SocialLoginRequest $request, SocialLoginAction $action, RecordUserSessionAction $recordSession): JsonResponse
     {
         $result = $action->execute(
             $request->string('id_token')->toString(),
@@ -84,6 +88,8 @@ class AuthController extends Controller
                 ],
             ]);
         }
+
+        $recordSession->execute($result->token->accessToken->tokenable, $request);
 
         return response()->json([
             'data' => [

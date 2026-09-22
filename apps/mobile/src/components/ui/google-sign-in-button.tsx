@@ -50,9 +50,15 @@ export function GoogleSignInButton({ label, loading, disabled, onPress }: Google
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const handlePressIn = (_e: GestureResponderEvent) => {
+    // react-hooks/immutability no conoce el contrato de Reanimated: asignar
+    // .value de un SharedValue es la API pública sancionada para animar en
+    // el hilo de UI, no un estado de React. Falso positivo documentado
+    // (ver mismo caso en primary-button.tsx).
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withSpring(0.97, PRESS_SPRING);
   };
   const handlePressOut = (_e: GestureResponderEvent) => {
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withSpring(1, PRESS_SPRING);
   };
 

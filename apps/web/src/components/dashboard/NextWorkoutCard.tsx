@@ -1,8 +1,16 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "react-router-dom"
 import { ArrowRight, Dumbbell } from "lucide-react"
-import { ApiError, estimateWorkoutMinutes, findNextDay, type Routine, type WorkoutSession } from "@sanken/core"
+import {
+  ApiError,
+  estimateWorkoutMinutes,
+  findNextDay,
+  formatUnlockCountdown,
+  parseDailyLock,
+  type Routine,
+  type WorkoutSession,
+} from "@sanken/core"
 import { api } from "@/lib/api"
 import { SankButton } from "@/components/ui/SankButton"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
@@ -14,7 +22,7 @@ export function NextWorkoutCard() {
   const queryClient = useQueryClient()
   const [confirmingSkip, setConfirmingSkip] = useState(false)
 
-  const { data: envelope, isLoading, isError, error } = useQuery({
+  const { data: envelope, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["routines", "active"],
     queryFn: () => api.getWithMeta<Routine>("/routines/active"),
     retry: false,
@@ -24,6 +32,29 @@ export function NextWorkoutCard() {
   const genericError = isError && !hasNoRoutine
 
   const day = findNextDay(envelope?.data ?? null, (envelope?.meta?.next_day_id as number | null) ?? null)
+  // Autoridad del backend sobre si el entrenamiento de hoy ya está gastado
+  // (ver DetermineDailyLockStatusAction en la API) -- esta card antes no
+  // tenía ninguna noción de "ya entrenaste hoy", a diferencia de mobile.
+  const dailyLock = parseDailyLock(envelope?.meta)
+
+  // Puramente visual -- al llegar a 0 se vuelve a pedir /routines/active
+  // para confirmar el desbloqueo real, nunca se confía en el reloj del
+  // navegador para decidir si mostrar el botón "Comenzar".
+  const [countdown, setCountdown] = useState<string | null>(null)
+  useEffect(() => {
+    if (!dailyLock.locked || !dailyLock.unlocks_at) {
+      setCountdown(null)
+      return
+    }
+    const tick = () => {
+      const remaining = formatUnlockCountdown(dailyLock.unlocks_at)
+      setCountdown(remaining)
+      if (!remaining) refetch()
+    }
+    tick()
+    const interval = setInterval(tick, 30_000)
+    return () => clearInterval(interval)
+  }, [dailyLock.locked, dailyLock.unlocks_at, refetch])
 
   const skipMutation = useMutation({
     mutationFn: () => api.post<WorkoutSession>("/workout-sessions/skip", { routine_day_id: day?.id ?? null }),
@@ -51,6 +82,35 @@ export function NextWorkoutCard() {
           title="Generando tu plan"
           description="Todavía estamos armando tu rutina. Vuelve en un momento."
         />
+      </div>
+    )
+  }
+
+  if (dailyLock.locked) {
+    return (
+      <div
+        className="position-relative overflow-hidden rounded-2 sank-hairline"
+        style={{
+          background: `
+            linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--sanken-black) 65%, transparent) 100%),
+            radial-gradient(120% 140% at 100% 0%, rgba(0, 184, 217, 0.22), transparent 55%),
+            var(--sanken-black-2)`,
+          boxShadow: "0 1px 2px rgba(0,0,0,0.3), 0 28px 60px -24px rgba(0,0,0,0.7)",
+        }}
+      >
+        <div className="p-4 p-sm-5">
+          <p className="sank-eyebrow sank-eyebrow--cyan mb-2">Entrenamiento de hoy</p>
+          <h2 className="display-6 sank-stat mb-4">
+            {dailyLock.reason === "skipped" ? "Entrenamiento saltado" : "✅ Entrenamiento completado"}
+          </h2>
+
+          <div className="rounded-2 p-3" style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}>
+            <p className="mb-1 fw-semibold">🔒 Próximo entrenamiento bloqueado</p>
+            <p className="small text-body-secondary mb-0">
+              Se desbloquea a las 00:00{countdown ? ` · Disponible en ${countdown}` : ""}
+            </p>
+          </div>
+        </div>
       </div>
     )
   }

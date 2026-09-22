@@ -6,6 +6,7 @@ use App\Application\Auth\Actions\ChallengeTwoFactorAction;
 use App\Application\Auth\Actions\ConfirmTwoFactorAction;
 use App\Application\Auth\Actions\DisableTwoFactorAction;
 use App\Application\Auth\Actions\EnableTwoFactorAction;
+use App\Application\Auth\Actions\RecordUserSessionAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ChallengeTwoFactorRequest;
 use App\Http\Requests\Auth\ConfirmTwoFactorRequest;
@@ -35,13 +36,14 @@ class TwoFactorController extends Controller
         return response()->json(['data' => ['message' => '2FA desactivado.']]);
     }
 
-    public function challenge(ChallengeTwoFactorRequest $request, ChallengeTwoFactorAction $action): JsonResponse
+    public function challenge(ChallengeTwoFactorRequest $request, ChallengeTwoFactorAction $action, RecordUserSessionAction $recordSession): JsonResponse
     {
         $token = $action->execute(
             $request->string('challenge_token')->toString(),
             $request->string('code')->toString(),
             $request->input('device_name') ?? $request->userAgent() ?? 'api',
         );
+        $recordSession->execute($token->accessToken->tokenable, $request);
 
         return response()->json([
             'data' => [

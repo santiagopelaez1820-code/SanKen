@@ -83,34 +83,47 @@ trait SeedsRoutineTemplates
             ['Pierna', $legsFemaleA],
         ]);
 
-        // -------- 4 días (upper_lower) --------
-        $this->makeTemplate('male', 4, $level, 'upper_lower', [
-            ['Tren Superior A', $upperMaleA],
-            ['Tren Inferior A', $lowerMaleA],
-            ['Tren Superior B', $upperMaleB],
-            ['Tren Inferior B', $lowerMaleB],
+        // -------- 4 días --------
+        // Antes era "upper_lower" (Tren Superior = pecho+espalda+hombros+
+        // bíceps+tríceps en una sola sesión, 5 grupos musculares principales
+        // de un saque) -- viola la regla de máximo 2-3 grupos/día. Se
+        // reemplaza por Empuje/Pierna/Tirón/Pierna(B): cada día entrena como
+        // mucho 3 grupos (Empuje = pecho+hombros+tríceps, Tirón =
+        // espalda+bíceps, Pierna = tren inferior), y ningún día consecutivo
+        // -- incluyendo el que cierra el ciclo contra el que lo abre --
+        // repite grupo muscular. Reusa los mismos bloques Push/Pull/Legs de
+        // siempre, sin ejercicios nuevos.
+        $this->makeTemplate('male', 4, $level, 'push_pull_legs', [
+            ['Empuje', $pushA],
+            ['Pierna A', $legsMaleA],
+            ['Tirón', $pullA],
+            ['Pierna B', $this->swap($legsMaleA)],
         ]);
-        $this->makeTemplate('female', 4, $level, 'upper_lower', [
-            ['Tren Inferior A', $lowerFemaleA],
-            ['Tren Superior', $upperFemaleA],
-            ['Tren Inferior B', $lowerFemaleB],
-            ['Tren Superior', $upperMaleB], // misma filosofía de Upper B masculino, ver seccion 11
+        $this->makeTemplate('female', 4, $level, 'push_pull_legs', [
+            ['Empuje', $pushA],
+            ['Pierna A', $legsFemaleA],
+            ['Tirón', $pullA],
+            ['Pierna B', $this->swap($legsFemaleA)],
         ]);
 
-        // -------- 5 días (híbrido PPL + Upper/Lower) --------
-        $this->makeTemplate('male', 5, $level, 'ppl_upper_lower', [
-            ['Empuje', $pushA],
-            ['Tirón', $pullA],
+        // -------- 5 días --------
+        // Mismo motivo que arriba: "Tren Superior"/"Tren Inferior" quedan
+        // afuera. Empuje x2 + Tirón x2 + Pierna x1 -- balancea frecuencia de
+        // empuje/tirón sin repetir grupo muscular en días consecutivos (ni
+        // en el cierre del ciclo).
+        $this->makeTemplate('male', 5, $level, 'push_pull_legs', [
+            ['Empuje A', $pushA],
+            ['Tirón A', $pullA],
             ['Pierna', $legsMaleA],
-            ['Tren Superior', $upperMaleA],
-            ['Tren Inferior', $lowerMaleA],
+            ['Empuje B', $this->swap($pushA)],
+            ['Tirón B', $this->swap($pullA)],
         ]);
-        $this->makeTemplate('female', 5, $level, 'ppl_upper_lower', [
-            ['Tren Inferior', $legsFemaleA],
-            ['Tren Superior', $upperFemaleA],
-            ['Tren Inferior', $lowerFemaleB],
-            ['Tren Superior', $upperMaleB],
-            ['Tren Inferior', $legsFemaleA],
+        $this->makeTemplate('female', 5, $level, 'push_pull_legs', [
+            ['Empuje A', $pushA],
+            ['Tirón A', $pullA],
+            ['Pierna', $legsFemaleA],
+            ['Empuje B', $this->swap($pushA)],
+            ['Tirón B', $this->swap($pullA)],
         ]);
 
         // -------- 6 días (PPL x2) --------

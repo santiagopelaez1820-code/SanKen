@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react"
 import {
+  Activity,
   Apple,
   BarChart3,
   Bell,
@@ -29,6 +30,8 @@ export interface NavItem {
   path: string
   icon: LucideIcon
   badge?: "feed" | "chat"
+  /** Se muestra directo en la barra superior de escritorio; el resto vive bajo "Más". */
+  primary?: boolean
 }
 
 export interface NavSection {
@@ -41,15 +44,15 @@ export function buildNavSections(user: User | null): NavSection[] {
     {
       title: "Principal",
       items: [
-        { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-        { label: "Progreso", path: "/progress", icon: BarChart3 },
-        { label: "Tienda", path: "/store", icon: ShoppingBag },
+        { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard, primary: true },
+        { label: "Entrenar", path: "/workout/precheck", icon: Dumbbell, primary: true },
+        { label: "Progreso", path: "/progress", icon: BarChart3, primary: true },
+        { label: "Retos", path: "/challenges", icon: Flag, primary: true },
+        { label: "Nutrición", path: "/nutrition", icon: Apple, primary: true },
+        { label: "Tienda", path: "/store", icon: ShoppingBag, primary: true },
         { label: "Mis pedidos", path: "/pedidos", icon: PackageSearch },
-        { label: "Entrenar", path: "/workout/precheck", icon: Dumbbell },
         { label: "PR y Rankings", path: "/prs", icon: Trophy },
         { label: "Calendario", path: "/calendar", icon: CalendarDays },
-        { label: "Retos", path: "/challenges", icon: Flag },
-        { label: "Nutrición", path: "/nutrition", icon: Apple },
       ],
     },
     {
@@ -76,6 +79,7 @@ export function buildNavSections(user: User | null): NavSection[] {
       title: "Administración",
       items: [
         { label: "Panel", path: "/admin", icon: Shield },
+        { label: "Analítica de uso", path: "/admin/analytics", icon: Activity },
         { label: "Usuarios", path: "/admin/users", icon: Users },
         { label: "Ejercicios", path: "/admin/exercises", icon: Dumbbell },
         { label: "Productos", path: "/admin/products", icon: Package },
@@ -101,4 +105,25 @@ export function findNavLabel(sections: NavSection[], pathname: string): string {
     if (match) return match.label
   }
   return "SanKen"
+}
+
+/** Items marcados `primary` de todas las secciones, en orden — botones directos de la barra superior de escritorio. */
+export function getPrimaryNavItems(sections: NavSection[]): NavItem[] {
+  return sections.flatMap((section) => section.items.filter((item) => item.primary))
+}
+
+/**
+ * Secciones "Administración" separadas del resto — se muestran en un desplegable
+ * propio de escritorio en vez de mezclarse con "Más", ya que solo aplican a un rol.
+ */
+export function getAdminSection(sections: NavSection[]): NavSection | undefined {
+  return sections.find((section) => section.title === "Administración")
+}
+
+/** El resto de secciones (sin los items `primary` ni "Administración") — contenido del desplegable "Más". */
+export function getOverflowSections(sections: NavSection[]): NavSection[] {
+  return sections
+    .filter((section) => section.title !== "Administración")
+    .map((section) => ({ ...section, items: section.items.filter((item) => !item.primary) }))
+    .filter((section) => section.items.length > 0)
 }

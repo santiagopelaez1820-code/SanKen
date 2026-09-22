@@ -99,7 +99,6 @@ describe('markRead / markAllRead', () => {
 
 describe('subscribe', () => {
   it('subscribes to the users own private channel for the native notification event', () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     useAuthStore.setState({ user: { id: 42 } as any });
     const listen = jest.fn();
     const echo = { private: jest.fn(() => ({ notification: listen })) };

@@ -21,6 +21,15 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // Node 22+ trae una Web Storage API propia experimental, activada por
+    // default (ver `node --help` -> --webstorage/--no-experimental-webstorage).
+    // Choca con el localStorage que jsdom define en su propio `window`: el
+    // getter de jsdom termina resolviendo a `undefined` en vez del Storage
+    // real, así que cualquier store con `persist` de zustand (cart-store,
+    // auth-store) rompe con "Cannot read properties of undefined (reading
+    // 'setItem')" apenas hace el primer setState. Confirmado con un repro
+    // mínimo: el mismo test pasa con este flag y falla sin él.
+    execArgv: ['--no-experimental-webstorage'],
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
     // Sin esto, Vitest también intenta recolectar los specs de Playwright en

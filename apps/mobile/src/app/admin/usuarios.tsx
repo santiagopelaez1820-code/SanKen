@@ -66,12 +66,15 @@ export default function AdminUsuariosScreen() {
   }, []);
 
   useEffect(() => {
-    if (!country) {
-      setCities([]);
-      return;
-    }
+    if (!country) return;
     api.get<OnboardingCity[]>(`/onboarding/countries/${country.id}/cities`).then(setCities);
   }, [country]);
+
+  // Deriva de `country` en vez de resetear `cities` sincrónicamente en el
+  // efecto de arriba -- sin país seleccionado, la lista de ciudades para el
+  // picker siempre debe estar vacía, sin importar qué haya quedado cacheado
+  // del país anterior.
+  const visibleCities = country ? cities : [];
 
   useEffect(() => {
     applyFilters();
@@ -248,7 +251,7 @@ export default function AdminUsuariosScreen() {
         <ListPickerModal
           visible={cityPickerVisible}
           title="Ciudad"
-          items={cities}
+          items={visibleCities}
           getId={(option) => option.id}
           getLabel={(option) => option.name}
           onSelect={(option) => {

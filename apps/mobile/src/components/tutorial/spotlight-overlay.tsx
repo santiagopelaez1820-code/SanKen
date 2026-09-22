@@ -43,10 +43,7 @@ export function SpotlightOverlay({ visible, steps, stepIndex, onNext, onPrev, on
   const step = steps[stepIndex];
 
   useEffect(() => {
-    if (!visible || !step?.ref?.current) {
-      setRect(null);
-      return;
-    }
+    if (!visible || !step?.ref?.current) return;
     const node = step.ref.current;
     const timer = setTimeout(() => {
       node.measureInWindow((x, y, width, height) => {
@@ -67,18 +64,25 @@ export function SpotlightOverlay({ visible, steps, stepIndex, onNext, onPrev, on
 
   if (!visible || !step) return null;
 
+  // El rect medido queda obsoleto un instante al cambiar de paso (el efecto
+  // de arriba todavía no volvió a medir el nuevo target) -- se anula acá
+  // en vez de resetear `rect` sincrónicamente en el efecto, así no se ve
+  // el recorte/aro del paso anterior mientras el nuevo target todavía no
+  // está montado.
+  const effectiveRect = step.ref?.current ? rect : null;
+
   const cardWidth = Math.min(CARD_MAX_WIDTH, screenWidth - Spacing.four * 2);
 
   let cardTop: number;
-  if (rect && rect.y + rect.height + 200 < screenHeight) {
-    cardTop = rect.y + rect.height + Spacing.three;
-  } else if (rect) {
-    cardTop = Math.max(Spacing.six, rect.y - 190);
+  if (effectiveRect && effectiveRect.y + effectiveRect.height + 200 < screenHeight) {
+    cardTop = effectiveRect.y + effectiveRect.height + Spacing.three;
+  } else if (effectiveRect) {
+    cardTop = Math.max(Spacing.six, effectiveRect.y - 190);
   } else {
     cardTop = screenHeight / 2 - 110;
   }
 
-  let cardLeft = rect ? rect.x + rect.width / 2 - cardWidth / 2 : screenWidth / 2 - cardWidth / 2;
+  let cardLeft = effectiveRect ? effectiveRect.x + effectiveRect.width / 2 - cardWidth / 2 : screenWidth / 2 - cardWidth / 2;
   cardLeft = Math.min(Math.max(Spacing.four, cardLeft), screenWidth - cardWidth - Spacing.four);
 
   return (
@@ -88,7 +92,9 @@ export function SpotlightOverlay({ visible, steps, stepIndex, onNext, onPrev, on
           <Defs>
             <Mask id="spotlight-mask">
               <Rect x={0} y={0} width={screenWidth} height={screenHeight} fill="white" />
-              {rect && <Rect x={rect.x} y={rect.y} width={rect.width} height={rect.height} rx={16} fill="black" />}
+              {effectiveRect && (
+                <Rect x={effectiveRect.x} y={effectiveRect.y} width={effectiveRect.width} height={effectiveRect.height} rx={16} fill="black" />
+              )}
             </Mask>
           </Defs>
           <Rect
@@ -101,12 +107,12 @@ export function SpotlightOverlay({ visible, steps, stepIndex, onNext, onPrev, on
           />
         </Svg>
 
-        {rect && (
+        {effectiveRect && (
           <View
             pointerEvents="none"
             style={[
               styles.ring,
-              { left: rect.x, top: rect.y, width: rect.width, height: rect.height, borderColor: theme.accent },
+              { left: effectiveRect.x, top: effectiveRect.y, width: effectiveRect.width, height: effectiveRect.height, borderColor: theme.accent },
             ]}
           />
         )}

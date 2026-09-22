@@ -47,10 +47,16 @@ export function PrimaryButton({
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   const handlePressIn = (e: GestureResponderEvent) => {
+    // react-hooks/immutability no conoce el contrato de Reanimated: asignar
+    // .value de un SharedValue es la API pública sancionada para animar en
+    // el hilo de UI, no un estado de React (vive fuera del ciclo de
+    // render/reconciliación a propósito). Falso positivo documentado.
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withSpring(0.97, PRESS_SPRING);
     onPressIn?.(e);
   };
   const handlePressOut = (e: GestureResponderEvent) => {
+    // eslint-disable-next-line react-hooks/immutability
     scale.value = withSpring(1, PRESS_SPRING);
     onPressOut?.(e);
   };

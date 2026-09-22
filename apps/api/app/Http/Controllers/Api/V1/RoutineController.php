@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Application\Routine\Actions\DetermineDailyLockStatusAction;
 use App\Application\Routine\Actions\DetermineNextRoutineDayAction;
 use App\Application\Routine\Actions\GenerateRoutineAction;
 use App\Domain\Routine\Contracts\RoutineRepositoryInterface;
@@ -19,8 +20,12 @@ use Illuminate\Validation\ValidationException;
 
 class RoutineController extends Controller
 {
-    public function active(Request $request, RoutineRepositoryInterface $routines, DetermineNextRoutineDayAction $nextDay): JsonResponse
-    {
+    public function active(
+        Request $request,
+        RoutineRepositoryInterface $routines,
+        DetermineNextRoutineDayAction $nextDay,
+        DetermineDailyLockStatusAction $dailyLock,
+    ): JsonResponse {
         $routine = $routines->findActiveForUser($request->user());
 
         if (! $routine) {
@@ -29,10 +34,12 @@ class RoutineController extends Controller
             ], 404);
         }
 
-        // next_day_id cambia con cada sesión completada, independiente de la
-        // rutina; se calcula siempre fresco para no tener que invalidar el
-        // cache de abajo en el path más caliente (fin de entrenamiento).
+        // next_day_id y daily_lock cambian con cada sesión completada,
+        // independiente de la rutina; se calculan siempre frescos para no
+        // tener que invalidar el cache de abajo en el path más caliente (fin
+        // de entrenamiento).
         $routine->loadMissing('days');
+        $lock = $dailyLock->execute($routine);
 
         $payload = Cache::remember(
             CacheKeys::activeRoutine($request->user()->id),
@@ -44,6 +51,15 @@ class RoutineController extends Controller
             'data' => $payload,
             'meta' => [
                 'next_day_id' => $nextDay->execute($routine)?->id,
+                // El frontend SOLO representa este estado (texto, contador
+                // visual) -- la regla real la impone el backend rechazando
+                // StartWorkoutSessionAction/SkipWorkoutSessionAction mientras
+                // locked=true, sin importar qué mande el cliente acá.
+                'daily_lock' => [
+                    'locked' => $lock->locked,
+                    'unlocks_at' => $lock->unlocksAt?->toIso8601String(),
+                    'reason' => $lock->reason,
+                ],
             ],
         ]);
     }

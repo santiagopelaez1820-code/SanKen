@@ -34,11 +34,23 @@ export function RestTimerRing({ restingUntil, totalSeconds, onSkip, onFinish }: 
     onFinishRef.current = onFinish;
   }, [onFinish]);
 
-  useEffect(() => {
-    if (restingUntil === null) return;
-    setRemaining(totalSeconds);
-    setIsPaused(false);
-  }, [restingUntil, totalSeconds]);
+  // Reinicia el conteo cuando arranca un nuevo descanso (restingUntil o
+  // totalSeconds cambian) -- ajuste de estado durante el render en vez de
+  // un efecto aparte (mismo patrón que "Adjusting state when a prop
+  // changes" en la doc de React): evita el frame de más donde se vería el
+  // valor del descanso anterior antes de que un efecto disparara. El
+  // efecto de abajo (el que corre el setInterval, con el fix ya
+  // documentado del orden de lecturas de `remaining`) queda intacto, no
+  // se toca acá.
+  const restKey = `${restingUntil}:${totalSeconds}`;
+  const [prevRestKey, setPrevRestKey] = useState(restKey);
+  if (restKey !== prevRestKey) {
+    setPrevRestKey(restKey);
+    if (restingUntil !== null) {
+      setRemaining(totalSeconds);
+      setIsPaused(false);
+    }
+  }
 
   useEffect(() => {
     if (restingUntil === null || isPaused) return;

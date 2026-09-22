@@ -276,24 +276,22 @@ body {
 }
 
 // ---------------------------------------------------------------------------
-// Rail de navegación (desktop) — carril angosto de iconos, no un sidebar
-// ancho con etiquetas. La etiqueta aparece como tooltip al hover.
+// Nav superior de escritorio — fila horizontal de icono + nombre, reemplaza
+// el rail lateral de solo iconos. Nunca solo icono: el nombre siempre va al
+// lado para que no haya que adivinar qué hace cada botón.
 // ---------------------------------------------------------------------------
-.sank-rail {
-  width: 76px;
-  background: var(--sanken-black-2);
-  border-right: 1px solid var(--bs-border-color);
-}
-
-.sank-rail-link {
-  width: 48px;
-  height: 48px;
+.sank-topnav-link {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
-  justify-content: center;
+  gap: 0.4rem;
+  height: 36px;
+  padding: 0 0.7rem;
   color: var(--sanken-gray-light);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
   border-radius: $border-radius-sm;
-  position: relative;
   transition: color 150ms ease-out, background-color 150ms ease-out;
 
   &:hover,
@@ -303,7 +301,7 @@ body {
   }
 }
 
-.sank-rail-link-active {
+.sank-topnav-link-active {
   color: var(--sanken-on-accent);
   background: var(--sanken-cyan);
 
@@ -314,27 +312,16 @@ body {
   }
 }
 
-.sank-rail-tooltip {
-  position: absolute;
-  left: calc(100% + 10px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--sanken-charcoal);
-  color: var(--sanken-white);
-  font-size: 0.75rem;
-  font-weight: 600;
-  white-space: nowrap;
-  padding: 0.35rem 0.65rem;
-  border-radius: $border-radius-sm;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease-out;
-  z-index: 40;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-}
+// Sin `display`: se combina con las utilidades d-none/d-lg-flex de Bootstrap
+// en vez de pisarlas (a diferencia de .sank-scroll-x, que fija flex fijo).
+// Deja deslizar la nav en vez de recortarla en laptops/ventanas angostas.
+.sank-topnav-scroll {
+  overflow-x: auto;
+  scrollbar-width: none;
 
-.sank-rail-link:hover .sank-rail-tooltip {
-  opacity: 1;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -425,14 +412,13 @@ body {
 
 // ---------------------------------------------------------------------------
 // Componentes de Bootstrap que SÍ se usan en el proyecto (Form.Control,
-// Card, Modal, Offcanvas, Nav — confirmado por grep de imports reales) y
-// que Bootstrap compila con el color de cada modo HORNEADO en la regla
-// (ej. `.form-control { background-color: #1D2732; }`, no
+// Card, Modal, Offcanvas, Nav, Dropdown — confirmado por grep de imports
+// reales) y que Bootstrap compila con el color de cada modo HORNEADO en la
+// regla (ej. `.form-control { background-color: #1D2732; }`, no
 // `var(--bs-input-bg, ...)`) — $input-bg/$card-bg/etc en
 // _sanken-variables.scss solo alimentan el modo oscuro (:root). Acá se pisa
-// puntualmente cada uno para modo claro; Dropdown/Tooltip/Popover/Toast/
-// Accordion/Pagination/Table no se usan en ningún lado, no hace falta
-// tocarlos.
+// puntualmente cada uno para modo claro; Tooltip/Popover/Toast/Accordion/
+// Pagination/Table no se usan en ningún lado, no hace falta tocarlos.
 // ---------------------------------------------------------------------------
 [data-bs-theme="light"] {
   .form-control {
@@ -472,6 +458,17 @@ body {
 
   .nav {
     --bs-nav-link-color: var(--sanken-gray-light);
+  }
+
+  .dropdown-menu {
+    --bs-dropdown-bg: var(--sanken-charcoal);
+    --bs-dropdown-border-color: var(--bs-border-color);
+    --bs-dropdown-link-color: var(--sanken-white);
+    --bs-dropdown-link-hover-color: var(--sanken-white);
+    --bs-dropdown-link-hover-bg: var(--sanken-overlay-hover);
+    --bs-dropdown-link-active-color: var(--sanken-cyan-light);
+    --bs-dropdown-link-active-bg: var(--sanken-cyan-dim);
+    --bs-dropdown-header-color: var(--sanken-gray-light);
   }
 }
 

@@ -56,7 +56,13 @@ export default function WorkoutSessionScreen() {
   const [restingUntil, setRestingUntil] = useState<number | null>(null);
   const [justSwapped, setJustSwapped] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const startedAt = useRef(Date.now());
+  // Date.now() no puede llamarse durante el render (impuro) -- se captura
+  // en un efecto que corre una sola vez al montar la pantalla, no al
+  // definir el ref.
+  const startedAt = useRef<number | null>(null);
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
 
   const workoutExercise = session?.exercises[currentIndex];
   const isLastExercise = session ? currentIndex === session.exercises.length - 1 : false;
@@ -75,18 +81,29 @@ export default function WorkoutSessionScreen() {
   const nextSetIndex = workoutExercise?.sets.length ?? 0;
   const suggestedRepsForNextSet = workoutExercise?.suggested_reps_per_set?.[nextSetIndex] ?? null;
 
-  useEffect(() => {
+  // Reinicia los inputs cuando cambia el ejercicio actual -- ajuste de
+  // estado durante el render en vez de un efecto (mismo patrón que
+  // "Adjusting state when a prop changes" en la doc de React): compara
+  // contra el id del ejercicio anterior y, si cambió, aplica el reset ya
+  // en esta misma pasada de render, sin el frame de más donde se verían
+  // los inputs del ejercicio anterior.
+  const [prevExerciseId, setPrevExerciseId] = useState(workoutExercise?.id);
+  if (workoutExercise?.id !== prevExerciseId) {
+    setPrevExerciseId(workoutExercise?.id);
     setWeightInput(workoutExercise?.suggested_weight_kg ?? null);
     setRpeInput(null);
     setJustSwapped(false);
     setRestingUntil(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workoutExercise?.id]);
+  }
 
-  useEffect(() => {
+  // Mismo patrón para las reps sugeridas de la PRÓXIMA serie -- cambia con
+  // el ejercicio actual o al avanzar de serie dentro del mismo ejercicio.
+  const repsKey = `${workoutExercise?.id}:${nextSetIndex}`;
+  const [prevRepsKey, setPrevRepsKey] = useState(repsKey);
+  if (repsKey !== prevRepsKey) {
+    setPrevRepsKey(repsKey);
     setRepsInput(suggestedRepsForNextSet);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [workoutExercise?.id, nextSetIndex]);
+  }
 
   const handleSwap = async () => {
     await swapCurrentExercise();
@@ -105,7 +122,7 @@ export default function WorkoutSessionScreen() {
   useEffect(() => {
     if (!session || session.completed || !allExercisesCompleted || isSubmitting) return;
     const timeout = setTimeout(async () => {
-      const durationMinutes = Math.max(1, Math.round((Date.now() - startedAt.current) / 60000));
+      const durationMinutes = Math.max(1, Math.round((Date.now() - (startedAt.current ?? Date.now())) / 60000));
       // OJO: no refrescar routine-store acá — el peso sugerido de la
       // próxima sesión recién se calcula al responder el feedback (ver
       // SubmitSessionFeedbackAction), no al completar. Refrescar antes de

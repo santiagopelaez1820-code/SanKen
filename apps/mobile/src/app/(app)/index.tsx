@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { Dumbbell, Menu, Moon, Sun } from 'lucide-react-native';
-import { estimateWorkoutMinutes } from '@sanken/core';
+import { estimateWorkoutMinutes, formatUnlockCountdown } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -24,7 +24,6 @@ import { BottomTabInset, glowShadow, MaxContentWidth, Spacing } from '@/constant
 import { useResolvedColorScheme, useTheme } from '@/hooks/use-theme';
 import { useTutorial } from '@/hooks/use-tutorial';
 import { api } from '@/lib/api';
-import { apiDateKey, toDateKey } from '@/lib/calendar-grid';
 import { useAuthStore } from '@/store/auth-store';
 import { useDashboardStore } from '@/store/dashboard-store';
 import { useFeedStore } from '@/store/feed-store';
@@ -47,7 +46,7 @@ export default function HomeScreen() {
   const isDark = useResolvedColorScheme() === 'dark';
   const setThemeMode = useThemeStore((s) => s.setMode);
   const user = useAuthStore((s) => s.user);
-  const { routine, nextDayId, isLoading, hasNoRoutine, error, load } = useRoutineStore();
+  const { routine, nextDayId, dailyLock, isLoading, hasNoRoutine, error, load } = useRoutineStore();
   const unreadFeedCount = useFeedStore((s) => s.unreadCount);
   const resumeWorkout = useWorkoutStore((s) => s.resume);
   const { stats, isLoadingStats, loadStats } = useDashboardStore();
@@ -102,14 +101,34 @@ export default function HomeScreen() {
 
   const day = findNextDay(routine, nextDayId);
 
-  // "Ya entrenaste hoy" se deriva del historial real (no de si `day`/`nextDayId`
-  // ya rotó al próximo entrenamiento) — un split de 4 días rota el día
-  // siguiente apenas se completa uno, así que sin esto la Home seguiría
-  // mostrando "Comenzar" para el día ya entrenado en vez de felicitar al
-  // usuario por el que sí completó.
-  const todayKey = toDateKey(new Date());
-  const todaysSession = sessions.find((s) => s.completed && !s.cancelled && apiDateKey(s.performed_at) === todayKey);
+  // El backend (daily_lock, ver DetermineDailyLockStatusAction en la API) es
+  // la única autoridad sobre si hoy ya se "gastó" el turno — nunca se deriva
+  // de la fecha local del dispositivo. Cuando locked=true por haber
+  // completado, la sesión de hoy es siempre la más reciente no cancelada
+  // (no puede haber ninguna con performed_at más nueva que la de hoy).
+  const todaysSession = dailyLock.reason === 'completed' ? sessions.find((s) => s.completed && !s.cancelled) ?? null : null;
   const nearestChallenge = findNearestChallenge(challenges);
+
+  // El valor en sí se deriva en cada render a partir de dailyLock (nunca se
+  // guarda en estado aparte, evita duplicar la fuente de verdad) — este
+  // estado solo fuerza un re-render cada 30s mientras está bloqueado para
+  // refrescar ese cálculo. Puramente visual: cuando llega a 0 volvemos a
+  // pedir /routines/active para confirmar el desbloqueo real en vez de
+  // confiar en el conteo del propio dispositivo (que el usuario podría
+  // haber atrasado/adelantado).
+  const [, forceCountdownTick] = useState(0);
+  useEffect(() => {
+    if (!dailyLock.locked || !dailyLock.unlocks_at) return;
+    const interval = setInterval(() => {
+      if (formatUnlockCountdown(dailyLock.unlocks_at)) {
+        forceCountdownTick((n) => n + 1);
+      } else {
+        load();
+      }
+    }, 30_000);
+    return () => clearInterval(interval);
+  }, [dailyLock.locked, dailyLock.unlocks_at, load]);
+  const countdown = dailyLock.locked ? formatUnlockCountdown(dailyLock.unlocks_at) : null;
 
   const handleSkip = async () => {
     setIsSkipping(true);
@@ -202,7 +221,7 @@ export default function HomeScreen() {
           </ThemedView>
         )}
 
-        {todaysSession ? (
+        {dailyLock.locked ? (
           <Animated.View entering={FadeInUp.delay(0).duration(320)}>
             <ThemedView
               style={[
@@ -214,29 +233,47 @@ export default function HomeScreen() {
                 ENTRENAMIENTO DE HOY
               </ThemedText>
               <ThemedText type="title" style={styles.todayTitle}>
-                ¡Excelente trabajo! 💪
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary" style={styles.completedSubtitle}>
-                {todaysSession.routine_day_label ?? 'Entrenamiento'} completado
+                {dailyLock.reason === 'skipped' ? 'Entrenamiento saltado' : '¡Excelente trabajo! 💪'}
               </ThemedText>
 
-              <ThemedView style={styles.todayStats}>
-                <ThemedView style={styles.todayStat}>
-                  <ThemedText type="title" style={styles.todayStatValue}>
-                    {todaysSession.duration_minutes ?? 0}
+              {todaysSession && (
+                <>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.completedSubtitle}>
+                    {todaysSession.routine_day_label ?? 'Entrenamiento'} completado
                   </ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
-                    MIN
-                  </ThemedText>
-                </ThemedView>
-                <ThemedView style={styles.todayStat}>
-                  <ThemedText type="title" style={styles.todayStatValue}>
-                    {todaysSession.exercises.length}
-                  </ThemedText>
-                  <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
-                    EJERCICIOS
-                  </ThemedText>
-                </ThemedView>
+
+                  <ThemedView style={styles.todayStats}>
+                    <ThemedView style={styles.todayStat}>
+                      <ThemedText type="title" style={styles.todayStatValue}>
+                        {todaysSession.duration_minutes ?? 0}
+                      </ThemedText>
+                      <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                        MIN
+                      </ThemedText>
+                    </ThemedView>
+                    <ThemedView style={styles.todayStat}>
+                      <ThemedText type="title" style={styles.todayStatValue}>
+                        {todaysSession.exercises.length}
+                      </ThemedText>
+                      <ThemedText type="small" themeColor="textSecondary" style={styles.todayStatLabel}>
+                        EJERCICIOS
+                      </ThemedText>
+                    </ThemedView>
+                  </ThemedView>
+                </>
+              )}
+
+              <ThemedView
+                style={[
+                  styles.lockBanner,
+                  { backgroundColor: `${theme.textSecondary}14`, borderColor: `${theme.textSecondary}30` },
+                ]}>
+                <ThemedText type="smallBold" style={{ color: theme.textSecondary }}>
+                  🔒 Próximo entrenamiento bloqueado
+                </ThemedText>
+                <ThemedText type="small" themeColor="textSecondary">
+                  Se desbloquea a las 00:00{countdown ? ` · Disponible en ${countdown}` : ''}
+                </ThemedText>
               </ThemedView>
             </ThemedView>
           </Animated.View>
@@ -444,6 +481,14 @@ const styles = StyleSheet.create({
   completedSubtitle: {
     marginTop: -Spacing.two,
     marginBottom: Spacing.three,
+  },
+  lockBanner: {
+    marginTop: Spacing.three,
+    borderRadius: Spacing.three,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
+    gap: 2,
   },
   challengeBanner: {
     borderRadius: Spacing.three,

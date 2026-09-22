@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Image } from 'expo-image';
 import { StyleSheet } from 'react-native';
 
@@ -27,9 +27,14 @@ export function Avatar({ name, avatarUrl, size }: AvatarProps) {
 
   // Si la URL cambia (nueva foto, o el usuario vuelve a intentar), hay que
   // darle otra oportunidad de cargar en vez de quedar pegado en el error
-  // de la URL anterior.
+  // de la URL anterior -- ajuste de estado durante el render en vez de un
+  // efecto (compara contra la URL anterior y resetea en la misma pasada).
   const [failed, setFailed] = useState(false);
-  useEffect(() => setFailed(false), [resolvedUrl]);
+  const [prevResolvedUrl, setPrevResolvedUrl] = useState(resolvedUrl);
+  if (resolvedUrl !== prevResolvedUrl) {
+    setPrevResolvedUrl(resolvedUrl);
+    setFailed(false);
+  }
 
   if (resolvedUrl && !failed) {
     return (

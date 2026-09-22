@@ -25,13 +25,49 @@ class RoutineTemplateGenerationTest extends TestCase
         $this->seed(RoutineTemplateSeeder::class);
     }
 
-    private function completeOnboardingFor(User $user, string $sex, int $frequencyDays, string $level = 'intermediate'): void
-    {
+    private function completeOnboardingFor(
+        User $user,
+        string $sex,
+        int $frequencyDays,
+        string $level = 'intermediate',
+        string $goal = 'gain_muscle',
+        ?int $sessionMinutes = null,
+    ): void {
         $user->profile()->create(['age' => 28, 'sex' => $sex, 'height_cm' => 175, 'weight_kg' => 75]);
         $user->onboardingResponse()->create([
-            'level' => $level, 'goals' => ['gain_muscle'], 'frequency_days' => $frequencyDays,
+            'level' => $level, 'goals' => [$goal], 'frequency_days' => $frequencyDays,
+            'session_minutes' => $sessionMinutes,
             'completed' => true, 'completed_at' => now(),
         ]);
+    }
+
+    /**
+     * "Familias" de grupo muscular más amplias que los slugs crudos de la
+     * tabla muscle_groups (quads/hamstrings/glutes son los 3 "piernas" de
+     * un mismo día de pierna; biceps/triceps son "brazos" del mismo modo).
+     * La regla de "máximo 2-3 grupos musculares por día" (sección 4 del
+     * pedido) se refiere a esto, no a contar cada slug fino por separado --
+     * un día de pierna con cuádriceps+isquios+glúteos sigue siendo UN día
+     * de pierna, no 3 grupos distintos. Solo se usa acá, en el test: la API
+     * sigue devolviendo los slugs crudos (target_muscle_groups) tal cual,
+     * porque CalendarController los resuelve contra la tabla real por slug.
+     */
+    private const MUSCLE_FAMILIES = [
+        'quads' => 'legs',
+        'hamstrings' => 'legs',
+        'glutes' => 'legs',
+        'biceps' => 'arms',
+        'triceps' => 'arms',
+    ];
+
+    /** Familias de grupo muscular de un día generado, sin duplicados. */
+    private function muscleGroupsOf(array $day): array
+    {
+        return collect($day['target_muscle_groups'] ?? [])
+            ->map(fn (string $slug) => self::MUSCLE_FAMILIES[$slug] ?? $slug)
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public static function sexFrequencyCombos(): array
@@ -81,18 +117,137 @@ class RoutineTemplateGenerationTest extends TestCase
             ->assertJsonPath('data.source', 'engine')
             ->assertJsonCount($frequencyDays, 'data.days');
 
-        // Cada ejercicio de cada dia trae sets/reps por defecto (8x12, ver
-        // RoutineTemplateExercise::default_sets/default_reps) y su exercise_id
-        // resuelve a un ejercicio real del catalogo.
+        // Nivel intermediate (default de completeOnboardingFor) + objetivo
+        // gain_muscle -> RoutineVolumeCalculator: 5 ejercicios/día, 3 series,
+        // reps "8-12" (ver RoutineVolumeCalculator::volumeForLevel/intensityForGoal).
+        // Cada ejercicio resuelve a un ejercicio real del catálogo, y ningún
+        // día pasa de 3 grupos musculares principales (sección 4 del pedido).
         $days = $response->json('data.days');
         foreach ($days as $day) {
             $this->assertNotEmpty($day['exercises']);
+            $this->assertLessThanOrEqual(5, count($day['exercises']));
+            $this->assertLessThanOrEqual(3, count($this->muscleGroupsOf($day)));
             foreach ($day['exercises'] as $exercise) {
                 $this->assertSame(3, $exercise['target_sets']);
-                $this->assertSame('12', $exercise['target_reps']);
+                $this->assertSame('8-12', $exercise['target_reps']);
                 $this->assertNotEmpty($exercise['exercise']['name']);
             }
         }
+    }
+
+    /** @dataProvider sexFrequencyCombos */
+    public function test_no_day_ever_exceeds_three_main_muscle_groups(string $sex, int $frequencyDays): void
+    {
+        $this->seedCatalog();
+        $user = User::factory()->create();
+        $this->completeOnboardingFor($user, $sex, $frequencyDays);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/routines/generate');
+        $days = $response->json('data.days');
+
+        foreach ($days as $day) {
+            $groups = $this->muscleGroupsOf($day);
+            $this->assertLessThanOrEqual(3, count($groups), "Día '{$day['label']}' entrena ".count($groups).' grupos musculares: '.implode(', ', $groups));
+        }
+    }
+
+    /**
+     * @dataProvider sexFrequencyCombos
+     *
+     * No exige CERO superposición entre días consecutivos (un día de tirón
+     * legítimamente toca algo de "shoulders" vía deltoide posterior, sin
+     * competir con el trabajo de empuje) -- exige que el grupo PRINCIPAL
+     * (familia del primer ejercicio, el compuesto del día, ver
+     * SeedsRoutineTemplates) nunca se repita entre un día y el siguiente,
+     * incluyendo el cierre del ciclo. Eso es lo que pide la sección 10:
+     * no "Pecho lunes, Pecho martes" sin motivo, no "cero contacto con
+     * cualquier músculo que haya tocado el día anterior".
+     */
+    public function test_the_main_muscle_group_never_repeats_on_the_immediately_next_day(string $sex, int $frequencyDays): void
+    {
+        $this->seedCatalog();
+        $user = User::factory()->create();
+        $this->completeOnboardingFor($user, $sex, $frequencyDays);
+
+        $response = $this->actingAs($user, 'sanctum')->postJson('/api/v1/routines/generate');
+        $days = $response->json('data.days');
+        $mainFamily = fn (array $day) => $this->muscleGroupsOf($day)[0] ?? null;
+
+        for ($i = 0; $i < count($days); $i++) {
+            $next = ($i + 1) % count($days);
+            $this->assertNotSame(
+                $mainFamily($days[$i]),
+                $mainFamily($days[$next]),
+                "'{$days[$i]['label']}' y '{$days[$next]['label']}' tienen el mismo grupo muscular principal"
+            );
+        }
+    }
+
+    public function test_beginner_gets_less_volume_than_advanced_for_the_same_split(): void
+    {
+        $this->seedCatalog();
+
+        $beginner = User::factory()->create();
+        $this->completeOnboardingFor($beginner, 'male', 3, 'beginner');
+        $beginnerDays = $this->actingAs($beginner, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
+
+        $advanced = User::factory()->create();
+        $this->completeOnboardingFor($advanced, 'male', 3, 'advanced');
+        $advancedDays = $this->actingAs($advanced, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
+
+        $totalSets = fn (array $days) => collect($days)->flatMap(fn ($d) => $d['exercises'])->sum('target_sets');
+        $exerciseCount = fn (array $days) => collect($days)->flatMap(fn ($d) => $d['exercises'])->count();
+
+        $this->assertLessThan($totalSets($advancedDays), $totalSets($beginnerDays));
+        // "Avanzado" no debe significar simplemente más ejercicios (sección 5):
+        // misma cantidad de movimientos que intermedio, más series cada uno.
+        $intermediate = User::factory()->create();
+        $this->completeOnboardingFor($intermediate, 'male', 3, 'intermediate');
+        $intermediateDays = $this->actingAs($intermediate, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
+        $this->assertSame($exerciseCount($intermediateDays), $exerciseCount($advancedDays));
+        $this->assertLessThan($exerciseCount($intermediateDays), $exerciseCount($beginnerDays));
+    }
+
+    public static function goalRepRanges(): array
+    {
+        return [
+            'strength -> reps bajas, descanso largo' => ['strength', '4-6', 150],
+            'gain_muscle -> reps moderadas' => ['gain_muscle', '8-12', 90],
+            'lose_fat -> reps altas, descanso corto' => ['lose_fat', '12-15', 45],
+            'endurance -> reps muy altas' => ['endurance', '15-20', 45],
+        ];
+    }
+
+    /** @dataProvider goalRepRanges */
+    public function test_reps_and_rest_follow_the_users_goal(string $goal, string $expectedReps, int $expectedRest): void
+    {
+        $this->seedCatalog();
+        $user = User::factory()->create();
+        $this->completeOnboardingFor($user, 'male', 3, 'intermediate', $goal);
+
+        $days = $this->actingAs($user, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
+
+        $this->assertSame($expectedReps, $days[0]['exercises'][0]['target_reps']);
+        $this->assertSame($expectedRest, $days[0]['exercises'][0]['rest_seconds']);
+    }
+
+    public function test_a_short_session_time_trims_exercises_but_a_long_one_does_not_inflate_them(): void
+    {
+        $this->seedCatalog();
+
+        $short = User::factory()->create();
+        $this->completeOnboardingFor($short, 'male', 3, 'intermediate', 'gain_muscle', 30);
+        $shortDays = $this->actingAs($short, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
+
+        $long = User::factory()->create();
+        $this->completeOnboardingFor($long, 'male', 3, 'intermediate', 'gain_muscle', 90);
+        $longDays = $this->actingAs($long, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
+
+        // 30 min a 3 series x (45s + 90s descanso) por ejercicio ~= 6.75min/ejercicio -> entran 4.
+        $this->assertCount(4, $shortDays[0]['exercises']);
+        // 90 min no debe "inflar" más allá de lo que el nivel ya decidió (5 para intermedio) --
+        // más tiempo disponible no es motivo para agregar ejercicios de más (sección 11).
+        $this->assertCount(5, $longDays[0]['exercises']);
     }
 
     /** @dataProvider sexFrequencyLevelCombos */

@@ -11,6 +11,7 @@ use Database\Seeders\AchievementSeeder;
 use Database\Seeders\ExerciseSeeder;
 use Database\Seeders\MuscleGroupSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -69,12 +70,23 @@ class XpAwardTest extends TestCase
 
     public function test_completing_the_tenth_session_unlocks_consistent_achievement(): void
     {
+        // Una sesión por día calendario: con el desbloqueo diario, completar
+        // el mismo routine_day_id dos veces el mismo día ya está bloqueado
+        // por el backend (ver DailyLockTest) -- 10 sesiones reales de este
+        // split necesariamente caen en 10 días distintos. Se saltea de a 2
+        // días (no día seguido) a propósito: este test mide únicamente el
+        // logro "consistent" (10 sesiones) -- entrenar 7+ días *seguidos*
+        // dispararía además "streak_7" (+100 XP) y rompería el total
+        // esperado, que es un logro distinto sin relación con este test.
+        Carbon::setTestNow(Carbon::parse('2026-01-01 08:00:00'));
+
         $user = User::factory()->create();
         $day = $this->makeRoutineDayWithOneExercise($user);
         $client = $this->actingAs($user, 'sanctum');
 
         for ($i = 0; $i < 9; $i++) {
             $this->completeASession($client, $day)->assertOk();
+            Carbon::setTestNow(Carbon::now()->addDays(2));
         }
 
         $response = $this->completeASession($client, $day);
@@ -84,5 +96,7 @@ class XpAwardTest extends TestCase
         $this->assertSame(['consistent'], array_column($response->json('meta.gamification.achievements_unlocked'), 'code'));
         // 10 sesiones x 20 base + 50 (first_workout) + 100 (consistent).
         $this->assertDatabaseHas('user_xp', ['user_id' => $user->id, 'total_xp' => 200 + 50 + 100]);
+
+        Carbon::setTestNow();
     }
 }

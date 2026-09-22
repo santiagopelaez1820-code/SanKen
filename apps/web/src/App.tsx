@@ -28,6 +28,7 @@ import { ChatInboxPage } from "@/pages/ChatInboxPage"
 import { ChatThreadPage } from "@/pages/ChatThreadPage"
 import { NutritionPage } from "@/pages/NutritionPage"
 import { FeedPage } from "@/pages/FeedPage"
+import { AdminAnalyticsPage } from "@/pages/AdminAnalyticsPage"
 import { AdminPage } from "@/pages/AdminPage"
 import { AdminUsersPage } from "@/pages/AdminUsersPage"
 import { AdminUserDetailPage } from "@/pages/AdminUserDetailPage"
@@ -158,6 +159,14 @@ function App() {
           element={
             <RequireAdmin>
               <AdminPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <RequireAdmin>
+              <AdminAnalyticsPage />
             </RequireAdmin>
           }
         />

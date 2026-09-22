@@ -46,3 +46,16 @@ export interface Routine {
   ends_at: string | null;
   days: RoutineDay[];
 }
+
+/**
+ * Estado del desbloqueo diario, tal como lo calcula el backend (nunca el
+ * cliente) — viene en `meta.daily_lock` de `GET /routines/active`. `reason`
+ * indica si el turno de hoy se gastó completando o saltando el
+ * entrenamiento; `unlocks_at` es la medianoche (UTC) del día calendario
+ * siguiente, o null si no está bloqueado.
+ */
+export interface DailyLock {
+  locked: boolean;
+  unlocks_at: string | null;
+  reason: 'completed' | 'skipped' | null;
+}
