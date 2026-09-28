@@ -25,4 +25,6 @@ export * from './lib/order-status';
 export * from './lib/routine-template';
 export * from './lib/food-quantity';
 export * from './lib/food-category-icon';
+export * from './lib/personal-record';
 export * from './realtime/echo';
+export * from './legal';

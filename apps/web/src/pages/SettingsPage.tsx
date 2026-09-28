@@ -16,14 +16,22 @@ import {
   type User,
 } from "@sanken/core"
 import { api } from "@/lib/api"
+import { prepareAvatarFile } from "@/lib/avatar-image"
+import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PasswordInput } from "@/components/ui/PasswordInput"
+import { LegalSettingsCard } from "@/components/legal/LegalSettingsCard"
 import { useThemeStore, type ThemeMode } from "@/lib/theme-store"
-import { getExistingWebPushSubscription, isWebPushSupported, subscribeToWebPush, unsubscribeFromWebPush } from "@/lib/web-push"
+import {
+  getExistingWebPushSubscription,
+  subscribeToWebPush,
+  unsubscribeFromWebPush,
+  webPushUnavailableReason,
+} from "@/lib/web-push"
 
 const THEME_MODE_OPTIONS: { label: string; value: ThemeMode }[] = [
   { label: "Automático", value: "system" },
@@ -57,17 +65,20 @@ export function SettingsPage() {
   })
 
   const avatarInputRef = useRef<HTMLInputElement>(null)
+  const setAuthUser = useAuthStore((s) => s.setUser)
   const [avatarError, setAvatarError] = useState<string | null>(null)
 
   const updateAvatarMutation = useMutation({
-    mutationFn: (file: File) => {
+    mutationFn: async (file: File) => {
       const formData = new FormData()
-      formData.append("avatar", file)
+      formData.append("avatar", await prepareAvatarFile(file))
       return api.post<User>("/auth/me/avatar", formData)
     },
     onSuccess: (updated) => {
       setAvatarError(null)
       queryClient.setQueryData(["auth", "me"], updated)
+      // El TopBar lee el usuario del auth store, no de esta query.
+      setAuthUser(updated)
     },
     onError: (err) =>
       setAvatarError(err instanceof ApiError ? err.body.message : "No se pudo actualizar la foto."),
@@ -78,6 +89,7 @@ export function SettingsPage() {
     onSuccess: (updated) => {
       setAvatarError(null)
       queryClient.setQueryData(["auth", "me"], updated)
+      setAuthUser(updated)
     },
     onError: (err) =>
       setAvatarError(err instanceof ApiError ? err.body.message : "No se pudo quitar la foto."),
@@ -176,6 +188,7 @@ export function SettingsPage() {
 
   const [pushEnabled, setPushEnabled] = useState(false)
   const [pushError, setPushError] = useState<string | null>(null)
+  const pushUnavailableReason = webPushUnavailableReason()
   useEffect(() => {
     getExistingWebPushSubscription().then((sub) => setPushEnabled(sub !== null))
   }, [])
@@ -541,17 +554,22 @@ export function SettingsPage() {
               </p>
               {pushError && <p className="mt-1 text-xs text-destructive">{pushError}</p>}
             </div>
-            {isWebPushSupported() ? (
+            {pushUnavailableReason ? (
+              <p className="max-w-40 text-right text-xs text-muted-foreground">{pushUnavailableReason}</p>
+            ) : (
               <Switch
                 checked={pushEnabled}
                 disabled={pushMutation.isPending}
-                onCheckedChange={(checked) => pushMutation.mutate(checked)}
+                onCheckedChange={(checked) => {
+                  setPushError(null)
+                  pushMutation.mutate(checked)
+                }}
               />
-            ) : (
-              <p className="text-xs text-muted-foreground">No soportado en este navegador.</p>
             )}
           </div>
         </Card>
+
+        <LegalSettingsCard />
       </div>
     </main>
   )

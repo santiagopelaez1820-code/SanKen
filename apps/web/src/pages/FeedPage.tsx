@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import type { FeedItem, NewChatMessageNotificationData } from "@sanken/core"
+import type { ApiSuccess, FeedItem, NewChatMessageNotificationData } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -13,7 +13,7 @@ function FeedItemRow({ item, onRead }: { item: FeedItem; onRead: (item: FeedItem
   if (item.feed_type === "news") {
     return (
       <button
-        onClick={() => onRead(item)}
+        onClick={() => !item.read_at && onRead(item)}
         className={cn(
           "w-full rounded-xl border border-border bg-card p-5 text-left",
           !item.read_at && "border-primary/40 bg-primary/5"
@@ -30,7 +30,7 @@ function FeedItemRow({ item, onRead }: { item: FeedItem; onRead: (item: FeedItem
   return (
     <button
       onClick={() => {
-        onRead(item)
+        if (!item.read_at) onRead(item)
         if (chatData.conversation_id) navigate(`/chat/${chatData.conversation_id}`)
       }}
       className={cn(
@@ -49,14 +49,34 @@ export function FeedPage() {
   const queryClient = useQueryClient()
   const { items, unreadCount, isLoading, isError, refetch } = useFeed()
 
+  // Optimista: la tarjeta y el badge se actualizan en el mismo clic (antes
+  // había que salir y volver a entrar — reporte del tester). onSettled
+  // resincroniza con el servidor, y si falló vuelve al estado real.
+  const markAsReadLocally = (predicate: (item: FeedItem) => boolean) => {
+    const readAt = new Date().toISOString()
+    queryClient.setQueryData<ApiSuccess<FeedItem[]>>(["feed"], (old) => {
+      if (!old) return old
+      let newlyRead = 0
+      const data = old.data.map((i) => {
+        if (i.read_at || !predicate(i)) return i
+        newlyRead++
+        return { ...i, read_at: readAt }
+      })
+      const unread = (old.meta?.unread_count as number | undefined) ?? 0
+      return { ...old, data, meta: { ...old.meta, unread_count: Math.max(0, unread - newlyRead) } }
+    })
+  }
+
   const markReadMutation = useMutation({
     mutationFn: (item: FeedItem) => api.post(`/feed/${item.feed_type}/${item.id}/read`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["feed"] }),
+    onMutate: (item) => markAsReadLocally((i) => i.feed_type === item.feed_type && i.id === item.id),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["feed"] }),
   })
 
   const markAllReadMutation = useMutation({
     mutationFn: () => api.post("/feed/read-all"),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["feed"] }),
+    onMutate: () => markAsReadLocally(() => true),
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["feed"] }),
   })
 
   return (

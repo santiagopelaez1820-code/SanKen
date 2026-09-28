@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Linking, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
-import { Bell, Eye, MapPin, MonitorSmartphone, Shield, ShieldCheck } from 'lucide-react-native';
+import { Bell, ChevronRight, Eye, FileText, MapPin, MonitorSmartphone, Shield, ShieldCheck } from 'lucide-react-native';
 import type { OnboardingState, User } from '@sanken/core';
+import { formatLegalDate, LEGAL_DOCUMENT_IDS, LEGAL_DOCUMENTS, LEGAL_STRINGS } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { DeleteAccountSection } from '@/components/legal/delete-account-section';
 import { Avatar } from '@/components/ui/avatar';
 import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -19,10 +21,12 @@ import { ToggleRow } from '@/components/ui/toggle-row';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
+import { LEGAL_ROUTES } from '@/lib/legal-routes';
 import {
   isPushNotificationsEnabled,
   registerForPushNotificationsAsync,
   unregisterFromPushNotifications,
+  type PushRegistrationResult,
 } from '@/lib/push';
 import { useAuthStore } from '@/store/auth-store';
 import { useOnboardingStore } from '@/store/onboarding-store';
@@ -64,15 +68,22 @@ export default function SettingsScreen() {
 
   const [pushEnabled, setPushEnabled] = useState(false);
   const [isTogglingPush, setIsTogglingPush] = useState(false);
+  const [pushMessage, setPushMessage] = useState<{ text: string; canOpenSettings: boolean } | null>(null);
   useEffect(() => {
     isPushNotificationsEnabled().then(setPushEnabled);
   }, []);
 
   const handlePushToggle = async (enabled: boolean) => {
     setIsTogglingPush(true);
+    setPushMessage(null);
+    // Refleja el toque de inmediato — si el registro falla, vuelve abajo
+    // junto con el motivo en vez de "rebotar" sin explicación.
+    setPushEnabled(enabled);
     try {
       if (enabled) {
-        await registerForPushNotificationsAsync();
+        const result = await registerForPushNotificationsAsync();
+        const message = PUSH_RESULT_MESSAGES[result];
+        if (message) setPushMessage({ text: message, canOpenSettings: result === 'blocked' });
       } else {
         await unregisterFromPushNotifications();
       }
@@ -382,6 +393,46 @@ export default function SettingsScreen() {
               disabled={isTogglingPush}
               onValueChange={handlePushToggle}
             />
+            {pushMessage && (
+              <ThemedView style={styles.pushMessage}>
+                <ThemedText type="small" themeColor="textSecondary">
+                  {pushMessage.text}
+                </ThemedText>
+                {pushMessage.canOpenSettings && (
+                  <PrimaryButton label="Abrir ajustes del teléfono" variant="ghost" onPress={() => Linking.openSettings()} />
+                )}
+              </ThemedView>
+            )}
+          </ThemedView>
+
+          <ThemedView type="backgroundElement" style={styles.card}>
+            <ThemedView style={styles.cardHeading}>
+              <Icon icon={FileText} size={16} color={theme.accent} />
+              <ThemedText type="default">{LEGAL_STRINGS.es.legalSectionTitle}</ThemedText>
+            </ThemedView>
+            <ThemedText type="small" themeColor="textSecondary">
+              {LEGAL_STRINGS.es.legalSectionDescription}
+            </ThemedText>
+            {LEGAL_DOCUMENT_IDS.map((id) => (
+              <Pressable
+                key={id}
+                accessibilityRole="link"
+                onPress={() => router.push(LEGAL_ROUTES[id])}
+                style={styles.legalRow}
+              >
+                <ThemedView style={styles.legalRowText}>
+                  <ThemedText type="default">{LEGAL_STRINGS.es.documentNames[id]}</ThemedText>
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {LEGAL_STRINGS.es.versionLine(LEGAL_DOCUMENTS[id].version, formatLegalDate(LEGAL_DOCUMENTS[id].updatedAt, 'es'))}
+                  </ThemedText>
+                </ThemedView>
+                <Icon icon={ChevronRight} size={16} color={theme.textSecondary} />
+              </Pressable>
+            ))}
+          </ThemedView>
+
+          <ThemedView type="backgroundElement" style={styles.card}>
+            <DeleteAccountSection />
           </ThemedView>
 
           <PrimaryButton label="Volver" variant="ghost" onPress={() => router.back()} />
@@ -391,7 +442,17 @@ export default function SettingsScreen() {
   );
 }
 
+const PUSH_RESULT_MESSAGES: Record<PushRegistrationResult, string | null> = {
+  enabled: null,
+  skipped: null,
+  denied: 'Necesitamos tu permiso para enviarte notificaciones. Volvé a activar el interruptor y aceptá el aviso.',
+  blocked: 'Las notificaciones de SanKen están bloqueadas en tu teléfono. Activalas desde los ajustes del sistema y volvé a intentarlo.',
+  unavailable: 'Las notificaciones push no están disponibles en esta versión de la app (Expo Go o web).',
+  error: 'No pudimos activar las notificaciones. Revisá tu conexión y probá de nuevo.',
+};
+
 const styles = StyleSheet.create({
+  pushMessage: { gap: Spacing.two, marginTop: Spacing.two, backgroundColor: 'transparent' },
   root: { flex: 1 },
   safeArea: { flex: 1, alignItems: 'center', width: '100%' },
   scrollView: { alignSelf: 'stretch' },
@@ -426,4 +487,6 @@ const styles = StyleSheet.create({
   qr: { alignSelf: 'center' },
   center: { textAlign: 'center' },
   error: { color: '#FF4D5E' },
+  legalRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: Spacing.two, minHeight: 44 },
+  legalRowText: { flex: 1, gap: 2, backgroundColor: 'transparent' },
 });

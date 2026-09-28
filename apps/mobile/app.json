@@ -53,7 +53,7 @@
         "expo-image-picker",
         {
           "photosPermission": "SanKen usa tus fotos para que elijas una foto de perfil.",
-          "cameraPermission": false
+          "cameraPermission": "SanKen usa la cámara para escanear el código de barras de un alimento."
         }
       ],
       "expo-video",

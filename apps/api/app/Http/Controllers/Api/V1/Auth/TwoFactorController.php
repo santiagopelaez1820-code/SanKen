@@ -47,7 +47,7 @@ class TwoFactorController extends Controller
 
         return response()->json([
             'data' => [
-                'user' => new UserResource($token->accessToken->tokenable),
+                'user' => UserResource::forOwner($token->accessToken->tokenable),
                 'token' => $token->plainTextToken,
             ],
         ]);

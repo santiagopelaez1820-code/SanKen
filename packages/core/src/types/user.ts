@@ -1,4 +1,6 @@
-export type UserRole = 'user' | 'trainer' | 'super_admin';
+import type { ConsentType } from '../legal/types';
+
+export type UserRole ='user' | 'trainer' | 'super_admin';
 
 export interface User {
   id: number;
@@ -14,4 +16,16 @@ export interface User {
   /** true si el perfil ya tiene city_id — gate independiente de onboarding_completed, ver RequireAuth. */
   has_location: boolean;
   created_at: string;
+  /**
+   * Consentimientos legales que el usuario todavía no aceptó en su versión
+   * vigente (ver config/legal.php). Solo viene para el propio usuario
+   * autenticado; opcional porque un `user` persistido por una versión
+   * anterior de la app no lo tiene.
+   */
+  pending_consents?: ConsentType[];
+  /**
+   * Solo para el propio usuario. null = cuenta creada con correo y
+   * contraseña (eliminarla pide la contraseña); 'google' = login social.
+   */
+  auth_provider?: string | null;
 }

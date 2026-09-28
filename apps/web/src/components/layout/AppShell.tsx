@@ -4,6 +4,7 @@ import { TopBar } from "@/components/layout/TopBar"
 import { BottomNav } from "@/components/layout/BottomNav"
 import { RouteProgressBar } from "@/components/layout/RouteProgressBar"
 import { EASE_OUT } from "@/lib/motion"
+import { LegalLinks } from "@/components/legal/LegalLinks"
 
 export function AppShell() {
   const location = useLocation()
@@ -21,6 +22,9 @@ export function AppShell() {
         >
           <Outlet />
         </motion.div>
+        <footer className="px-4 pt-2 pb-6">
+          <LegalLinks />
+        </footer>
       </main>
       <BottomNav />
     </div>

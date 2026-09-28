@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { Trophy } from 'lucide-react-native';
-import type { PersonalRecordSummary } from '@sanken/core';
+import { formatPersonalRecord, type PersonalRecordSummary } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -38,7 +38,7 @@ export function RecentPRsRow({ records }: RecentPRsRowProps) {
                 {record.exercise_name}
               </ThemedText>
               <ThemedText type="smallBold" style={styles.value}>
-                {record.value} kg
+                {formatPersonalRecord(record)}
               </ThemedText>
             </ThemedView>
           ))}

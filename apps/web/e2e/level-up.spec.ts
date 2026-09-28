@@ -91,7 +91,7 @@ async function authedGet(page: Page, path: string) {
 test.beforeAll(async () => {
   const ctx = await pwRequest.newContext()
   const res = await ctx.post(`${API_URL}/auth/register`, {
-    data: { name: 'E2E LevelUp', email: EMAIL, password: PASSWORD, password_confirmation: PASSWORD },
+    data: { name: 'E2E LevelUp', email: EMAIL, password: PASSWORD, password_confirmation: PASSWORD, accept_terms: true, accept_privacy: true, accept_health_data: true },
   })
   if (!res.ok()) {
     throw new Error(`fixture setup failed: ${res.status()} ${await res.text()}`)

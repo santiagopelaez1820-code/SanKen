@@ -93,4 +93,48 @@ class PersonalRecordsTest extends TestCase
 
         $this->assertSame(0, WorkoutSession::query()->count());
     }
+
+    /**
+     * Reporte del tester: 100 kg × 5 se mostraba como "116.67 kg" (1RM
+     * estimado) y después 110 kg × 1 no contaba como récord. El récord es
+     * el peso real levantado, y más peso siempre lo supera.
+     */
+    public function test_manual_pr_stores_the_real_weight_and_a_heavier_lift_always_beats_it(): void
+    {
+        $user = User::factory()->create();
+        $client = $this->actingAs($user, 'sanctum');
+        $exerciseId = Exercise::query()->where('name', 'Press banca con barra')->value('id');
+
+        $first = $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 100, 'reps' => 5]);
+        $first->assertJsonPath('data.value', 100);
+        $first->assertJsonPath('data.reps', 5);
+
+        $heavier = $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 110, 'reps' => 1]);
+        $heavier->assertCreated();
+        $heavier->assertJsonPath('meta.is_new_best', true);
+        $heavier->assertJsonPath('data.value', 110);
+        $heavier->assertJsonPath('data.reps', 1);
+
+        $client->getJson('/api/v1/stats/personal-records')
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.value', 110)
+            ->assertJsonPath('data.0.reps', 1);
+    }
+
+    public function test_manual_pr_with_same_weight_only_wins_with_more_reps(): void
+    {
+        $user = User::factory()->create();
+        $client = $this->actingAs($user, 'sanctum');
+        $exerciseId = Exercise::query()->where('name', 'Press banca con barra')->value('id');
+
+        $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 100, 'reps' => 3]);
+
+        $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 100, 'reps' => 2])
+            ->assertJsonPath('meta.is_new_best', false)
+            ->assertJsonPath('data.reps', 3);
+
+        $client->postJson('/api/v1/stats/personal-records', ['exercise_id' => $exerciseId, 'weight_kg' => 100, 'reps' => 4])
+            ->assertJsonPath('meta.is_new_best', true)
+            ->assertJsonPath('data.reps', 4);
+    }
 }

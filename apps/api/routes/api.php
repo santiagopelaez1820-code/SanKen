@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminProductController;
 use App\Http\Controllers\Api\V1\Admin\AdminReportController;
 use App\Http\Controllers\Api\V1\Admin\AdminRoutineTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminStatsController;
+use App\Http\Controllers\Api\V1\Admin\AdminUserConsentController;
 use App\Http\Controllers\Api\V1\Admin\AdminUserController;
 use App\Http\Controllers\Api\V1\Admin\AdminUserRoutineController;
 use App\Http\Controllers\Api\V1\Auth\AuthController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Api\V1\ExerciseController;
 use App\Http\Controllers\Api\V1\ExerciseRankingController;
 use App\Http\Controllers\Api\V1\FeedController;
 use App\Http\Controllers\Api\V1\GamificationController;
+use App\Http\Controllers\Api\V1\Legal\LegalController;
 use App\Http\Controllers\Api\V1\MyTrainerController;
 use App\Http\Controllers\Api\V1\NutritionController;
 use App\Http\Controllers\Api\V1\NutritionPlanController;
@@ -45,6 +47,16 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function () {
     Route::get('/ping', PingController::class)->name('ping');
+
+    // Documentos legales y consentimientos — ver config/legal.php.
+    Route::prefix('legal')->name('legal.')->group(function () {
+        Route::get('/documents', [LegalController::class, 'documents'])->name('documents');
+
+        Route::middleware('auth:sanctum')->group(function () {
+            Route::get('/consents', [LegalController::class, 'consents'])->name('consents.index');
+            Route::post('/consents', [LegalController::class, 'accept'])->middleware('throttle:writes')->name('consents.store');
+        });
+    });
 
     Route::prefix('auth')->name('auth.')->group(function () {
         Route::post('/register', [AuthController::class, 'register'])
@@ -78,6 +90,9 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::middleware('auth:sanctum')->group(function () {
             Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
             Route::get('/me', [AuthController::class, 'me'])->name('me');
+            Route::delete('/me', [AuthController::class, 'destroyMe'])
+                ->middleware('throttle:5,1')
+                ->name('me.destroy');
             Route::post('/me/avatar', [AuthController::class, 'updateAvatar'])
                 ->middleware('throttle:writes')
                 ->name('me.avatar.store');
@@ -261,6 +276,7 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::patch('/users/{user}/activate', [AdminUserController::class, 'activate'])->middleware('throttle:writes')->name('users.activate');
         Route::patch('/users/{user}/deactivate', [AdminUserController::class, 'deactivate'])->middleware('throttle:writes')->name('users.deactivate');
         Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->middleware('throttle:writes')->name('users.destroy');
+        Route::get('/users/{user}/consents', [AdminUserConsentController::class, 'index'])->name('users.consents.index');
 
         Route::get('/users/{user}/routine', [AdminUserRoutineController::class, 'show'])->name('users.routine.show');
         Route::post('/users/{user}/routine', [AdminUserRoutineController::class, 'store'])->middleware('throttle:writes')->name('users.routine.store');

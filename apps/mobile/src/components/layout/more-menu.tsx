@@ -6,13 +6,13 @@ import {
   CalendarDays,
   ChevronRight,
   Dumbbell,
+  Flag,
   History,
   LogOut,
   MessageCircle,
   Ruler,
   Settings,
   Shield,
-  Trophy,
   User,
   Users,
   type LucideIcon,
@@ -109,7 +109,7 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
 
   const seguimientoItems: MoreMenuItem[] = [
     { label: 'Historial', icon: History, path: '/history' },
-    { label: 'PR', icon: Trophy, path: '/prs' },
+    { label: 'Retos', icon: Flag, path: '/retos' },
     { label: 'Medidas corporales', icon: Ruler, path: '/measurements' },
   ];
   const adminItem: MoreMenuItem | null =

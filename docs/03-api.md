@@ -250,6 +250,27 @@ con el mismo Bearer token que el resto de la API, guard `sanctum` — ver nota
 en `config/auth.php` sobre por qué el guard por defecto de la app tuvo que
 cambiar de `web` a `sanctum` para que esto funcionara desde el navegador).
 
+## 15.1 Documentos legales y consentimiento
+
+Ver `docs/08-legal-y-consentimiento.md` para el diseño completo.
+
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| GET | `/legal/documents` | Pública | Versión vigente de cada documento (`terms`, `privacy`, `cookies`) y consentimientos exigidos. |
+| GET | `/legal/consents` | Sanctum | `pending` (lo que el usuario debe aceptar/re-aceptar) + `history` (append-only). |
+| POST | `/legal/consents` | Sanctum, `throttle:writes` | `{ consents: ["privacy", ...], legal_versions?: {...} }` — registra la versión vigente según el servidor. |
+| GET | `/admin/users/{user}/consents` | `role:super_admin` | Historial de consentimientos de un usuario (solo lectura). |
+
+| DELETE | `/auth/me` | Sanctum, `throttle:5,1` | Elimina la propia cuenta. Body: `confirmation: "ELIMINAR"` + `password` si la cuenta es de correo (`auth_provider` null). 403 para `super_admin`. |
+
+**Bloqueo por consentimientos pendientes** (`EnsureLegalConsentsAccepted`, global en el grupo `api`): un usuario autenticado con documentos pendientes recibe `403 { code: "consent_required", pending: [...] }` en toda ruta salvo `ping`, `legal/*`, `auth/me` (GET y DELETE), `auth/logout`, `auth/email/*` y los DELETE de push. `ApiClient` expone `onConsentRequired` para reaccionar.
+
+Cambios en endpoints existentes:
+
+- `POST /auth/register` exige `accept_terms`, `accept_privacy`, `accept_health_data` = `true` (422 si falta alguno). `legal_versions.<tipo>` opcional: si viene y no es la vigente → 422.
+- `POST /auth/social`: si la cuenta de Google **no existe** y faltan los `accept_*`, responde `200 { requires_consent: true, consents: [...] }` sin crear nada. Cuentas existentes inician sesión igual que antes.
+- `UserResource` incluye `pending_consents: string[]` solo para el propio usuario autenticado (login/registro/`/auth/me`).
+
 ## 16. Documentación
 
 - OpenAPI 3.1 generado a partir de anotaciones (`dedoc/scramble` o `l5-swagger`) → publicado en `/docs` (protegido en producción).

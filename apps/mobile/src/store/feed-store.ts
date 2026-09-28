@@ -43,14 +43,35 @@ export const useFeedStore = create<FeedStoreState>((set, get) => ({
     }
   },
 
+  // Optimista: la tarjeta deja de verse como no leída en el mismo toque, sin
+  // esperar al round-trip. Si el servidor falla se recarga el estado real.
   markRead: async (item: FeedItem) => {
-    await api.post(`/feed/${item.feed_type as FeedItemType}/${item.id}/read`);
-    await get().load();
+    if (item.read_at) return;
+    const readAt = new Date().toISOString();
+    set((state) => ({
+      items: state.items.map((i) =>
+        i.feed_type === item.feed_type && i.id === item.id ? { ...i, read_at: readAt } : i
+      ),
+      unreadCount: Math.max(0, state.unreadCount - 1),
+    }));
+    try {
+      await api.post(`/feed/${item.feed_type as FeedItemType}/${item.id}/read`);
+    } catch {
+      await get().load();
+    }
   },
 
   markAllRead: async () => {
-    await api.post('/feed/read-all');
-    await get().load();
+    const readAt = new Date().toISOString();
+    set((state) => ({
+      items: state.items.map((i) => (i.read_at ? i : { ...i, read_at: readAt })),
+      unreadCount: 0,
+    }));
+    try {
+      await api.post('/feed/read-all');
+    } catch {
+      await get().load();
+    }
   },
 
   subscribe: () => {

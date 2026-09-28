@@ -11,7 +11,7 @@ const RUN_ID = Date.now()
 // abrir una página; solo la verificación final usa el navegador real.
 async function registerUser(ctx: APIRequestContext, name: string, email: string) {
   const res = await ctx.post(`${API_URL}/auth/register`, {
-    data: { name, email, password: 'Rankings123!', password_confirmation: 'Rankings123!' },
+    data: { name, email, password: 'Rankings123!', password_confirmation: 'Rankings123!', accept_terms: true, accept_privacy: true, accept_health_data: true },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
   const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }

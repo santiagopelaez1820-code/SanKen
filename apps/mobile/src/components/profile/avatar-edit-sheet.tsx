@@ -15,6 +15,14 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuthStore } from '@/store/auth-store';
 
+/** Tiempo para que el Modal del BottomSheet termine de cerrarse (animación "fade") antes de abrir la galería. */
+const MODAL_DISMISS_MS = 350;
+
+/** Detalle técnico al final del mensaje, para que un tester pueda reportar qué falló. */
+function errorDetail(err: unknown): string {
+  return err instanceof Error && err.message ? ` (detalle: ${err.message})` : '';
+}
+
 interface PickedAsset {
   uri: string;
   name: string;
@@ -80,6 +88,15 @@ export function AvatarEditSheet({ visible, onClose, hasAvatar }: AvatarEditSheet
 
     setPickerError(null);
     setIsPicking(true);
+    // isPicking oculta el BottomSheet (ver `sheetVisible`). Se espera a que
+    // el Modal termine de cerrarse ANTES de abrir la galería: en Android el
+    // Modal es un Dialog nativo, y abrir otra Activity encima de él hacía
+    // que al volver se disparara su onRequestClose -> handleClose -> reset(),
+    // descartando en silencio la foto elegida. Por eso en el APK "eliminar"
+    // funcionaba (no abre ninguna Activity) y "cambiar" nunca llegaba a
+    // mandar el POST, mientras que en la web andaba perfecto.
+    await new Promise((resolve) => setTimeout(resolve, MODAL_DISMISS_MS));
+    if (isStale()) return;
 
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (isStale()) return;
@@ -95,15 +112,18 @@ export function AvatarEditSheet({ visible, onClose, hasAvatar }: AvatarEditSheet
 
     let result: ImagePicker.ImagePickerResult;
     try {
+      // Sin `allowsEditing`: el recorte nativo abre una segunda Activity
+      // (ExpoCropImageActivity, de CanHub Cropper) que era otro punto de
+      // falla en Android/MIUI. El recorte cuadrado se hace abajo con
+      // ImageManipulator, centrado — igual resultado que la web, que
+      // tampoco usa un recortador nativo.
       result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
+        quality: 1,
       });
-    } catch {
+    } catch (err) {
       if (!isStale()) {
-        setPickerError('No se pudo abrir la galería. Inténtalo nuevamente.');
+        setPickerError(`No se pudo abrir la galería. Inténtalo nuevamente.${errorDetail(err)}`);
         setIsPicking(false);
       }
       return;
@@ -136,16 +156,19 @@ export function AvatarEditSheet({ visible, onClose, hasAvatar }: AvatarEditSheet
       const probe = await ImageManipulator.manipulate(asset.uri).renderAsync();
       if (isStale()) return;
 
+      // Recorte cuadrado centrado (reemplaza al recortador nativo) y, si hace
+      // falta, reducción a 512px. Solo se pasa `width` al resize: el recorte
+      // ya es 1:1, así que el alto sale igual sin riesgo de estirar.
       const MAX_AVATAR_DIMENSION = 512;
-      const needsResize = probe.width > MAX_AVATAR_DIMENSION || probe.height > MAX_AVATAR_DIMENSION;
-      // Solo se pasa `width`: pasar width Y height fuerza un estirado a esa
-      // caja exacta (ver ResizeAction), distorsionando la imagen si el
-      // recorte previo no quedó perfectamente 1:1. Con un solo valor,
-      // expo-image-manipulator calcula el otro lado preservando la
-      // relación de aspecto.
-      const rendered = needsResize
-        ? await ImageManipulator.manipulate(probe).resize({ width: MAX_AVATAR_DIMENSION }).renderAsync()
-        : probe;
+      const side = Math.min(probe.width, probe.height);
+      let context = ImageManipulator.manipulate(probe).crop({
+        originX: Math.floor((probe.width - side) / 2),
+        originY: Math.floor((probe.height - side) / 2),
+        width: side,
+        height: side,
+      });
+      if (side > MAX_AVATAR_DIMENSION) context = context.resize({ width: MAX_AVATAR_DIMENSION });
+      const rendered = await context.renderAsync();
       if (isStale()) return;
       const jpeg = await rendered.saveAsync({ format: SaveFormat.JPEG, compress: 0.85 });
       if (isStale()) return;
@@ -166,9 +189,9 @@ export function AvatarEditSheet({ visible, onClose, hasAvatar }: AvatarEditSheet
         mimeType: 'image/jpeg',
       });
       setIsPicking(false);
-    } catch {
+    } catch (err) {
       if (!isStale()) {
-        setPickerError('No pudimos procesar esa imagen. Probá con otra foto.');
+        setPickerError(`No pudimos procesar esa imagen. Probá con otra foto.${errorDetail(err)}`);
         setIsPicking(false);
       }
     }
@@ -197,7 +220,7 @@ export function AvatarEditSheet({ visible, onClose, hasAvatar }: AvatarEditSheet
 
   return (
     <>
-      <BottomSheet visible={visible && !confirmingDelete} onClose={handleClose}>
+      <BottomSheet visible={visible && !confirmingDelete && !isPicking} onClose={handleClose}>
         <ThemedView style={styles.container}>
           {!pickedAsset ? (
             <>

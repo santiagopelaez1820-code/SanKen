@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
 import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Animated, { FadeIn, FadeInUp } from 'react-native-reanimated';
-import { ChevronRight, Dumbbell, Medal, Trophy } from 'lucide-react-native';
-import type { ExerciseCatalogItem, ExerciseRankingScope, ExerciseRankingSex, PersonalRecordSummary, PrSubmission } from '@sanken/core';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { ChevronRight, Dumbbell, Medal, Trophy, Video } from 'lucide-react-native';
+import {
+  formatPersonalRecord,
+  type ExerciseCatalogItem,
+  type ExerciseRankingScope,
+  type ExerciseRankingSex,
+  type PrSubmission,
+} from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -14,7 +20,7 @@ import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { ListPickerModal } from '@/components/ui/list-picker-modal';
-import { BottomTabInset, CardShadow, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { api } from '@/lib/api';
 import { parseDecimalInput } from '@/lib/number-input';
@@ -36,24 +42,54 @@ const SUBMISSION_STATUS_VARIANT: Record<PrSubmission['status'], BadgeVariant> = 
   rejected: 'error',
 };
 
+/** Mismo tope que UploadPrSubmissionVideoRequest (max:102400 KB). */
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024;
+
+interface PickedVideo {
+  uri: string;
+  name: string;
+  mimeType: string | null;
+}
+
+/**
+ * Abre el selector de videos y valida el tamaño antes de intentar subir —
+ * así un video demasiado pesado da un mensaje claro en vez de un error
+ * genérico del servidor. Devuelve null si el usuario canceló.
+ */
+async function pickEvidenceVideo(): Promise<{ video: PickedVideo } | { error: string } | null> {
+  const result = await DocumentPicker.getDocumentAsync({ type: 'video/*', copyToCacheDirectory: true });
+  if (result.canceled || !result.assets[0]) return null;
+  const asset = result.assets[0];
+  if (asset.size && asset.size > MAX_VIDEO_BYTES) {
+    return { error: 'El video pesa más de 100 MB — recórtalo o grábalo en menor calidad.' };
+  }
+  return { video: { uri: asset.uri, name: asset.name, mimeType: asset.mimeType ?? null } };
+}
+
 function PrSubmissionRow({ submission }: { submission: PrSubmission }) {
   const theme = useTheme();
-  const { uploadVideo, uploadingId, uploadError } = usePrSubmissionsStore();
+  const { uploadVideo, uploadingId, uploadError, failedUploadId } = usePrSubmissionsStore();
   const isUploading = uploadingId === submission.id;
+  const rowUploadError = failedUploadId === submission.id ? uploadError : null;
+  const [pickError, setPickError] = useState<string | null>(null);
 
   const handlePick = async () => {
-    const result = await DocumentPicker.getDocumentAsync({ type: 'video/*' });
-    if (result.canceled || !result.assets[0]) return;
-    const asset = result.assets[0];
+    setPickError(null);
+    const picked = await pickEvidenceVideo();
+    if (!picked) return;
+    if ('error' in picked) {
+      setPickError(picked.error);
+      return;
+    }
     try {
-      await uploadVideo(submission.id, { uri: asset.uri, name: asset.name, mimeType: asset.mimeType ?? null });
+      await uploadVideo(submission.id, picked.video);
     } catch {
       // el error ya queda expuesto vía uploadError
     }
   };
 
   return (
-    <ThemedView type="backgroundElement" style={styles.row}>
+    <ThemedView type="backgroundSelected" style={styles.submissionRow}>
       <ThemedView style={styles.submissionHeader}>
         <ThemedText type="small">
           {submission.exercise.name} — {submission.weight_kg} kg × {submission.reps}
@@ -73,9 +109,9 @@ function PrSubmissionRow({ submission }: { submission: PrSubmission }) {
           onPress={handlePick}
         />
       )}
-      {submission.status === 'pending' && !submission.video_url && uploadError && (
+      {submission.status === 'pending' && !submission.video_url && (pickError || rowUploadError) && (
         <ThemedText type="small" style={styles.error}>
-          {uploadError}
+          {pickError ?? rowUploadError}
         </ThemedText>
       )}
       {submission.video_url && (
@@ -107,38 +143,9 @@ const RANKING_SEXES: { value: ExerciseRankingSex; label: string }[] = [
 
 const MEDAL_COLORS: Record<number, string> = { 1: '#D4AF37', 2: '#A8A9AD', 3: '#B08D57' };
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-
-function RecordRow({ record, index }: { record: PersonalRecordSummary; index: number }) {
-  const theme = useTheme();
-  return (
-    <Animated.View
-      style={{ flex: 1 }}
-      entering={FadeInUp.delay(Math.min(index, 8) * 40).duration(280)}
-    >
-      <ThemedView type="backgroundElement" style={[styles.trophyCard, CardShadow]}>
-        <ThemedView style={[styles.trophyCircle, { backgroundColor: `${theme.accent}22` }]}>
-          <Icon icon={Trophy} size={22} color={theme.accent} />
-        </ThemedView>
-        <ThemedText type="small" themeColor="textSecondary" numberOfLines={1} style={styles.trophyName}>
-          {record.exercise_name}
-        </ThemedText>
-        <ThemedText type="stat" style={styles.trophyValue}>
-          {record.value} kg
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {formatDate(record.achieved_at)}
-        </ThemedText>
-      </ThemedView>
-    </Animated.View>
-  );
-}
-
 export default function PersonalRecordsScreen() {
   const theme = useTheme();
-  const { records, isLoading, error, isSubmitting, submitError, load, registerRecord } = usePersonalRecordsStore();
+  const { error, isSubmitting, submitError, load, registerRecord } = usePersonalRecordsStore();
   const { exercises, load: loadExercises } = useExerciseCatalogStore();
   const {
     scope: rankingScope,
@@ -169,12 +176,27 @@ export default function PersonalRecordsScreen() {
     error: submissionsError,
     load: loadSubmissions,
     submit: submitPrSubmission,
+    uploadVideo: uploadSubmissionVideo,
   } = usePrSubmissionsStore();
   const [submissionPickerVisible, setSubmissionPickerVisible] = useState(false);
   const [selectedSubmissionExercise, setSelectedSubmissionExercise] = useState<ExerciseCatalogItem | null>(null);
   const [submissionWeightInput, setSubmissionWeightInput] = useState('');
   const [submissionRepsInput, setSubmissionRepsInput] = useState('1');
   const [submissionFormError, setSubmissionFormError] = useState<string | null>(null);
+  const [submissionVideo, setSubmissionVideo] = useState<PickedVideo | null>(null);
+  const [submissionConfirmation, setSubmissionConfirmation] = useState<string | null>(null);
+  const [isSendingSubmission, setIsSendingSubmission] = useState(false);
+
+  const handlePickSubmissionVideo = async () => {
+    setSubmissionFormError(null);
+    const picked = await pickEvidenceVideo();
+    if (!picked) return;
+    if ('error' in picked) {
+      setSubmissionFormError(picked.error);
+      return;
+    }
+    setSubmissionVideo(picked.video);
+  };
 
   useEffect(() => {
     load();
@@ -199,12 +221,32 @@ export default function PersonalRecordsScreen() {
       return;
     }
 
-    setSubmissionFormError(null);
-    const ok = await submitPrSubmission({ exercise_id: selectedSubmissionExercise.id, weight_kg: weight, reps });
-    if (ok) {
-      setSubmissionWeightInput('');
-      setSelectedSubmissionExercise(null);
+    if (!submissionVideo) {
+      setSubmissionFormError('Adjunta un video de evidencia para que puedan verificar tu PR.');
+      return;
     }
+
+    setSubmissionFormError(null);
+    setSubmissionConfirmation(null);
+    setIsSendingSubmission(true);
+    const created = await submitPrSubmission({ exercise_id: selectedSubmissionExercise.id, weight_kg: weight, reps });
+    if (!created) {
+      setIsSendingSubmission(false);
+      return;
+    }
+
+    // La postulación ya existe aunque el video falle: queda en la lista de
+    // abajo con su propio botón "Subir video de evidencia" para reintentar.
+    setSubmissionWeightInput('');
+    setSelectedSubmissionExercise(null);
+    try {
+      await uploadSubmissionVideo(created.id, submissionVideo);
+      setSubmissionConfirmation('¡Postulación enviada con su video! Te avisaremos cuando la revisen.');
+    } catch {
+      setSubmissionFormError('Se creó la postulación pero el video no se pudo subir. Reintenta desde la lista de abajo.');
+    }
+    setSubmissionVideo(null);
+    setIsSendingSubmission(false);
   };
 
   const handleSubmit = async () => {
@@ -228,12 +270,14 @@ export default function PersonalRecordsScreen() {
     setFormError(null);
     const ok = await registerRecord({ exercise_id: selectedExercise.id, weight_kg: weight, reps });
     if (ok) {
-      const isNewBest = Boolean(usePersonalRecordsStore.getState().lastIsNewBest);
+      const { lastIsNewBest, lastRecord } = usePersonalRecordsStore.getState();
+      const isNewBest = Boolean(lastIsNewBest);
+      const current = lastRecord ? formatPersonalRecord(lastRecord) : null;
       setConfirmationIsNewBest(isNewBest);
       setConfirmation(
         isNewBest
-          ? '¡Nuevo récord personal!'
-          : 'Registrado — no supera tu récord actual, se conserva el anterior.'
+          ? `¡Nuevo récord personal! ${selectedExercise.name}: ${current ?? ''}`.trim()
+          : `No supera tu récord actual${current ? ` (${current})` : ''} — se conserva el anterior.`
       );
       setWeightInput('');
     }
@@ -242,267 +286,272 @@ export default function PersonalRecordsScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <FlatList
+        <ScrollView
           style={styles.list}
-          data={records}
-          numColumns={2}
-          columnWrapperStyle={styles.trophyRow}
-          keyExtractor={(item) => String(item.id)}
-          renderItem={({ item, index }) => <RecordRow record={item} index={index} />}
           contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}
-          ListHeaderComponent={
-            <>
-              <ThemedText type="title" style={styles.pageTitle}>
-                Personal Records
+          keyboardShouldPersistTaps="handled">
+          <ThemedText type="title" style={styles.pageTitle}>
+            Personal Records
+          </ThemedText>
+
+          <ThemedView type="backgroundElement" style={styles.formCard}>
+            <Pressable style={styles.pickerRow} onPress={() => setPickerVisible(true)}>
+              <ThemedView style={styles.pickerRowLeft}>
+                <Icon icon={Dumbbell} size={16} color={theme.textSecondary} />
+                <ThemedText type="small" numberOfLines={1}>
+                  {selectedExercise?.name ?? 'Elegir ejercicio'}
+                </ThemedText>
+              </ThemedView>
+              <Icon icon={ChevronRight} size={16} color={theme.textSecondary} />
+            </Pressable>
+
+            <ThemedView style={styles.formRow}>
+              <ThemedView style={styles.formRowField}>
+                <TextField
+                  label="Peso (kg)"
+                  value={weightInput}
+                  onChangeText={setWeightInput}
+                  keyboardType="decimal-pad"
+                  placeholder="0.0"
+                />
+              </ThemedView>
+
+              <ThemedView style={styles.formRowField}>
+                <TextField
+                  label="Repeticiones"
+                  value={repsInput}
+                  onChangeText={setRepsInput}
+                  keyboardType="number-pad"
+                  placeholder="1"
+                />
+              </ThemedView>
+            </ThemedView>
+
+            {(formError || submitError) && (
+              <ThemedText type="small" style={styles.error}>
+                {formError ?? submitError}
               </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary" style={styles.subtitle}>
-                Tus mejores levantamientos
-              </ThemedText>
-
-              <ThemedView type="backgroundElement" style={styles.formCard}>
-                <Pressable style={styles.pickerRow} onPress={() => setPickerVisible(true)}>
-                  <ThemedView style={styles.pickerRowLeft}>
-                    <Icon icon={Dumbbell} size={16} color={theme.textSecondary} />
-                    <ThemedText type="small" numberOfLines={1}>
-                      {selectedExercise?.name ?? 'Elegir ejercicio'}
-                    </ThemedText>
-                  </ThemedView>
-                  <Icon icon={ChevronRight} size={16} color={theme.textSecondary} />
-                </Pressable>
-
-                <ThemedView style={styles.formRow}>
-                  <ThemedView style={styles.formRowField}>
-                    <TextField
-                      label="Peso (kg)"
-                      value={weightInput}
-                      onChangeText={setWeightInput}
-                      keyboardType="decimal-pad"
-                      placeholder="0.0"
-                    />
-                  </ThemedView>
-
-                  <ThemedView style={styles.formRowField}>
-                    <TextField
-                      label="Repeticiones"
-                      value={repsInput}
-                      onChangeText={setRepsInput}
-                      keyboardType="number-pad"
-                      placeholder="1"
-                    />
-                  </ThemedView>
-                </ThemedView>
-
-                {(formError || submitError) && (
-                  <ThemedText type="small" style={styles.error}>
-                    {formError ?? submitError}
-                  </ThemedText>
-                )}
-                {confirmation && confirmationIsNewBest && (
-                  <Animated.View entering={FadeIn.duration(250)}>
-                    <ThemedView style={[styles.confirmationBanner, { backgroundColor: `${theme.accent}1F` }]}>
-                      <Icon icon={Trophy} size={16} color={theme.accent} />
-                      <ThemedText type="smallBold" themeColor="accent">
-                        {confirmation}
-                      </ThemedText>
-                    </ThemedView>
-                  </Animated.View>
-                )}
-                {confirmation && !confirmationIsNewBest && (
-                  <ThemedText type="small" themeColor="textSecondary">
+            )}
+            {confirmation && confirmationIsNewBest && (
+              <Animated.View entering={FadeIn.duration(250)}>
+                <ThemedView style={[styles.confirmationBanner, { backgroundColor: `${theme.accent}1F` }]}>
+                  <Icon icon={Trophy} size={16} color={theme.accent} />
+                  <ThemedText type="smallBold" themeColor="accent">
                     {confirmation}
                   </ThemedText>
+                </ThemedView>
+              </Animated.View>
+            )}
+            {confirmation && !confirmationIsNewBest && (
+              <ThemedText type="small" themeColor="textSecondary">
+                {confirmation}
+              </ThemedText>
+            )}
+
+            <PrimaryButton label="Registrar PR" loading={isSubmitting} onPress={handleSubmit} />
+          </ThemedView>
+
+          {error && (
+            <ThemedText type="small" style={styles.error}>
+              {error}
+            </ThemedText>
+          )}
+
+          <ThemedView type="backgroundElement" style={styles.rankingCard}>
+            <ThemedText type="smallBold">Postular PR para Rankings</ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              Adjunta un video de evidencia para que un entrenador o administrador verifique tu PR. Solo los
+              aprobados aparecen en Rankings públicos; tus récords personales siguen siendo privados.
+            </ThemedText>
+
+            <ThemedView style={styles.field}>
+              <ThemedText type="small" themeColor="textSecondary">
+                Ejercicio
+              </ThemedText>
+              <PrimaryButton
+                label={selectedSubmissionExercise?.name ?? 'Elegir ejercicio'}
+                variant="ghost"
+                onPress={() => setSubmissionPickerVisible(true)}
+              />
+            </ThemedView>
+
+            <TextField
+              label="Peso (kg)"
+              value={submissionWeightInput}
+              onChangeText={setSubmissionWeightInput}
+              keyboardType="decimal-pad"
+              placeholder="0.0"
+            />
+
+            <TextField
+              label="Repeticiones"
+              value={submissionRepsInput}
+              onChangeText={setSubmissionRepsInput}
+              keyboardType="number-pad"
+              placeholder="1"
+            />
+
+            <Pressable
+              onPress={handlePickSubmissionVideo}
+              disabled={isSendingSubmission}
+              style={[styles.pickerRow, submissionVideo && { borderColor: theme.accent }]}
+              accessibilityRole="button"
+              accessibilityLabel="Elegir video de evidencia">
+              <ThemedView style={styles.pickerRowLeft}>
+                <Icon icon={Video} size={16} color={submissionVideo ? theme.accent : theme.textSecondary} />
+                <ThemedText type="small" numberOfLines={1} themeColor={submissionVideo ? 'text' : 'textSecondary'}>
+                  {submissionVideo ? submissionVideo.name : 'Adjuntar video de evidencia'}
+                </ThemedText>
+              </ThemedView>
+              <ThemedText type="small" style={{ color: theme.accent }}>
+                {submissionVideo ? 'Cambiar' : 'Elegir'}
+              </ThemedText>
+            </Pressable>
+
+            {(submissionFormError || submissionsError) && (
+              <ThemedText type="small" style={styles.error}>
+                {submissionFormError ?? submissionsError}
+              </ThemedText>
+            )}
+            {submissionConfirmation && !submissionFormError && (
+              <ThemedText type="small" themeColor="accent">
+                {submissionConfirmation}
+              </ThemedText>
+            )}
+
+            <PrimaryButton
+              label={isSendingSubmission && !isSubmittingSubmission ? 'Subiendo video…' : 'Postular PR'}
+              loading={isSendingSubmission}
+              onPress={handleSubmitPrSubmission}
+            />
+
+            {!isLoadingSubmissions && submissions.length > 0 && (
+              <ThemedView style={styles.field}>
+                {submissions.map((submission) => (
+                  <PrSubmissionRow key={submission.id} submission={submission} />
+                ))}
+              </ThemedView>
+            )}
+          </ThemedView>
+
+          <ThemedView type="backgroundElement" style={styles.rankingCard}>
+            <ThemedText type="smallBold">Rankings por ejercicio</ThemedText>
+
+            <ThemedView style={styles.field}>
+              <ThemedText type="small" themeColor="textSecondary">
+                Ejercicio
+              </ThemedText>
+              <PrimaryButton
+                label={rankingExercise?.name ?? 'Elegir ejercicio'}
+                variant="ghost"
+                onPress={() => setRankingPickerVisible(true)}
+              />
+            </ThemedView>
+
+            {rankingExercise && (
+              <>
+                <ThemedView style={styles.chipsRow}>
+                  {RANKING_SEXES.map((s) => {
+                    const selected = s.value === rankingSex;
+                    return (
+                      <Pressable
+                        key={s.value}
+                        onPress={() => setRankingSex(s.value)}
+                        style={[
+                          styles.chip,
+                          { borderColor: selected ? theme.accent : theme.backgroundSelected },
+                          selected && { backgroundColor: theme.backgroundSelected },
+                        ]}
+                      >
+                        <ThemedText type="small" themeColor={selected ? 'text' : 'textSecondary'}>
+                          {s.label}
+                        </ThemedText>
+                      </Pressable>
+                    );
+                  })}
+                </ThemedView>
+
+                <ThemedView style={styles.chipsRow}>
+                  {RANKING_SCOPES.map((s) => {
+                    const selected = s.value === rankingScope;
+                    return (
+                      <Pressable
+                        key={s.value}
+                        onPress={() => setRankingScope(s.value)}
+                        style={[
+                          styles.chip,
+                          { borderColor: selected ? theme.accent : theme.backgroundSelected },
+                          selected && { backgroundColor: theme.backgroundSelected },
+                        ]}
+                      >
+                        <ThemedText type="small" themeColor={selected ? 'text' : 'textSecondary'}>
+                          {s.label}
+                        </ThemedText>
+                      </Pressable>
+                    );
+                  })}
+                </ThemedView>
+
+                {rankingError && (
+                  <ThemedText type="small" style={styles.error}>
+                    {rankingError}
+                  </ThemedText>
                 )}
 
-                <PrimaryButton label="Registrar PR" loading={isSubmitting} onPress={handleSubmit} />
-              </ThemedView>
+                {isLoadingRanking && (
+                  <Skeleton height={72} borderRadius={Spacing.three} />
+                )}
 
-              {error && (
-                <ThemedText type="small" style={styles.error}>
-                  {error}
-                </ThemedText>
-              )}
-            </>
-          }
-          ListEmptyComponent={
-            !isLoading ? (
-              <ThemedText type="small" themeColor="textSecondary">
-                Todavía no tienes récords registrados.
-              </ThemedText>
-            ) : null
-          }
-          ListFooterComponent={
-            <>
-            <ThemedView type="backgroundElement" style={styles.rankingCard}>
-              <ThemedText type="smallBold">Postular PR para Rankings</ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                Solo los PR aprobados por un administrador, con video de evidencia, aparecen en Rankings públicos. Tus
-                récords de arriba son privados y no se ven afectados por esto.
-              </ThemedText>
+                {!isLoadingRanking && (
+                  <Animated.View key={`${rankingScope}-${rankingSex}`} entering={FadeIn.duration(220)}>
+                    {rankingData?.scope_label && (
+                      <ThemedText type="small" themeColor="textSecondary">
+                        {rankingData.scope_label}
+                      </ThemedText>
+                    )}
 
-              <ThemedView style={styles.field}>
-                <ThemedText type="small" themeColor="textSecondary">
-                  Ejercicio
-                </ThemedText>
-                <PrimaryButton
-                  label={selectedSubmissionExercise?.name ?? 'Elegir ejercicio'}
-                  variant="ghost"
-                  onPress={() => setSubmissionPickerVisible(true)}
-                />
-              </ThemedView>
+                    {(rankingData?.entries.length ?? 0) === 0 && (
+                      <ThemedText type="small" themeColor="textSecondary">
+                        Todavía no hay suficientes récords públicos para este ranking.
+                      </ThemedText>
+                    )}
 
-              <TextField
-                label="Peso (kg)"
-                value={submissionWeightInput}
-                onChangeText={setSubmissionWeightInput}
-                keyboardType="decimal-pad"
-                placeholder="0.0"
-              />
-
-              <TextField
-                label="Repeticiones"
-                value={submissionRepsInput}
-                onChangeText={setSubmissionRepsInput}
-                keyboardType="number-pad"
-                placeholder="1"
-              />
-
-              {(submissionFormError || submissionsError) && (
-                <ThemedText type="small" style={styles.error}>
-                  {submissionFormError ?? submissionsError}
-                </ThemedText>
-              )}
-
-              <PrimaryButton label="Postular PR" loading={isSubmittingSubmission} onPress={handleSubmitPrSubmission} />
-
-              {!isLoadingSubmissions && submissions.length > 0 && (
-                <ThemedView style={styles.field}>
-                  {submissions.map((submission) => (
-                    <PrSubmissionRow key={submission.id} submission={submission} />
-                  ))}
-                </ThemedView>
-              )}
-            </ThemedView>
-
-            <ThemedView type="backgroundElement" style={styles.rankingCard}>
-              <ThemedText type="smallBold">Rankings por ejercicio</ThemedText>
-
-              <ThemedView style={styles.field}>
-                <ThemedText type="small" themeColor="textSecondary">
-                  Ejercicio
-                </ThemedText>
-                <PrimaryButton
-                  label={rankingExercise?.name ?? 'Elegir ejercicio'}
-                  variant="ghost"
-                  onPress={() => setRankingPickerVisible(true)}
-                />
-              </ThemedView>
-
-              {rankingExercise && (
-                <>
-                  <ThemedView style={styles.chipsRow}>
-                    {RANKING_SEXES.map((s) => {
-                      const selected = s.value === rankingSex;
-                      return (
-                        <Pressable
-                          key={s.value}
-                          onPress={() => setRankingSex(s.value)}
-                          style={[
-                            styles.chip,
-                            { borderColor: selected ? theme.accent : theme.backgroundSelected },
-                            selected && { backgroundColor: theme.backgroundSelected },
-                          ]}
-                        >
-                          <ThemedText type="small" themeColor={selected ? 'text' : 'textSecondary'}>
-                            {s.label}
-                          </ThemedText>
-                        </Pressable>
-                      );
-                    })}
-                  </ThemedView>
-
-                  <ThemedView style={styles.chipsRow}>
-                    {RANKING_SCOPES.map((s) => {
-                      const selected = s.value === rankingScope;
-                      return (
-                        <Pressable
-                          key={s.value}
-                          onPress={() => setRankingScope(s.value)}
-                          style={[
-                            styles.chip,
-                            { borderColor: selected ? theme.accent : theme.backgroundSelected },
-                            selected && { backgroundColor: theme.backgroundSelected },
-                          ]}
-                        >
-                          <ThemedText type="small" themeColor={selected ? 'text' : 'textSecondary'}>
-                            {s.label}
-                          </ThemedText>
-                        </Pressable>
-                      );
-                    })}
-                  </ThemedView>
-
-                  {rankingError && (
-                    <ThemedText type="small" style={styles.error}>
-                      {rankingError}
-                    </ThemedText>
-                  )}
-
-                  {isLoadingRanking && (
-                    <Skeleton height={72} borderRadius={Spacing.three} />
-                  )}
-
-                  {!isLoadingRanking && (
-                    <Animated.View key={`${rankingScope}-${rankingSex}`} entering={FadeIn.duration(220)}>
-                      {rankingData?.scope_label && (
-                        <ThemedText type="small" themeColor="textSecondary">
-                          {rankingData.scope_label}
+                    {rankingData?.entries.map((entry) => (
+                      <ThemedView
+                        key={entry.user_id}
+                        style={[styles.listRow, entry.is_viewer && { backgroundColor: theme.backgroundSelected }]}
+                      >
+                        <ThemedView style={styles.rankRow}>
+                          {MEDAL_COLORS[entry.rank] ? (
+                            <Icon icon={Medal} size={16} color={MEDAL_COLORS[entry.rank]} />
+                          ) : (
+                            <ThemedText type="small" themeColor="textSecondary" style={styles.rankNumber}>
+                              {entry.rank}
+                            </ThemedText>
+                          )}
+                          <ThemedText type="small">{entry.user_name}</ThemedText>
+                        </ThemedView>
+                        <ThemedText type="smallBold" style={{ color: theme.accent }}>
+                          {entry.metric_value.toLocaleString('es-AR')} kg
                         </ThemedText>
-                      )}
+                      </ThemedView>
+                    ))}
 
-                      {(rankingData?.entries.length ?? 0) === 0 && (
-                        <ThemedText type="small" themeColor="textSecondary">
-                          Todavía no hay suficientes récords públicos para este ranking.
-                        </ThemedText>
-                      )}
-
-                      {rankingData?.entries.map((entry) => (
-                        <ThemedView
-                          key={entry.user_id}
-                          style={[styles.listRow, entry.is_viewer && { backgroundColor: theme.backgroundSelected }]}
-                        >
-                          <ThemedView style={styles.rankRow}>
-                            {MEDAL_COLORS[entry.rank] ? (
-                              <Icon icon={Medal} size={16} color={MEDAL_COLORS[entry.rank]} />
-                            ) : (
-                              <ThemedText type="small" themeColor="textSecondary" style={styles.rankNumber}>
-                                {entry.rank}
-                              </ThemedText>
-                            )}
-                            <ThemedText type="small">{entry.user_name}</ThemedText>
-                          </ThemedView>
+                    {rankingData?.viewer &&
+                      !rankingData.entries.some((e) => e.user_id === rankingData.viewer?.user_id) && (
+                        <ThemedView style={[styles.listRow, styles.viewerRow, { borderColor: theme.backgroundSelected }]}>
+                          <ThemedText type="small">Tu posición: {rankingData.viewer.rank}</ThemedText>
                           <ThemedText type="smallBold" style={{ color: theme.accent }}>
-                            {entry.metric_value.toLocaleString('es-AR')} kg
+                            {rankingData.viewer.metric_value.toLocaleString('es-AR')} kg
                           </ThemedText>
                         </ThemedView>
-                      ))}
-
-                      {rankingData?.viewer &&
-                        !rankingData.entries.some((e) => e.user_id === rankingData.viewer?.user_id) && (
-                          <ThemedView style={[styles.listRow, styles.viewerRow, { borderColor: theme.backgroundSelected }]}>
-                            <ThemedText type="small">Tu posición: {rankingData.viewer.rank}</ThemedText>
-                            <ThemedText type="smallBold" style={{ color: theme.accent }}>
-                              {rankingData.viewer.metric_value.toLocaleString('es-AR')} kg
-                            </ThemedText>
-                          </ThemedView>
-                        )}
-                    </Animated.View>
-                  )}
-                </>
-              )}
-            </ThemedView>
-            </>
-          }
-        />
+                      )}
+                  </Animated.View>
+                )}
+              </>
+            )}
+          </ThemedView>
+        </ScrollView>
 
         <ListPickerModal
           visible={pickerVisible}
@@ -566,7 +615,6 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   pageTitle: { fontSize: 28, lineHeight: 34 },
-  subtitle: { marginBottom: Spacing.two },
   formCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,
@@ -574,13 +622,12 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.three,
   },
   field: { gap: Spacing.one, backgroundColor: 'transparent' },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  // Columna, no fila: antes el encabezado, el botón "Subir video" y el
+  // error quedaban apretados lado a lado y el botón casi no se veía.
+  submissionRow: {
     borderRadius: Spacing.three,
     padding: Spacing.three,
-    marginBottom: Spacing.two,
+    gap: Spacing.two,
   },
   pickerRow: {
     flexDirection: 'row',
@@ -612,33 +659,6 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.three,
     paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.three,
-  },
-  trophyRow: { gap: Spacing.two },
-  trophyCard: {
-    flex: 1,
-    alignItems: 'center',
-    borderRadius: Spacing.four,
-    paddingVertical: Spacing.four,
-    paddingHorizontal: Spacing.two,
-    gap: Spacing.half,
-    marginBottom: Spacing.two,
-  },
-  trophyCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.half,
-  },
-  trophyName: {
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-  },
-  trophyValue: {
-    fontSize: 24,
-    lineHeight: 28,
   },
   rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two, backgroundColor: 'transparent' },
   rankNumber: { width: 16, textAlign: 'center' },

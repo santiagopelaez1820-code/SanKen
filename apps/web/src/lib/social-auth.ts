@@ -1,4 +1,4 @@
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth"
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth"
 import { firebaseAuth } from "@/lib/firebase"
 
 export interface SocialAuthResult {
@@ -15,6 +15,12 @@ export async function signInWithGoogle(): Promise<SocialAuthResult> {
     const provider = new GoogleAuthProvider()
     const credential = await signInWithPopup(firebaseAuth, provider)
     const idToken = await credential.user.getIdToken()
+    // La sesión real es la de Sanctum: la de Firebase solo sirve para
+    // obtener este ID Token. Cerrarla evita dejar el usuario de Firebase
+    // guardado en IndexedDB (firebaseLocalStorageDb) — ver Política de Cookies.
+    // El token ya emitido sigue siendo válido para reenviarlo (p. ej. tras
+    // aceptar los consentimientos de una cuenta nueva).
+    await signOut(firebaseAuth).catch(() => {})
     return { idToken }
   } catch (err) {
     const code = (err as { code?: string })?.code

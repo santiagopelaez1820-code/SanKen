@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom"
 import { Trophy } from "lucide-react"
-import type { PersonalRecordSummary } from "@sanken/core"
+import { formatPersonalRecord, type PersonalRecordSummary } from "@sanken/core"
 import { SankCard } from "@/components/ui/SankCard"
 import { SankEmptyState } from "@/components/ui/SankEmptyState"
 import { SankCarousel } from "@/components/ui/SankCarousel"
@@ -31,7 +31,7 @@ export function RecentPRsRow({ records }: { records: PersonalRecordSummary[] }) 
         <SankCard key={record.id} className="p-3 h-100">
           <Trophy size={16} color="var(--sanken-cyan)" className="mb-2" />
           <p className="small text-body-secondary text-truncate mb-1">{record.exercise_name}</p>
-          <p className="fs-5 fw-bold sank-tabular-nums mb-0">{record.value} kg</p>
+          <p className="fs-5 fw-bold sank-tabular-nums mb-0">{formatPersonalRecord(record)}</p>
         </SankCard>
       ))}
     </SankCarousel>

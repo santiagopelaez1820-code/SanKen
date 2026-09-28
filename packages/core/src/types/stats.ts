@@ -3,7 +3,10 @@ export interface PersonalRecordSummary {
   exercise_id: number;
   exercise_name: string;
   record_type: '1rm' | 'max_reps' | 'max_volume';
+  /** Peso real levantado (kg), no un 1RM estimado. */
   value: number;
+  /** Reps de esa serie — null en récords manuales anteriores a 2026-09-23. */
+  reps: number | null;
   achieved_at: string;
 }
 

@@ -68,32 +68,58 @@ describe('load', () => {
 });
 
 describe('markRead / markAllRead', () => {
-  it('marks a news item read using its feed_type and reloads', async () => {
+  // Bug del tester: tocar una notificación no la marcaba como leída hasta
+  // salir y volver a entrar. Ahora se marca en el acto (optimista).
+  it('marks a news item read immediately and calls the API with its feed_type', async () => {
+    useFeedStore.setState({ items: [newsItem, notificationItem], unreadCount: 2 });
     mockedApi.post.mockResolvedValueOnce(undefined);
-    mockedApi.getWithMeta.mockResolvedValueOnce({ data: [], meta: { unread_count: 0 } });
 
     await useFeedStore.getState().markRead(newsItem);
 
     expect(mockedApi.post).toHaveBeenCalledWith('/feed/news/1/read');
-    expect(mockedApi.getWithMeta).toHaveBeenCalledWith('/feed');
+    const { items, unreadCount } = useFeedStore.getState();
+    expect(items.find((i) => i.feed_type === 'news')?.read_at).not.toBeNull();
+    expect(items.find((i) => i.feed_type === 'notification')?.read_at).toBeNull();
+    expect(unreadCount).toBe(1);
+    expect(mockedApi.getWithMeta).not.toHaveBeenCalled();
   });
 
-  it('marks a notification item read using its feed_type and reloads', async () => {
+  it('marks a notification item read using its feed_type', async () => {
+    useFeedStore.setState({ items: [notificationItem], unreadCount: 1 });
     mockedApi.post.mockResolvedValueOnce(undefined);
-    mockedApi.getWithMeta.mockResolvedValueOnce({ data: [], meta: { unread_count: 0 } });
 
     await useFeedStore.getState().markRead(notificationItem);
 
     expect(mockedApi.post).toHaveBeenCalledWith('/feed/notification/uuid-1/read');
+    expect(useFeedStore.getState().unreadCount).toBe(0);
   });
 
-  it('marks all read and reloads', async () => {
+  it('does nothing for an item that is already read', async () => {
+    await useFeedStore.getState().markRead({ ...newsItem, read_at: '2026-08-20T00:00:00Z' });
+
+    expect(mockedApi.post).not.toHaveBeenCalled();
+  });
+
+  it('reloads the real state when the API call fails', async () => {
+    useFeedStore.setState({ items: [newsItem], unreadCount: 1 });
+    mockedApi.post.mockRejectedValueOnce(new Error('boom'));
+    mockedApi.getWithMeta.mockResolvedValueOnce({ data: [newsItem], meta: { unread_count: 1 } });
+
+    await useFeedStore.getState().markRead(newsItem);
+
+    expect(mockedApi.getWithMeta).toHaveBeenCalledWith('/feed');
+    expect(useFeedStore.getState().unreadCount).toBe(1);
+  });
+
+  it('marks all read immediately', async () => {
+    useFeedStore.setState({ items: [newsItem, notificationItem], unreadCount: 2 });
     mockedApi.post.mockResolvedValueOnce(undefined);
-    mockedApi.getWithMeta.mockResolvedValueOnce({ data: [], meta: { unread_count: 0 } });
 
     await useFeedStore.getState().markAllRead();
 
     expect(mockedApi.post).toHaveBeenCalledWith('/feed/read-all');
+    expect(useFeedStore.getState().unreadCount).toBe(0);
+    expect(useFeedStore.getState().items.every((i) => i.read_at !== null)).toBe(true);
   });
 });
 

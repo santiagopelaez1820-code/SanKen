@@ -7,7 +7,7 @@ const PASSWORD = 'Chat123!'
 
 async function registerUser(ctx: APIRequestContext, name: string, email: string) {
   const res = await ctx.post(`${API_URL}/auth/register`, {
-    data: { name, email, password: PASSWORD, password_confirmation: PASSWORD },
+    data: { name, email, password: PASSWORD, password_confirmation: PASSWORD, accept_terms: true, accept_privacy: true, accept_health_data: true },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
   const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
@@ -97,7 +97,7 @@ test('un mensaje enviado por el entrenador llega en vivo al cliente, que lo ve d
 
   // El cliente ya tiene el hilo abierto (suscripto al canal privado de
   // Reverb) antes de que el entrenador escriba nada.
-  await trainerPage.fill('input[placeholder="Escribí un mensaje…"]', 'Hola, esto llega en vivo')
+  await trainerPage.fill('textarea[placeholder="Escribí un mensaje…"]', 'Hola, esto llega en vivo')
   await trainerPage.click('button[type=submit]')
 
   await expect(clientPage.getByText('Hola, esto llega en vivo')).toBeVisible({ timeout: 10_000 })

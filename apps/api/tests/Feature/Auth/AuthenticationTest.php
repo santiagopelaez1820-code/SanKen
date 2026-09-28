@@ -21,6 +21,9 @@ class AuthenticationTest extends TestCase
             'email' => 'santiago@example.com',
             'password' => 'Password!234',
             'password_confirmation' => 'Password!234',
+            'accept_terms' => true,
+            'accept_privacy' => true,
+            'accept_health_data' => true,
         ]);
 
         $response->assertCreated()

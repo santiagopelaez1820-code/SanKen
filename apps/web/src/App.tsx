@@ -50,6 +50,10 @@ import { CheckoutPage } from "@/pages/CheckoutPage"
 import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage"
 import { MyOrdersPage } from "@/pages/MyOrdersPage"
 import { MyOrderDetailPage } from "@/pages/MyOrderDetailPage"
+import { LegalDocumentPage } from "@/pages/LegalDocumentPage"
+import { CookieBanner } from "@/components/legal/CookieBanner"
+import { CookieSettingsDialog } from "@/components/legal/CookieSettingsDialog"
+import { LEGAL_PATHS } from "@/lib/legal-paths"
 
 function App() {
   const mode = useThemeStore((s) => s.mode)
@@ -68,7 +72,12 @@ function App() {
   }, [mode])
 
   return (
+    <>
     <Routes>
+      {/* Documentos legales: públicos, accesibles con o sin sesión. */}
+      <Route path={LEGAL_PATHS.terms} element={<LegalDocumentPage documentId="terms" />} />
+      <Route path={LEGAL_PATHS.privacy} element={<LegalDocumentPage documentId="privacy" />} />
+      <Route path={LEGAL_PATHS.cookies} element={<LegalDocumentPage documentId="cookies" />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login/verify" element={<LoginVerifyPage />} />
@@ -294,6 +303,10 @@ function App() {
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    {/* Aviso y panel de cookies: globales, en cualquier ruta (incluidas login y las páginas legales). */}
+    <CookieBanner />
+    <CookieSettingsDialog />
+    </>
   )
 }
 

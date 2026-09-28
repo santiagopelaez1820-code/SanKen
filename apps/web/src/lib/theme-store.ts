@@ -1,5 +1,6 @@
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
+import { createJSONStorage, persist } from "zustand/middleware"
+import { preferenceStorage } from "@/lib/preference-storage"
 
 export type ThemeMode = "light" | "dark" | "system"
 
@@ -36,6 +37,8 @@ export const useThemeStore = create<ThemeStoreState>()(
         applyThemeToDocument(mode)
       },
     }),
-    { name: "sanken-theme" }
+    // Cookie de "Preferencias" (ver Política de Cookies): sin consentimiento
+    // el modo elegido vale solo durante la visita.
+    { name: "sanken-theme", storage: createJSONStorage(() => preferenceStorage) }
   )
 )

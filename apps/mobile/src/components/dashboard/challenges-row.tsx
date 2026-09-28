@@ -14,7 +14,7 @@ function daysLeft(endsAt: string) {
   return Math.max(0, Math.ceil((new Date(endsAt).getTime() - Date.now()) / 86_400_000));
 }
 
-/** Vista previa de retos activos en Home — el detalle completo vive en la pestaña Retos. */
+/** Vista previa de retos activos en Home — el detalle completo vive en la pantalla Retos (menú "Más"). */
 export function ChallengesRow() {
   const theme = useTheme();
   const { challenges, isLoading, load } = useRetosStore();

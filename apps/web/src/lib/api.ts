@@ -26,4 +26,11 @@ export const api = new ApiClient({
   // de una query que falla por 401 se queda mostrando su loading state para
   // siempre (ver OnboardingPage) en vez de mandar al usuario a /login.
   onUnauthorized: () => useAuthStore.getState().clearSession(),
+  // 403 consent_required (se publicó una versión nueva de un documento en
+  // medio de la sesión): se marca en el usuario y LegalConsentGate muestra
+  // la re-aceptación de inmediato, sin esperar a refrescar /legal/consents.
+  onConsentRequired: (pending) => {
+    const { user, setUser } = useAuthStore.getState()
+    if (user) setUser({ ...user, pending_consents: pending })
+  },
 })

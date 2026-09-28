@@ -3,12 +3,16 @@
 namespace App\Application\Auth\Actions;
 
 use App\Application\Auth\DTOs\AuthenticationResult;
+use App\Application\Legal\Actions\RecordUserConsentsAction;
+use App\Domain\Legal\Services\LegalConsentCatalog;
 use App\Domain\User\Contracts\UserRepositoryInterface;
 use App\Infrastructure\Firebase\FirebaseTokenClaims;
 use App\Infrastructure\Firebase\FirebaseTokenVerifier;
 use App\Models\User;
+use App\Models\UserConsent;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -18,12 +22,32 @@ class SocialLoginAction
     public function __construct(
         private readonly UserRepositoryInterface $users,
         private readonly FirebaseTokenVerifier $verifier,
+        private readonly LegalConsentCatalog $legal,
+        private readonly RecordUserConsentsAction $recordConsents,
     ) {}
 
-    public function execute(string $idToken, string $provider, string $deviceName): AuthenticationResult
+    /**
+     * @param  list<string>  $acceptedConsents  tipos de consentimiento que el usuario marcó (ver SocialLoginRequest)
+     */
+    public function execute(string $idToken, string $provider, string $deviceName, array $acceptedConsents = []): AuthenticationResult
     {
         $claims = $this->verifier->verify($idToken);
-        $user = $this->resolveUser($claims, $provider);
+        $user = $this->resolveUser($claims, $provider, $acceptedConsents);
+
+        if (! $user) {
+            // Cuenta nueva sin todos los consentimientos: no se crea nada
+            // todavía — el cliente muestra las casillas y reenvía el mismo
+            // id_token (válido 1 h) con accept_* marcados.
+            return AuthenticationResult::consentRequired(array_map(
+                fn (string $type) => [
+                    'type' => $type,
+                    'document' => $this->legal->documentFor($type),
+                    'version' => $this->legal->currentVersionFor($type),
+                    'accepted_version' => null,
+                ],
+                $this->legal->consentTypes(),
+            ));
+        }
 
         if ($user->is_banned) {
             throw ValidationException::withMessages([
@@ -52,13 +76,17 @@ class SocialLoginAction
      * 2) Si no, ¿existe una cuenta con el mismo email — y Firebase lo
      *    marca como verificado? se vincula esa cuenta (evita duplicar la
      *    cuenta de alguien que ya se había registrado con email+password).
-     * 3) Si no, se crea una cuenta nueva.
+     * 3) Si no, se crea una cuenta nueva — SOLO si el usuario aceptó todos
+     *    los consentimientos obligatorios (mismo requisito que el registro
+     *    con email). Si faltan, devuelve null y no se crea nada.
      *
      * Solo se confía en el email para el paso 2 cuando viene con
      * email_verified=true en el token ya verificado por Firebase — nunca
      * en un email suelto enviado por el cliente.
+     *
+     * @param  list<string>  $acceptedConsents
      */
-    private function resolveUser(FirebaseTokenClaims $claims, string $provider): User
+    private function resolveUser(FirebaseTokenClaims $claims, string $provider, array $acceptedConsents): ?User
     {
         if ($existing = $this->users->findByFirebaseUid($claims->uid)) {
             return $existing;
@@ -91,22 +119,33 @@ class SocialLoginAction
             return $byEmail;
         }
 
-        $user = $this->users->create([
-            'name' => $claims->name ?: Str::before($claims->email, '@'),
-            'email' => $claims->email,
-            'phone' => null,
-            'avatar_url' => $claims->picture,
-            'firebase_uid' => $claims->uid,
-            'auth_provider' => $provider,
-            // Cuenta creada por login social: nunca inicia sesión con esta
-            // password, pero la columna es NOT NULL — se genera una al azar
-            // e inutilizable en vez de tocar el esquema de `users`.
-            'password' => Hash::make(Str::random(40)),
-            'role' => 'user',
-            'is_public_profile' => false,
-            'is_banned' => false,
-            'two_factor_enabled' => false,
-        ]);
+        $required = $this->legal->consentTypes();
+        if (array_diff($required, $acceptedConsents) !== []) {
+            return null;
+        }
+
+        $user = DB::transaction(function () use ($claims, $provider, $required) {
+            $user = $this->users->create([
+                'name' => $claims->name ?: Str::before($claims->email, '@'),
+                'email' => $claims->email,
+                'phone' => null,
+                'avatar_url' => $claims->picture,
+                'firebase_uid' => $claims->uid,
+                'auth_provider' => $provider,
+                // Cuenta creada por login social: nunca inicia sesión con esta
+                // password, pero la columna es NOT NULL — se genera una al azar
+                // e inutilizable en vez de tocar el esquema de `users`.
+                'password' => Hash::make(Str::random(40)),
+                'role' => 'user',
+                'is_public_profile' => false,
+                'is_banned' => false,
+                'two_factor_enabled' => false,
+            ]);
+
+            $this->recordConsents->execute($user, $required, UserConsent::SOURCE_SOCIAL_REGISTRATION);
+
+            return $user;
+        });
 
         if ($claims->emailVerified) {
             $user->markEmailAsVerified();

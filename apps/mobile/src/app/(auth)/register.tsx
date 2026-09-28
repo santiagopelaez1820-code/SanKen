@@ -2,9 +2,13 @@ import { useState } from 'react';
 import { Link, router } from 'expo-router';
 import { Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { buildConsentFields, LEGAL_STRINGS, REQUIRED_CONSENTS, type ConsentType } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ConsentCheckboxes } from '@/components/legal/consent-checkboxes';
+import { LegalLinks } from '@/components/legal/legal-links';
+import { SocialConsentSheet } from '@/components/legal/social-consent-sheet';
 import { GoogleSignInButton } from '@/components/ui/google-sign-in-button';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
@@ -18,31 +22,50 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [consents, setConsents] = useState<Partial<Record<ConsentType, boolean>>>({});
+  const [consentErrors, setConsentErrors] = useState<Partial<Record<ConsentType, string>>>({});
   const { register, loginWithGoogle, isSubmitting, isSubmittingGoogle, error, clearError } = useAuthStore();
   const anySubmitting = isSubmitting || isSubmittingGoogle;
 
+  const handleConsentChange = (type: ConsentType, checked: boolean) => {
+    setConsents((prev) => ({ ...prev, [type]: checked }));
+    if (checked) setConsentErrors((prev) => ({ ...prev, [type]: undefined }));
+  };
+
+  // Validación local para dar feedback inmediato; el backend igual rechaza
+  // el registro si falta cualquiera (RegisterRequest).
   const handleSubmit = () => {
     clearError();
+    const missing: Partial<Record<ConsentType, string>> = {};
+    for (const type of REQUIRED_CONSENTS) {
+      if (!consents[type]) missing[type] = LEGAL_STRINGS.es.consentRequiredErrors[type];
+    }
+    setConsentErrors(missing);
+    if (Object.keys(missing).length > 0) return;
+
     register({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       password,
       password_confirmation: passwordConfirmation,
+      ...buildConsentFields(consents),
     }).catch(() => {});
+  };
+
+  const goTo2faIfNeeded = () => {
+    if (useAuthStore.getState().pendingChallenge) {
+      router.push('/verify-2fa');
+    }
   };
 
   // Mismo endpoint /auth/social que usa el login: el backend resuelve solo
   // si la cuenta de Google ya existe o hay que crearla — no hace falta un
   // flujo de "registro con Google" separado ni un formulario adicional.
+  // Si las casillas ya están marcadas se mandan directo; si no, y la cuenta
+  // de Google es nueva, se abre SocialConsentSheet antes de crearla.
   const handleGoogleSubmit = () => {
     clearError();
-    loginWithGoogle()
-      .then(() => {
-        if (useAuthStore.getState().pendingChallenge) {
-          router.push('/verify-2fa');
-        }
-      })
-      .catch(() => {});
+    loginWithGoogle(consents).then(goTo2faIfNeeded).catch(() => {});
   };
 
   return (
@@ -83,6 +106,14 @@ export default function RegisterScreen() {
                 autoComplete="new-password"
               />
 
+              <ConsentCheckboxes
+                consents={REQUIRED_CONSENTS}
+                values={consents}
+                errors={consentErrors}
+                disabled={anySubmitting}
+                onChange={handleConsentChange}
+              />
+
               {error && (
                 <ThemedText type="small" style={styles.error}>
                   {error}
@@ -114,7 +145,10 @@ export default function RegisterScreen() {
                 ¿Ya tienes cuenta? <ThemedText type="linkPrimary">Inicia sesión</ThemedText>
               </ThemedText>
             </Link>
+
+            <LegalLinks />
           </ScrollView>
+          <SocialConsentSheet onAuthenticated={goTo2faIfNeeded} />
         </SafeAreaView>
       </KeyboardAvoidingView>
     </ThemedView>

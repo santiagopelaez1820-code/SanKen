@@ -40,6 +40,9 @@ class SocialLoginTest extends TestCase
         $response = $this->postJson('/api/v1/auth/social', [
             'id_token' => 'fake-token',
             'provider' => 'google',
+            'accept_terms' => true,
+            'accept_privacy' => true,
+            'accept_health_data' => true,
         ]);
 
         $response->assertOk()

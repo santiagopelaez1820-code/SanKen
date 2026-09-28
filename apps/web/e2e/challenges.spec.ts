@@ -7,7 +7,7 @@ const PASSWORD = 'Challenges123!'
 
 async function registerUser(ctx: APIRequestContext, name: string, email: string) {
   const res = await ctx.post(`${API_URL}/auth/register`, {
-    data: { name, email, password: PASSWORD, password_confirmation: PASSWORD },
+    data: { name, email, password: PASSWORD, password_confirmation: PASSWORD, accept_terms: true, accept_privacy: true, accept_health_data: true },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
   const { data } = (await res.json()) as { data: { token: string; user: { id: number } } }
@@ -100,7 +100,8 @@ test('unirse a un reto refleja el progreso en la tabla y se actualiza en vivo po
 
   await dismissTutorials(page, idA)
   await login(page, emailA)
-  await page.getByRole('link', { name: 'Retos' }).click()
+  // Retos ya no está en la barra principal (cedió su lugar a PR): se entra por URL.
+  await page.goto('/challenges')
   await expect(page).toHaveURL(/\/challenges$/)
 
   await expect(page.getByText('Racha semanal')).toBeVisible()

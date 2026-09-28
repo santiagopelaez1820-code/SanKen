@@ -5,6 +5,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { LegalLinks } from '@/components/legal/legal-links';
+import { SocialConsentSheet } from '@/components/legal/social-consent-sheet';
 import { GoogleSignInButton } from '@/components/ui/google-sign-in-button';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
@@ -30,15 +32,17 @@ export default function LoginScreen() {
       .catch(() => {});
   };
 
+  const goTo2faIfNeeded = () => {
+    if (useAuthStore.getState().pendingChallenge) {
+      router.push('/verify-2fa');
+    }
+  };
+
+  // Si la cuenta de Google es nueva, el store deja pendingSocialConsent y se
+  // abre SocialConsentSheet: la cuenta no se crea sin las casillas.
   const handleGoogleSubmit = () => {
     clearError();
-    loginWithGoogle()
-      .then(() => {
-        if (useAuthStore.getState().pendingChallenge) {
-          router.push('/verify-2fa');
-        }
-      })
-      .catch(() => {});
+    loginWithGoogle().then(goTo2faIfNeeded).catch(() => {});
   };
 
   return (
@@ -105,7 +109,10 @@ export default function LoginScreen() {
                 ¿No tienes cuenta? <ThemedText type="linkPrimary">Regístrate</ThemedText>
               </ThemedText>
             </Link>
+
+            <LegalLinks />
           </ScrollView>
+          <SocialConsentSheet onAuthenticated={goTo2faIfNeeded} />
         </SafeAreaView>
       </KeyboardAvoidingView>
     </ThemedView>

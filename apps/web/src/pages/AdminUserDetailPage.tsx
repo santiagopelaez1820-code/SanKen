@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { AdminUserDetail, AssignableRole } from "@sanken/core"
+import { formatPersonalRecord, type AdminUserDetail, type AssignableRole } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
@@ -180,7 +180,7 @@ export function AdminUserDetailPage() {
               {user.personal_records.map((record) => (
                 <li key={record.id} className="flex items-center justify-between py-2.5 text-sm">
                   <span>{record.exercise_name}</span>
-                  <span className="font-medium text-primary">{record.value} kg</span>
+                  <span className="font-medium text-primary">{formatPersonalRecord(record)}</span>
                 </li>
               ))}
             </ul>

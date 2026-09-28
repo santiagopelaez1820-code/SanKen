@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureLegalConsentsAccepted;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\TouchLastActive;
 use Illuminate\Console\Scheduling\Schedule;
@@ -38,7 +39,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global: corre para toda request bajo routes/api.php sin tener que
         // apendearlo a cada uno de los ~15 grupos `auth:sanctum` existentes.
         // No-op para requests sin usuario autenticado (ver TouchLastActive).
-        $middleware->api(append: [TouchLastActive::class]);
+        // EnsureLegalConsentsAccepted: mismo criterio global — bloquea con 403
+        // a quien tenga documentos legales pendientes (ver el middleware).
+        $middleware->api(append: [TouchLastActive::class, EnsureLegalConsentsAccepted::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

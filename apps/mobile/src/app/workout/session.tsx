@@ -14,6 +14,7 @@ import { Icon } from '@/components/ui/icon';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { RestTimerRing } from '@/components/ui/rest-timer-ring';
 import { SetTrackerTable } from '@/components/ui/set-tracker-table';
+import { RulerSlider } from '@/components/ui/ruler-slider';
 import { Stepper } from '@/components/ui/stepper';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -321,7 +322,11 @@ export default function WorkoutSessionScreen() {
             </ThemedView>
           )}
 
-          <ExerciseVideoPlayer videoUrl={workoutExercise.exercise.video_url} exerciseName={workoutExercise.exercise.name} />
+          <ExerciseVideoPlayer
+            videoUrl={workoutExercise.exercise.video_url}
+            exerciseName={workoutExercise.exercise.name}
+            autoPlay
+          />
 
           {workoutExercise.alternative && (
             <ThemedView style={styles.swapBlock}>
@@ -378,25 +383,25 @@ export default function WorkoutSessionScreen() {
             </CelebrationOverlay>
           ) : (
             <>
+              <ThemedView style={styles.rpeBlock}>
+                <ThemedText type="small" themeColor="textSecondary" style={styles.stepperLabel}>
+                  Peso (kg) — deslizá la regla
+                </ThemedText>
+                <RulerSlider value={weightInput} onChange={setWeightInput} unit="kg" />
+              </ThemedView>
               <ThemedView style={styles.inputsRow}>
-                <ThemedView style={styles.inputHalf}>
-                  <ThemedText type="small" themeColor="textSecondary" style={styles.stepperLabel}>
-                    Peso (kg)
-                  </ThemedText>
-                  <Stepper value={weightInput} onChange={setWeightInput} step={2.5} unit="kg" />
-                </ThemedView>
                 <ThemedView style={styles.inputHalf}>
                   <ThemedText type="small" themeColor="textSecondary" style={styles.stepperLabel}>
                     Reps
                   </ThemedText>
                   <Stepper value={repsInput} onChange={setRepsInput} step={1} unit="reps" />
                 </ThemedView>
-              </ThemedView>
-              <ThemedView style={styles.rpeBlock}>
-                <ThemedText type="small" themeColor="textSecondary" style={styles.stepperLabel}>
-                  RPE (opcional)
-                </ThemedText>
-                <Stepper value={rpeInput} onChange={setRpeInput} step={0.5} max={10} unit="RPE" />
+                <ThemedView style={styles.inputHalf}>
+                  <ThemedText type="small" themeColor="textSecondary" style={styles.stepperLabel}>
+                    RPE (opcional)
+                  </ThemedText>
+                  <Stepper value={rpeInput} onChange={setRpeInput} step={0.5} max={10} unit="RPE" />
+                </ThemedView>
               </ThemedView>
 
               {error && (

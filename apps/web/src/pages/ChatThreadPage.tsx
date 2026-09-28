@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import type { ChatMessage, MessageSentBroadcast, ReportReason } from "@sanken/core"
+import { ChevronLeft, Flag, Loader2, SendHorizontal } from "lucide-react"
+import type { ChatMessage, ConversationSummary, MessageSentBroadcast, ReportReason } from "@sanken/core"
 import { api } from "@/lib/api"
 import { getEcho } from "@/lib/echo"
+import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,12 +17,31 @@ const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   other: "Otro",
 }
 
+/**
+ * Agrega un mensaje sin duplicarlo. El backend transmite `message.sent` a
+ * todo el canal (no usa toOthers(): el cliente no manda X-Socket-ID), así
+ * que quien envía recibe su propio mensaje por websocket además de la
+ * respuesta del POST — antes aparecía dos veces y como si fuera del otro.
+ */
+function upsertMessage(current: ChatMessage[], message: ChatMessage): ChatMessage[] {
+  return current.some((m) => m.id === message.id)
+    ? current.map((m) => (m.id === message.id ? message : m))
+    : [...current, message]
+}
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })
+}
+
 export function ChatThreadPage() {
   const { conversationId } = useParams<{ conversationId: string }>()
   const queryClient = useQueryClient()
+  const myId = useAuthStore((s) => s.user?.id)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [body, setBody] = useState("")
+  const [sendError, setSendError] = useState<string | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const [reportingMessageId, setReportingMessageId] = useState<number | null>(null)
   const [reportReason, setReportReason] = useState<ReportReason>("abuse")
   const [reportDetails, setReportDetails] = useState("")
@@ -32,6 +53,16 @@ export function ChatThreadPage() {
     enabled: Boolean(conversationId),
   })
 
+  const { data: conversations } = useQuery({
+    queryKey: ["conversations"],
+    queryFn: () => api.get<ConversationSummary[]>("/conversations"),
+  })
+
+  const otherPartyName =
+    conversations?.find((c) => String(c.id) === conversationId)?.other_party.name ??
+    messages.find((m) => !m.is_mine)?.sender_name ??
+    "Chat"
+
   useEffect(() => {
     if (data) setMessages(data)
   }, [data])
@@ -42,24 +73,40 @@ export function ChatThreadPage() {
     const echo = getEcho()
     const channel = echo.private(`conversations.${conversationId}`)
     channel.listen(".message.sent", (payload: MessageSentBroadcast) => {
-      setMessages((current) => [...current, { ...payload, is_mine: false }])
+      setMessages((current) => upsertMessage(current, { ...payload, is_mine: payload.sender_id === myId }))
       queryClient.invalidateQueries({ queryKey: ["conversations"] })
     })
 
     return () => echo.leave(`conversations.${conversationId}`)
-  }, [conversationId, queryClient])
+  }, [conversationId, queryClient, myId])
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+    bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "end" })
   }, [messages])
+
+  // El textarea crece con el texto hasta ~5 líneas.
+  useEffect(() => {
+    const el = inputRef.current
+    if (!el) return
+    el.style.height = "auto"
+    el.style.height = `${Math.min(el.scrollHeight, 132)}px`
+  }, [body])
 
   const sendMutation = useMutation({
     mutationFn: (text: string) =>
       api.post<ChatMessage>(`/conversations/${conversationId}/messages`, { body: text }),
-    onSuccess: (message) => {
-      setMessages((current) => [...current, message])
+    onMutate: () => {
+      setSendError(null)
       setBody("")
+    },
+    onSuccess: (message) => {
+      setMessages((current) => upsertMessage(current, message))
       queryClient.invalidateQueries({ queryKey: ["conversations"] })
+    },
+    onError: (_err, text) => {
+      // El texto vuelve al campo: antes se perdía si el envío fallaba.
+      setBody(text)
+      setSendError("No se pudo enviar el mensaje. Revisá tu conexión y probá de nuevo.")
     },
   })
 
@@ -78,101 +125,166 @@ export function ChatThreadPage() {
     },
   })
 
+  const canSend = body.trim().length > 0 && !sendMutation.isPending
+  const send = () => {
+    if (canSend) sendMutation.mutate(body.trim())
+  }
+
   return (
-    <main className="flex flex-col px-6 py-8">
-      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col gap-4">
-        <header className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-medium tracking-tight">Chat</h1>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/chat">Volver</Link>
-          </Button>
+    // Alto fijo al viewport: el campo de escritura queda siempre visible
+    // abajo y solo scrollea la lista de mensajes.
+    <main className="flex h-[calc(100dvh-8rem)] flex-col px-4 py-4 sm:px-6 lg:h-[calc(100dvh-5rem)]">
+      <div className="mx-auto flex min-h-0 w-full max-w-lg flex-1 flex-col overflow-hidden rounded-2xl border border-border bg-card">
+        <header className="flex items-center gap-3 border-b border-border px-3 py-2.5">
+          <Link
+            to="/chat"
+            aria-label="Volver al chat"
+            className="flex size-9 items-center justify-center rounded-full text-foreground hover:bg-muted"
+          >
+            <ChevronLeft className="size-5" />
+          </Link>
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted font-heading text-sm font-bold">
+            {otherPartyName.trim()[0]?.toUpperCase() ?? "?"}
+          </div>
+          <h1 className="min-w-0 flex-1 truncate font-heading text-base font-semibold">{otherPartyName}</h1>
         </header>
 
-        <div className="flex flex-1 flex-col gap-2 overflow-y-auto rounded-xl border border-border bg-card p-4">
-          {isLoading && <Skeleton className="h-20 w-full" />}
+        <div className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto px-3 py-4">
+          {isLoading && (
+            <>
+              <Skeleton className="h-11 w-3/5 rounded-2xl" />
+              <Skeleton className="ml-auto h-11 w-2/5 rounded-2xl" />
+            </>
+          )}
+
+          {!isLoading && messages.length === 0 && (
+            <p className="mt-6 text-center text-sm text-muted-foreground">Todavía no hay mensajes. ¡Escribí el primero!</p>
+          )}
 
           {!isLoading &&
-            messages.map((message) => (
-              <div
-                key={message.id}
-                className={cn("flex flex-col gap-0.5", message.is_mine ? "items-end" : "items-start")}
-              >
+            messages.map((message, index) => {
+              const previous = messages[index - 1]
+              const isFirstOfGroup = !previous || previous.is_mine !== message.is_mine
+              const isReported = reportedIds.includes(message.id)
+              return (
                 <div
+                  key={message.id}
                   className={cn(
-                    "max-w-[80%] rounded-xl px-3 py-2 text-sm",
-                    message.is_mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"
+                    "group flex flex-col gap-0.5",
+                    message.is_mine ? "items-end" : "items-start",
+                    isFirstOfGroup && "mt-2"
                   )}
                 >
-                  {message.body}
-                </div>
-                <span className="text-[10px] text-muted-foreground">
-                  {message.is_mine ? "Vos" : message.sender_name} ·{" "}
-                  {new Date(message.created_at).toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" })}
-                  {!message.is_mine && !reportedIds.includes(message.id) && (
-                    <button
-                      onClick={() => setReportingMessageId(message.id)}
-                      className="ml-1.5 underline decoration-dotted"
+                  <div
+                    className={cn(
+                      "max-w-[82%] whitespace-pre-wrap break-words rounded-2xl px-3.5 pt-2 pb-1 text-[15px] leading-snug",
+                      message.is_mine
+                        ? "rounded-br-md bg-primary text-primary-foreground"
+                        : "rounded-bl-md bg-muted text-foreground"
+                    )}
+                  >
+                    {message.body}
+                    <span
+                      className={cn(
+                        "mt-0.5 block text-right text-[10px]",
+                        message.is_mine ? "text-primary-foreground/70" : "text-muted-foreground"
+                      )}
                     >
-                      Reportar
+                      {formatTime(message.created_at)}
+                    </span>
+                  </div>
+
+                  {!message.is_mine && !isReported && reportingMessageId !== message.id && (
+                    <button
+                      type="button"
+                      onClick={() => setReportingMessageId(message.id)}
+                      className="flex items-center gap-1 text-[11px] text-muted-foreground opacity-70 hover:opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    >
+                      <Flag className="size-3" /> Reportar
                     </button>
                   )}
-                  {reportedIds.includes(message.id) && <span className="ml-1.5">Reportado</span>}
-                </span>
+                  {isReported && <span className="text-[11px] text-muted-foreground">Reportado</span>}
 
-                {reportingMessageId === message.id && (
-                  <div className="mt-1 flex w-full max-w-[80%] flex-col gap-1.5 rounded-lg border border-border bg-card p-2">
-                    <select
-                      value={reportReason}
-                      onChange={(e) => setReportReason(e.target.value as ReportReason)}
-                      className="rounded-lg border border-input bg-background px-2 py-1 text-xs"
-                    >
-                      {Object.entries(REPORT_REASON_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                    <textarea
-                      value={reportDetails}
-                      onChange={(e) => setReportDetails(e.target.value)}
-                      placeholder="Detalle (opcional)"
-                      className="rounded-lg border border-input bg-background px-2 py-1 text-xs"
-                    />
-                    <div className="flex gap-1.5">
-                      <Button
-                        size="sm"
-                        onClick={() => reportMutation.mutate(message.id)}
-                        disabled={reportMutation.isPending}
+                  {reportingMessageId === message.id && (
+                    <div className="mt-1 flex w-full max-w-[82%] flex-col gap-2 rounded-xl border border-border bg-background p-3">
+                      <p className="text-sm font-medium">Reportar mensaje</p>
+                      <select
+                        value={reportReason}
+                        onChange={(e) => setReportReason(e.target.value as ReportReason)}
+                        className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
                       >
-                        Enviar reporte
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => setReportingMessageId(null)}>
-                        Cancelar
-                      </Button>
+                        {Object.entries(REPORT_REASON_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                      <textarea
+                        value={reportDetails}
+                        onChange={(e) => setReportDetails(e.target.value)}
+                        placeholder="Detalle (opcional)"
+                        className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
+                      />
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="outline" onClick={() => setReportingMessageId(null)}>
+                          Cancelar
+                        </Button>
+                        <Button
+                          size="sm"
+                          onClick={() => reportMutation.mutate(message.id)}
+                          disabled={reportMutation.isPending}
+                        >
+                          Enviar reporte
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              )
+            })}
           <div ref={bottomRef} />
         </div>
+
+        {sendError && <p className="px-4 pb-1 text-xs text-destructive">{sendError}</p>}
 
         <form
           onSubmit={(e) => {
             e.preventDefault()
-            if (body.trim()) sendMutation.mutate(body.trim())
+            send()
           }}
-          className="flex gap-2"
+          className="flex items-end gap-2 border-t border-border p-3"
         >
-          <input
+          <textarea
+            ref={inputRef}
+            rows={1}
             value={body}
-            onChange={(e) => setBody(e.target.value)}
+            onChange={(e) => {
+              setBody(e.target.value)
+              if (sendError) setSendError(null)
+            }}
+            onKeyDown={(e) => {
+              // Enter envía, Shift+Enter hace salto de línea.
+              if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                e.preventDefault()
+                send()
+              }
+            }}
+            maxLength={2000}
             placeholder="Escribí un mensaje…"
-            className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            aria-label="Mensaje"
+            className="min-h-11 flex-1 resize-none rounded-3xl border border-input bg-background px-4 py-2.5 text-[15px] leading-snug outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           />
-          <Button type="submit" disabled={!body.trim() || sendMutation.isPending}>
-            Enviar
-          </Button>
+          <button
+            type="submit"
+            disabled={!canSend}
+            aria-label="Enviar mensaje"
+            className={cn(
+              "flex size-11 shrink-0 items-center justify-center rounded-full transition-colors",
+              canSend ? "bg-primary text-primary-foreground hover:bg-primary/90" : "bg-muted text-muted-foreground"
+            )}
+          >
+            {sendMutation.isPending ? <Loader2 className="size-5 animate-spin" /> : <SendHorizontal className="size-5" />}
+          </button>
         </form>
       </div>
     </main>

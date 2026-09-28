@@ -4,9 +4,10 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { AnimatePresence, motion } from "framer-motion"
-import { Trophy } from "lucide-react"
+import { Trophy, Video } from "lucide-react"
 import {
   ApiError,
+  formatPersonalRecord,
   type ExerciseCatalogItem,
   type ExerciseRankingResponse,
   type ExerciseRankingScope,
@@ -22,7 +23,10 @@ import type { VariantProps } from "class-variance-authority"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ExerciseRankingList } from "@/components/rankings/ExerciseRankingList"
 import { Skeleton } from "@/components/ui/skeleton"
-import { fadeInUp, staggerContainer } from "@/lib/motion"
+import { cn } from "@/lib/utils"
+
+/** Mismo tope que UploadPrSubmissionVideoRequest (max:102400 KB). */
+const MAX_VIDEO_BYTES = 100 * 1024 * 1024
 
 const STATUS_LABEL: Record<PrSubmission["status"], string> = {
   pending: "En revisión",
@@ -158,11 +162,6 @@ export function PersonalRecordsPage() {
     queryFn: () => api.get<ExerciseCatalogItem[]>("/exercises"),
   })
 
-  const { data: records, isLoading } = useQuery({
-    queryKey: ["stats", "personal-records"],
-    queryFn: () => api.get<PersonalRecordSummary[]>("/stats/personal-records"),
-  })
-
   const {
     register,
     handleSubmit,
@@ -176,10 +175,14 @@ export function PersonalRecordsPage() {
     onSuccess: (envelope) => {
       const meta = envelope.meta as RegisterPersonalRecordMeta | undefined
       setConfirmationIsNewBest(Boolean(meta?.is_new_best))
+      // La página ya no tiene grilla de récords (pedido del tester): la
+      // confirmación muestra el récord vigente, nuevo o conservado.
+      const current = formatPersonalRecord(envelope.data)
+      const exerciseName = envelope.data.exercise_name
       setConfirmation(
         meta?.is_new_best
-          ? "¡Nuevo récord personal!"
-          : "Registrado — pero no supera tu récord actual en este ejercicio, así que se conserva el anterior."
+          ? `¡Nuevo récord personal!${exerciseName ? ` ${exerciseName}:` : ""} ${current}`
+          : `No supera tu récord actual (${current}) — se conserva el anterior.`
       )
       queryClient.invalidateQueries({ queryKey: ["stats", "personal-records"] })
       queryClient.invalidateQueries({ queryKey: ["stats", "dashboard"] })
@@ -198,6 +201,9 @@ export function PersonalRecordsPage() {
   }
 
   const [submissionServerError, setSubmissionServerError] = useState<string | null>(null)
+  const [submissionConfirmation, setSubmissionConfirmation] = useState<string | null>(null)
+  const [submissionVideo, setSubmissionVideo] = useState<File | null>(null)
+  const submissionVideoInputRef = useRef<HTMLInputElement>(null)
 
   const { data: submissions, isLoading: isLoadingSubmissions } = useQuery({
     queryKey: ["pr-submissions"],
@@ -213,18 +219,46 @@ export function PersonalRecordsPage() {
 
   const createSubmissionMutation = useMutation({
     mutationFn: (values: PrFormValues) => api.post<PrSubmission>("/pr-submissions", values),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pr-submissions"] })
-      resetSubmissionForm({ exercise_id: undefined, weight_kg: undefined, reps: 1 })
-    },
   })
 
+  // El video se elige en el mismo formulario y se sube apenas se crea la
+  // postulación — antes había que postular primero y después buscar el
+  // botón en la lista, y el tester no encontraba cómo cargar la evidencia.
   const onSubmitSubmission = async (values: PrFormValues) => {
     setSubmissionServerError(null)
+    setSubmissionConfirmation(null)
+    if (!submissionVideo) {
+      setSubmissionServerError("Adjunta un video de evidencia para que puedan verificar tu PR.")
+      return
+    }
+    if (submissionVideo.size > MAX_VIDEO_BYTES) {
+      setSubmissionServerError("El video pesa más de 100 MB — recórtalo o grábalo en menor calidad.")
+      return
+    }
+
+    let created: PrSubmission
     try {
-      await createSubmissionMutation.mutateAsync(values)
+      created = await createSubmissionMutation.mutateAsync(values)
     } catch (err) {
       setSubmissionServerError(err instanceof ApiError ? err.body.message : "No se pudo postular el PR.")
+      return
+    }
+
+    resetSubmissionForm({ exercise_id: undefined, weight_kg: undefined, reps: 1 })
+    try {
+      const formData = new FormData()
+      formData.append("video", submissionVideo)
+      await api.post(`/pr-submissions/${created.id}/video`, formData)
+      setSubmissionConfirmation("¡Postulación enviada con su video! Te avisaremos cuando la revisen.")
+    } catch (err) {
+      setSubmissionServerError(
+        err instanceof ApiError
+          ? `Se creó la postulación pero el video no se pudo subir: ${err.body.message}`
+          : "Se creó la postulación pero el video no se pudo subir. Reintenta desde la lista de abajo."
+      )
+    } finally {
+      setSubmissionVideo(null)
+      queryClient.invalidateQueries({ queryKey: ["pr-submissions"] })
     }
   }
 
@@ -233,7 +267,6 @@ export function PersonalRecordsPage() {
       <div className="mx-auto flex max-w-lg flex-col gap-6">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Personal Records</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Tus mejores levantamientos</p>
         </div>
 
         <form
@@ -317,48 +350,10 @@ export function PersonalRecordsPage() {
         </form>
 
         <div className="rounded-xl border border-border bg-card p-5">
-          <h2 className="font-heading text-sm font-medium text-foreground">Tus récords</h2>
-
-          {isLoading && <Skeleton className="mt-3 h-40 w-full" />}
-
-          {!isLoading && (records?.length ?? 0) === 0 && (
-            <p className="mt-3 text-sm text-muted-foreground">Todavía no tienes récords registrados.</p>
-          )}
-
-          {!isLoading && (records?.length ?? 0) > 0 && (
-            <motion.div
-              className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3"
-              variants={staggerContainer(0.04)}
-              initial="hidden"
-              animate="show"
-            >
-              {records!.map((record) => (
-                <motion.div
-                  key={record.id}
-                  variants={fadeInUp}
-                  className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-background px-3 py-5 text-center transition-transform duration-200 hover:-translate-y-0.5"
-                >
-                  <div className="mb-1 flex size-11 items-center justify-center rounded-full bg-primary/15">
-                    <Trophy className="size-5 text-primary" />
-                  </div>
-                  <p className="truncate text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-                    {record.exercise_name}
-                  </p>
-                  <p className="font-heading text-2xl font-extrabold tabular-nums text-foreground">
-                    {record.value} kg
-                  </p>
-                  <p className="text-xs text-muted-foreground">{record.achieved_at}</p>
-                </motion.div>
-              ))}
-            </motion.div>
-          )}
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-5">
           <h2 className="font-heading text-sm font-medium text-foreground">Postular PR para Rankings</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Solo los PR aprobados por un administrador, con video de evidencia, aparecen en Rankings públicos. Tus
-            récords de arriba son privados y no se ven afectados por esto.
+            Adjunta un video de evidencia para que un entrenador o administrador verifique tu PR. Solo los aprobados
+            aparecen en Rankings públicos; tus récords personales siguen siendo privados.
           </p>
 
           <form onSubmit={handleSubmitSubmission(onSubmitSubmission)} className="mt-4 space-y-4">
@@ -415,10 +410,41 @@ export function PersonalRecordsPage() {
               {submissionErrors.reps && <p className="text-xs text-destructive">{submissionErrors.reps.message}</p>}
             </div>
 
+            <div className="space-y-1.5">
+              <span className="text-sm font-medium">Video de evidencia</span>
+              <input
+                ref={submissionVideoInputRef}
+                type="file"
+                accept="video/mp4,video/webm,video/quicktime"
+                className="hidden"
+                onChange={(e) => {
+                  setSubmissionVideo(e.target.files?.[0] ?? null)
+                  e.target.value = ""
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => submissionVideoInputRef.current?.click()}
+                className={cn(
+                  "flex w-full items-center justify-between gap-2 rounded-lg border px-3 py-2 text-left text-sm",
+                  submissionVideo ? "border-primary text-foreground" : "border-input text-muted-foreground"
+                )}
+              >
+                <span className="flex min-w-0 items-center gap-2">
+                  <Video className={cn("size-4 shrink-0", submissionVideo && "text-primary")} />
+                  <span className="truncate">{submissionVideo ? submissionVideo.name : "Adjuntar video de evidencia"}</span>
+                </span>
+                <span className="text-primary">{submissionVideo ? "Cambiar" : "Elegir"}</span>
+              </button>
+            </div>
+
             {submissionServerError && <p className="text-sm text-destructive">{submissionServerError}</p>}
+            {submissionConfirmation && !submissionServerError && (
+              <p className="text-sm text-primary">{submissionConfirmation}</p>
+            )}
 
             <Button type="submit" disabled={isSubmittingSubmission} className="w-full">
-              {isSubmittingSubmission ? "Postulando…" : "Postular PR"}
+              {isSubmittingSubmission ? "Enviando…" : "Postular PR"}
             </Button>
           </form>
 

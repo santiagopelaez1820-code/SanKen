@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { formatPersonalRecord } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -184,7 +185,7 @@ export default function AdminUserDetailScreen() {
                 <ThemedView key={record.id} style={styles.recordRow}>
                   <ThemedText type="small">{record.exercise_name}</ThemedText>
                   <ThemedText type="smallBold" themeColor="accent">
-                    {record.value} kg
+                    {formatPersonalRecord(record)}
                   </ThemedText>
                 </ThemedView>
               ))

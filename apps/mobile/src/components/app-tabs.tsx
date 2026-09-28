@@ -4,7 +4,7 @@ import { Tabs, TabList, TabTrigger, TabSlot, useTabTrigger } from 'expo-router/u
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { BarChart3, Flag, Home, ShoppingBag, User, type LucideIcon } from 'lucide-react-native';
+import { BarChart3, Home, ShoppingBag, Trophy, User, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -99,22 +99,22 @@ export default function AppTabs() {
           <CenterAction />
         </View>
 
-        <TabTrigger name="retos" href="/retos" style={styles.tab}>
-          <TabIcon name="retos" icon={Flag} label="Retos" />
+        <TabTrigger name="prs" href="/prs" style={styles.tab}>
+          <TabIcon name="prs" icon={Trophy} label="PR" />
         </TabTrigger>
         <TabTrigger name="profile" href="/profile" style={styles.tab}>
           <TabIcon name="profile" icon={User} label="Perfil" />
         </TabTrigger>
 
         {/*
-          Historial/PR/Medidas ya no son tabs visibles (viven en el perfil y
-          en el menú "Más"), pero siguen siendo archivos dentro de (app)/ --
+          Historial/Retos/Medidas no son tabs visibles (viven en el perfil y
+          en el menú "Más"; Retos cedió su pestaña a PR a pedido del tester), pero siguen siendo archivos dentro de (app)/ --
           con expo-router/ui, un archivo solo es navegable dentro de este
           Tabs si tiene un TabTrigger real dentro del TabList. Sin estos
           triggers ocultos, router.push() a esas rutas no tendría a dónde ir.
         */}
         <TabTrigger name="history" href="/history" style={styles.hidden} />
-        <TabTrigger name="prs" href="/prs" style={styles.hidden} />
+        <TabTrigger name="retos" href="/retos" style={styles.hidden} />
         <TabTrigger name="measurements" href="/measurements" style={styles.hidden} />
       </TabList>
     </Tabs>

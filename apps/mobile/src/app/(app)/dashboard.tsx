@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
 import { BarChart3, Clock, Flame, ListChecks, Lock, Trophy, Weight } from 'lucide-react-native';
-import type { ProgressMetric, VolumeRange } from '@sanken/core';
+import { formatPersonalRecord, type ProgressMetric, type VolumeRange } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -209,7 +209,7 @@ export default function DashboardScreen() {
               <ThemedView key={pr.id} style={styles.listRow}>
                 <ThemedText type="small">{pr.exercise_name}</ThemedText>
                 <ThemedText type="smallBold" style={{ color: theme.accent }}>
-                  {pr.value} kg
+                  {formatPersonalRecord(pr)}
                 </ThemedText>
               </ThemedView>
             ))}

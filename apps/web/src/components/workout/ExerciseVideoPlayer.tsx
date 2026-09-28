@@ -1,12 +1,16 @@
 import { Dumbbell } from "lucide-react"
 import { api } from "@/lib/api"
 
-function toEmbedUrl(url: string): string | null {
+function toEmbedUrl(url: string, autoPlay: boolean): string | null {
   const youtube = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/)
-  if (youtube) return `https://www.youtube.com/embed/${youtube[1]}`
+  if (youtube) {
+    const id = youtube[1]
+    // loop en YouTube exige repetir el id en `playlist`.
+    return `https://www.youtube.com/embed/${id}${autoPlay ? `?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1` : ""}`
+  }
 
   const vimeo = url.match(/vimeo\.com\/(\d+)/)
-  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}`
+  if (vimeo) return `https://player.vimeo.com/video/${vimeo[1]}${autoPlay ? "?autoplay=1&muted=1&loop=1" : ""}`
 
   return null
 }
@@ -14,6 +18,12 @@ function toEmbedUrl(url: string): string | null {
 interface ExerciseVideoPlayerProps {
   videoUrl: string | null
   exerciseName: string
+  /**
+   * Arranca solo, en loop y sin sonido (pedido del tester para la sesión de
+   * entrenamiento). Sin sonido porque los navegadores bloquean el autoplay
+   * con audio; los controles siguen disponibles para activarlo.
+   */
+  autoPlay?: boolean
 }
 
 /**
@@ -24,7 +34,7 @@ interface ExerciseVideoPlayerProps {
  * directo (controles nativos del navegador: play/pausa/volumen/fullscreen) o
  * una URL de YouTube/Vimeo, embebida in-app en vez de abrir otra pestaña.
  */
-export function ExerciseVideoPlayer({ videoUrl, exerciseName }: ExerciseVideoPlayerProps) {
+export function ExerciseVideoPlayer({ videoUrl, exerciseName, autoPlay = false }: ExerciseVideoPlayerProps) {
   const resolvedUrl = api.mediaUrl(videoUrl)
 
   if (!resolvedUrl) {
@@ -42,7 +52,7 @@ export function ExerciseVideoPlayer({ videoUrl, exerciseName }: ExerciseVideoPla
     )
   }
 
-  const embedUrl = toEmbedUrl(resolvedUrl)
+  const embedUrl = toEmbedUrl(resolvedUrl, autoPlay)
 
   return (
     <div className="aspect-video w-full overflow-hidden rounded-xl border border-border bg-black">
@@ -56,7 +66,16 @@ export function ExerciseVideoPlayer({ videoUrl, exerciseName }: ExerciseVideoPla
           title="Video del ejercicio"
         />
       ) : (
-        <video key={resolvedUrl} src={resolvedUrl} controls playsInline className="h-full w-full object-contain" />
+        <video
+          key={resolvedUrl}
+          src={resolvedUrl}
+          controls
+          playsInline
+          autoPlay={autoPlay}
+          muted={autoPlay}
+          loop={autoPlay}
+          className="h-full w-full object-contain"
+        />
       )}
     </div>
   )

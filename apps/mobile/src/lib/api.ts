@@ -10,7 +10,7 @@ import { useAuthStore } from '@/store/auth-store';
 // aunque EXPO_PUBLIC_API_URL esté seteada — si no, "localhost" terminaría
 // intentando autoconectarse a la IP de LAN propia, lo que falla por NAT
 // hairpin (el mismo bug que rompió el login por Google en apps/web).
-function resolveApiBaseUrl(): string {
+export function resolveApiBaseUrl(): string {
   if (Platform.OS === 'web') {
     return `http://${window.location.hostname}:8000`;
   }
@@ -25,4 +25,8 @@ export const api = new ApiClient({
   // esto, una pantalla que dependa de una request que falla por 401 se
   // queda colgada en su loading state en vez de volver al login.
   onUnauthorized: () => useAuthStore.getState().clearSessionLocal(),
+  // 403 consent_required (versión nueva de un documento publicada en medio
+  // de la sesión): se marca en el usuario y LegalConsentGuard (layout raíz)
+  // manda a /legal/aceptar desde cualquier pantalla.
+  onConsentRequired: (pending) => useAuthStore.getState().markPendingConsents(pending),
 });

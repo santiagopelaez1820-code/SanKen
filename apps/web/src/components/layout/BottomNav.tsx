@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
-import { BarChart3, Flag, LayoutDashboard, Menu, ShoppingBag } from "lucide-react"
+import { BarChart3, LayoutDashboard, Menu, ShoppingBag, Trophy } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCartStore } from "@/lib/cart-store"
 import { MoreSheet } from "@/components/layout/MoreSheet"
@@ -11,7 +11,8 @@ const TABS = [
 ] as const
 
 const TABS_RIGHT = [
-  { label: "Retos", path: "/challenges", icon: Flag },
+  // Retos cedió su lugar a PR (pedido del tester) — sigue en el menú "Más".
+  { label: "PR", path: "/prs", icon: Trophy },
 ] as const
 
 /** Navegación primaria de mobile: 4 tabs + FAB central, reemplaza el patrón hamburguesa+drawer. */

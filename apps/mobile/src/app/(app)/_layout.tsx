@@ -13,7 +13,8 @@ export default function AppLayout() {
   const subscribeToFeed = useFeedStore((s) => s.subscribe);
 
   useEffect(() => {
-    if (!token || !user) return;
+    // Con documentos pendientes el backend respondería 403 a todo esto.
+    if (!token || !user || user.pending_consents?.length) return;
     loadFeed();
     subscribeToFeed();
     registerForPushNotificationsAsync({ silent: true });
@@ -21,6 +22,12 @@ export default function AppLayout() {
 
   if (!token || !user) {
     return <Redirect href="/login" />;
+  }
+
+  // Documentos legales pendientes (nunca aceptados o actualizados): antes
+  // que onboarding/ubicación, ninguna pantalla de la app sin aceptarlos.
+  if (user.pending_consents?.length) {
+    return <Redirect href="/legal/aceptar" />;
   }
 
   if (!user.onboarding_completed) {

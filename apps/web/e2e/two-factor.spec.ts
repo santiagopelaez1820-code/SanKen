@@ -37,6 +37,9 @@ test.beforeAll(async () => {
       email: EMAIL,
       password: PASSWORD,
       password_confirmation: PASSWORD,
+      accept_terms: true,
+      accept_privacy: true,
+      accept_health_data: true,
     },
   })
   if (!res.ok()) {

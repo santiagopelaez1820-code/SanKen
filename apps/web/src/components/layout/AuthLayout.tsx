@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { Card } from "react-bootstrap"
+import { LegalLinks } from "@/components/legal/LegalLinks"
 
 /** Shell compartido por login / registro / verificación 2FA — logo + card centrada sobre fondo con glow cyan sutil. */
 export function AuthLayout({ children }: { children: ReactNode }) {
@@ -16,6 +17,7 @@ export function AuthLayout({ children }: { children: ReactNode }) {
       <Card className="sank-surface border-0 w-100" style={{ maxWidth: 380 }}>
         <Card.Body className="p-4">{children}</Card.Body>
       </Card>
+      <LegalLinks className="w-100" />
     </main>
   )
 }

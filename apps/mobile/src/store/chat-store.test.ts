@@ -3,6 +3,7 @@ import type { ChatMessage, ConversationSummary, ConversationWithMessages } from 
 
 import { api } from '@/lib/api';
 import { getEcho } from '@/lib/echo';
+import { useAuthStore } from '@/store/auth-store';
 import { useChatStore } from './chat-store';
 
 jest.mock('@/lib/api', () => ({
@@ -142,5 +143,65 @@ describe('sendMessage', () => {
   it('does nothing when there is no active conversation', async () => {
     await useChatStore.getState().sendMessage('Hola');
     expect(mockedApi.post).not.toHaveBeenCalled();
+  });
+
+  it('returns false and keeps the thread intact when the request fails', async () => {
+    mockedApi.get.mockResolvedValueOnce([]);
+    mockedGetEcho.mockReturnValue({ private: jest.fn(() => ({ listen: jest.fn() })), leave: jest.fn() });
+    await useChatStore.getState().openThread(9);
+
+    mockedApi.post.mockRejectedValueOnce(new Error('offline'));
+    const ok = await useChatStore.getState().sendMessage('Hola');
+
+    expect(ok).toBe(false);
+    expect(useChatStore.getState().messages).toEqual([]);
+  });
+
+  // El backend transmite el mensaje a todo el canal, incluido quien lo envió:
+  // antes aparecía duplicado y como si fuera del otro participante.
+  it('does not duplicate my own message when its broadcast echo arrives', async () => {
+    useAuthStore.setState({ user: { id: 5 } as any });
+    mockedApi.get.mockResolvedValueOnce([]);
+    let broadcastCallback: ((payload: unknown) => void) | undefined;
+    mockedGetEcho.mockReturnValue({
+      private: jest.fn(() => ({
+        listen: jest.fn((_event: string, cb: typeof broadcastCallback) => {
+          broadcastCallback = cb;
+        }),
+      })),
+      leave: jest.fn(),
+    });
+    await useChatStore.getState().openThread(9);
+
+    mockedApi.post.mockResolvedValueOnce(message);
+    await useChatStore.getState().sendMessage('Hola');
+    const { is_mine: _ignored, ...broadcast } = message;
+    broadcastCallback?.(broadcast);
+
+    expect(useChatStore.getState().messages).toEqual([message]);
+    useAuthStore.setState({ user: null });
+  });
+
+  it('marks a broadcast from my own user as mine even if it arrives before the POST response', async () => {
+    useAuthStore.setState({ user: { id: 5 } as any });
+    mockedApi.get.mockResolvedValueOnce([]);
+    let broadcastCallback: ((payload: unknown) => void) | undefined;
+    mockedGetEcho.mockReturnValue({
+      private: jest.fn(() => ({
+        listen: jest.fn((_event: string, cb: typeof broadcastCallback) => {
+          broadcastCallback = cb;
+        }),
+      })),
+      leave: jest.fn(),
+    });
+    await useChatStore.getState().openThread(9);
+
+    const { is_mine: _ignored, ...broadcast } = message;
+    broadcastCallback?.(broadcast);
+    mockedApi.post.mockResolvedValueOnce(message);
+    await useChatStore.getState().sendMessage('Hola');
+
+    expect(useChatStore.getState().messages).toEqual([message]);
+    useAuthStore.setState({ user: null });
   });
 });

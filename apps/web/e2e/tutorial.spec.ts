@@ -6,7 +6,7 @@ const PASSWORD = 'Tutorial123!'
 
 async function registerUser(ctx: APIRequestContext, name: string, email: string) {
   const res = await ctx.post(`${API_URL}/auth/register`, {
-    data: { name, email, password: PASSWORD, password_confirmation: PASSWORD },
+    data: { name, email, password: PASSWORD, password_confirmation: PASSWORD, accept_terms: true, accept_privacy: true, accept_health_data: true },
   })
   if (!res.ok()) throw new Error(`register failed: ${res.status()} ${await res.text()}`)
   return ((await res.json()) as { data: { token: string } }).data.token

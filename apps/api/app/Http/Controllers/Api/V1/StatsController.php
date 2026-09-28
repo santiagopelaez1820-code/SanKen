@@ -143,7 +143,7 @@ class StatsController extends Controller
             ->firstOrFail();
 
         return response()->json([
-            'data' => (new PersonalRecordResource($record))->resolve(),
+            'data' => (new PersonalRecordResource($record->load('exercise')))->resolve(),
             'meta' => ['is_new_best' => $isNewBest],
         ], $isNewBest ? 201 : 200);
     }

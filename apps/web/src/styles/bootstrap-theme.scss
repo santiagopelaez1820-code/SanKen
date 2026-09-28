@@ -488,3 +488,16 @@ body {
     scroll-snap-align: start;
   }
 }
+
+// Aviso de cookies (components/legal/CookieBanner.tsx): flota sobre el
+// contenido sin bloquearlo. En pantallas con la barra inferior visible se
+// ubica por encima de ella para no tapar la navegación.
+.sank-cookie-banner {
+  bottom: calc(env(safe-area-inset-bottom) + 12px);
+}
+
+@media (max-width: 991.98px) {
+  body:has(.sank-bottom-nav) .sank-cookie-banner {
+    bottom: calc(64px + env(safe-area-inset-bottom) + 12px);
+  }
+}

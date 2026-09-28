@@ -12,6 +12,8 @@ interface AuthState {
   pendingChallenge: PendingChallenge | null
   setSession: (token: string, user: User) => void
   clearSession: () => void
+  /** Reemplaza el usuario (p. ej. tras cambiar la foto) sin tocar el token. */
+  setUser: (user: User) => void
   setPendingChallenge: (challengeToken: string) => void
   clearPendingChallenge: () => void
   setOnboardingCompleted: () => void
@@ -26,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
       pendingChallenge: null,
       setSession: (token, user) => set({ token, user, pendingChallenge: null }),
       clearSession: () => set({ token: null, user: null }),
+      setUser: (user) => set({ user }),
       setPendingChallenge: (challengeToken) => set({ pendingChallenge: { challengeToken } }),
       clearPendingChallenge: () => set({ pendingChallenge: null }),
       setOnboardingCompleted: () =>

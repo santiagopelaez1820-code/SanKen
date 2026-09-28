@@ -20,6 +20,7 @@ class PersonalRecordResource extends JsonResource
             'exercise_name' => $this->whenLoaded('exercise', fn () => $this->exercise->name),
             'record_type' => $this->record_type,
             'value' => (float) $this->value,
+            'reps' => $this->reps,
             'achieved_at' => $this->achieved_at?->toDateString(),
         ];
     }

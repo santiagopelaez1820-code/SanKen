@@ -13,7 +13,7 @@
   NOTA DE ENCODING: archivo en ASCII puro a proposito (ver start-sanken.ps1).
 #>
 
-$RepoRoot    = "C:\Users\SatanKen\OneDrive\Desktop\SanKen-main"
+$RepoRoot    = "C:\Users\SatanKen\OneDrive\Desktop\AplicacionesparaGithub\SanKen"
 $StartScript = Join-Path $RepoRoot "scripts\start-sanken.ps1"
 $TaskName    = "SanKen AutoStart"
 
@@ -51,6 +51,32 @@ if ($isAdmin) {
       Write-Host "Firewall: regla '$($rule.Name)' creada (perfiles Private/Domain, no Public)."
     }
   }
+
+  # WSL en modo mirrored: el acceso desde la LAN a Laravel (8000) y Reverb
+  # (8080), que corren DENTRO de WSL, lo controla el firewall de Hyper-V
+  # (WSL trae DefaultInboundAction=Block). Esto reemplaza al viejo
+  # "netsh portproxy 0.0.0.0:8000", que es persistente y dejaba el :8000
+  # tomado por Windows al reiniciar: Laravel no podia arrancar (ver el paso
+  # 1b de start-sanken.ps1).
+  $legacyProxy = netsh interface portproxy show v4tov4 | Select-String "\s8000\s"
+  if ($legacyProxy) {
+    netsh interface portproxy delete v4tov4 listenport=8000 listenaddress=0.0.0.0 2>$null | Out-Null
+    Write-Host "Port proxy 8000 (legado): eliminado."
+  }
+  if (Get-Command New-NetFirewallHyperVRule -ErrorAction SilentlyContinue) {
+    $wslVmCreatorId = '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}'
+    foreach ($r in @(@{ Name = "SanKen-WSL-API-8000"; Port = 8000 }, @{ Name = "SanKen-WSL-Reverb-8080"; Port = 8080 })) {
+      if (Get-NetFirewallHyperVRule -Name $r.Name -ErrorAction SilentlyContinue) {
+        Write-Host "Firewall Hyper-V (WSL): '$($r.Name)' ya existia."
+      } else {
+        New-NetFirewallHyperVRule -Name $r.Name -DisplayName $r.Name -Direction Inbound -VMCreatorId $wslVmCreatorId `
+          -Protocol TCP -LocalPorts $r.Port -Action Allow | Out-Null
+        Write-Host "Firewall Hyper-V (WSL): regla '$($r.Name)' creada."
+      }
+    }
+  } else {
+    Write-Host "AVISO: este Windows no tiene firewall de Hyper-V (New-NetFirewallHyperVRule); la LAN no va a poder llegar a Laravel dentro de WSL."
+  }
 } else {
   Write-Host "AVISO: no estas corriendo como administrador, salteo las reglas de firewall."
   Write-Host "       Para crearlas, volve a correr este script desde una PowerShell 'Ejecutar como administrador'."
@@ -77,9 +103,9 @@ $action = New-ScheduledTaskAction -Execute "powershell.exe" `
 $userTrigger = "$env:COMPUTERNAME\$env:USERNAME"
 $trigger = New-ScheduledTaskTrigger -AtLogOn -User $userTrigger
 
-# RunLevel Highest: start-sanken.ps1 necesita administrador para configurar
-# el port proxy 8000 (Windows -> WSL, ver el comentario en start-sanken.ps1)
-# cada vez que arranca, no solo la primera. Con el usuario logueado siendo
+# RunLevel Highest: start-sanken.ps1 necesita administrador para borrar un
+# port proxy 8000 heredado y asegurar las reglas de firewall de Hyper-V
+# (Windows -> WSL, ver el paso 1b de start-sanken.ps1) en cada arranque. Con el usuario logueado siendo
 # administrador, una tarea programada con Highest corre elevada SOLA, sin
 # pedir UAC (a diferencia de doble-clickear un .exe) -- es el mecanismo
 # soportado para esto, no un workaround.
@@ -99,9 +125,8 @@ try {
 
   if ($isAdmin) {
     # La corremos ya mismo (elevada, gracias al RunLevel Highest de arriba)
-    # para que el port proxy 8000 quede configurado ahora, sin esperar al
-    # proximo login.
-    Write-Host "Ejecutandola ahora mismo para aplicar el port proxy 8000 (tarda ~60s por el WaitSeconds interno)..."
+    # para dejar todo arriba ahora, sin esperar al proximo login.
+    Write-Host "Ejecutandola ahora mismo (tarda ~60s por el WaitSeconds interno)..."
     Start-ScheduledTask -TaskName $TaskName
   }
 } catch {

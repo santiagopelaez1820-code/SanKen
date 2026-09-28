@@ -74,7 +74,7 @@ export default function HomeScreen() {
       },
       {
         title: 'Explorá la barra inferior',
-        description: 'Progreso, Tienda, Retos y tu Perfil están siempre a un toque de distancia, abajo de la pantalla.',
+        description: 'Progreso, Tienda, PR y tu Perfil están siempre a un toque de distancia, abajo de la pantalla.',
       },
     ],
     !isLoading,

@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import * as SecureStore from 'expo-secure-store';
-import Constants from 'expo-constants';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 
 import { api } from '@/lib/api';
 
@@ -38,8 +38,8 @@ async function setStoredPreference(value: 'enabled' | 'disabled'): Promise<void>
  * Requiere un build de EAS dev-client con el plugin expo-notifications
  * (ver app.json) — no funciona en Expo Go (SDK 57 no es compatible, ver
  * memoria de testing en dispositivo) ni en el simulador de iOS (push remoto
- * no soportado ahí). Falla en silencio en esos casos: es un opt-in, no algo
- * que deba tumbar la app si no está disponible.
+ * no soportado ahí). Nunca tira: devuelve un PushRegistrationResult para que
+ * Configuración pueda explicar por qué no se activó; el boot lo ignora.
  *
  * `silent`: true en el registro automático del boot — ahí se respeta un
  * "disabled" guardado (no vuelve a pedir permiso/registrar). false cuando lo
@@ -47,10 +47,25 @@ async function setStoredPreference(value: 'enabled' | 'disabled'): Promise<void>
  * proceder siempre así el usuario pueda prender push de nuevo tras haberlo
  * apagado antes.
  */
-export async function registerForPushNotificationsAsync(options?: { silent?: boolean }): Promise<void> {
-  try {
-    if (options?.silent && (await getStoredPreference()) === 'disabled') return;
+export type PushRegistrationResult =
+  /** Token registrado en el backend. */
+  | 'enabled'
+  /** Registro automático del boot omitido porque el usuario lo apagó a mano. */
+  | 'skipped'
+  /** El usuario rechazó el prompt de permiso recién ahora. */
+  | 'denied'
+  /** El SO ya no deja volver a preguntar — solo se habilita desde Ajustes del sistema. */
+  | 'blocked'
+  /** Expo Go, emulador sin Google Play, etc. — push remoto no disponible acá. */
+  | 'unavailable'
+  /** Falló obtener el token o registrarlo en el backend (red, FCM, etc). */
+  | 'error';
 
+export async function registerForPushNotificationsAsync(options?: { silent?: boolean }): Promise<PushRegistrationResult> {
+  if (options?.silent && (await getStoredPreference()) === 'disabled') return 'skipped';
+  if (Platform.OS === 'web' || Constants.executionEnvironment === ExecutionEnvironment.StoreClient) return 'unavailable';
+
+  try {
     if (Platform.OS === 'android') {
       // Tiene que crearse ANTES de pedir el token/permiso en Android 13+, o
       // el prompt de permiso ni aparece — confirmado en la doc versionada
@@ -61,22 +76,33 @@ export async function registerForPushNotificationsAsync(options?: { silent?: boo
       });
     }
 
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== 'granted') {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
+    const existing = await Notifications.getPermissionsAsync();
+    let finalStatus = existing.status;
+    if (existing.status !== 'granted') {
+      // Antes esto terminaba en un return silencioso: si el permiso había
+      // sido rechazado alguna vez, Android ya no muestra el prompt y el
+      // switch de Configuración "rebotaba" a apagado sin explicar nada
+      // (reporte del tester). Ahora se distingue para poder ofrecer ir a
+      // Ajustes del sistema.
+      if (!existing.canAskAgain) return 'blocked';
+      const requested = await Notifications.requestPermissionsAsync();
+      finalStatus = requested.status;
+      if (finalStatus !== 'granted') return requested.canAskAgain ? 'denied' : 'blocked';
     }
-    if (finalStatus !== 'granted') return;
+  } catch {
+    return 'unavailable';
+  }
 
+  try {
     const projectId = Constants.expoConfig?.extra?.eas?.projectId as string | undefined;
     const { data: token } = await Notifications.getExpoPushTokenAsync(projectId ? { projectId } : undefined);
 
     await api.post('/push/expo-token', { token });
     await setStoredPreference('enabled');
-  } catch {
-    // Sin device físico/build de dev-client no hay mucho más que hacer acá
-    // que no intentarlo de nuevo la próxima vez que se llame.
+    return 'enabled';
+  } catch (err) {
+    console.warn('[push] no se pudo registrar el token:', err);
+    return 'error';
   }
 }
 

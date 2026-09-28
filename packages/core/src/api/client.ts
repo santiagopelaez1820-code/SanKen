@@ -1,3 +1,11 @@
+import type { ConsentType, PendingConsent } from '../legal/types';
+
+/** Body del 403 que devuelve EnsureLegalConsentsAccepted. */
+interface ConsentRequiredBody extends ApiErrorBody {
+  code: 'consent_required';
+  pending?: PendingConsent[];
+}
+
 export interface ApiSuccess<T> {
   data: T;
   meta?: Record<string, unknown>;
@@ -45,6 +53,14 @@ export interface ApiClientConfig {
    * succeed (see OnboardingPage's old `isLoading || !questions` bug).
    */
   onUnauthorized?: () => void;
+  /**
+   * Called when the API answers 403 `code: "consent_required"`: the user has
+   * legal documents pending (never accepted, or a newer version was
+   * published mid-session — see EnsureLegalConsentsAccepted). Each platform
+   * wires this to show its re-acceptance screen. The request still rejects
+   * with ApiError so callers stop as usual.
+   */
+  onConsentRequired?: (pending: ConsentType[]) => void;
 }
 
 /**
@@ -58,6 +74,7 @@ export class ApiClient {
   private readonly withCredentials: boolean;
   private readonly getCsrfToken?: () => string | null | undefined;
   private readonly onUnauthorized?: () => void;
+  private readonly onConsentRequired?: (pending: ConsentType[]) => void;
 
   constructor(config: ApiClientConfig) {
     this.baseUrl = config.baseUrl.replace(/\/+$/, '');
@@ -65,6 +82,7 @@ export class ApiClient {
     this.withCredentials = config.withCredentials ?? false;
     this.getCsrfToken = config.getCsrfToken;
     this.onUnauthorized = config.onUnauthorized;
+    this.onConsentRequired = config.onConsentRequired;
   }
 
   /**
@@ -100,12 +118,19 @@ export class ApiClient {
     return this.request<T>('GET', path).then((envelope) => envelope.data);
   }
 
+  /**
+   * `envelope` puede ser null: varios endpoints de acción responden 204 sin
+   * body (p. ej. POST /feed/{type}/{id}/read). Antes esto hacía
+   * `envelope.data` sobre null, tiraba un TypeError aunque la request
+   * hubiera salido bien, y quien llamaba nunca llegaba a refrescar su
+   * estado (bug de "la notificación no se marca como leída").
+   */
   post<T>(path: string, body?: unknown) {
-    return this.request<T>('POST', path, body).then((envelope) => envelope.data);
+    return this.request<T>('POST', path, body).then((envelope) => envelope?.data as T);
   }
 
   patch<T>(path: string, body?: unknown) {
-    return this.request<T>('PATCH', path, body).then((envelope) => envelope.data);
+    return this.request<T>('PATCH', path, body).then((envelope) => envelope?.data as T);
   }
 
   /**
@@ -166,6 +191,9 @@ export class ApiClient {
     if (!res.ok) {
       if (res.status === 401) {
         this.onUnauthorized?.();
+      }
+      if (res.status === 403 && (json as ConsentRequiredBody | null)?.code === 'consent_required') {
+        this.onConsentRequired?.(((json as ConsentRequiredBody).pending ?? []).map((p) => p.type));
       }
       throw new ApiError(res.status, (json as ApiErrorBody) ?? { message: res.statusText });
     }

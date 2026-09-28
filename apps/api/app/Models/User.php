@@ -140,6 +140,12 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(Order::class);
     }
 
+    /** Historial append-only de consentimientos legales — ver UserConsent. */
+    public function consents(): HasMany
+    {
+        return $this->hasMany(UserConsent::class);
+    }
+
     public function trainerClients(): HasMany
     {
         return $this->hasMany(TrainerClient::class, 'trainer_id');

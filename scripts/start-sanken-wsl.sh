@@ -9,7 +9,7 @@
 # (por ejemplo el túnel), el resto tiene que seguir intentando lo suyo.
 set -uo pipefail
 
-REPO_API_WIN="/mnt/c/Users/SatanKen/OneDrive/Desktop/SanKen-main/apps/api"
+REPO_API_WIN="/mnt/c/Users/SatanKen/OneDrive/Desktop/AplicacionesparaGithub/SanKen/apps/api"
 API_DIR="$HOME/sanken/api"
 LOG_DIR="$HOME/sanken/logs"
 AUTOSTART_LOG="$LOG_DIR/autostart.log"
@@ -111,7 +111,12 @@ if curl -fs -o /dev/null --max-time 2 http://127.0.0.1:8000/api/v1/ping 2>/dev/n
   log "Laravel API: OK (ya estaba respondiendo en :8000)"
 else
   log "Laravel API: iniciando (php artisan serve --host=0.0.0.0 --port=8000)..."
-  daemonize "$LOG_DIR/laravel.log" php artisan serve --host=0.0.0.0 --port=8000
+  # PHP_INI_SCAN_DIR con ":" adelante = "los conf.d de siempre + esta
+  # carpeta": suma apps/api/php/uploads.ini (límites de subida de 2M -> 110M,
+  # sin eso los videos de evidencia de PR nunca llegaban a Laravel) sin
+  # necesitar sudo para tocar /etc/php. `artisan serve` hereda el entorno
+  # en el proceso `php -S` que lanza.
+  daemonize "$LOG_DIR/laravel.log" env PHP_INI_SCAN_DIR=":$API_DIR/php" php artisan serve --host=0.0.0.0 --port=8000
   ok=0
   for _ in $(seq 1 20); do
     if curl -fs -o /dev/null --max-time 2 http://127.0.0.1:8000/api/v1/ping 2>/dev/null; then ok=1; break; fi
@@ -121,6 +126,11 @@ else
     log "Laravel API: OK (recién iniciado)"
   else
     log "ERROR: Laravel API no respondió a tiempo — revisar $LOG_DIR/laravel.log"
+    if tail -n 5 "$LOG_DIR/laravel.log" 2>/dev/null | grep -q "Address already in use"; then
+      # En modo mirrored, algo de Windows ya tiene el :8000 — típicamente el
+      # viejo "netsh portproxy" (ver el paso 1b de start-sanken.ps1).
+      log "CAUSA: el puerto 8000 está tomado (¿port proxy viejo de Windows?). Correr scripts/install-autostart.ps1 como administrador."
+    fi
   fi
 fi
 

@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import { LegalConsentGuard } from '@/components/legal/legal-consent-guard';
 import { ToastHost } from '@/components/ui/toast';
 import { useResolvedColorScheme } from '@/hooks/use-theme';
 import { useAuthStore } from '@/store/auth-store';
@@ -42,6 +43,7 @@ export default function RootLayout() {
           <Stack.Screen name="onboarding" />
           <Stack.Screen name="workout" />
         </Stack>
+        <LegalConsentGuard />
         <ToastHost />
       </ThemeProvider>
     </GestureHandlerRootView>

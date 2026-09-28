@@ -11,6 +11,7 @@ import { LevelUpModal } from "@/components/workout/LevelUpModal"
 import { ExerciseVideoPlayer } from "@/components/workout/ExerciseVideoPlayer"
 import { RestTimerRing } from "@/components/ui/rest-timer-ring"
 import { SetTrackerTable } from "@/components/ui/set-tracker-table"
+import { RulerSlider } from "@/components/ui/ruler-slider"
 import { Stepper } from "@/components/ui/stepper"
 import { CelebrationOverlay } from "@/components/ui/celebration-overlay"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -326,7 +327,11 @@ export function WorkoutSessionPage() {
           </div>
         )}
 
-        <ExerciseVideoPlayer videoUrl={currentExercise.exercise.video_url} exerciseName={currentExercise.exercise.name} />
+        <ExerciseVideoPlayer
+          videoUrl={currentExercise.exercise.video_url}
+          exerciseName={currentExercise.exercise.name}
+          autoPlay
+        />
 
         {currentExercise.alternative && (
           <div className="flex flex-col gap-1">
@@ -382,19 +387,19 @@ export function WorkoutSessionPage() {
 
         {!exerciseJustCompleted && (
           <div className="flex flex-col gap-3 rounded-xl border border-border bg-card p-4">
+            <div>
+              <p className="mb-1.5 text-xs font-medium text-muted-foreground">Peso (kg) — deslizá la regla</p>
+              <RulerSlider value={weightInput} onChange={setWeightInput} unit="kg" />
+            </div>
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <p className="mb-1.5 text-xs font-medium text-muted-foreground">Peso (kg)</p>
-                <Stepper value={weightInput} onChange={setWeightInput} step={2.5} unit="kg" />
-              </div>
               <div>
                 <p className="mb-1.5 text-xs font-medium text-muted-foreground">Repeticiones</p>
                 <Stepper value={repsInput} onChange={setRepsInput} step={1} unit="reps" />
               </div>
-            </div>
-            <div>
-              <p className="mb-1.5 text-xs font-medium text-muted-foreground">RPE (opcional)</p>
-              <Stepper value={rpeInput} onChange={setRpeInput} step={0.5} max={10} unit="RPE" />
+              <div>
+                <p className="mb-1.5 text-xs font-medium text-muted-foreground">RPE (opcional)</p>
+                <Stepper value={rpeInput} onChange={setRpeInput} step={0.5} max={10} unit="RPE" />
+              </div>
             </div>
             <Button
               type="button"

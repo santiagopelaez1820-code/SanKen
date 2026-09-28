@@ -25,6 +25,10 @@ test('registers a new user, is routed through onboarding, and reaches the dashbo
   await page.fill('#email', email)
   await page.fill('#password', 'Password123!')
   await page.fill('#password_confirmation', 'Password123!')
+  // Consentimientos obligatorios (una casilla por finalidad).
+  await page.check('#register-terms')
+  await page.check('#register-privacy')
+  await page.check('#register-health_data')
   await page.click('button[type=submit]')
 
   // Un usuario recién registrado no tiene onboarding_completed=true, así que
@@ -62,4 +66,16 @@ test('registers a new user, is routed through onboarding, and reaches the dashbo
   await page.click('text=Generar mi plan') // equipment (optional, last step)
 
   await page.waitForURL(/\/dashboard$/, { timeout: 20000 })
+})
+
+test('cannot create an account without accepting the legal documents', async ({ page }) => {
+  await page.goto('/register')
+  await page.fill('#name', 'No Consent')
+  await page.fill('#email', `noconsent-${Date.now()}@sanken.app`)
+  await page.fill('#password', 'Password123!')
+  await page.fill('#password_confirmation', 'Password123!')
+  await page.click('button[type=submit]')
+
+  await expect(page.getByText('Debes aceptar los Términos y Condiciones.')).toBeVisible()
+  await expect(page).toHaveURL(/\/register$/)
 })

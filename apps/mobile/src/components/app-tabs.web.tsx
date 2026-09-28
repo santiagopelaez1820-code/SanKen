@@ -8,7 +8,7 @@ import {
   TabListProps,
 } from 'expo-router/ui';
 import { Image, Pressable, View, StyleSheet } from 'react-native';
-import { BarChart3, Flag, Home, ShoppingBag, User, type LucideIcon } from 'lucide-react-native';
+import { BarChart3, Home, ShoppingBag, Trophy, User, type LucideIcon } from 'lucide-react-native';
 
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -49,14 +49,14 @@ export default function AppTabs() {
               </ThemedText>
             </ThemedView>
           </Pressable>
-          <TabTrigger name="retos" href="/retos" asChild>
-            <TabButton icon={Flag}>Retos</TabButton>
+          <TabTrigger name="prs" href="/prs" asChild>
+            <TabButton icon={Trophy}>PR</TabButton>
           </TabTrigger>
           <TabTrigger name="profile" href="/profile" asChild>
             <TabButton icon={User}>Perfil</TabButton>
           </TabTrigger>
           <TabTrigger name="history" href="/history" style={styles.hidden} />
-          <TabTrigger name="prs" href="/prs" style={styles.hidden} />
+          <TabTrigger name="retos" href="/retos" style={styles.hidden} />
           <TabTrigger name="measurements" href="/measurements" style={styles.hidden} />
         </CustomTabList>
       </TabList>

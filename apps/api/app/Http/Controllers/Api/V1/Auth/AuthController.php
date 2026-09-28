@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Api\V1\Auth;
 
 use App\Application\Auth\Actions\AuthenticateUserAction;
+use App\Application\Auth\Actions\DeleteOwnAccountAction;
 use App\Application\Auth\Actions\RecordUserSessionAction;
 use App\Application\Auth\Actions\RegisterUserAction;
 use App\Application\Auth\Actions\SocialLoginAction;
 use App\Domain\User\Contracts\UserRepositoryInterface;
 use App\Http\Controllers\Concerns\ReplacesPublicFile;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\DeleteAccountRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\SocialLoginRequest;
@@ -33,7 +35,7 @@ class AuthController extends Controller
 
         return response()->json([
             'data' => [
-                'user' => new UserResource($user),
+                'user' => UserResource::forOwner($user),
                 'token' => $token->plainTextToken,
             ],
         ], 201);
@@ -60,7 +62,7 @@ class AuthController extends Controller
 
         return response()->json([
             'data' => [
-                'user' => new UserResource($result->token->accessToken->tokenable),
+                'user' => UserResource::forOwner($result->token->accessToken->tokenable),
                 'token' => $result->token->plainTextToken,
             ],
         ]);
@@ -78,7 +80,20 @@ class AuthController extends Controller
             $request->string('id_token')->toString(),
             $request->string('provider')->toString(),
             $request->input('device_name') ?? $request->userAgent() ?? 'api',
+            $request->acceptedConsentTypes(),
         );
+
+        // Cuenta nueva sin los consentimientos obligatorios: no se creó
+        // nada. Mismo patrón que requires_two_factor — el cliente muestra las
+        // casillas y reenvía el mismo id_token con accept_* marcados.
+        if ($result->requiresConsent()) {
+            return response()->json([
+                'data' => [
+                    'requires_consent' => true,
+                    'consents' => $result->requiredConsents,
+                ],
+            ]);
+        }
 
         if ($result->requiresTwoFactor()) {
             return response()->json([
@@ -93,7 +108,7 @@ class AuthController extends Controller
 
         return response()->json([
             'data' => [
-                'user' => new UserResource($result->token->accessToken->tokenable),
+                'user' => UserResource::forOwner($result->token->accessToken->tokenable),
                 'token' => $result->token->plainTextToken,
             ],
         ]);
@@ -147,6 +162,28 @@ class AuthController extends Controller
         $user->update(['avatar_url' => null]);
 
         return response()->json(['data' => new UserResource($user->fresh())]);
+    }
+
+    /**
+     * El propio usuario elimina su cuenta (irreversible). Exenta de
+     * EnsureLegalConsentsAccepted: quien no acepta una versión nueva de los
+     * documentos debe poder irse. Un Super Admin no puede autoeliminarse
+     * desde acá — evita dejar la plataforma sin administración por un
+     * descuido; lo hace otro Super Admin desde el panel.
+     */
+    public function destroyMe(DeleteAccountRequest $request, DeleteOwnAccountAction $action): JsonResponse
+    {
+        $user = $request->user();
+
+        abort_if(
+            $user->role === 'super_admin',
+            403,
+            'Una cuenta de Super Admin no se puede eliminar desde la app. Pedíselo a otro Super Admin.',
+        );
+
+        $action->execute($user);
+
+        return response()->json(['data' => ['message' => 'Tu cuenta y tus datos fueron eliminados.']]);
     }
 
     public function forgotPassword(Request $request, UserRepositoryInterface $users): JsonResponse

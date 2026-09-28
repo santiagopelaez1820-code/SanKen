@@ -23,14 +23,28 @@ import { api } from '@/lib/api';
 export function ExerciseVideoPlayer({
   videoUrl,
   exerciseName,
+  autoPlay = false,
 }: {
   videoUrl: string | null;
   exerciseName?: string;
+  /**
+   * Arranca solo, en loop y sin sonido (pedido del tester para la sesión de
+   * entrenamiento: el video es la demo de la técnica, no hay que tocar play
+   * entre serie y serie). Sin sonido porque los sistemas suelen bloquear el
+   * autoplay con audio y el usuario suele tener su propia música; los
+   * controles nativos siguen ahí. useVideoPlayer recrea el player al cambiar
+   * de ejercicio, así que este setup vuelve a correr en cada uno.
+   */
+  autoPlay?: boolean;
 }) {
   const theme = useTheme();
   const resolvedUrl = api.mediaUrl(videoUrl);
   const player = useVideoPlayer(resolvedUrl, (p) => {
-    p.loop = false;
+    p.loop = autoPlay;
+    if (autoPlay) {
+      p.muted = true;
+      p.play();
+    }
   });
 
   if (!resolvedUrl) {

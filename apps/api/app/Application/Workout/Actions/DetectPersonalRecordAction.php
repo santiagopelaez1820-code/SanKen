@@ -10,9 +10,9 @@ use App\Support\CacheKeys;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * Estima el 1RM (fórmula de Epley: peso × (1 + reps/30)) de la serie recién
- * registrada y actualiza el récord si supera el anterior. Series de
- * calentamiento o no completadas nunca cuentan como récord.
+ * Actualiza el récord del ejercicio si la serie recién registrada lo supera
+ * (más peso, o mismo peso con más reps — ver PersonalRecord::isBeatenBy).
+ * Series de calentamiento o no completadas nunca cuentan como récord.
  */
 class DetectPersonalRecordAction
 {
@@ -22,21 +22,19 @@ class DetectPersonalRecordAction
             return null;
         }
 
-        $estimated1Rm = round((float) $set->weight_kg * (1 + $set->reps / 30), 2);
-
         $existing = PersonalRecord::query()
             ->where('user_id', $user->id)
             ->where('exercise_id', $exerciseId)
             ->where('record_type', '1rm')
             ->first();
 
-        if ($existing && (float) $existing->value >= $estimated1Rm) {
+        if ($existing && ! $existing->isBeatenBy((float) $set->weight_kg, (int) $set->reps)) {
             return null;
         }
 
         $record = PersonalRecord::query()->updateOrCreate(
             ['user_id' => $user->id, 'exercise_id' => $exerciseId, 'record_type' => '1rm'],
-            ['value' => $estimated1Rm, 'achieved_at' => now()->toDateString(), 'workout_set_id' => $set->id],
+            ['value' => $set->weight_kg, 'reps' => $set->reps, 'achieved_at' => now()->toDateString(), 'workout_set_id' => $set->id],
         );
 
         Cache::forget(CacheKeys::statsDashboard($user->id));

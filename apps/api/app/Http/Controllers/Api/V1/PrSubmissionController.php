@@ -47,9 +47,8 @@ class PrSubmissionController extends Controller
             'exercise_id' => $request->validated('exercise_id'),
             'weight_kg' => $weightKg,
             'reps' => $reps,
-            // Misma fórmula de Epley que DetectPersonalRecordAction/
-            // RegisterManualPersonalRecordAction — mismo criterio en toda
-            // la app para estimar 1RM a partir de peso×reps.
+            // Fórmula de Epley (misma que StatsController::progress) para
+            // comparar en Rankings levantamientos con distintas reps.
             'estimated_1rm' => round($weightKg * (1 + $reps / 30), 2),
         ]);
 

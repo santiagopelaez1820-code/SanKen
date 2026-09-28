@@ -11,7 +11,8 @@ import { SankButton } from "@/components/ui/SankButton"
 import { GoogleIcon } from "@/components/ui/GoogleIcon"
 import { PasswordFormControl } from "@/components/ui/PasswordFormControl"
 import { AuthLayout } from "@/components/layout/AuthLayout"
-import { describeSocialAuthError, signInWithGoogle, SocialAuthCancelledError } from "@/lib/social-auth"
+import { SocialConsentDialog } from "@/components/legal/SocialConsentDialog"
+import { useGoogleAuth } from "@/hooks/use-google-auth"
 
 const loginSchema = z.object({
   email: z.string().email("Ingresa un correo válido"),
@@ -25,39 +26,10 @@ export function LoginPage() {
   const setSession = useAuthStore((state) => state.setSession)
   const setPendingChallenge = useAuthStore((state) => state.setPendingChallenge)
   const [serverError, setServerError] = useState<string | null>(null)
-  const [isSubmittingGoogle, setIsSubmittingGoogle] = useState(false)
-
-  const handleGoogleSubmit = async () => {
-    setServerError(null)
-    setIsSubmittingGoogle(true)
-    try {
-      const { idToken } = await signInWithGoogle()
-      await api.bootstrapCsrf()
-      const response = await api.post<AuthPayload | TwoFactorChallengeResponse>("/auth/social", {
-        id_token: idToken,
-        provider: "google",
-      })
-
-      if (isTwoFactorChallenge(response)) {
-        setPendingChallenge(response.challenge_token)
-        navigate("/login/verify")
-        return
-      }
-
-      setSession(response.token, response.user)
-      navigate(response.user.role === "trainer" ? "/trainer" : "/dashboard", { replace: true })
-    } catch (err) {
-      if (err instanceof SocialAuthCancelledError) {
-        // El usuario cerró el popup a propósito — no es un error para mostrar.
-      } else if (err instanceof ApiError) {
-        setServerError(err.body.message)
-      } else {
-        setServerError(describeSocialAuthError(err))
-      }
-    } finally {
-      setIsSubmittingGoogle(false)
-    }
-  }
+  // Una cuenta de Google NUEVA no se crea sin los consentimientos: el hook
+  // abre SocialConsentDialog (ver use-google-auth.ts).
+  const google = useGoogleAuth()
+  const isSubmittingGoogle = google.isSubmitting
 
   const {
     register,
@@ -114,9 +86,9 @@ export function LoginPage() {
           ¿Olvidaste tu contraseña?
         </Link>
 
-        {serverError && (
-          <Alert variant="danger" className="py-2 small mb-0">
-            {serverError}
+        {(serverError || (!google.pendingConsent && google.error)) && (
+          <Alert variant="danger" className="py-2 small mb-0" role="alert">
+            {serverError ?? google.error}
           </Alert>
         )}
 
@@ -141,7 +113,10 @@ export function LoginPage() {
           disabled={isSubmitting || isSubmittingGoogle}
           loading={isSubmittingGoogle}
           iconStart={!isSubmittingGoogle ? <GoogleIcon /> : undefined}
-          onClick={handleGoogleSubmit}
+          onClick={() => {
+            setServerError(null)
+            void google.start()
+          }}
           className="w-100 justify-content-center"
         >
           {isSubmittingGoogle ? "Continuando con Google…" : "Continuar con Google"}
@@ -154,6 +129,14 @@ export function LoginPage() {
           </Link>
         </p>
       </Form>
+
+      <SocialConsentDialog
+        pending={google.pendingConsent?.consents ?? null}
+        isSubmitting={google.isSubmitting}
+        error={google.pendingConsent ? google.error : null}
+        onConfirm={(accepted) => void google.confirmConsent(accepted)}
+        onCancel={google.cancelConsent}
+      />
     </AuthLayout>
   )
 }

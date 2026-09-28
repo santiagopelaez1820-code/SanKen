@@ -29,7 +29,7 @@ param(
 $ErrorActionPreference = 'Continue'
 
 # --- Rutas ---
-$RepoRoot   = "C:\Users\SatanKen\OneDrive\Desktop\SanKen-main"
+$RepoRoot   = "C:\Users\SatanKen\OneDrive\Desktop\AplicacionesparaGithub\SanKen"
 $WebDir     = Join-Path $RepoRoot "apps\web"
 $MobileDir  = Join-Path $RepoRoot "apps\mobile"
 $WslDistro  = "Ubuntu"
@@ -165,9 +165,43 @@ if (-not $running) {
 }
 Write-Log "WSL: OK"
 
+# --- 1b. Acceso LAN -> WSL (antes de arrancar Laravel) ---
+# Version anterior: un "netsh portproxy 0.0.0.0:8000 -> 127.0.0.1:8000".
+# Con WSL en modo mirrored eso ROMPE la API: netsh portproxy es persistente
+# entre reinicios, asi que al prender la PC Windows (svchost/iphlpsvc) ya
+# tiene tomado el :8000 y "php artisan serve" falla con "Address already in
+# use" (paso el 2026-09-28: Laravel API X y ngrok con 503). Ahora:
+#   1) se borra ese portproxy si existe (y ANTES del paso 2, que arranca
+#      Laravel), y
+#   2) el acceso desde la LAN se habilita con reglas del firewall de
+#      Hyper-V para WSL (el mecanismo soportado en modo mirrored: WSL trae
+#      DefaultInboundAction=Block), que NO ocupan el puerto.
+# Ambas cosas requieren administrador (la tarea programada corre elevada,
+# ver install-autostart.ps1). Sin admin solo se avisa.
+$WslVmCreatorId = '{40E0AC32-46A5-438A-A0B2-2B479E8F2E90}'
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$legacyProxy = netsh interface portproxy show v4tov4 | Select-String "\s8000\s"
+if ($legacyProxy) {
+  if ($isAdmin) {
+    netsh interface portproxy delete v4tov4 listenport=8000 listenaddress=0.0.0.0 2>$null | Out-Null
+    Write-Log "Port proxy 8000 (legado): eliminado -- ocupaba el puerto de Laravel en modo mirrored"
+  } else {
+    Write-Log "ERROR: existe un port proxy en :8000 que impide arrancar Laravel. Correr scripts\install-autostart.ps1 como administrador (lo elimina)."
+  }
+}
+if ($isAdmin -and (Get-Command New-NetFirewallHyperVRule -ErrorAction SilentlyContinue)) {
+  foreach ($r in @(@{ Name = "SanKen-WSL-API-8000"; Port = 8000 }, @{ Name = "SanKen-WSL-Reverb-8080"; Port = 8080 })) {
+    if (-not (Get-NetFirewallHyperVRule -Name $r.Name -ErrorAction SilentlyContinue)) {
+      New-NetFirewallHyperVRule -Name $r.Name -DisplayName $r.Name -Direction Inbound -VMCreatorId $WslVmCreatorId `
+        -Protocol TCP -LocalPorts $r.Port -Action Allow | Out-Null
+      Write-Log "Firewall Hyper-V (WSL): regla $($r.Name) creada"
+    }
+  }
+}
+
 # --- 2. Delegar a la parte WSL: MySQL, Redis, Laravel, Queue, Reverb, tuneles ---
 Write-Log "Ejecutando start-sanken-wsl.sh dentro de WSL..."
-$wslScriptPath = "/mnt/c/Users/SatanKen/OneDrive/Desktop/SanKen-main/scripts/start-sanken-wsl.sh"
+$wslScriptPath = "/mnt/c/Users/SatanKen/OneDrive/Desktop/AplicacionesparaGithub/SanKen/scripts/start-sanken-wsl.sh"
 $wslOutput = wsl.exe -d $WslDistro -e bash -lc "bash '$wslScriptPath'" 2>&1
 foreach ($line in $wslOutput) {
   Write-Host $line
@@ -179,7 +213,7 @@ foreach ($line in $wslOutput) {
 # apps/web ya no necesita que le toquemos el .env: api.ts deriva la URL de
 # la API del host de la pagina (localhost, IP de LAN, lo que sea) solo -- ver
 # el comentario en apps/web/src/lib/api.ts y apps/mobile/src/lib/api.ts.
-# Tocar VITE_API_URL a mano acá rompia el login (NAT hairpin) para quien usa
+# Tocar VITE_API_URL a mano aca rompia el login (NAT hairpin) para quien usa
 # localhost:5173 en esta misma PC, asi que se dejo de hacer a proposito.
 #
 # apps/mobile SI sigue necesitando esto para el celular con Expo Go (no hay
@@ -192,39 +226,9 @@ if ($LanIp) {
   Write-Log "AVISO: no se pudo detectar una IP de LAN (sin red?) - dejo el .env de mobile como estaba"
 }
 
-# --- 3b. Port proxy Windows -> WSL para el puerto 8000 ---
-# Con WSL en modo "mirrored", Windows y WSL comparten la misma IP de LAN,
-# pero eso NO significa que Windows reenvie automaticamente a WSL el trafico
-# que llega de otros dispositivos a un puerto que solo escucha adentro de
-# WSL (Laravel) — Get-NetTCPConnection nunca muestra el :8000 como
-# escuchando del lado Windows, aunque adentro de WSL responda perfecto. Sin
-# este port proxy, ningun dispositivo externo (celular, otra PC) puede
-# llegar nunca a la API, solo esta misma PC via el truco de "localhost"
-# compartido. Requiere administrador — si esta tarea no corre elevada, se
-# omite con un aviso en vez de fallar todo el arranque.
-if ($LanIp) {
-  # connectaddress=127.0.0.1, NO la IP de LAN: Windows no puede conectarse a
-  # su propia IP externa (mismo NAT hairpin de siempre) ni siquiera para
-  # relayar una conexion ajena que le entra por 0.0.0.0 -- el intento
-  # original con connectaddress=$LanIp quedaba con el proxy creado pero
-  # inerte (verificado: timeout total). 127.0.0.1 SI funciona porque es el
-  # mismo mecanismo de "localhost compartido" que ya usa curl.exe para
-  # llegar a Laravel desde Windows.
-  $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-  if ($isAdmin) {
-    $existing = netsh interface portproxy show v4tov4 | Select-String "0\.0\.0\.0\s+8000"
-    $alreadyCorrect = $existing -and ($existing -match "127\.0\.0\.1")
-    if ($alreadyCorrect) {
-      Write-Log "Port proxy 8000: OK (ya apuntaba a 127.0.0.1)"
-    } else {
-      netsh interface portproxy delete v4tov4 listenport=8000 listenaddress=0.0.0.0 2>$null | Out-Null
-      netsh interface portproxy add v4tov4 listenport=8000 listenaddress=0.0.0.0 connectport=8000 connectaddress=127.0.0.1 | Out-Null
-      Write-Log "Port proxy 8000: configurado (0.0.0.0:8000 -> 127.0.0.1:8000)"
-    }
-  } else {
-    Write-Log "AVISO: no corro como administrador, no puedo configurar el port proxy 8000 -- correr scripts\install-autostart.ps1 como administrador (una vez alcanza; la tarea programada ya corre elevada sola de ahi en mas)"
-  }
-}
+# --- 3b. (eliminado) Port proxy 8000 ---
+# Ya no se crea: rompia la API en modo mirrored. El acceso LAN -> WSL lo dan
+# las reglas de firewall de Hyper-V del paso 1b.
 
 # --- 4. Web (Vite) - nativo en Windows ---
 if (Test-PortOpen -Port 5173) {

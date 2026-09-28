@@ -7,6 +7,9 @@ export default function AuthLayout() {
   const token = useAuthStore((s) => s.token);
 
   if (token && user) {
+    if (user.pending_consents?.length) {
+      return <Redirect href="/legal/aceptar" />;
+    }
     return <Redirect href={user.onboarding_completed ? '/' : '/onboarding'} />;
   }
 

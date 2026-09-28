@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { CreatePrSubmissionPayload, PrSubmission } from '@sanken/core';
 
 import { api } from '@/lib/api';
+import { uploadFileAsync } from '@/lib/upload-file';
 
 interface VideoPickerAsset {
   uri: string;
@@ -16,9 +17,12 @@ interface PrSubmissionsStoreState {
   error: string | null;
   uploadingId: number | null;
   uploadError: string | null;
+  /** Postulación a la que corresponde uploadError — cada fila muestra solo su propio error. */
+  failedUploadId: number | null;
 
   load: () => Promise<void>;
-  submit: (payload: CreatePrSubmissionPayload) => Promise<boolean>;
+  /** Devuelve la postulación creada (para subirle el video enseguida) o null si falló. */
+  submit: (payload: CreatePrSubmissionPayload) => Promise<PrSubmission | null>;
   uploadVideo: (id: number, asset: VideoPickerAsset) => Promise<void>;
 }
 
@@ -29,6 +33,7 @@ export const usePrSubmissionsStore = create<PrSubmissionsStoreState>((set, get) 
   error: null,
   uploadingId: null,
   uploadError: null,
+  failedUploadId: null,
 
   load: async () => {
     set({ isLoading: true, error: null });
@@ -43,31 +48,35 @@ export const usePrSubmissionsStore = create<PrSubmissionsStoreState>((set, get) 
   submit: async (payload) => {
     set({ isSubmitting: true, error: null });
     try {
-      await api.post<PrSubmission>('/pr-submissions', payload);
+      const created = await api.post<PrSubmission>('/pr-submissions', payload);
       await get().load();
       set({ isSubmitting: false });
-      return true;
+      return created;
     } catch (err) {
       set({ isSubmitting: false, error: err instanceof Error ? err.message : 'No se pudo postular el PR.' });
-      return false;
+      return null;
     }
   },
 
   uploadVideo: async (id, asset) => {
-    set({ uploadingId: id, uploadError: null });
+    set({ uploadingId: id, uploadError: null, failedUploadId: null });
     try {
-      const formData = new FormData();
-      // El shape clásico { uri, name, type } no funciona: desde SDK 53 Expo
-      // reemplaza `fetch` global por su propio runtime en todas las
-      // plataformas, y su FormData solo reconoce Blob real (o string) — ver
-      // el mismo comentario en auth-store.ts::updateAvatar.
-      const blob = await fetch(asset.uri).then((r) => r.blob());
-      formData.append('video', blob, asset.name);
-      await api.post(`/pr-submissions/${id}/video`, formData);
+      // Subida multipart nativa leyendo el video desde disco — ver lib/upload-file.ts.
+      await uploadFileAsync({
+        path: `/pr-submissions/${id}/video`,
+        fieldName: 'video',
+        uri: asset.uri,
+        name: asset.name,
+        mimeType: asset.mimeType,
+      });
       await get().load();
       set({ uploadingId: null });
     } catch (err) {
-      set({ uploadingId: null, uploadError: err instanceof Error ? err.message : 'No se pudo subir el video.' });
+      set({
+        uploadingId: null,
+        uploadError: err instanceof Error ? err.message : 'No se pudo subir el video.',
+        failedUploadId: id,
+      });
       throw err;
     }
   },

@@ -10,6 +10,12 @@ interface PersonalRecordsStoreState {
   isSubmitting: boolean;
   submitError: string | null;
   lastIsNewBest: boolean | null;
+  /**
+   * Récord vigente después del último registro: el nuevo si lo superó, o
+   * el que se conserva si no. La pantalla PR ya no tiene grilla de récords
+   * (pedido del tester), así que la confirmación muestra este valor.
+   */
+  lastRecord: PersonalRecordSummary | null;
 
   load: () => Promise<void>;
   registerRecord: (payload: RegisterPersonalRecordPayload) => Promise<boolean>;
@@ -22,6 +28,7 @@ export const usePersonalRecordsStore = create<PersonalRecordsStoreState>((set, g
   isSubmitting: false,
   submitError: null,
   lastIsNewBest: null,
+  lastRecord: null,
 
   load: async () => {
     set({ isLoading: true, error: null });
@@ -38,7 +45,7 @@ export const usePersonalRecordsStore = create<PersonalRecordsStoreState>((set, g
     try {
       const envelope = await api.postWithMeta<PersonalRecordSummary>('/stats/personal-records', payload);
       const meta = envelope.meta as RegisterPersonalRecordMeta | undefined;
-      set({ isSubmitting: false, lastIsNewBest: meta?.is_new_best ?? null });
+      set({ isSubmitting: false, lastIsNewBest: meta?.is_new_best ?? null, lastRecord: envelope.data });
       await get().load();
       return true;
     } catch (err) {

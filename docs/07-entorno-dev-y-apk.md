@@ -12,7 +12,7 @@ esto, leer este archivo entero.
   `docker-compose.yml` exista en el repo — es un artefacto no usado en esta
   máquina.
 - **Laravel (`apps/api`)** corre dentro de WSL, en `~/sanken/api` — una
-  **copia de trabajo separada** del repo real (`C:\...\SanKen-main\apps\api`
+  **copia de trabajo separada** del repo real (`C:\...\AplicacionesparaGithub\SanKen\apps\api`
   en Windows/OneDrive). Se sincroniza con `rsync` en cada arranque, nunca al
   revés.
 - **Web (`apps/web`) y Mobile (`apps/mobile`)** corren **nativos en
@@ -42,6 +42,15 @@ esto, leer este archivo entero.
   `app.json` (`expo.android`), Android bloquea CUALQUIER request `http://`
   en builds de producción — la app falla en silencio (login, todo). Ya está
   seteado, no sacarlo mientras se use un backend `http://`.
+- **NO usar `netsh interface portproxy` en el puerto 8000.** Con WSL en modo
+  `mirrored` el portproxy es persistente entre reinicios: al prender la PC,
+  Windows (svchost) ya tiene tomado el `:8000` y `php artisan serve` falla con
+  "Address already in use" (API caída y ngrok con 503 — pasó el 2026-09-28).
+  El acceso desde la LAN a Laravel (8000) y Reverb (8080) dentro de WSL se da
+  con **reglas del firewall de Hyper-V** (`SanKen-WSL-API-8000`,
+  `SanKen-WSL-Reverb-8080`), que crean `install-autostart.ps1` y el paso 1b de
+  `start-sanken.ps1` cuando corren como administrador; ese mismo paso borra
+  cualquier portproxy heredado ANTES de arrancar Laravel.
 - **Procesos en WSL necesitan `setsid`**: `nohup cmd & disown` solo (sin
   `setsid`) NO sobrevive a que termine la invocación de `wsl.exe` que lo
   lanzó. Usar siempre el helper `daemonize()` de `start-sanken-wsl.sh`.
@@ -139,13 +148,13 @@ esa es la URL que se comparte.
 
 ```powershell
 # Levantar todo (o verificar que ya está arriba)
-C:\Users\SatanKen\OneDrive\Desktop\SanKen-main\scripts\start-sanken.ps1 -WaitSeconds 0
+C:\Users\SatanKen\OneDrive\Desktop\AplicacionesparaGithub\SanKen\scripts\start-sanken.ps1 -WaitSeconds 0
 
 # Parar todo (menos MySQL/Redis)
-C:\Users\SatanKen\OneDrive\Desktop\SanKen-main\scripts\stop-sanken.ps1
+C:\Users\SatanKen\OneDrive\Desktop\AplicacionesparaGithub\SanKen\scripts\stop-sanken.ps1
 
 # Reinstalar el arranque automático (firewall + red + tarea programada) — requiere administrador
-C:\Users\SatanKen\OneDrive\Desktop\SanKen-main\scripts\install-autostart.ps1
+C:\Users\SatanKen\OneDrive\Desktop\AplicacionesparaGithub\SanKen\scripts\install-autostart.ps1
 ```
 
 Logs: `%LOCALAPPDATA%\SanKen\logs\latest.log` (Windows) y `~/sanken/logs/`
