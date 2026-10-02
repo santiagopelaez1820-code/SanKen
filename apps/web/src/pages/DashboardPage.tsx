@@ -10,8 +10,10 @@ import { PerformanceHero } from "@/components/dashboard/PerformanceHero"
 import { RecentPRsRow } from "@/components/dashboard/RecentPRsRow"
 import { AchievementsList } from "@/components/dashboard/AchievementsList"
 import { DashboardChallengesRow } from "@/components/dashboard/DashboardChallengesRow"
+import { AnimatedLogoMark } from "@/components/brand/AnimatedLogoMark"
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay"
 import { useTutorial } from "@/hooks/use-tutorial"
+import { useResolvedTheme } from "@/hooks/use-resolved-theme"
 import { fadeInUp, staggerContainer } from "@/lib/motion"
 
 function greeting() {
@@ -23,6 +25,7 @@ function greeting() {
 
 export function DashboardPage() {
   const user = useAuthStore((state) => state.user)
+  const resolvedTheme = useResolvedTheme()
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["stats", "dashboard"],
@@ -80,7 +83,12 @@ export function DashboardPage() {
               boxShadow: "0 0 32px -8px rgba(0, 184, 217, 0.25)",
             }}
           >
-            <img src="/logo-full.png" alt="SanKen" style={{ width: 220, height: "auto" }} />
+            {/* Isotipo que se redibuja en bucle (mismo efecto que la intro de la
+                app) + el wordmark real debajo: la composición de logo-full.png. */}
+            <div className="d-flex flex-column align-items-center" style={{ gap: 10 }} role="img" aria-label="SanKen">
+              <AnimatedLogoMark width={196} onLight={resolvedTheme === "light"} />
+              <img src="/brand-wordmark.png" alt="" style={{ width: 196, height: "auto" }} />
+            </div>
             <div className="d-flex flex-wrap align-items-center justify-content-center mt-3" style={{ gap: "0.5rem" }}>
               {["ENTRENA", "PROGRESA", "SUPÉRATE"].map((word, i) => (
                 <span key={word} className="d-flex align-items-center" style={{ gap: "0.5rem" }}>

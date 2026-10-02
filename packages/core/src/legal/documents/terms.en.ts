@@ -2,7 +2,7 @@ import type { LegalDocumentContent } from '../types';
 
 /**
  * Terms and Conditions — English translation of terms.es.ts.
- * NOT legally reviewed: the Spanish text is the reference version.
+ * Reviewed by the SanKen owner; the Spanish text is the reference version.
  */
 export const termsEn: LegalDocumentContent = {
   title: 'Terms and Conditions',

@@ -66,7 +66,7 @@ export function PrimaryButton({
   ) : (
     <>
       {icon && <Icon icon={icon} size={16} color={labelColor} />}
-      <ThemedText type="smallBold" style={{ color: labelColor }}>
+      <ThemedText type="smallBold" style={[styles.label, { color: labelColor }]}>
         {label}
       </ThemedText>
     </>
@@ -137,7 +137,8 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
     alignSelf: 'stretch',
     borderRadius: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 5,
+    minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -154,6 +155,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: 'transparent',
   },
+  label: { fontSize: 14, lineHeight: 18 },
   disabled: {
     opacity: 0.5,
   },

@@ -1,8 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { Clock, Weight } from 'lucide-react-native';
 import type { DashboardStats, GamificationSummary } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { Icon } from '@/components/ui/icon';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spacing } from '@/constants/theme';
@@ -18,7 +20,7 @@ export function PerformanceHero({ stats, gamification, isLoading }: PerformanceH
   const theme = useTheme();
 
   if (isLoading) {
-    return <Skeleton height={176} borderRadius={Spacing.four} />;
+    return <Skeleton height={104} borderRadius={Spacing.four} />;
   }
 
   const progressPct = Math.round((gamification?.progress_pct ?? 0) * 100);
@@ -28,22 +30,21 @@ export function PerformanceHero({ stats, gamification, isLoading }: PerformanceH
       <ProgressRing
         value={gamification?.progress_pct ?? 0}
         max={1}
-        size={92}
-        strokeWidth={8}
+        size={64}
+        strokeWidth={6}
         color="accent"
-        label="Nivel"
         valueLabel={`${gamification?.level ?? 1}`}
       />
 
       <ThemedView style={styles.info}>
-        <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
-          Progreso de nivel
+        <ThemedText type="caption" themeColor="textSecondary" style={styles.eyebrow}>
+          Progreso · Nivel {gamification?.level ?? 1}
         </ThemedText>
         <ThemedText type="subtitle" style={styles.percent}>
-          {progressPct}%
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {gamification?.total_xp ?? 0} / {gamification?.xp_for_next_level ?? 100} XP
+          {progressPct}%{' '}
+          <ThemedText type="small" themeColor="textSecondary">
+            {gamification?.total_xp ?? 0} / {gamification?.xp_for_next_level ?? 100} XP
+          </ThemedText>
         </ThemedText>
 
         {/* La racha ya no se repite acá — `StreakWidget` (Home) la muestra
@@ -51,11 +52,13 @@ export function PerformanceHero({ stats, gamification, isLoading }: PerformanceH
             como número suelto era ruido, no información nueva. */}
         <ThemedView style={styles.statsRow}>
           <ThemedView style={styles.statItem}>
+            <Icon icon={Clock} size={13} color={theme.accentSecondary} />
             <ThemedText type="smallBold" style={styles.statValue}>
               {stats?.total_hours ?? 0} h
             </ThemedText>
           </ThemedView>
           <ThemedView style={styles.statItem}>
+            <Icon icon={Weight} size={13} color={theme.accent} />
             <ThemedText type="smallBold" style={styles.statValue}>
               {((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t
             </ThemedText>
@@ -73,7 +76,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     borderRadius: Spacing.four,
     borderWidth: 1,
-    padding: Spacing.four,
+    padding: Spacing.three,
   },
   info: {
     flex: 1,
@@ -84,15 +87,15 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   percent: {
-    fontSize: 32,
-    lineHeight: 36,
+    fontSize: 22,
+    lineHeight: 26,
     fontWeight: '800',
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
-    marginTop: Spacing.two,
+    marginTop: Spacing.one,
     backgroundColor: 'transparent',
   },
   statItem: {
@@ -102,6 +105,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   statValue: {
-    fontSize: 17,
+    fontSize: 14,
   },
 });

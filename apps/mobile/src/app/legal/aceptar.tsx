@@ -91,7 +91,7 @@ export default function AcceptLegalScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  scroll: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.four, gap: Spacing.four },
+  scroll: { flexGrow: 1, justifyContent: 'center', alignItems: 'center', padding: Spacing.four, gap: Spacing.three },
   logo: { width: 180, height: 120 },
   form: { alignSelf: 'stretch', maxWidth: MaxContentWidth, gap: Spacing.three },
   error: { color: '#FF4D5E' },

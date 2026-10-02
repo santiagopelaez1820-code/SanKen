@@ -6,6 +6,7 @@ import { formatPersonalRecord } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -74,9 +75,7 @@ export default function AdminUserDetailScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={{ gap: Spacing.two, paddingBottom: BottomTabInset + Spacing.four }}>
-          <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-            ← Usuarios
-          </ThemedText>
+          <BackButton label="Usuarios" fallbackHref="/admin/usuarios" />
           <ThemedText type="title" style={styles.pageTitle}>
             {user.name}
           </ThemedText>

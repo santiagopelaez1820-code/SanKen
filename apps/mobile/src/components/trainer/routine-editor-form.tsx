@@ -6,6 +6,7 @@ import type { ExerciseCatalogItem, FitnessGoal, ManualRoutinePayload, Routine, S
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { OptionCard } from '@/components/ui/option-card';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -243,9 +244,7 @@ function RoutineEditorFields({ scope = 'trainer', mode, trainerClientId, routine
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
-          <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-            ← Volver
-          </ThemedText>
+          <BackButton fallbackHref="/trainer" />
           <ThemedText type="title" style={styles.pageTitle}>
             {scope === 'admin'
               ? initialRoutine

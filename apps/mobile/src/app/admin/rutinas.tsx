@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import type { AdminRoutineTemplate, ExerciseCatalogItem } from '@sanken/core';
@@ -17,6 +16,7 @@ import {
 } from '@/components/admin/routine-template-form-types';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { OptionCard } from '@/components/ui/option-card';
@@ -178,9 +178,7 @@ export default function AdminRutinasScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView style={styles.scrollView} contentContainerStyle={[styles.content, { paddingBottom: BottomTabInset + Spacing.four }]}>
-          <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-            ← Volver
-          </ThemedText>
+          <BackButton label="Panel admin" fallbackHref="/admin" />
           <ThemedText type="title" style={styles.pageTitle}>
             Rutinas generales
           </ThemedText>
@@ -351,7 +349,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.three,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34 },
+  pageTitle: { fontSize: 24, lineHeight: 30 },
   card: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.two },
   optionRow: { flexDirection: 'row', gap: Spacing.two, backgroundColor: 'transparent' },
   optionList: { gap: Spacing.two, backgroundColor: 'transparent' },

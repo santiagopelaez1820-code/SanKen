@@ -40,6 +40,38 @@ const STATUS_VARIANT: Record<PrSubmission["status"], VariantProps<typeof badgeVa
   rejected: "error",
 }
 
+/**
+ * Reproduce el video de evidencia en la misma página (igual que la revisión
+ * del admin) en vez de abrirlo en otra pestaña: detrás del túnel ngrok
+ * gratuito, navegar directo al .mp4 muestra la página de advertencia de
+ * ngrok en lugar del video.
+ */
+function PrSubmissionVideo({ videoUrl }: { videoUrl: string }) {
+  const [isOpen, setIsOpen] = useState(false)
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setIsOpen((value) => !value)}
+        aria-expanded={isOpen}
+        className="self-end py-1 text-xs font-medium text-primary underline-offset-4 hover:underline"
+      >
+        {isOpen ? "Ocultar video" : "Ver video"}
+      </button>
+      {isOpen && (
+        <video
+          src={api.mediaUrl(videoUrl) ?? undefined}
+          controls
+          autoPlay
+          playsInline
+          className="aspect-video w-full rounded-lg border border-border bg-black"
+        />
+      )}
+    </>
+  )
+}
+
 function PrSubmissionVideoUpload({ submission }: { submission: PrSubmission }) {
   const queryClient = useQueryClient()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -263,7 +295,7 @@ export function PersonalRecordsPage() {
   }
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Personal Records</h1>
@@ -466,16 +498,7 @@ export function PersonalRecordsPage() {
                   {submission.status === "pending" && !submission.video_url && (
                     <PrSubmissionVideoUpload submission={submission} />
                   )}
-                  {submission.video_url && (
-                    <a
-                      href={api.mediaUrl(submission.video_url) ?? submission.video_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="self-end text-xs font-medium text-primary underline-offset-4 hover:underline"
-                    >
-                      Ver video
-                    </a>
-                  )}
+                  {submission.video_url && <PrSubmissionVideo videoUrl={submission.video_url} />}
                 </li>
               ))}
             </ul>

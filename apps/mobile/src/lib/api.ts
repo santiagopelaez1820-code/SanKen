@@ -12,7 +12,12 @@ import { useAuthStore } from '@/store/auth-store';
 // hairpin (el mismo bug que rompió el login por Google en apps/web).
 export function resolveApiBaseUrl(): string {
   if (Platform.OS === 'web') {
-    return `http://${window.location.hostname}:8000`;
+    // Durante el prerender estático de `expo export` (output: "static")
+    // este módulo corre en Node, donde no existe `window` — antes eso
+    // rompía el export web entero. En el navegador real sigue usando el
+    // host de la página.
+    const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+    return `http://${host}:8000`;
   }
   return process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8000';
 }

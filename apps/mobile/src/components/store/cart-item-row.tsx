@@ -59,8 +59,8 @@ export function CartItemRow({ item, onIncrement, onDecrement, onRemove }: CartIt
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: Spacing.three, borderRadius: Spacing.three, padding: Spacing.three, alignItems: 'center' },
-  imageWrap: { width: 64, height: 64, borderRadius: Spacing.two, overflow: 'hidden' },
+  row: { flexDirection: 'row', gap: Spacing.two + 4, borderRadius: Spacing.three, padding: Spacing.two + 4, alignItems: 'center' },
+  imageWrap: { width: 56, height: 56, borderRadius: Spacing.two, overflow: 'hidden' },
   image: { width: '100%', height: '100%' },
   info: { flex: 1, minWidth: 0, gap: 2, backgroundColor: 'transparent' },
   actions: { alignItems: 'flex-end', gap: Spacing.one, backgroundColor: 'transparent' },

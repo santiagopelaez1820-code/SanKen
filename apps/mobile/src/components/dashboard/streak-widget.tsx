@@ -45,7 +45,7 @@ export function StreakWidget({ streakDays, sessions }: StreakWidgetProps) {
       type="backgroundElement"
       style={[styles.card, { borderColor: `${theme.accent}30` }, glowShadow(theme.accent)]}>
       <ThemedView style={styles.header}>
-        <Flame size={18} color={theme.accent} />
+        <Flame size={16} color={theme.accent} />
         <ThemedText type="smallBold">
           Racha de {streakDays} {streakDays === 1 ? 'día' : 'días'}
         </ThemedText>
@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     borderRadius: Spacing.four,
     borderWidth: 1,
     padding: Spacing.three,
-    gap: Spacing.three,
+    gap: Spacing.two,
   },
   header: {
     flexDirection: 'row',
@@ -105,16 +105,16 @@ const styles = StyleSheet.create({
   },
   dayColumn: {
     alignItems: 'center',
-    gap: Spacing.one,
+    gap: Spacing.half,
     backgroundColor: 'transparent',
   },
   dayLetter: {
     fontSize: 11,
   },
   dot: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -123,7 +123,8 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   check: {
-    fontSize: 13,
+    fontSize: 11,
+    lineHeight: 14,
     fontWeight: '700',
     color: '#050505',
   },

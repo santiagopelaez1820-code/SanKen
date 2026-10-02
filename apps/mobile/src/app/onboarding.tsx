@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react';
 import { Redirect, router } from 'expo-router';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { FitnessGoal, FitnessLevel, FrequencyDays } from '@sanken/core';
+import {
+  ONBOARDING_AGE_MESSAGES,
+  ONBOARDING_MAX_AGE,
+  ONBOARDING_MIN_AGE,
+  validateOnboardingAge,
+  type FitnessGoal,
+  type FitnessLevel,
+  type FrequencyDays,
+} from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -53,6 +61,7 @@ export default function OnboardingScreen() {
 
   const [stepIndex, setStepIndex] = useState(0);
   const [ageInput, setAgeInput] = useState('');
+  const [ageTouched, setAgeTouched] = useState(false);
   const [heightInput, setHeightInput] = useState('');
   const [weightInput, setWeightInput] = useState('');
 
@@ -65,11 +74,27 @@ export default function OnboardingScreen() {
   if (!user) return <Redirect href="/login" />;
   if (user.onboarding_completed) return <Redirect href="/" />;
 
+  const ageValidation = validateOnboardingAge(ageInput);
+
   const goNext = async () => {
+    // No alcanza con deshabilitar el botón: el "Continuar" del teclado o un
+    // doble toque no deben poder saltarse la validación de edad.
+    if (step === 'age' && !ageValidation.valid) {
+      setAgeTouched(true);
+      return;
+    }
+
     const isLast = stepIndex === STEP_ORDER.length - 1;
 
     if (!isLast) {
       setStepIndex((i) => i + 1);
+      return;
+    }
+
+    // Defensa extra: nunca enviar el onboarding con una edad inválida.
+    if (!ageValidation.valid) {
+      setStepIndex(STEP_ORDER.indexOf('age'));
+      setAgeTouched(true);
       return;
     }
 
@@ -90,7 +115,7 @@ export default function OnboardingScreen() {
 
   const canContinue = (): boolean => {
     switch (step) {
-      case 'age': return ageInput.trim().length > 0;
+      case 'age': return ageValidation.valid;
       case 'sex': return !!answers.sex;
       case 'height': return heightInput.trim().length > 0;
       case 'weight': return weightInput.trim().length > 0;
@@ -122,16 +147,32 @@ export default function OnboardingScreen() {
             <ProgressBar current={stepIndex + 1} total={STEP_ORDER.length} />
 
             {step === 'age' && (
-              <Question title="¿Cuál es tu edad?">
+              <Question
+                title="¿Cuál es tu edad?"
+                subtitle={`Entre ${ONBOARDING_MIN_AGE} y ${ONBOARDING_MAX_AGE} años`}>
                 <TextField
                   label="Edad"
                   keyboardType="number-pad"
+                  maxLength={3}
                   value={ageInput}
+                  onBlur={() => setAgeTouched(true)}
+                  onSubmitEditing={goNext}
+                  accessibilityHint={ONBOARDING_AGE_MESSAGES.outOfRange}
                   onChangeText={(v) => {
                     setAgeInput(v);
-                    setAnswer('age', Number(v) || undefined);
+                    const result = validateOnboardingAge(v);
+                    // Solo una edad válida llega a las respuestas que se
+                    // envían — nunca un valor fuera de rango "a medias".
+                    setAnswer('age', result.valid ? result.age : undefined);
                   }}
                 />
+                {/* El error aparece recién cuando el usuario ya escribió
+                    algo (o intentó avanzar), no apenas entra al paso. */}
+                {!ageValidation.valid && (ageTouched || ageInput.trim().length >= 2) && (
+                  <ThemedText type="small" style={styles.error} accessibilityLiveRegion="polite">
+                    {ageValidation.error}
+                  </ThemedText>
+                )}
               </Question>
             )}
 
@@ -177,7 +218,9 @@ export default function OnboardingScreen() {
             )}
 
             {step === 'level' && (
-              <Question title="¿Cuál es tu nivel?">
+              <Question
+                title="¿Cuál es tu nivel de entrenamiento?"
+                subtitle="Según tu experiencia entrenando fuerza o en el gimnasio">
                 {questions.levels.map((value) => (
                   <OptionCard
                     key={value}
@@ -261,8 +304,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: '100%',
   },
-  question: { gap: Spacing.two, marginBottom: Spacing.four },
-  optionsList: { gap: Spacing.two, marginTop: Spacing.three },
+  question: { gap: Spacing.one, marginBottom: Spacing.four },
+  optionsList: { gap: Spacing.two, marginTop: Spacing.two },
   actions: { gap: Spacing.two, marginTop: 'auto' },
   error: { color: '#FF4D5E', marginBottom: Spacing.two },
 });

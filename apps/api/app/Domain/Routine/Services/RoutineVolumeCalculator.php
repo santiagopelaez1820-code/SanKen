@@ -22,14 +22,17 @@ use App\Domain\Routine\ValueObjects\RoutineGenerationParams;
  * El tiempo disponible (session_minutes del onboarding) actúa como techo
  * final sobre el nº de ejercicios: nunca sube el volumen que ya decidió el
  * nivel, solo lo recorta si no entra en el tiempo que el usuario dijo que
- * tiene.
+ * tiene -- siempre dentro del rango 6-8 ejercicios por día.
  */
 final class RoutineVolumeCalculator
 {
     /** Segundos de trabajo activo por serie -- misma cifra que ya usa estimateWorkoutMinutes() en @sanken/core, para que la duración estimada en el cliente y el recorte del servidor coincidan. */
     private const WORK_SECONDS_PER_SET = 45;
 
-    private const MIN_EXERCISES_PER_DAY = 2;
+    /** Rango de ejercicios por día que exige el producto: nunca menos de 6 ni más de 8. */
+    public const MIN_EXERCISES_PER_DAY = 6;
+
+    public const MAX_EXERCISES_PER_DAY = 8;
 
     public function calculate(string $level, string $goal, int $sessionMinutes): RoutineGenerationParams
     {
@@ -54,13 +57,14 @@ final class RoutineVolumeCalculator
     {
         return match ($level) {
             // Menos ejercicios Y menos series: prioriza aprender técnica sin
-            // acumular fatiga innecesaria -- sección 5 del pedido.
-            'beginner' => ['exercises' => 4, 'sets' => 3],
+            // acumular fatiga innecesaria -- sección 5 del pedido. Aun así,
+            // nunca por debajo del mínimo de 6 ejercicios por día.
+            'beginner' => ['exercises' => self::MIN_EXERCISES_PER_DAY, 'sets' => 3],
             // Misma cantidad de ejercicios que intermedio, una serie más por
             // ejercicio -- más capacidad de trabajo sin diluir la selección
             // en variantes redundantes (sección 5: "avanzado no es más ejercicios").
-            'advanced' => ['exercises' => 5, 'sets' => 4],
-            default => ['exercises' => 5, 'sets' => 3], // intermediate
+            'advanced' => ['exercises' => self::MAX_EXERCISES_PER_DAY, 'sets' => 4],
+            default => ['exercises' => self::MAX_EXERCISES_PER_DAY, 'sets' => 3], // intermediate
         };
     }
 
@@ -83,9 +87,9 @@ final class RoutineVolumeCalculator
     /**
      * Cuántos ejercicios entran en el tiempo disponible, asumiendo
      * setsPerExercise series de WORK_SECONDS_PER_SET + el descanso propio
-     * del objetivo, por ejercicio. Nunca menos de MIN_EXERCISES_PER_DAY: un
-     * día de 1 solo ejercicio no es una sesión razonable aunque el tiempo
-     * declarado sea muy corto.
+     * del objetivo, por ejercicio. Nunca menos de MIN_EXERCISES_PER_DAY (6):
+     * con poco tiempo declarado la sesión se alarga un poco, pero el día
+     * sigue teniendo el volumen mínimo que pide el producto.
      */
     private function maxExercisesForDuration(int $sessionMinutes, int $setsPerExercise, int $restSeconds): int
     {

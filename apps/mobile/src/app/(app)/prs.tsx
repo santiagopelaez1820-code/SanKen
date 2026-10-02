@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import * as DocumentPicker from 'expo-document-picker';
-import { openBrowserAsync, WebBrowserPresentationStyle } from 'expo-web-browser';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -22,13 +21,13 @@ import { TextField } from '@/components/ui/text-field';
 import { ListPickerModal } from '@/components/ui/list-picker-modal';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { api } from '@/lib/api';
 import { parseDecimalInput } from '@/lib/number-input';
 import { useExerciseCatalogStore } from '@/store/exercise-catalog-store';
 import { useExerciseRankingsStore } from '@/store/exercise-rankings-store';
 import { usePersonalRecordsStore } from '@/store/personal-records-store';
 import { usePrSubmissionsStore } from '@/store/pr-submissions-store';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ExerciseVideoPlayer } from '@/components/workout/exercise-video-player';
 
 const SUBMISSION_STATUS_LABEL: Record<PrSubmission['status'], string> = {
   pending: 'En revisión',
@@ -72,6 +71,7 @@ function PrSubmissionRow({ submission }: { submission: PrSubmission }) {
   const isUploading = uploadingId === submission.id;
   const rowUploadError = failedUploadId === submission.id ? uploadError : null;
   const [pickError, setPickError] = useState<string | null>(null);
+  const [showVideo, setShowVideo] = useState(false);
 
   const handlePick = async () => {
     setPickError(null);
@@ -114,18 +114,21 @@ function PrSubmissionRow({ submission }: { submission: PrSubmission }) {
           {pickError ?? rowUploadError}
         </ThemedText>
       )}
+      {/* Se reproduce dentro de la app (mismo player que la revisión del admin)
+          en vez de abrir el navegador: vía el túnel ngrok gratuito, un navegador
+          recibe la página de advertencia de ngrok en lugar del MP4. */}
       {submission.video_url && (
         <Pressable
-          onPress={() => {
-            const url = api.mediaUrl(submission.video_url) ?? (submission.video_url as string);
-            openBrowserAsync(url, { presentationStyle: WebBrowserPresentationStyle.AUTOMATIC });
-          }}
+          onPress={() => setShowVideo((value) => !value)}
+          accessibilityRole="button"
+          accessibilityState={{ expanded: showVideo }}
           style={styles.videoLink}>
           <ThemedText type="small" style={{ color: theme.accent }}>
-            Ver video
+            {showVideo ? 'Ocultar video' : 'Ver video'}
           </ThemedText>
         </Pressable>
       )}
+      {submission.video_url && showVideo && <ExerciseVideoPlayer videoUrl={submission.video_url} />}
     </ThemedView>
   );
 }
@@ -614,7 +617,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.two,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34 },
+  pageTitle: { fontSize: 24, lineHeight: 30 },
   formCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,

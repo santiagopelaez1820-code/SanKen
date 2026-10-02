@@ -51,8 +51,8 @@ export const LEGAL_OWNER_INFO: Record<LegalOwnerField, LegalOwnerValue> = {
     en: 'your data is kept while your account is active and is deleted when you delete your account',
   },
   /**
-   * Mayoría de edad en Colombia. La app admite registrarse desde los 13 años
-   * (OnboardingRequest: 'age' min:13): entre 13 y 17 se requiere la
+   * Mayoría de edad en Colombia. La app admite usuarios de 15 a 70 años
+   * (OnboardingRequest::MIN_AGE/MAX_AGE): entre 15 y 17 se requiere la
    * autorización de madre, padre o representante legal (así lo dicen los
    * documentos).
    */

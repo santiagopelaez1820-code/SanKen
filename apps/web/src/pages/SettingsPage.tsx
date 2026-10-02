@@ -210,14 +210,14 @@ export function SettingsPage() {
   })
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
         <div>
           <p className="text-xs font-semibold tracking-widest text-primary uppercase">Configuración</p>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Tu cuenta</h1>
         </div>
 
-        <Card className="flex items-center gap-3">
+        <Card className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <button
               type="button"
@@ -243,8 +243,8 @@ export function SettingsPage() {
               onChange={handleAvatarFileChange}
             />
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="font-heading text-base font-bold text-foreground">{user?.name ?? "…"}</p>
+          <div className="min-w-0 flex-1 basis-40">
+            <p className="font-heading text-base font-bold break-words text-foreground">{user?.name ?? "…"}</p>
             <p className="text-xs text-muted-foreground">{user ? ROLE_LABEL[user.role] : ""}</p>
           </div>
           <div className="flex flex-shrink-0 flex-col items-end gap-1">
@@ -524,7 +524,7 @@ export function SettingsPage() {
 
         <Card>
           <div className="flex items-center justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <Eye className="size-4 text-primary" />
                 <h2 className="font-heading text-sm font-medium text-foreground">Rankings públicos</h2>
@@ -544,7 +544,7 @@ export function SettingsPage() {
 
         <Card>
           <div className="flex items-center justify-between gap-4">
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <Bell className="size-4 text-primary" />
                 <h2 className="font-heading text-sm font-medium text-foreground">Notificaciones push</h2>

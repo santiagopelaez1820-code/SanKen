@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
+import { currentConsentVersions } from "@sanken/core"
 import { useCookieConsentStore } from "@/lib/cookie-consent-store"
 import { RegisterPage } from "./RegisterPage"
 
@@ -84,7 +85,7 @@ describe("RegisterPage legal consents", () => {
         accept_terms: true,
         accept_privacy: true,
         accept_health_data: true,
-        legal_versions: { terms: "1.0", privacy: "1.0", health_data: "1.0" },
+        legal_versions: currentConsentVersions(),
       })
     )
   })

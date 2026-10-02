@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import type { LegalConsentsResponse, User } from "@sanken/core"
+import { currentConsentVersions, type LegalConsentsResponse, type User } from "@sanken/core"
 import { useAuthStore } from "@/lib/auth-store"
 import { LegalConsentGate } from "./LegalConsentGate"
 
@@ -100,7 +100,7 @@ describe("LegalConsentGate", () => {
     await userEvent.click(screen.getByRole("checkbox"))
     await userEvent.click(submit)
 
-    expect(post).toHaveBeenCalledWith("/legal/consents", { consents: ["privacy"], legal_versions: { privacy: "1.0" } })
+    expect(post).toHaveBeenCalledWith("/legal/consents", { consents: ["privacy"], legal_versions: currentConsentVersions(["privacy"]) })
     expect(await screen.findByText("Contenido de la app")).toBeInTheDocument()
   })
 })

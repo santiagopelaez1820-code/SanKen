@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\Admin\AdminProductController;
 use App\Http\Controllers\Api\V1\Admin\AdminReportController;
 use App\Http\Controllers\Api\V1\Admin\AdminRoutineTemplateController;
 use App\Http\Controllers\Api\V1\Admin\AdminStatsController;
+use App\Http\Controllers\Api\V1\Admin\AdminSupportController;
 use App\Http\Controllers\Api\V1\Admin\AdminUserConsentController;
 use App\Http\Controllers\Api\V1\Admin\AdminUserController;
 use App\Http\Controllers\Api\V1\Admin\AdminUserRoutineController;
@@ -39,6 +40,8 @@ use App\Http\Controllers\Api\V1\RankingController;
 use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\RoutineController;
 use App\Http\Controllers\Api\V1\StatsController;
+use App\Http\Controllers\Api\V1\Support\SupportTicketController;
+use App\Http\Controllers\Api\V1\Support\WeeklyCheckinController;
 use App\Http\Controllers\Api\V1\Trainer\TrainerClientController;
 use App\Http\Controllers\Api\V1\Trainer\TrainerRoutineController;
 use App\Http\Controllers\Api\V1\WorkoutSessionController;
@@ -260,6 +263,20 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
         Route::post('/reports', [ReportController::class, 'store'])->middleware('throttle:writes')->name('reports.store');
     });
 
+    // Soporte: solicitudes del propio usuario y check-in semanal — ver
+    // docs/09-soporte-y-checkin.md.
+    Route::middleware('auth:sanctum')->prefix('support')->name('support.')->group(function () {
+        Route::get('/tickets', [SupportTicketController::class, 'index'])->name('tickets.index');
+        Route::post('/tickets', [SupportTicketController::class, 'store'])->middleware('throttle:10,1')->name('tickets.store');
+        Route::get('/tickets/{ticket}', [SupportTicketController::class, 'show'])->name('tickets.show');
+        Route::post('/tickets/{ticket}/messages', [SupportTicketController::class, 'reply'])->middleware('throttle:writes')->name('tickets.messages.store');
+        Route::post('/tickets/{ticket}/close', [SupportTicketController::class, 'close'])->middleware('throttle:writes')->name('tickets.close');
+
+        Route::get('/check-ins/current', [WeeklyCheckinController::class, 'current'])->name('check-ins.current');
+        Route::post('/check-ins/{checkin}/answer', [WeeklyCheckinController::class, 'answer'])->middleware('throttle:writes')->name('check-ins.answer');
+        Route::post('/check-ins/{checkin}/postpone', [WeeklyCheckinController::class, 'postpone'])->middleware('throttle:writes')->name('check-ins.postpone');
+    });
+
     Route::middleware('auth:sanctum')->prefix('pr-submissions')->name('pr-submissions.')->group(function () {
         Route::get('/', [PrSubmissionController::class, 'index'])->name('index');
         Route::post('/', [PrSubmissionController::class, 'store'])->middleware('throttle:writes')->name('store');
@@ -308,6 +325,15 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             Route::patch('/{challengeTemplate}', [AdminChallengeTemplateController::class, 'update'])->middleware('throttle:writes')->name('update');
             Route::patch('/{challengeTemplate}/activate', [AdminChallengeTemplateController::class, 'activate'])->middleware('throttle:writes')->name('activate');
             Route::patch('/{challengeTemplate}/deactivate', [AdminChallengeTemplateController::class, 'deactivate'])->middleware('throttle:writes')->name('deactivate');
+        });
+
+        Route::prefix('support')->name('support.')->group(function () {
+            Route::get('/tickets', [AdminSupportController::class, 'index'])->name('tickets.index');
+            Route::get('/tickets/{ticket}', [AdminSupportController::class, 'show'])->name('tickets.show');
+            Route::post('/tickets/{ticket}/messages', [AdminSupportController::class, 'reply'])->middleware('throttle:writes')->name('tickets.messages.store');
+            Route::patch('/tickets/{ticket}', [AdminSupportController::class, 'update'])->middleware('throttle:writes')->name('tickets.update');
+            Route::get('/staff', [AdminSupportController::class, 'staff'])->name('staff');
+            Route::get('/stats', [AdminSupportController::class, 'stats'])->name('stats');
         });
 
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');

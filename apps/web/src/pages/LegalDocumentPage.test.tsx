@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest"
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
+import { LEGAL_DOCUMENTS } from "@sanken/core"
 import { useCookieConsentStore } from "@/lib/cookie-consent-store"
 import { useLegalLocaleStore } from "@/lib/legal-locale-store"
 import { LegalDocumentPage } from "./LegalDocumentPage"
@@ -25,23 +26,29 @@ describe("LegalDocumentPage", () => {
     ["terms", "Términos y Condiciones"],
     ["privacy", "Política de Privacidad"],
     ["cookies", "Política de Cookies"],
-  ] as const)("renders %s in Spanish as an approved document with version and structured sections", (id, title) => {
+  ] as const)("renders %s in Spanish with its version, review status and structured sections", (id, title) => {
     renderDoc(id)
+    const meta = LEGAL_DOCUMENTS[id]
 
     expect(screen.getByRole("heading", { level: 1, name: title })).toBeInTheDocument()
-    expect(screen.getByText(/Versión 1\.0 · Actualizado el 28 de septiembre de 2026/)).toBeInTheDocument()
-    expect(screen.queryByText(/Borrador pendiente de revisión legal/)).not.toBeInTheDocument()
-    expect(screen.queryByRole("note")).not.toBeInTheDocument()
+    expect(screen.getByText(new RegExp(`Versión ${meta.version.replace(".", "\\.")} · Actualizado el`))).toBeInTheDocument()
+    // El aviso de borrador aparece solo mientras la versión no fue aprobada.
+    if (meta.status === "approved") {
+      expect(screen.queryByText(/Borrador pendiente de revisión legal/)).not.toBeInTheDocument()
+    } else {
+      expect(screen.getByText(/Borrador pendiente de revisión legal/)).toBeInTheDocument()
+    }
     expect(screen.getAllByRole("heading", { level: 2 }).length).toBeGreaterThan(3)
     expect(screen.getByRole("article")).toHaveAttribute("lang", "es")
   })
 
-  it("switches to English and warns that the translation is not legally reviewed", async () => {
+  it("switches to English without review notices", async () => {
     renderDoc("privacy")
     await userEvent.click(screen.getByRole("button", { name: "English" }))
 
     expect(screen.getByRole("heading", { level: 1, name: "Privacy Policy" })).toBeInTheDocument()
-    expect(screen.getByText(/has not been legally reviewed/)).toBeInTheDocument()
+    expect(screen.queryByText(/has not been legally reviewed/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/Draft pending legal review/)).not.toBeInTheDocument()
     expect(screen.getByRole("article")).toHaveAttribute("lang", "en")
   })
 

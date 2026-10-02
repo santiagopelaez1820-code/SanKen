@@ -27,7 +27,7 @@ function StatCell({ value, label }: { value: string | number; label: string }) {
       <ThemedText type="subtitle" style={styles.statValue}>
         {value}
       </ThemedText>
-      <ThemedText type="small" themeColor="textSecondary">
+      <ThemedText type="caption" themeColor="textSecondary" style={styles.statLabel}>
         {label}
       </ThemedText>
     </View>
@@ -65,17 +65,17 @@ export default function ProfileScreen() {
               accessibilityRole="button"
               accessibilityLabel="Cambiar foto de perfil">
               {isLoading ? (
-                <Skeleton height={96} width={96} borderRadius={48} />
+                <Skeleton height={84} width={84} borderRadius={42} />
               ) : (
                 <ProgressRing
                   value={summary?.progress_pct ?? 0}
                   max={1}
-                  size={104}
-                  strokeWidth={7}
+                  size={88}
+                  strokeWidth={6}
                   color="accent"
                   label=""
                   valueLabel=""
-                  centerContent={<Avatar name={user?.name} avatarUrl={user?.avatar_url} size={76} />}
+                  centerContent={<Avatar name={user?.name} avatarUrl={user?.avatar_url} size={66} />}
                 />
               )}
               {!isLoading && (
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: Spacing.three,
     paddingTop: Spacing.three,
     paddingBottom: BottomTabInset + Spacing.three,
   },
@@ -174,23 +174,23 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   avatarBlock: {
-    marginTop: Spacing.two,
+    marginTop: Spacing.one,
     marginBottom: Spacing.one,
   },
   cameraBadge: {
     position: 'absolute',
     right: 0,
     bottom: 4,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     borderWidth: 2,
     alignItems: 'center',
     justifyContent: 'center',
   },
   name: {
-    fontSize: 24,
-    lineHeight: 30,
+    fontSize: 20,
+    lineHeight: 26,
   },
   level: {
     fontWeight: '700',
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: Spacing.four,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 4,
   },
   statCell: {
     flex: 1,
@@ -209,7 +209,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 18,
+    lineHeight: 22,
+    fontWeight: '800',
+  },
+  // Mismo tratamiento que las etiquetas de StatTile (Progreso).
+  statLabel: {
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   divider: {
     width: 1,
@@ -224,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
     borderRadius: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 4,
     paddingHorizontal: Spacing.three,
   },
   actionLabel: {

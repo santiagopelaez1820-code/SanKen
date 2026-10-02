@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.two,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34, marginBottom: Spacing.two },
+  pageTitle: { fontSize: 24, lineHeight: 30, marginBottom: Spacing.two },
   formCard: {
     borderRadius: Spacing.four,
     padding: Spacing.three,

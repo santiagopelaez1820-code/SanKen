@@ -41,7 +41,7 @@ export function Stepper({ value, onChange, min = 0, max = 999, step = 1, unit, c
   useEffect(() => stopHold, [])
 
   return (
-    <div className={cn("flex items-center justify-between gap-4 rounded-xl border border-border bg-card p-3", className)}>
+    <div className={cn("flex items-center justify-between gap-2 rounded-xl border border-border bg-card p-3 sm:gap-4", className)}>
       <button
         type="button"
         aria-label="Restar"

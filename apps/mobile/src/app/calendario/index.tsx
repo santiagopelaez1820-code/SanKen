@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.three,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34 },
+  pageTitle: { fontSize: 24, lineHeight: 30 },
   monthNav: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   navButton: { borderWidth: 1, borderRadius: Spacing.two, paddingVertical: Spacing.one, paddingHorizontal: Spacing.two },
   weekdayRow: { flexDirection: 'row' },

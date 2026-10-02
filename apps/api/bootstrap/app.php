@@ -24,6 +24,11 @@ return Application::configure(basePath: dirname(__DIR__))
     // sirve para un despliegue real con cron.
     ->withSchedule(function (Schedule $schedule): void {
         $schedule->command('challenges:generate')->weekly();
+        // Check-in semanal: viernes 5 p. m. hora de Colombia (ver
+        // config/support.php). Idempotente: correrlo de nuevo no reenvía.
+        $schedule->command('support:weekly-checkin-reminders')
+            ->weeklyOn(5, '17:00')
+            ->timezone(config('support.checkin.timezone'));
     })
     ->withRouting(
         web: __DIR__.'/../routes/web.php',

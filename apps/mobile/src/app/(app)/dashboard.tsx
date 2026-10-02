@@ -3,8 +3,8 @@ import { ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { BarChart, LineChart } from 'react-native-gifted-charts';
-import { BarChart3, Clock, Flame, ListChecks, Lock, Trophy, Weight } from 'lucide-react-native';
-import { formatPersonalRecord, type ProgressMetric, type VolumeRange } from '@sanken/core';
+import { BarChart3, Clock, Dumbbell, Flag, Flame, ListChecks, Lock, Trophy, Weight, type LucideIcon } from 'lucide-react-native';
+import { formatPersonalRecord, type DashboardStats, type ProgressMetric, type VolumeRange } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -14,11 +14,44 @@ import { Icon } from '@/components/ui/icon';
 import { ProgressRing } from '@/components/ui/progress-ring';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
-import { StatTile } from '@/components/ui/stat-tile';
+import { StatTile, type StatTone } from '@/components/ui/stat-tile';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useDashboardStore } from '@/store/dashboard-store';
 import { useGamificationStore } from '@/store/gamification-store';
+
+interface Kpi {
+  label: string;
+  icon: LucideIcon;
+  tone: StatTone;
+  value: (stats: DashboardStats | null) => string;
+  hint?: (stats: DashboardStats) => string | undefined;
+}
+
+/**
+ * KPI de Progreso — cada uno con su tono (siempre de la paleta del tema).
+ * Entrenamientos y Retos completados ya venían en /stats (el perfil los
+ * muestra) pero esta pantalla no los usaba.
+ */
+const KPIS: Kpi[] = [
+  { label: 'Entrenamientos', icon: Dumbbell, tone: 'accent', value: (s) => `${s?.total_workouts ?? 0}` },
+  { label: 'Horas', icon: Clock, tone: 'accentSecondary', value: (s) => `${s?.total_hours ?? 0} h` },
+  {
+    label: 'Racha',
+    icon: Flame,
+    tone: 'warning',
+    value: (s) => `${s?.current_streak_days ?? 0} ${s?.current_streak_days === 1 ? 'día' : 'días'}`,
+    hint: (s) => (s.current_streak_days > 0 ? '¡Sigue así!' : undefined),
+  },
+  { label: 'Series', icon: ListChecks, tone: 'accentSecondary', value: (s) => `${s?.total_sets ?? 0}` },
+  {
+    label: 'Toneladas',
+    icon: Weight,
+    tone: 'accent',
+    value: (s) => `${((s?.total_volume_kg ?? 0) / 1000).toFixed(1)} t`,
+  },
+  { label: 'Retos', icon: Flag, tone: 'success', value: (s) => `${s?.completed_challenges ?? 0}` },
+];
 
 export default function DashboardScreen() {
   const { width } = useWindowDimensions();
@@ -70,51 +103,39 @@ export default function DashboardScreen() {
           {statsError && !isLoadingStats && <ErrorState message={statsError} onRetry={loadStats} />}
 
           <ThemedView style={styles.tileGrid}>
-            <Animated.View entering={FadeInUp.delay(0).duration(280)} style={styles.tileWrap}>
-              <StatTile
-                icon={Clock}
-                label="Horas entrenadas"
-                value={isLoadingStats ? '…' : `${stats?.total_hours ?? 0} h`}
-              />
-            </Animated.View>
-            <Animated.View entering={FadeInUp.delay(40).duration(280)} style={styles.tileWrap}>
-              <StatTile icon={ListChecks} label="Series totales" value={isLoadingStats ? '…' : `${stats?.total_sets ?? 0}`} />
-            </Animated.View>
-            <Animated.View entering={FadeInUp.delay(80).duration(280)} style={styles.tileWrap}>
-              <StatTile
-                icon={Weight}
-                label="Toneladas movidas"
-                value={isLoadingStats ? '…' : `${((stats?.total_volume_kg ?? 0) / 1000).toFixed(1)} t`}
-              />
-            </Animated.View>
-            <Animated.View entering={FadeInUp.delay(120).duration(280)} style={styles.tileWrap}>
-              <StatTile
-                icon={Flame}
-                label="Racha actual"
-                value={isLoadingStats ? '…' : `${stats?.current_streak_days ?? 0} días`}
-                hint={stats && stats.current_streak_days > 0 ? '¡Sigue así!' : undefined}
-              />
-            </Animated.View>
+            {KPIS.map((kpi, i) => (
+              <Animated.View key={kpi.label} entering={FadeInUp.delay(i * 40).duration(280)} style={styles.tileWrap}>
+                <StatTile
+                  icon={kpi.icon}
+                  tone={kpi.tone}
+                  label={kpi.label}
+                  value={isLoadingStats ? '…' : kpi.value(stats)}
+                  hint={stats ? kpi.hint?.(stats) : undefined}
+                />
+              </Animated.View>
+            ))}
           </ThemedView>
 
-          <Animated.View entering={FadeInUp.delay(160).duration(300)}>
+          <Animated.View entering={FadeInUp.delay(240).duration(300)}>
           <ThemedView type="backgroundElement" style={[styles.card, styles.xpCard]}>
             <ProgressRing
               value={summary?.progress_pct ?? 0}
               max={1}
-              size={76}
-              strokeWidth={7}
+              size={56}
+              strokeWidth={5}
               color="accent"
-              label="Nivel"
               valueLabel={isLoadingGamification ? '…' : `${summary?.level ?? 1}`}
             />
             <ThemedView style={styles.xpInfo}>
-              <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
-                PROGRESO DE NIVEL
+              <ThemedText type="caption" themeColor="textSecondary" style={styles.eyebrow}>
+                PROGRESO DE NIVEL {summary?.level ?? 1}
               </ThemedText>
               {!isLoadingGamification && (
-                <ThemedText type="small" themeColor="textSecondary">
-                  {`${summary?.total_xp ?? 0} / ${summary?.xp_for_next_level ?? 100} XP`}
+                <ThemedText type="smallBold">
+                  {Math.round((summary?.progress_pct ?? 0) * 100)}%{' '}
+                  <ThemedText type="small" themeColor="textSecondary">
+                    {`· ${summary?.total_xp ?? 0} / ${summary?.xp_for_next_level ?? 100} XP`}
+                  </ThemedText>
                 </ThemedText>
               )}
             </ThemedView>
@@ -135,7 +156,7 @@ export default function DashboardScreen() {
               />
             </ThemedView>
 
-            {isLoadingVolume && <Skeleton height={180} borderRadius={Spacing.three} />}
+            {isLoadingVolume && <Skeleton height={150} borderRadius={Spacing.three} />}
             {!isLoadingVolume && barData.length === 0 && (
               <EmptyState icon={BarChart3} title="Sin datos de volumen" description="Todavía no hay entrenamientos registrados en este rango." />
             )}
@@ -143,7 +164,7 @@ export default function DashboardScreen() {
               <BarChart
                 data={barData}
                 width={chartWidth}
-                height={180}
+                height={150}
                 barWidth={22}
                 spacing={18}
                 roundedTop
@@ -174,7 +195,7 @@ export default function DashboardScreen() {
               />
             </ThemedView>
 
-            {isLoadingProgress && <Skeleton height={180} borderRadius={Spacing.three} />}
+            {isLoadingProgress && <Skeleton height={150} borderRadius={Spacing.three} />}
             {!isLoadingProgress && lineData.length === 0 && (
               <EmptyState icon={BarChart3} title="Sin datos de progreso" description="Todavía no hay suficientes registros para esta métrica." />
             )}
@@ -182,7 +203,7 @@ export default function DashboardScreen() {
               <LineChart
                 data={lineData}
                 width={chartWidth}
-                height={180}
+                height={150}
                 thickness={2}
                 color={theme.accent}
                 dataPointsColor={theme.accent}
@@ -272,7 +293,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.three,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34, marginBottom: Spacing.one },
+  pageTitle: { fontSize: 24, lineHeight: 30, marginBottom: Spacing.one },
   tileGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -328,7 +349,7 @@ const styles = StyleSheet.create({
     gap: Spacing.half,
     borderRadius: Spacing.three,
     borderWidth: 1,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two,
     paddingHorizontal: Spacing.one,
     backgroundColor: 'transparent',
   },

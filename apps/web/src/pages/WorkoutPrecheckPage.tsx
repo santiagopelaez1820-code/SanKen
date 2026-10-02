@@ -45,14 +45,14 @@ export function WorkoutPrecheckPage() {
 
   if (isLoading) {
     return (
-      <main className="px-6 py-8">
+      <main className="px-4 py-6 sm:px-6 sm:py-8">
         <Skeleton className="h-20 w-full" />
       </main>
     )
   }
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-6">
         <header>
           <button

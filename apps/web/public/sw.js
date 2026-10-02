@@ -19,8 +19,10 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close()
 
-  const conversationId = event.notification.data?.conversation_id
-  const url = conversationId ? `/chat/${conversationId}` : "/dashboard"
+  // Notificaciones nuevas (soporte, check-in semanal) traen `link` propio;
+  // las de chat siguen usando conversation_id.
+  const data = event.notification.data ?? {}
+  const url = data.link ? data.link : data.conversation_id ? `/chat/${data.conversation_id}` : "/dashboard"
 
   event.waitUntil(
     self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {

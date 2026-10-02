@@ -7,6 +7,7 @@ import { formatCurrency } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -24,9 +25,7 @@ export default function PedidosScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-          ← Volver
-        </ThemedText>
+        <BackButton fallbackHref="/profile" />
         <ThemedText type="title" style={styles.title}>
           Mis pedidos
         </ThemedText>
@@ -82,7 +81,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.three,
   },
-  title: { fontSize: 26, lineHeight: 32 },
+  title: { fontSize: 24, lineHeight: 30 },
   skeletonWrap: { gap: Spacing.two },
   list: { gap: Spacing.two, paddingBottom: BottomTabInset + Spacing.four },
   row: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.half },

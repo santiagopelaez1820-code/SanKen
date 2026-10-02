@@ -89,10 +89,10 @@ describe("legal documents", () => {
     })
   })
 
-  it("keeps the English translation flagged as not legally reviewed; documents are approved by the owner", () => {
+  it("marks every document and translation as reviewed by the owner", () => {
     for (const id of LEGAL_DOCUMENT_IDS) {
       expect(getLegalDocument(id, "es").translationReviewed).toBe(true)
-      expect(getLegalDocument(id, "en").translationReviewed).toBe(false)
+      expect(getLegalDocument(id, "en").translationReviewed).toBe(true)
       expect(getLegalDocument(id, "es").status).toBe("approved")
     }
   })

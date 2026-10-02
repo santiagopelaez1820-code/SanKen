@@ -29,6 +29,14 @@ class LegalConsentTest extends TestCase
     {
         parent::setUp();
         UserFactory::$acceptLegalConsents = false;
+        // Estos tests prueban el mecanismo de versiones, no la versión
+        // publicada hoy: se fijan todas en 1.0 (y cada test sube la que
+        // necesite) para que publicar una versión nueva no los rompa.
+        config([
+            'legal.documents.terms.version' => '1.0',
+            'legal.documents.privacy.version' => '1.0',
+            'legal.documents.cookies.version' => '1.0',
+        ]);
     }
 
     protected function tearDown(): void

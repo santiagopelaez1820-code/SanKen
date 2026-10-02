@@ -61,8 +61,8 @@ class NewOrderNotification extends Notification implements ShouldQueue
         $order = $this->order;
 
         $mail = (new MailMessage)
-            ->subject("🛒 Nuevo pedido #{$order->orderNumber()} - SanKen Store")
-            ->greeting('🛒 Nuevo pedido en SanKen Store')
+            ->subject("🛒 Nuevo pedido #{$order->orderNumber()} - Tienda SanKen")
+            ->greeting('🛒 Nuevo pedido en la Tienda SanKen')
             ->line("Pedido **#{$order->orderNumber()}** — {$order->created_at->format('d/m/Y H:i')} — Estado: **{$this->statusLabel()}**")
             ->line('**CLIENTE**')
             ->line("Nombre: {$order->customer_name}")
@@ -88,7 +88,7 @@ class NewOrderNotification extends Notification implements ShouldQueue
         return $mail
             ->line("### TOTAL: {$this->money($order->total)}")
             ->action('Ver pedido en SanKen', $this->adminOrderUrl())
-            ->salutation('SanKen Store');
+            ->salutation('Tienda SanKen');
     }
 
     /**

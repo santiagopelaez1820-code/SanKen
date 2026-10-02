@@ -42,7 +42,7 @@ export function ProductImageControls({ product }: { product: AdminProduct }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       {product.image && (
         <img
           src={api.mediaUrl(product.image) ?? undefined}

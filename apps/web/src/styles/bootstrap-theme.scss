@@ -294,6 +294,17 @@ body {
   border-radius: $border-radius-sm;
   transition: color 150ms ease-out, background-color 150ms ease-out;
 
+  // Laptops (992–1199px): un poco más compacto para que entren todos los
+  // módulos principales sin tener que deslizar la barra.
+  @media (min-width: 992px) and (max-width: 1199.98px) {
+    gap: 0.3rem;
+    padding: 0 0.4rem;
+  }
+
+  @media (min-width: 1200px) and (max-width: 1279.98px) {
+    padding: 0 0.55rem;
+  }
+
   &:hover,
   &:focus-visible {
     color: var(--sanken-white);

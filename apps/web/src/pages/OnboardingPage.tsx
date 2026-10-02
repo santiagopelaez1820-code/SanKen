@@ -9,7 +9,13 @@ import type {
   OnboardingQuestions,
   OnboardingState,
 } from "@sanken/core"
-import { ApiError } from "@sanken/core"
+import {
+  ApiError,
+  ONBOARDING_AGE_MESSAGES,
+  ONBOARDING_MAX_AGE,
+  ONBOARDING_MIN_AGE,
+  validateOnboardingAge,
+} from "@sanken/core"
 import { api } from "@/lib/api"
 import { useAuthStore } from "@/lib/auth-store"
 import { Button } from "@/components/ui/button"
@@ -68,6 +74,7 @@ export function OnboardingPage() {
   const [stepIndex, setStepIndex] = useState(0)
   const [answers, setAnswers] = useState<OnboardingAnswers>({})
   const [ageInput, setAgeInput] = useState("")
+  const [ageTouched, setAgeTouched] = useState(false)
   const [heightInput, setHeightInput] = useState("")
   const [weightInput, setWeightInput] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -112,10 +119,12 @@ export function OnboardingPage() {
     )
   }
 
+  const ageValidation = validateOnboardingAge(ageInput)
+
   const canContinue = (): boolean => {
     switch (step) {
       case "age":
-        return ageInput.trim().length > 0
+        return ageValidation.valid
       case "sex":
         return !!answers.sex
       case "height":
@@ -137,6 +146,14 @@ export function OnboardingPage() {
   }
 
   const goNext = async () => {
+    // No alcanza con deshabilitar el botón: Enter en el input no debe
+    // poder saltarse la validación de edad (ver validateOnboardingAge).
+    if ((step === "age" || stepIndex === STEP_ORDER.length - 1) && !ageValidation.valid) {
+      setStepIndex(STEP_ORDER.indexOf("age"))
+      setAgeTouched(true)
+      return
+    }
+
     const isLast = stepIndex === STEP_ORDER.length - 1
 
     if (!isLast) {
@@ -169,17 +186,33 @@ export function OnboardingPage() {
         </div>
 
         {step === "age" && (
-          <Question title="¿Cuál es tu edad?">
+          <Question title="¿Cuál es tu edad?" subtitle={`Entre ${ONBOARDING_MIN_AGE} y ${ONBOARDING_MAX_AGE} años`}>
             <input
               type="number"
               inputMode="numeric"
+              min={ONBOARDING_MIN_AGE}
+              max={ONBOARDING_MAX_AGE}
+              aria-label="Edad"
+              aria-invalid={!ageValidation.valid && ageTouched}
+              aria-describedby="age-error"
+              title={ONBOARDING_AGE_MESSAGES.outOfRange}
               className={inputClass}
               value={ageInput}
+              onBlur={() => setAgeTouched(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void goNext()
+              }}
               onChange={(e) => {
                 setAgeInput(e.target.value)
-                setAnswer("age", Number(e.target.value) || undefined)
+                const result = validateOnboardingAge(e.target.value)
+                setAnswer("age", result.valid ? result.age : undefined)
               }}
             />
+            {!ageValidation.valid && (ageTouched || ageInput.trim().length >= 2) && (
+              <p id="age-error" role="alert" className="text-sm text-destructive">
+                {ageValidation.error}
+              </p>
+            )}
           </Question>
         )}
 
@@ -227,7 +260,10 @@ export function OnboardingPage() {
         )}
 
         {step === "level" && (
-          <Question title="¿Cuál es tu nivel?">
+          <Question
+            title="¿Cuál es tu nivel de entrenamiento?"
+            subtitle="Según tu experiencia entrenando fuerza o en el gimnasio"
+          >
             {questions.levels.map((value) => (
               <OptionButton
                 key={value}

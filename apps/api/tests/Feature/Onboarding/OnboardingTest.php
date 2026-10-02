@@ -244,6 +244,48 @@ class OnboardingTest extends TestCase
             ->assertJsonPath('data.age', 28);
     }
 
+    public function test_age_range_limits_are_accepted(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user, 'sanctum')
+            ->postJson('/api/v1/onboarding', ['age' => 15])
+            ->assertCreated()
+            ->assertJsonPath('data.age', 15);
+
+        $this->actingAs($user, 'sanctum')
+            ->patchJson('/api/v1/onboarding', ['age' => 70])
+            ->assertOk()
+            ->assertJsonPath('data.age', 70);
+    }
+
+    public function test_age_outside_15_to_70_is_rejected(): void
+    {
+        $user = User::factory()->create();
+
+        foreach ([14, 71, -5, 0] as $age) {
+            $this->actingAs($user, 'sanctum')
+                ->postJson('/api/v1/onboarding', ['age' => $age])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors(['age' => 'La edad debe estar entre 15 y 70 años.']);
+        }
+
+        $this->assertDatabaseMissing('user_profiles', ['user_id' => $user->id, 'age' => 14]);
+        $this->assertDatabaseMissing('user_profiles', ['user_id' => $user->id, 'age' => 71]);
+    }
+
+    public function test_non_numeric_or_empty_age_is_rejected(): void
+    {
+        $user = User::factory()->create();
+
+        foreach (['abc', '25.5', '', null] as $age) {
+            $this->actingAs($user, 'sanctum')
+                ->postJson('/api/v1/onboarding', ['age' => $age])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors('age');
+        }
+    }
+
     public function test_invalid_goal_is_rejected(): void
     {
         $user = User::factory()->create();

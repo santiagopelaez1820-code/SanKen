@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { Image, Pressable, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SUPPORT_STRINGS } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -21,6 +22,7 @@ export default function AdminScreen() {
         <PrimaryButton label="Usuarios" variant="ghost" onPress={() => router.push('/admin/usuarios')} />
         <PrimaryButton label="Ejercicios" variant="ghost" onPress={() => router.push('/admin/ejercicios')} />
         <PrimaryButton label="Rutinas generales" variant="ghost" onPress={() => router.push('/admin/rutinas')} />
+        <PrimaryButton label={SUPPORT_STRINGS.es.admin.title} variant="ghost" onPress={() => router.push('/admin/soporte')} />
         <PrimaryButton label="Reportes" variant="ghost" onPress={() => router.push('/admin/reportes')} />
         <PrimaryButton label="PR pendientes" variant="ghost" onPress={() => router.push('/admin/pr-submissions')} />
         <PrimaryButton label="Retos" variant="ghost" onPress={() => router.push('/admin/retos')} />

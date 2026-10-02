@@ -10,7 +10,7 @@ import { SocialConsentSheet } from '@/components/legal/social-consent-sheet';
 import { GoogleSignInButton } from '@/components/ui/google-sign-in-button';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { FormMaxWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuthStore } from '@/store/auth-store';
 
@@ -126,24 +126,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.four,
-    gap: Spacing.four,
-  },
-  logo: { width: 240, height: 162 },
-  subtitle: { textAlign: 'center', marginBottom: Spacing.two },
-  form: {
-    alignSelf: 'stretch',
-    maxWidth: MaxContentWidth,
     gap: Spacing.three,
   },
+  // Proporción real de logo-full.png (879x600).
+  logo: { width: 132, height: 90 },
+  subtitle: { textAlign: 'center' },
+  form: {
+    width: '100%',
+    maxWidth: FormMaxWidth,
+    gap: Spacing.two + 4,
+  },
   error: { color: '#FF4D5E' },
-  footerLink: { marginTop: Spacing.two },
+  footerLink: {},
   forgotPasswordLink: { alignSelf: 'center' },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.two,
-    alignSelf: 'stretch',
-    maxWidth: MaxContentWidth,
+    width: '100%',
+    maxWidth: FormMaxWidth,
   },
   dividerLine: { flex: 1, height: 1 },
 });

@@ -10,6 +10,7 @@ import { CATEGORY_LABELS } from '@/components/store/category-chips';
 import { isNewProduct } from '@/components/store/product-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { ErrorState } from '@/components/ui/error-state';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -52,7 +53,7 @@ export default function ProductDetailScreen() {
     return (
       <ThemedView style={styles.root}>
         <SafeAreaView style={styles.safeArea}>
-          <Skeleton height={280} borderRadius={Spacing.four} />
+          <Skeleton height={240} borderRadius={Spacing.four} />
         </SafeAreaView>
       </ThemedView>
     );
@@ -73,14 +74,12 @@ export default function ProductDetailScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.topBar}>
-          <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-            ← Tienda
-          </ThemedText>
+          <BackButton label="Tienda" fallbackHref="/store" />
           <Pressable
             onPress={() => router.push('/store/cart')}
             accessibilityLabel="Ver carrito"
             style={[styles.cartButton, { backgroundColor: theme.backgroundElement }]}>
-            <ShoppingCart size={22} color={theme.text} />
+            <ShoppingCart size={20} color={theme.text} />
             {itemCount > 0 && (
               <ThemedView style={[styles.cartBadge, { backgroundColor: theme.accent }]}>
                 <ThemedText type="small" style={styles.cartBadgeText}>
@@ -94,9 +93,9 @@ export default function ProductDetailScreen() {
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={[styles.imageWrap, { backgroundColor: theme.backgroundElement }]}>
             {imageUrl ? (
-              <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" transition={150} />
+              <Image source={{ uri: imageUrl }} style={styles.image} contentFit="contain" transition={150} />
             ) : (
-              <ShoppingBag size={48} color={theme.textSecondary} />
+              <ShoppingBag size={40} color={theme.textSecondary} />
             )}
             {isNewProduct(product.created_at) && (
               <ThemedView style={[styles.newBadge, { backgroundColor: theme.accent }]}>
@@ -142,7 +141,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+    paddingTop: Spacing.two,
     paddingBottom: BottomTabInset,
     gap: Spacing.three,
   },
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   cartButton: {
-    // 44x44: mismo mínimo táctil que el botón de carrito de la Store
+    // 44x44: mismo mínimo táctil que el botón de carrito de la Tienda
     // (store/index.tsx) — no achicarlo solo porque comparte fila con el
     // link de volver.
     width: 44,
@@ -174,10 +173,12 @@ const styles = StyleSheet.create({
   },
   cartBadgeText: { color: '#050505', fontWeight: '700', fontSize: 10 },
   scrollContent: { gap: Spacing.two, paddingBottom: Spacing.four },
+  // 4:3 + contain (antes 1:1 + cover): la foto entra completa sin recortar
+  // y el detalle gana altura para nombre, precio y descripción.
   imageWrap: {
     width: '100%',
-    aspectRatio: 1,
-    borderRadius: Spacing.four,
+    aspectRatio: 4 / 3,
+    borderRadius: Spacing.three,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -194,8 +195,8 @@ const styles = StyleSheet.create({
   },
   newBadgeText: { color: '#050505', fontWeight: '700', fontSize: 11 },
   category: { textTransform: 'uppercase', letterSpacing: 0.5 },
-  name: { fontSize: 26, lineHeight: 32 },
-  price: { fontSize: 24, lineHeight: 30 },
+  name: { fontSize: 22, lineHeight: 28 },
+  price: { fontSize: 20, lineHeight: 26 },
   description: { marginTop: Spacing.two },
   quantityRow: {
     flexDirection: 'row',

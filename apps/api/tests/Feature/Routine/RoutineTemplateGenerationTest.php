@@ -118,14 +118,14 @@ class RoutineTemplateGenerationTest extends TestCase
             ->assertJsonCount($frequencyDays, 'data.days');
 
         // Nivel intermediate (default de completeOnboardingFor) + objetivo
-        // gain_muscle -> RoutineVolumeCalculator: 5 ejercicios/día, 3 series,
-        // reps "8-12" (ver RoutineVolumeCalculator::volumeForLevel/intensityForGoal).
+        // gain_muscle -> RoutineVolumeCalculator: entre 6 y 8 ejercicios/día,
+        // 3 series, reps "8-12" (ver RoutineVolumeCalculator::volumeForLevel/intensityForGoal).
         // Cada ejercicio resuelve a un ejercicio real del catálogo, y ningún
         // día pasa de 3 grupos musculares principales (sección 4 del pedido).
         $days = $response->json('data.days');
         foreach ($days as $day) {
-            $this->assertNotEmpty($day['exercises']);
-            $this->assertLessThanOrEqual(5, count($day['exercises']));
+            $this->assertGreaterThanOrEqual(6, count($day['exercises']));
+            $this->assertLessThanOrEqual(8, count($day['exercises']));
             $this->assertLessThanOrEqual(3, count($this->muscleGroupsOf($day)));
             foreach ($day['exercises'] as $exercise) {
                 $this->assertSame(3, $exercise['target_sets']);
@@ -187,12 +187,13 @@ class RoutineTemplateGenerationTest extends TestCase
     {
         $this->seedCatalog();
 
+        // 90 min para que el techo por tiempo no iguale a todos en el mínimo de 6.
         $beginner = User::factory()->create();
-        $this->completeOnboardingFor($beginner, 'male', 3, 'beginner');
+        $this->completeOnboardingFor($beginner, 'male', 3, 'beginner', 'gain_muscle', 90);
         $beginnerDays = $this->actingAs($beginner, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
 
         $advanced = User::factory()->create();
-        $this->completeOnboardingFor($advanced, 'male', 3, 'advanced');
+        $this->completeOnboardingFor($advanced, 'male', 3, 'advanced', 'gain_muscle', 90);
         $advancedDays = $this->actingAs($advanced, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
 
         $totalSets = fn (array $days) => collect($days)->flatMap(fn ($d) => $d['exercises'])->sum('target_sets');
@@ -202,7 +203,7 @@ class RoutineTemplateGenerationTest extends TestCase
         // "Avanzado" no debe significar simplemente más ejercicios (sección 5):
         // misma cantidad de movimientos que intermedio, más series cada uno.
         $intermediate = User::factory()->create();
-        $this->completeOnboardingFor($intermediate, 'male', 3, 'intermediate');
+        $this->completeOnboardingFor($intermediate, 'male', 3, 'intermediate', 'gain_muscle', 90);
         $intermediateDays = $this->actingAs($intermediate, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
         $this->assertSame($exerciseCount($intermediateDays), $exerciseCount($advancedDays));
         $this->assertLessThan($exerciseCount($intermediateDays), $exerciseCount($beginnerDays));
@@ -243,11 +244,28 @@ class RoutineTemplateGenerationTest extends TestCase
         $this->completeOnboardingFor($long, 'male', 3, 'intermediate', 'gain_muscle', 90);
         $longDays = $this->actingAs($long, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
 
-        // 30 min a 3 series x (45s + 90s descanso) por ejercicio ~= 6.75min/ejercicio -> entran 4.
-        $this->assertCount(4, $shortDays[0]['exercises']);
-        // 90 min no debe "inflar" más allá de lo que el nivel ya decidió (5 para intermedio) --
-        // más tiempo disponible no es motivo para agregar ejercicios de más (sección 11).
-        $this->assertCount(5, $longDays[0]['exercises']);
+        // 30 min a 3 series x (45s + 90s descanso) por ejercicio ~= 6.75min/ejercicio -> entrarían 4,
+        // pero nunca se baja del mínimo de 6 ejercicios por día.
+        $this->assertCount(6, $shortDays[0]['exercises']);
+        // 90 min: el día de Empuje intermedio trae toda su plantilla (7), sin pasar del máximo de 8.
+        $this->assertCount(7, $longDays[0]['exercises']);
+    }
+
+    /** @dataProvider sexFrequencyLevelCombos */
+    public function test_every_day_has_between_six_and_eight_exercises(string $sex, int $frequencyDays, string $level): void
+    {
+        $this->seedCatalog();
+
+        foreach ([30, 90] as $sessionMinutes) {
+            $user = User::factory()->create();
+            $this->completeOnboardingFor($user, $sex, $frequencyDays, $level, 'gain_muscle', $sessionMinutes);
+            $days = $this->actingAs($user, 'sanctum')->postJson('/api/v1/routines/generate')->json('data.days');
+
+            foreach ($days as $day) {
+                $count = count($day['exercises']);
+                $this->assertTrue($count >= 6 && $count <= 8, "Día '{$day['label']}' ({$sessionMinutes} min) tiene {$count} ejercicios.");
+            }
+        }
     }
 
     /** @dataProvider sexFrequencyLevelCombos */

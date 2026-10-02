@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.three,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34 },
+  pageTitle: { fontSize: 24, lineHeight: 30 },
   card: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.two },
   input: { borderWidth: 1, borderRadius: Spacing.two, paddingHorizontal: Spacing.two, paddingVertical: Spacing.two },
   actionsRow: { flexDirection: 'row', gap: Spacing.two },

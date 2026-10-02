@@ -26,7 +26,7 @@ class FirebaseUserDeleter
         }
 
         try {
-            $factory = (new Factory())->withServiceAccount($credentials);
+            $factory = (new Factory)->withServiceAccount($credentials);
 
             if ($projectId = config('services.firebase.project_id')) {
                 $factory = $factory->withProjectId($projectId);

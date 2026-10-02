@@ -62,7 +62,7 @@ export function AdminChallengeTemplatesPage() {
   const canSubmit = code.trim() && title.trim() && description.trim() && target.trim() && !createMutation.isPending
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Retos</h1>
 
@@ -145,8 +145,8 @@ export function AdminChallengeTemplatesPage() {
           <ul className="flex flex-col gap-3">
             {templates?.map((template) => (
               <li key={template.id} className="rounded-lg border border-border p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1 basis-48">
                     <p className="text-sm font-medium">
                       {template.title}{" "}
                       <span className="text-xs font-normal text-muted-foreground">({template.code})</span>

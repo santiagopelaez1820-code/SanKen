@@ -23,7 +23,7 @@ export function ChallengesRow() {
     load();
   }, [load]);
 
-  if (isLoading) return <Skeleton height={168} borderRadius={Spacing.four} />;
+  if (isLoading) return <Skeleton height={132} borderRadius={Spacing.four} />;
 
   const active = challenges.filter((c) => !c.completed).slice(0, 6);
   if (active.length === 0) return null;
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: Spacing.four,
     padding: Spacing.three,
-    gap: Spacing.three,
+    gap: Spacing.two,
   },
   header: {
     flexDirection: 'row',
@@ -98,9 +98,9 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   tile: {
-    width: 176,
+    width: 164,
     borderRadius: Spacing.three,
-    padding: Spacing.three,
+    padding: Spacing.two + 4,
     gap: Spacing.one,
   },
   tileHeader: {
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   tileTitle: {
-    minHeight: 34,
+    minHeight: 36,
   },
   pressed: {
     opacity: 0.8,

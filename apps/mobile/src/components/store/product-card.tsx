@@ -37,7 +37,7 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} style={styles.image} contentFit="cover" transition={150} />
           ) : (
-            <ShoppingBag size={28} color={theme.textSecondary} />
+            <ShoppingBag size={24} color={theme.textSecondary} />
           )}
           {isNewProduct(product.created_at) && (
             <ThemedView style={[styles.newBadge, { backgroundColor: theme.accent }]}>
@@ -77,11 +77,11 @@ export function ProductCard({ product, onPress }: ProductCardProps) {
 const styles = StyleSheet.create({
   card: { minWidth: 0 },
   pressed: { opacity: 0.85 },
-  inner: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.one },
+  inner: { borderRadius: Spacing.three, padding: Spacing.two + 2, gap: Spacing.half },
   imageWrap: {
     width: '100%',
     aspectRatio: 1,
-    borderRadius: Spacing.three,
+    borderRadius: Spacing.two + 2,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
   },
   newBadgeText: { color: '#050505', fontWeight: '700', fontSize: 10 },
-  description: { minHeight: 34 },
+  description: { minHeight: 36, fontSize: 12, lineHeight: 18 },
   price: { marginTop: Spacing.one },
-  addButton: { paddingVertical: Spacing.two, marginTop: Spacing.one },
+  addButton: { paddingVertical: Spacing.two, minHeight: 36, marginTop: Spacing.one },
 });

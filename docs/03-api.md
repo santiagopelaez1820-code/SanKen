@@ -271,6 +271,17 @@ Cambios en endpoints existentes:
 - `POST /auth/social`: si la cuenta de Google **no existe** y faltan los `accept_*`, responde `200 { requires_consent: true, consents: [...] }` sin crear nada. Cuentas existentes inician sesión igual que antes.
 - `UserResource` incluye `pending_consents: string[]` solo para el propio usuario autenticado (login/registro/`/auth/me`).
 
+## 15.2 Soporte y check-in semanal
+
+Ver `docs/09-soporte-y-checkin.md`. Usuario (Sanctum): `GET/POST /support/tickets`
+(creación `throttle:10,1`), `GET /support/tickets/{id}`,
+`POST /support/tickets/{id}/messages`, `POST /support/tickets/{id}/close`,
+`GET /support/check-ins/current`, `POST /support/check-ins/{id}/answer`,
+`POST /support/check-ins/{id}/postpone`. Equipo (`role:super_admin`):
+`GET /admin/support/tickets`, `GET|PATCH /admin/support/tickets/{id}`,
+`POST /admin/support/tickets/{id}/messages`, `GET /admin/support/stats`,
+`GET /admin/support/staff`.
+
 ## 16. Documentación
 
 - OpenAPI 3.1 generado a partir de anotaciones (`dedoc/scramble` o `l5-swagger`) → publicado en `/docs` (protegido en producción).

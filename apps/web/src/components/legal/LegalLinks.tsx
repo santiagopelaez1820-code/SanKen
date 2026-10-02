@@ -16,10 +16,10 @@ export function LegalLinks({ className }: { className?: string }) {
 
   return (
     <nav aria-label={t.legalSectionTitle} className={cn("text-xs text-muted-foreground", className)}>
-      <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-x-4 gap-y-1 p-0">
+      <ul className="m-0 flex list-none flex-wrap items-center justify-center gap-x-4 p-0">
         {LEGAL_DOCUMENT_IDS.map((id) => (
           <li key={id}>
-            <Link to={LEGAL_PATHS[id]} className="underline-offset-4 hover:underline" style={{ color: "inherit" }}>
+            <Link to={LEGAL_PATHS[id]} className="inline-block py-1.5 underline-offset-4 hover:underline" style={{ color: "inherit" }}>
               {t.documentNames[id]}
             </Link>
           </li>
@@ -28,7 +28,7 @@ export function LegalLinks({ className }: { className?: string }) {
           <button
             type="button"
             onClick={openCookieSettings}
-            className="border-0 bg-transparent p-0 underline-offset-4 hover:underline"
+            className="border-0 bg-transparent px-0 py-1.5 underline-offset-4 hover:underline"
             style={{ color: "inherit" }}
           >
             {t.cookieSettingsTitle}

@@ -51,6 +51,11 @@ import { OrderConfirmationPage } from "@/pages/OrderConfirmationPage"
 import { MyOrdersPage } from "@/pages/MyOrdersPage"
 import { MyOrderDetailPage } from "@/pages/MyOrderDetailPage"
 import { LegalDocumentPage } from "@/pages/LegalDocumentPage"
+import { SupportPage } from "@/pages/SupportPage"
+import { SupportTicketPage } from "@/pages/SupportTicketPage"
+import { WeeklyCheckinPage } from "@/pages/WeeklyCheckinPage"
+import { AdminSupportPage } from "@/pages/AdminSupportPage"
+import { AdminSupportTicketPage } from "@/pages/AdminSupportTicketPage"
 import { CookieBanner } from "@/components/legal/CookieBanner"
 import { CookieSettingsDialog } from "@/components/legal/CookieSettingsDialog"
 import { LEGAL_PATHS } from "@/lib/legal-paths"
@@ -120,6 +125,10 @@ function App() {
         <Route path="/workout/precheck" element={<WorkoutPrecheckPage />} />
         <Route path="/workout/session/:sessionId" element={<WorkoutSessionPage />} />
         <Route path="/feed" element={<FeedPage />} />
+
+        <Route path="/soporte" element={<SupportPage />} />
+        <Route path="/soporte/check-in" element={<WeeklyCheckinPage />} />
+        <Route path="/soporte/:ticketId" element={<SupportTicketPage />} />
 
         <Route path="/store" element={<StorePage />} />
         <Route path="/store/cart" element={<CartPage />} />
@@ -224,6 +233,22 @@ function App() {
           element={
             <RequireAdmin>
               <RoutineEditorPage scope="admin" />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/admin/soporte"
+          element={
+            <RequireAdmin>
+              <AdminSupportPage />
+            </RequireAdmin>
+          }
+        />
+        <Route
+          path="/admin/soporte/:ticketId"
+          element={
+            <RequireAdmin>
+              <AdminSupportTicketPage />
             </RequireAdmin>
           }
         />

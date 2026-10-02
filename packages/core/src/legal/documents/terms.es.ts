@@ -2,7 +2,7 @@ import type { LegalDocumentContent } from '../types';
 
 /**
  * Términos y Condiciones — texto de referencia (español).
- * BORRADOR: requiere revisión del responsable y de un profesional jurídico.
+ * Revisado y aprobado por el responsable de SanKen (v1.0).
  */
 export const termsEs: LegalDocumentContent = {
   title: 'Términos y Condiciones',

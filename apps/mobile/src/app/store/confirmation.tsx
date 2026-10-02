@@ -18,7 +18,7 @@ export default function OrderConfirmationScreen() {
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <ThemedView type="backgroundElement" style={styles.iconCircle}>
-          <Icon icon={CheckCircle2} size={40} color={theme.accent} />
+          <Icon icon={CheckCircle2} size={32} color={theme.accent} />
         </ThemedView>
         <ThemedText type="title" style={styles.title}>
           ¡Pedido realizado!
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
   },
-  iconCircle: { width: 80, height: 80, borderRadius: 40, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 28, lineHeight: 34, textAlign: 'center' },
+  iconCircle: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 24, lineHeight: 30, textAlign: 'center' },
   description: { textAlign: 'center' },
 });

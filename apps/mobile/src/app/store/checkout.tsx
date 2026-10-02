@@ -6,6 +6,7 @@ import { formatCurrency } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
 import { ToggleRow } from '@/components/ui/toggle-row';
@@ -68,9 +69,7 @@ export default function CheckoutScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-          ← Carrito
-        </ThemedText>
+        <BackButton label="Carrito" fallbackHref="/store/cart" />
         <ThemedText type="title" style={styles.title}>
           Checkout
         </ThemedText>
@@ -171,11 +170,11 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+    paddingTop: Spacing.two,
     paddingBottom: BottomTabInset,
     gap: Spacing.two,
   },
-  title: { fontSize: 26, lineHeight: 32 },
+  title: { fontSize: 24, lineHeight: 30 },
   scrollContent: { gap: Spacing.two, paddingBottom: Spacing.four },
   sectionSpacer: { marginTop: Spacing.three },
   summary: { borderRadius: Spacing.four, padding: Spacing.three, gap: Spacing.one, marginTop: Spacing.three },

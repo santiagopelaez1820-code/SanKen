@@ -32,11 +32,11 @@ export function AdminPrSubmissionsPage() {
   })
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">PR pendientes de revisión</h1>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {(["pending", "approved", "rejected", "all"] as const).map((option) => (
             <Button
               key={option}
@@ -90,7 +90,7 @@ export function AdminPrSubmissionsPage() {
                     {errorBySubmission[submission.id] && (
                       <p className="text-xs text-destructive">{errorBySubmission[submission.id]}</p>
                     )}
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         disabled={reviewMutation.isPending || !submission.video_url}

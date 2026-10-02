@@ -140,6 +140,16 @@ class User extends Authenticatable implements MustVerifyEmailContract
         return $this->hasMany(Order::class);
     }
 
+    public function supportTickets(): HasMany
+    {
+        return $this->hasMany(SupportTicket::class);
+    }
+
+    public function weeklyCheckins(): HasMany
+    {
+        return $this->hasMany(WeeklyCheckin::class);
+    }
+
     /** Historial append-only de consentimientos legales — ver UserConsent. */
     public function consents(): HasMany
     {

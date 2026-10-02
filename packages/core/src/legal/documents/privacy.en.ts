@@ -2,7 +2,7 @@ import type { LegalDocumentContent } from '../types';
 
 /**
  * Privacy Policy — English translation of privacy.es.ts.
- * NOT legally reviewed: the Spanish text is the reference version. Keep both
+ * Reviewed by the SanKen owner; the Spanish text is the reference version. Keep both
  * in sync (same sections, same facts) whenever either changes.
  */
 export const privacyEn: LegalDocumentContent = {
@@ -83,6 +83,16 @@ export const privacyEn: LegalDocumentContent = {
               'You and the people you talk to.',
             ],
             [
+              'Support',
+              'Requests you send to the {{brandName}} team (type, subject, messages and status) and the team replies.',
+              'You, in the Support section.',
+            ],
+            [
+              'Weekly check-in',
+              'How you felt about your workouts that week, whether you wanted to tell us something (and your comment, if you wrote one), whether you postponed it and, as context, your active routine and how many sessions you completed that week.',
+              'You, when answering the check-in (optional).',
+            ],
+            [
               'Store orders',
               'Name, email, phone, WhatsApp number, department, city, address, additional information, products, amounts, order status, carrier and tracking number.',
               'You, when placing an order; the {{brandName}} team, when managing it.',
@@ -118,6 +128,8 @@ export const privacyEn: LegalDocumentContent = {
             'To enable communication with your trainer (or your clients, if you are a trainer).',
             'To show you in public rankings only if you turn on "Public rankings" (you can turn it off at any time), and in the leaderboards of challenges you join.',
             'To review records you submit with video and content reports.',
+            'To handle your support requests (questions, complaints, observations, suggestions or problems) and reply to you.',
+            'To ask you once a week how you felt about your workouts, to detect questions or problems and improve routines. Today your answers do not change your routine automatically; if they are used to adjust it in the future, this policy will say so.',
             'To manage and deliver your store orders and contact you about them.',
             'To send you push notifications when you have enabled them, and transactional emails (email verification, password recovery).',
             'To keep the service secure, prevent abuse and fraud, and enforce the Terms and Conditions.',
@@ -136,7 +148,7 @@ export const privacyEn: LegalDocumentContent = {
       blocks: [
         {
           type: 'p',
-          text: 'Some data you log in {{brandName}} (weight, height, age, sex, body composition and measurements, sleep quality, energy, muscle soreness and diet) may be considered health-related or sensitive data under applicable law. That is why we ask for a specific, separate authorization to process it.',
+          text: 'Some data you log in {{brandName}} (weight, height, age, sex, body composition and measurements, sleep quality, energy, muscle soreness, diet and how you felt about your workouts in the weekly check-in) may be considered health-related or sensitive data under applicable law. That is why we ask for a specific, separate authorization to process it.',
         },
         {
           type: 'list',
@@ -163,7 +175,7 @@ export const privacyEn: LegalDocumentContent = {
           items: [
             'Your trainer: if you connect with a trainer in {{brandName}}, they can see what they need to coach you (your name, routines, workouts and progress) and chat with you.',
             'Other users: your name and lifts appear in rankings only if you turn on "Public rankings"; in challenges you join, your name and progress appear in the challenge leaderboard.',
-            '{{brandName}} administration team: limited access to what is needed for support, moderation, record review and order management.',
+            '{{brandName}} administration team: limited access to what is needed for support, moderation, record review and order management. Your support requests and weekly check-in answers are only seen by this team — not by your trainer or other users.',
             'Technical providers that provide services to {{brandName}} (see section 6), only with the data each one needs.',
             'Shipping companies: when applicable, the carrier delivering your order receives the delivery name, phone and address.',
             'Authorities: when required by law or by an order of a competent authority.',
@@ -280,7 +292,7 @@ export const privacyEn: LegalDocumentContent = {
       blocks: [
         {
           type: 'p',
-          text: 'The app requires a minimum age of 13. To use {{brandName}} without an adult\'s authorization you must be at least {{minimumAge}}. If you are younger, you need authorization from your parent or legal guardian.',
+          text: 'The app accepts users between 15 and 70 years old. To use {{brandName}} without an adult\'s authorization you must be at least {{minimumAge}}. If you are younger, you need authorization from your parent or legal guardian.',
         },
       ],
     },

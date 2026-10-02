@@ -32,11 +32,13 @@ export function OrderTimeline({ status }: OrderTimelineProps) {
     )
   }
 
+  // En celular los 5 pasos no entran en una fila: se apilan en vertical
+  // (círculo + etiqueta al lado); desde sm vuelve a ser la línea horizontal.
   return (
-    <div className="flex items-center">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-0">
       {timeline.steps.map(({ step, label, isDone, isCurrent, isLast }, index) => (
-        <div key={step} className={cn("flex items-center", !isLast && "flex-1")}>
-          <div className="flex flex-col items-center gap-1">
+        <div key={step} className={cn("flex items-center", !isLast && "sm:flex-1")}>
+          <div className="flex items-center gap-2 sm:flex-col sm:gap-1">
             <div
               className={cn(
                 "flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-bold",
@@ -46,12 +48,12 @@ export function OrderTimeline({ status }: OrderTimelineProps) {
             >
               {isDone ? <Check size={13} /> : index + 1}
             </div>
-            <span className={cn("text-center text-[0.7rem] leading-tight", isCurrent ? "font-semibold text-foreground" : "text-muted-foreground")} style={{ maxWidth: 80 }}>
+            <span className={cn("text-sm leading-tight sm:max-w-20 sm:text-center sm:text-[0.7rem]", isCurrent ? "font-semibold text-foreground" : "text-muted-foreground")}>
               {label}
             </span>
           </div>
           {!isLast && (
-            <div className={cn("mx-1 h-0.5 flex-1", isDone ? "bg-primary" : "bg-border")} style={{ marginBottom: 20 }} />
+            <div className={cn("mx-1 mb-5 hidden h-0.5 flex-1 sm:block", isDone ? "bg-primary" : "bg-border")} />
           )}
         </div>
       ))}

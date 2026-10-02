@@ -30,7 +30,7 @@ const TILES = [
 
 export function AdminPage() {
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <Link to="/dashboard" className="flex items-center gap-3 text-decoration-none">
           <img src="/logo.png" alt="" className="h-9 w-9" />

@@ -8,7 +8,8 @@ import type { LegalDocumentContent } from '../types';
  * se recogen o a quién se envían, este texto debe actualizarse y su versión
  * subirse en ../versions.ts y apps/api/config/legal.php.
  *
- * BORRADOR: requiere revisión del responsable y de un profesional jurídico.
+ * Revisado y aprobado por el responsable de SanKen (v1.1). v1.2: rango de
+ * edad 15–70 (sección Menores), aplicado a pedido del responsable.
  */
 export const privacyEs: LegalDocumentContent = {
   title: 'Política de Privacidad',
@@ -92,6 +93,16 @@ export const privacyEs: LegalDocumentContent = {
               'Tú y las personas con las que conversas.',
             ],
             [
+              'Soporte',
+              'Solicitudes que envías al equipo de {{brandName}} (tipo, asunto, mensajes y su estado) y las respuestas del equipo.',
+              'Tú, en la sección Soporte.',
+            ],
+            [
+              'Check-in semanal',
+              'Cómo te sentiste con tus entrenamientos esa semana, si quisiste contarnos algo (y tu comentario, si lo escribiste), si lo pospusiste y, como contexto, tu rutina activa y cuántas sesiones completaste esa semana.',
+              'Tú, al responder el check-in (opcional).',
+            ],
+            [
               'Pedidos de la tienda',
               'Nombre, correo, teléfono, número de WhatsApp, departamento, ciudad, dirección, información adicional, productos, importes, estado del pedido, transportadora y número de guía.',
               'Tú, al hacer un pedido; el equipo de {{brandName}}, al gestionarlo.',
@@ -127,6 +138,8 @@ export const privacyEs: LegalDocumentContent = {
             'Permitir la comunicación con tu entrenador (o con tus clientes, si eres entrenador).',
             'Mostrarte en rankings públicos únicamente si activas la opción "Rankings públicos" (puedes desactivarla cuando quieras), y en las clasificaciones de los retos en los que participes.',
             'Revisar los récords que envíes con video y las denuncias de contenido.',
+            'Atender tus solicitudes de soporte (dudas, reclamos, observaciones, sugerencias o problemas) y responderte.',
+            'Preguntarte una vez por semana cómo te sentiste con tus entrenamientos, para detectar dudas o problemas y mejorar las rutinas. Hoy tus respuestas no cambian tu rutina automáticamente; si en el futuro se usan para ajustarla, se informará en esta política.',
             'Gestionar y entregar tus pedidos de la tienda y contactarte sobre ellos.',
             'Enviarte notificaciones push cuando las hayas activado, y correos transaccionales (verificación de correo, recuperación de contraseña).',
             'Mantener la seguridad del servicio, prevenir abusos y fraudes, y aplicar los Términos y Condiciones.',
@@ -145,7 +158,7 @@ export const privacyEs: LegalDocumentContent = {
       blocks: [
         {
           type: 'p',
-          text: 'Algunos datos que registras en {{brandName}} (peso, estatura, edad, sexo, composición y medidas corporales, calidad de sueño, energía, dolor muscular y alimentación) pueden considerarse datos relativos a la salud o datos sensibles según la ley aplicable. Por eso te pedimos una autorización específica y separada para tratarlos.',
+          text: 'Algunos datos que registras en {{brandName}} (peso, estatura, edad, sexo, composición y medidas corporales, calidad de sueño, energía, dolor muscular, alimentación y cómo te sentiste con tus entrenamientos en el check-in semanal) pueden considerarse datos relativos a la salud o datos sensibles según la ley aplicable. Por eso te pedimos una autorización específica y separada para tratarlos.',
         },
         {
           type: 'list',
@@ -175,7 +188,7 @@ export const privacyEs: LegalDocumentContent = {
           items: [
             'Tu entrenador: si te vinculas con un entrenador en {{brandName}}, podrá ver la información necesaria para acompañarte (tu nombre, rutinas, entrenamientos y progreso) y conversar contigo por chat.',
             'Otros usuarios: tu nombre y tus marcas aparecen en rankings solo si activas "Rankings públicos"; en los retos en los que participas, tu nombre y avance aparecen en la clasificación del reto.',
-            'Equipo de administración de {{brandName}}: acceso limitado a lo necesario para soporte, moderación, revisión de récords y gestión de pedidos.',
+            'Equipo de administración de {{brandName}}: acceso limitado a lo necesario para soporte, moderación, revisión de récords y gestión de pedidos. Tus solicitudes de soporte y tus respuestas del check-in semanal solo las ve este equipo — no tu entrenador ni otros usuarios.',
             'Proveedores técnicos que prestan servicios a {{brandName}} (ver sección 6), solo con los datos que cada uno necesita.',
             'Empresas de transporte: cuando corresponda, la transportadora que entregue tu pedido recibe el nombre, teléfono y dirección de entrega.',
             'Autoridades: cuando una ley o una orden de autoridad competente lo exija.',
@@ -307,7 +320,7 @@ export const privacyEs: LegalDocumentContent = {
       blocks: [
         {
           type: 'p',
-          text: 'La aplicación solicita una edad mínima de 13 años. Para usar {{brandName}} sin autorización de un adulto debes tener al menos {{minimumAge}}. Si eres menor de esa edad, necesitas la autorización de tu madre, padre o representante legal.',
+          text: 'La aplicación admite usuarios de entre 15 y 70 años. Para usar {{brandName}} sin autorización de un adulto debes tener al menos {{minimumAge}}. Si eres menor de esa edad, necesitas la autorización de tu madre, padre o representante legal.',
         },
       ],
     },

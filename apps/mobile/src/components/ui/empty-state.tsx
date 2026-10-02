@@ -33,7 +33,7 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
     <ThemedView style={styles.container}>
       <Animated.View style={iconStyle}>
         <ThemedView type="backgroundElement" style={styles.iconCircle}>
-          <Icon icon={icon} size={24} color={theme.textSecondary} />
+          <Icon icon={icon} size={20} color={theme.textSecondary} />
         </ThemedView>
       </Animated.View>
       <ThemedText type="smallBold" style={styles.centerText}>
@@ -62,14 +62,14 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     gap: Spacing.two,
-    paddingVertical: Spacing.five,
+    paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.four,
     backgroundColor: 'transparent',
   },
   iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },

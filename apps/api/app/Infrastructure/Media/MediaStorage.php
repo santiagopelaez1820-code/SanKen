@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Infrastructure\Media;
+
+use Illuminate\Http\UploadedFile;
+
+/**
+ * Dónde se guardan los archivos que suben usuarios y admins (avatar, imagen
+ * de producto, videos de ejercicio y de PR). Lo que se guarda en la columna
+ * de la base es siempre lo que devuelve store(): una URL absoluta de
+ * Cloudinary o una ruta relativa "/storage/..." en modo local. Los clientes
+ * resuelven ambas con ApiClient::mediaUrl() (packages/core).
+ *
+ * Implementación según MEDIA_STORAGE (ver AppServiceProvider):
+ * CloudinaryMediaStorage en producción, LocalPublicMediaStorage en dev/tests.
+ */
+interface MediaStorage
+{
+    /**
+     * Guarda $file en el destino de $slot y borra el archivo apuntado por
+     * $previousUrl si es nuestro y ya no corresponde. Nunca deja la fila
+     * sin archivo: si la subida falla, aborta antes de borrar nada.
+     */
+    public function store(UploadedFile $file, MediaSlot $slot, ?string $previousUrl, string $failureMessage): string;
+
+    /**
+     * Borra el archivo de esa URL si lo subió esta app (Cloudinary dentro de
+     * nuestra carpeta raíz, o "/storage/..." local). Una URL ajena (link
+     * externo pegado por un admin) se ignora a propósito.
+     */
+    public function delete(?string $url): void;
+}

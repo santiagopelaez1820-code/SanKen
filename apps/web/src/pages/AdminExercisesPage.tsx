@@ -97,7 +97,7 @@ export function AdminExercisesPage() {
   }
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Ejercicios</h1>
 
@@ -214,10 +214,10 @@ export function AdminExercisesPage() {
             <ul className="divide-y divide-border">
               {response.data.map((exercise) => (
                 <li key={exercise.id} className="flex flex-col gap-2 py-2.5">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <button
                       onClick={() => startEdit(exercise)}
-                      className={`flex-1 text-left text-sm ${exercise.is_active ? "" : "opacity-50"}`}
+                      className={`min-w-0 flex-1 basis-48 text-left text-sm ${exercise.is_active ? "" : "opacity-50"}`}
                     >
                       {exercise.name}
                       <span className="ml-1 text-xs text-muted-foreground">

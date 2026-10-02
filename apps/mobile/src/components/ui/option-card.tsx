@@ -43,6 +43,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: Spacing.three,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 4,
   },
 });

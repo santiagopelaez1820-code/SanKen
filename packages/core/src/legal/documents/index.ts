@@ -14,10 +14,11 @@ const CONTENT: Record<LegalDocumentId, Record<LegalLocale, LegalDocumentContent>
 };
 
 /**
- * El español es el texto de referencia. La traducción al inglés NO tiene
- * revisión jurídica — pasar a true solo cuando un profesional la valide.
+ * El español es el texto de referencia. La traducción al inglés fue revisada
+ * por el responsable; si se agrega un idioma nuevo, arranca en false hasta
+ * que alguien lo revise (se muestra un aviso en la página del documento).
  */
-const TRANSLATION_REVIEWED: Record<LegalLocale, boolean> = { es: true, en: false };
+const TRANSLATION_REVIEWED: Record<LegalLocale, boolean> = { es: true, en: true };
 
 export function getLegalDocument(id: LegalDocumentId, locale: LegalLocale): LegalDocument {
   return {

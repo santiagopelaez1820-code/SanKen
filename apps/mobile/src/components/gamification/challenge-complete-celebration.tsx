@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: Spacing.two,
   },
-  title: { fontSize: 26, lineHeight: 32, textAlign: 'center' },
+  title: { fontSize: 24, lineHeight: 30, textAlign: 'center' },
   subtitle: { textAlign: 'center', marginTop: Spacing.one },
   button: {
     alignSelf: 'stretch',

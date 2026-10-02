@@ -21,11 +21,13 @@ export default function AppTabs() {
 
   return (
     <Tabs>
-      <TabSlot style={{ height: '100%' }} />
+      {/* La barra de tabs web es un header flotante (position: absolute): sin
+          este padding tapaba el encabezado de cada pantalla. */}
+      <TabSlot style={styles.slot} />
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton icon={Home}>Home</TabButton>
+            <TabButton icon={Home}>Inicio</TabButton>
           </TabTrigger>
           <TabTrigger name="dashboard" href="/dashboard" asChild>
             <TabButton icon={BarChart3}>Progreso</TabButton>
@@ -105,6 +107,8 @@ export function CustomTabList(props: TabListProps) {
 }
 
 const styles = StyleSheet.create({
+  // Alto del header flotante: padding del contenedor + pastilla + botones.
+  slot: { height: '100%', paddingTop: 64 },
   tabListContainer: {
     position: 'absolute',
     width: '100%',
@@ -130,8 +134,8 @@ const styles = StyleSheet.create({
     marginRight: 'auto',
   },
   brandLogo: {
-    width: 22,
-    height: 22,
+    width: 30,
+    height: 30,
   },
   brandText: {},
   pressed: {

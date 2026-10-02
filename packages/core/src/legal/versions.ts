@@ -12,8 +12,8 @@ import type { ConsentAcceptanceFields, ConsentType, LegalDocumentId, LegalDocume
  */
 export const LEGAL_DOCUMENTS: Record<LegalDocumentId, LegalDocumentMeta> = {
   terms: { id: 'terms', version: '1.0', updatedAt: '2026-09-28', status: 'approved' },
-  privacy: { id: 'privacy', version: '1.0', updatedAt: '2026-09-28', status: 'approved' },
-  cookies: { id: 'cookies', version: '1.0', updatedAt: '2026-09-28', status: 'approved' },
+  privacy: { id: 'privacy', version: '1.2', updatedAt: '2026-09-30', status: 'approved' },
+  cookies: { id: 'cookies', version: '1.1', updatedAt: '2026-09-30', status: 'approved' },
 };
 
 /** Documento que respalda cada consentimiento (espejo de `consents` en config/legal.php). */

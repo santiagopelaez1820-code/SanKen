@@ -1,16 +1,17 @@
 # Documentos legales y consentimiento
 
-Estado: implementación técnica completa. **Contenido legal en BORRADOR**: falta
-completar los datos del responsable y la revisión de un profesional jurídico.
+Estado: implementación técnica completa. Contenido legal (ES y EN) revisado y
+aprobado por el responsable de SanKen: Términos v1.0, Privacidad v1.2 (v1.2: edad
+15–70), Cookies v1.1 (v1.1: preferencia "tarjeta de marca" de la app móvil).
 
 ## Dónde vive cada cosa
 
 | Qué | Dónde |
 |---|---|
 | Versión vigente (fuente de verdad del servidor) | `apps/api/config/legal.php` |
-| Texto de los documentos (ES referencia, EN sin revisión jurídica) | `packages/core/src/legal/documents/*.ts` |
+| Texto de los documentos (ES referencia, EN revisado) | `packages/core/src/legal/documents/*.ts` |
 | Versión mostrada en web/mobile | `packages/core/src/legal/versions.ts` (debe coincidir con `config/legal.php`) |
-| Datos del responsable (hoy `null` = "[Pendiente: …]") | `packages/core/src/legal/owner-info.ts` |
+| Datos del responsable (`null` = "[Pendiente: …]"; hoy todos completos) | `packages/core/src/legal/owner-info.ts` |
 | Textos de interfaz (casillas, banner, re-aceptación) ES/EN | `packages/core/src/legal/strings.ts` |
 | Modelo de consentimiento de cookies (web) | `packages/core/src/legal/cookies.ts` |
 | Registro de consentimientos (append-only) | tabla `user_consents`, modelo `App\Models\UserConsent` |

@@ -10,6 +10,7 @@ import { estimateWorkoutMinutes, formatUnlockCountdown } from '@sanken/core';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { ChallengesRow } from '@/components/dashboard/challenges-row';
+import { DailyTipCard } from '@/components/dashboard/daily-tip-card';
 import { PerformanceHero } from '@/components/dashboard/performance-hero';
 import { StreakWidget } from '@/components/dashboard/streak-widget';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -18,6 +19,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
 import { Icon } from '@/components/ui/icon';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AnimatedLogoMark } from '@/components/brand/animated-logo-mark';
 import { MoreMenu } from '@/components/layout/more-menu';
 import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { BottomTabInset, glowShadow, MaxContentWidth, Spacing } from '@/constants/theme';
@@ -33,6 +35,9 @@ import { findNextDay, useRoutineStore } from '@/store/routine-store';
 import { useThemeStore } from '@/store/theme-store';
 import { useWorkoutHistoryStore } from '@/store/workout-history-store';
 import { useWorkoutStore } from '@/store/workout-store';
+
+/** Ancho del isotipo animado de la tarjeta de marca. */
+const BRAND_MARK_WIDTH = 76;
 
 function greeting() {
   const hour = new Date().getHours();
@@ -176,6 +181,7 @@ export default function HomeScreen() {
           </View>
         </ThemedView>
 
+        {/* Tarjeta de marca compacta: logo + lema centrados, siempre visible. */}
         <Animated.View entering={FadeInUp.duration(360)}>
           <ThemedView
             ref={brandCardRef}
@@ -183,21 +189,26 @@ export default function HomeScreen() {
             style={[styles.brandCard, { borderColor: `${theme.accent}30` }, glowShadow(theme.accent)]}>
             <LinearGradient
               colors={[`${theme.accent}33`, `${theme.accent}00`]}
-              start={{ x: 0.15, y: 0 }}
-              end={{ x: 0.85, y: 1 }}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
               style={StyleSheet.absoluteFill}
             />
-            <Image source={require('@/assets/images/logo-full.png')} style={styles.brandLogo} resizeMode="contain" />
-            <ThemedView style={styles.brandSloganRow}>
-              {['ENTRENA', 'PROGRESA', 'SUPÉRATE'].map((word, i) => (
-                <ThemedView key={word} style={styles.brandSloganItem}>
-                  {i > 0 && (
-                    <ThemedView style={[styles.brandDot, { backgroundColor: theme.accent }]} />
-                  )}
-                  <ThemedText type="small" style={[styles.brandSloganWord, { color: theme.accent }]}>
-                    {word}
-                  </ThemedText>
-                </ThemedView>
+            {/* Isotipo que se redibuja en bucle (misma técnica que la
+                intro de apertura) + el wordmark real debajo — la misma
+                composición que logo-full.png. */}
+            <View style={styles.brandLogo} accessible accessibilityLabel="SanKen">
+              <AnimatedLogoMark width={BRAND_MARK_WIDTH} onLight={!isDark} />
+              <Image
+                source={require('@/assets/images/brand-wordmark.png')}
+                style={styles.brandWordmark}
+                resizeMode="contain"
+              />
+            </View>
+            <ThemedView style={styles.brandSloganColumn}>
+              {['ENTRENA', 'PROGRESA', 'SUPÉRATE'].map((word) => (
+                <ThemedText key={word} type="caption" style={[styles.brandSloganWord, { color: theme.accent }]}>
+                  {word}
+                </ThemedText>
               ))}
             </ThemedView>
           </ThemedView>
@@ -209,7 +220,7 @@ export default function HomeScreen() {
           </ThemedView>
         )}
 
-        {isLoading && <Skeleton height={200} borderRadius={Spacing.four} />}
+        {isLoading && <Skeleton height={168} borderRadius={Spacing.four} />}
 
         {hasNoRoutine && !isLoading && (
           <ThemedView type="backgroundElement" style={styles.card}>
@@ -346,6 +357,10 @@ export default function HomeScreen() {
           </Animated.View>
         )}
 
+        <Animated.View entering={FadeInUp.delay(100).duration(320)}>
+          <DailyTipCard />
+        </Animated.View>
+
         <Animated.View entering={FadeInUp.delay(120).duration(320)}>
           <ChallengesRow />
         </Animated.View>
@@ -388,7 +403,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: Spacing.three,
     paddingTop: Spacing.three,
     paddingBottom: BottomTabInset + Spacing.three,
   },
@@ -403,8 +418,8 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   title: {
-    fontSize: 30,
-    lineHeight: 36,
+    fontSize: 24,
+    lineHeight: 30,
   },
   headerActions: {
     flexDirection: 'row',
@@ -428,66 +443,56 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
   },
   brandCard: {
-    alignItems: 'center',
-    gap: Spacing.three,
-    borderRadius: Spacing.four,
-    borderWidth: 1,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.five,
-    overflow: 'hidden',
-  },
-  brandLogo: { width: 192, height: 131 },
-  brandSloganRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'transparent',
+    gap: Spacing.three,
+    borderRadius: Spacing.three,
+    borderWidth: 1,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.two,
+    overflow: 'hidden',
   },
-  brandSloganItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  brandLogo: { alignItems: 'center', gap: 4 },
+  // Proporción real de brand-wordmark.png (865×127).
+  brandWordmark: { width: BRAND_MARK_WIDTH, height: BRAND_MARK_WIDTH / (865 / 127) },
+  brandSloganColumn: {
     backgroundColor: 'transparent',
   },
   brandSloganWord: {
-    fontSize: 12,
+    fontSize: 10,
+    lineHeight: 13,
     fontWeight: '800',
     letterSpacing: 2,
-    marginHorizontal: Spacing.one,
-  },
-  brandDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 1.5,
   },
   centerText: { textAlign: 'center' },
   card: {
     borderRadius: Spacing.four,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
+    paddingVertical: Spacing.three,
     alignItems: 'center',
   },
   todayCard: {
     borderRadius: Spacing.four,
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.three,
+    paddingVertical: Spacing.three,
     borderWidth: 1,
   },
   todayTitle: {
-    fontSize: 26,
-    lineHeight: 31,
-    marginBottom: Spacing.three,
+    fontSize: 20,
+    lineHeight: 26,
+    marginBottom: Spacing.two,
   },
   completedSubtitle: {
-    marginTop: -Spacing.two,
-    marginBottom: Spacing.three,
+    marginTop: -Spacing.one,
+    marginBottom: Spacing.two,
   },
   lockBanner: {
-    marginTop: Spacing.three,
+    marginTop: Spacing.two,
     borderRadius: Spacing.three,
     borderWidth: 1,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two,
     gap: 2,
   },
   challengeBanner: {
@@ -498,15 +503,15 @@ const styles = StyleSheet.create({
   },
   todayStats: {
     flexDirection: 'row',
-    gap: Spacing.five,
+    gap: Spacing.four,
     backgroundColor: 'transparent',
   },
   todayStat: {
     backgroundColor: 'transparent',
   },
   todayStatValue: {
-    fontSize: 24,
-    lineHeight: 28,
+    fontSize: 20,
+    lineHeight: 24,
   },
   todayStatLabel: {
     letterSpacing: 0.5,
@@ -522,6 +527,6 @@ const styles = StyleSheet.create({
   // (`todayCard`). Sin este override quedaba un rectángulo del color de
   // fondo general de la app, mal encajado, arriba y abajo de "Comenzar" —
   // el mismo mecanismo que causaba el rectángulo reportado.
-  spacer: { height: Spacing.three, backgroundColor: 'transparent' },
+  spacer: { height: Spacing.two, backgroundColor: 'transparent' },
   buttonGap: { height: Spacing.two, backgroundColor: 'transparent' },
 });

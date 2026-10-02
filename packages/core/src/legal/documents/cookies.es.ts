@@ -9,7 +9,7 @@ import type { LegalDocumentContent } from '../types';
  * clave de almacenamiento nueva, debe agregarse acá y en COOKIE_INVENTORY
  * (../cookies.ts), y subirse la versión del documento.
  *
- * BORRADOR: requiere revisión del responsable y de un profesional jurídico.
+ * Revisado y aprobado por el responsable de SanKen (v1.0).
  */
 export const cookiesEs: LegalDocumentContent = {
   title: 'Política de Cookies',
@@ -98,7 +98,7 @@ export const cookiesEs: LegalDocumentContent = {
       blocks: [
         {
           type: 'p',
-          text: 'La app móvil no usa cookies de navegador ni tecnologías de seguimiento publicitario o analítico. Guarda en el almacenamiento seguro de tu teléfono solo lo necesario para funcionar (tu sesión, tu carrito, el entrenamiento en curso) y tus preferencias (tema visual, tutoriales vistos y si activaste las notificaciones). La sesión se borra al cerrar sesión, y todo lo demás al desinstalar la app.',
+          text: 'La app móvil no usa cookies de navegador ni tecnologías de seguimiento publicitario o analítico. Guarda en el almacenamiento seguro de tu teléfono solo lo necesario para funcionar (tu sesión, tu carrito, el entrenamiento en curso) y tus preferencias (tema visual, tutoriales vistos, si activaste las notificaciones y si ocultaste la tarjeta de marca de Inicio). La sesión se borra al cerrar sesión, y todo lo demás al desinstalar la app.',
         },
       ],
     },

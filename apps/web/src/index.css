@@ -185,3 +185,53 @@
     animation: shimmer 1.8s infinite;
   }
 }
+/*
+ * Choque de nombres Bootstrap × Tailwind (auditoría responsive 2026-09-29).
+ * Las dos librerías conviven y comparten nombres de clase con valores
+ * distintos; la regla de Bootstrap gana (va sin @layer y con !important):
+ *
+ * 1) Títulos: Bootstrap da tamaño propio a h1–h6, así que un <h2
+ *    className="text-sm"> salía gigante. Bootstrap no define clases de
+ *    tamaño text-xs…text-4xl, así que cuando un título las lleva la intención
+ *    es inequívoca: se respeta el tamaño de Tailwind.
+ */
+:is(h1, h2, h3, h4, h5, h6).text-xs { font-size: var(--text-xs, 0.75rem); line-height: var(--text-xs--line-height, 1.333); }
+:is(h1, h2, h3, h4, h5, h6).text-sm { font-size: var(--text-sm, 0.875rem); line-height: var(--text-sm--line-height, 1.429); }
+:is(h1, h2, h3, h4, h5, h6).text-base { font-size: var(--text-base, 1rem); line-height: var(--text-base--line-height, 1.5); }
+:is(h1, h2, h3, h4, h5, h6).text-lg { font-size: var(--text-lg, 1.125rem); line-height: var(--text-lg--line-height, 1.556); }
+:is(h1, h2, h3, h4, h5, h6).text-xl { font-size: var(--text-xl, 1.25rem); line-height: var(--text-xl--line-height, 1.4); }
+:is(h1, h2, h3, h4, h5, h6).text-2xl { font-size: var(--text-2xl, 1.5rem); line-height: var(--text-2xl--line-height, 1.333); }
+:is(h1, h2, h3, h4, h5, h6).text-3xl { font-size: var(--text-3xl, 1.875rem); line-height: var(--text-3xl--line-height, 1.2); }
+:is(h1, h2, h3, h4, h5, h6).text-4xl { font-size: var(--text-4xl, 2.25rem); line-height: var(--text-4xl--line-height, 1.111); }
+
+/*
+ * 2) Espaciado nivel 5: en Bootstrap p-5/px-5/gap-5 = 3rem (48px); en
+ *    Tailwind 1.25rem. En celular 48px de relleno por tarjeta (más el del
+ *    contenedor) se come un tercio de la pantalla: por debajo de 576px se
+ *    usa el valor de Tailwind. En tablet/escritorio no cambia nada.
+ */
+@media (max-width: 575.98px) {
+  .p-5 { padding: 1.25rem !important; }
+  .px-5 { padding-right: 1.25rem !important; padding-left: 1.25rem !important; }
+  .py-5 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+  .pt-5 { padding-top: 1.25rem !important; }
+  .pb-5 { padding-bottom: 1.25rem !important; }
+  .ps-5 { padding-left: 1.25rem !important; }
+  .pe-5 { padding-right: 1.25rem !important; }
+  .gap-5 { gap: 1.25rem !important; }
+}
+
+/*
+ * Áreas táctiles en celular / pantallas táctiles: los botones sm/xs (28/24px)
+ * y las casillas de Bootstrap (14px) son difíciles de tocar con el dedo. Solo
+ * crece el mínimo en táctil o por debajo de 640px; en escritorio con mouse no
+ * cambia nada.
+ */
+@media (pointer: coarse), (max-width: 639.98px) {
+  [data-slot="button"]:is([data-size="sm"], [data-size="xs"]) { min-height: 2.25rem; }
+  [data-slot="button"]:is([data-size="icon"], [data-size="icon-sm"], [data-size="icon-xs"]) { min-width: 2.25rem; min-height: 2.25rem; }
+  .form-check:not(.form-switch) > .form-check-input[type="checkbox"],
+  .form-check:not(.form-switch) > .form-check-input[type="radio"] { width: 1.25rem; height: 1.25rem; margin-top: 0.1rem; }
+  .form-check:not(.form-switch) { padding-left: 1.875rem; }
+  .form-check:not(.form-switch) > .form-check-input { margin-left: -1.875rem; }
+}

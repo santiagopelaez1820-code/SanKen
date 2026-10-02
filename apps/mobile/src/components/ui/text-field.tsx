@@ -39,7 +39,7 @@ export function TextField({ label, style, secureTextEntry, ...props }: TextField
             hitSlop={8}
             style={styles.toggle}
             accessibilityLabel={isVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-            <Icon icon={isVisible ? EyeOff : Eye} size={20} color={colors.textSecondary} />
+            <Icon icon={isVisible ? EyeOff : Eye} size={18} color={colors.textSecondary} />
           </Pressable>
         )}
       </View>
@@ -59,11 +59,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: Spacing.three,
     paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.three,
-    fontSize: 16,
+    paddingVertical: Spacing.two + 3,
+    fontSize: 15,
   },
   inputWithToggle: {
-    paddingRight: Spacing.three * 2 + 20,
+    paddingRight: Spacing.three * 2 + 18,
   },
   toggle: {
     position: 'absolute',

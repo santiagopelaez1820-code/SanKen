@@ -178,7 +178,7 @@ export function WorkoutSessionPage() {
 
   if (sessionQuery.isLoading || !session) {
     return (
-      <main className="px-6 py-8">
+      <main className="px-4 py-6 sm:px-6 sm:py-8">
         <div className="mx-auto flex max-w-lg flex-col gap-4">
           <Skeleton className="h-8 w-2/3" />
           <Skeleton className="h-48 w-full" />
@@ -196,7 +196,7 @@ export function WorkoutSessionPage() {
   // Feedback post-sesión: máquina de estados derivada de `session`, sin estado propio.
   if (session.completed && session.completed_as_planned === null) {
     return (
-      <main className="px-6 py-8">
+      <main className="px-4 py-6 sm:px-6 sm:py-8">
         <LevelUpModal result={levelUpResult} onClose={() => setLevelUpResult(null)} />
         <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
           <h1 className="font-heading text-2xl font-medium tracking-tight">¡Entrenamiento completado!</h1>
@@ -222,7 +222,7 @@ export function WorkoutSessionPage() {
 
   if (session.completed && session.completed_as_planned !== null) {
     return (
-      <main className="px-6 py-8">
+      <main className="px-4 py-6 sm:px-6 sm:py-8">
         <div className="mx-auto flex max-w-lg flex-col items-center gap-6 text-center">
           <h1 className="font-heading text-2xl font-medium tracking-tight">Buen trabajo</h1>
           <p className="text-sm text-muted-foreground">
@@ -244,7 +244,7 @@ export function WorkoutSessionPage() {
   const exerciseJustCompleted = currentExercise.sets.length >= currentExercise.target_sets
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-lg flex-col gap-4">
         <header className="flex items-center justify-between">
           <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Entrenamiento</p>
@@ -303,23 +303,23 @@ export function WorkoutSessionPage() {
         {(currentExercise.suggested_weight_kg !== null || suggestedRepsForNextSet !== null) && (
           <div className="grid grid-cols-2 gap-3">
             {currentExercise.suggested_weight_kg !== null && (
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="min-w-0 rounded-xl border border-border bg-card p-3 sm:p-4">
                 <p className="flex items-center gap-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                   <TrendingUp className="size-3.5 text-primary" />
                   Peso recomendado
                 </p>
-                <p className="mt-1 font-heading text-4xl font-bold text-primary tabular-nums">
+                <p className="mt-1 font-heading text-3xl font-bold text-primary tabular-nums sm:text-4xl">
                   {currentExercise.suggested_weight_kg} kg
                 </p>
               </div>
             )}
             {suggestedRepsForNextSet !== null && (
-              <div className="rounded-xl border border-border bg-card p-4">
+              <div className="min-w-0 rounded-xl border border-border bg-card p-3 sm:p-4">
                 <p className="flex items-center gap-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                   <TrendingUp className="size-3.5 text-primary" />
                   Reps recomendadas
                 </p>
-                <p className="mt-1 font-heading text-4xl font-bold text-primary tabular-nums">
+                <p className="mt-1 font-heading text-3xl font-bold text-primary tabular-nums sm:text-4xl">
                   {suggestedRepsForNextSet}
                 </p>
               </div>
@@ -391,7 +391,7 @@ export function WorkoutSessionPage() {
               <p className="mb-1.5 text-xs font-medium text-muted-foreground">Peso (kg) — deslizá la regla</p>
               <RulerSlider value={weightInput} onChange={setWeightInput} unit="kg" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
                 <p className="mb-1.5 text-xs font-medium text-muted-foreground">Repeticiones</p>
                 <Stepper value={repsInput} onChange={setRepsInput} step={1} unit="reps" />

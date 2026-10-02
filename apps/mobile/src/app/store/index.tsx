@@ -2,20 +2,23 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { router } from 'expo-router';
 import { FlatList, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ShoppingCart } from 'lucide-react-native';
+import { SearchX, ShoppingCart } from 'lucide-react-native';
 import type { ProductCategory } from '@sanken/core';
 
-import { CategoryChips } from '@/components/store/category-chips';
+import { CATEGORY_LABELS, CategoryChips } from '@/components/store/category-chips';
 import { ProductCard } from '@/components/store/product-card';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ErrorState } from '@/components/ui/error-state';
+import { SearchField } from '@/components/ui/search-field';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TutorialOverlay } from '@/components/tutorial/tutorial-overlay';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useTutorial } from '@/hooks/use-tutorial';
+import { filterProducts } from '@/lib/product-search';
 import { useAuthStore } from '@/store/auth-store';
 import { useCartStore } from '@/store/cart-store';
 import { useProductStore } from '@/store/product-store';
@@ -28,6 +31,7 @@ export default function StoreScreen() {
   // (compartido por todas las pantallas de /store), no acá.
   const itemCount = useCartStore((s) => s.getItemCount());
   const [category, setCategory] = useState<ProductCategory | null>(null);
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     loadProducts();
@@ -41,13 +45,13 @@ export default function StoreScreen() {
     [
       {
         ref: headerRef,
-        title: 'SanKen Store',
+        title: 'Tienda SanKen',
         description: 'Suplementos y merch pensados para tu entrenamiento, con envío a todo el país.',
       },
       {
         ref: headerListRef,
-        title: 'Explorá por categoría',
-        description: 'Filtrá por categoría o mirá los productos destacados arriba de la lista.',
+        title: 'Buscá y explorá',
+        description: 'Buscá por nombre o filtrá por categoría. Los destacados aparecen arriba de la lista.',
       },
       {
         ref: cartButtonRef,
@@ -59,30 +63,31 @@ export default function StoreScreen() {
     userId,
   );
 
+  const isSearching = query.trim().length > 0;
   const featured = useMemo(() => products.slice(0, 5), [products]);
+  // Búsqueda local sobre el catálogo ya cargado (GET /products no pagina):
+  // sin requests extra por tecla y combinada con la categoría elegida.
   const filtered = useMemo(
-    () => (category ? products.filter((p) => p.category === category) : products),
-    [products, category],
+    () => filterProducts(products, { category, query, categoryLabels: CATEGORY_LABELS }),
+    [products, category, query],
   );
 
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
         <View ref={headerRef} style={styles.header}>
-          <View>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
-              SANKEN
-            </ThemedText>
-            <ThemedText type="title" style={styles.title}>
-              Store
+          <View style={styles.titleRow}>
+            <BackButton fallbackHref="/" />
+            <ThemedText type="title" accessibilityRole="header">
+              Tienda
             </ThemedText>
           </View>
           <Pressable
             ref={cartButtonRef}
             onPress={() => router.push('/store/cart')}
-            accessibilityLabel="Ver carrito"
+            accessibilityLabel={itemCount > 0 ? `Ver carrito, ${itemCount} productos` : 'Ver carrito'}
             style={[styles.cartButton, { backgroundColor: theme.backgroundElement }]}>
-            <ShoppingCart size={22} color={theme.text} />
+            <ShoppingCart size={20} color={theme.text} />
             {itemCount > 0 && (
               <ThemedView style={[styles.badge, { backgroundColor: theme.accent }]}>
                 <ThemedText type="small" style={styles.badgeText}>
@@ -95,8 +100,9 @@ export default function StoreScreen() {
 
         {isLoadingProducts ? (
           <View style={styles.skeletonWrap}>
-            <Skeleton height={140} borderRadius={Spacing.four} />
-            <Skeleton height={220} borderRadius={Spacing.four} />
+            <Skeleton height={42} borderRadius={Spacing.three} />
+            <Skeleton height={120} borderRadius={Spacing.three} />
+            <Skeleton height={200} borderRadius={Spacing.three} />
           </View>
         ) : productsError && products.length === 0 ? (
           // Antes un error de red acá caía en el ListEmptyComponent de la
@@ -111,9 +117,14 @@ export default function StoreScreen() {
             numColumns={2}
             columnWrapperStyle={styles.column}
             contentContainerStyle={styles.listContent}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
             ListHeaderComponent={
               <View ref={headerListRef} style={styles.headerList}>
-                {featured.length > 0 && (
+                <SearchField value={query} onChangeText={setQuery} placeholder="Buscar productos…" />
+                {/* Con una búsqueda activa, los destacados solo empujarían
+                    los resultados fuera de la pantalla. */}
+                {!isSearching && featured.length > 0 && (
                   <View style={styles.section}>
                     <ThemedText type="smallBold">Destacados</ThemedText>
                     <ScrollView
@@ -129,6 +140,11 @@ export default function StoreScreen() {
                   </View>
                 )}
                 <CategoryChips value={category} onChange={setCategory} />
+                {isSearching && (
+                  <ThemedText type="small" themeColor="textSecondary" accessibilityLiveRegion="polite">
+                    {filtered.length === 1 ? '1 resultado' : `${filtered.length} resultados`}
+                  </ThemedText>
+                )}
               </View>
             }
             renderItem={({ item }) => (
@@ -137,11 +153,22 @@ export default function StoreScreen() {
               </View>
             )}
             ListEmptyComponent={
-              <EmptyState
-                icon={ShoppingCart}
-                title="No hay productos en esta categoría"
-                description="Probá con otra categoría."
-              />
+              isSearching ? (
+                <EmptyState
+                  icon={SearchX}
+                  title={`Sin resultados para “${query.trim()}”`}
+                  description={
+                    category ? 'Probá con otra palabra o quitá el filtro de categoría.' : 'Probá con otra palabra.'
+                  }
+                  action={{ label: 'Limpiar búsqueda', onPress: () => setQuery('') }}
+                />
+              ) : (
+                <EmptyState
+                  icon={ShoppingCart}
+                  title="No hay productos en esta categoría"
+                  description="Probá con otra categoría."
+                />
+              )
             }
           />
         )}
@@ -159,12 +186,12 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+    paddingTop: Spacing.two,
     gap: Spacing.three,
   },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' },
-  eyebrow: { textTransform: 'uppercase', letterSpacing: 1 },
-  title: { fontSize: 28, lineHeight: 32 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  // 44x44: mínimo táctil (mismo que el carrito del detalle de producto).
   cartButton: { width: 44, height: 44, borderRadius: Spacing.three, alignItems: 'center', justifyContent: 'center' },
   badge: {
     position: 'absolute',
@@ -177,13 +204,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 4,
   },
-  badgeText: { color: '#050505', fontWeight: '700', fontSize: 10 },
+  badgeText: { color: '#050505', fontWeight: '700', fontSize: 10, lineHeight: 12 },
   skeletonWrap: { gap: Spacing.three },
   listContent: { gap: Spacing.three, paddingBottom: BottomTabInset + Spacing.four },
   headerList: { gap: Spacing.three, marginBottom: Spacing.one },
   section: { gap: Spacing.two },
   featuredRow: { gap: Spacing.two },
-  featuredCard: { width: 180 },
+  featuredCard: { width: 164 },
   column: { gap: Spacing.three },
   gridItem: { flex: 1 },
 });

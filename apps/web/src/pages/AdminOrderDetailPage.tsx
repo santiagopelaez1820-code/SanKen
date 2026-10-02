@@ -96,7 +96,7 @@ export function AdminOrderDetailPage() {
 
   if (isLoading || !order || !form) {
     return (
-      <main className="px-6 py-8">
+      <main className="px-4 py-6 sm:px-6 sm:py-8">
         <div className="mx-auto max-w-3xl">
           <Skeleton className="h-40 w-full" />
         </div>
@@ -128,7 +128,7 @@ export function AdminOrderDetailPage() {
   }
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <Link to="/admin/orders" className="text-sm text-muted-foreground hover:text-foreground">
           ← Pedidos
@@ -158,7 +158,7 @@ export function AdminOrderDetailPage() {
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Correo</p>
-            <p className="text-sm">{order.customer_email}</p>
+            <p className="text-sm break-all">{order.customer_email}</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Teléfono</p>

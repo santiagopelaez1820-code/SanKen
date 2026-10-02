@@ -72,18 +72,49 @@ export const Fonts = Platform.select({
   },
 });
 
+/**
+ * Escala de espaciado "compacta" (SanKen 2.0): three/four/five bajaron de
+ * 16/24/32 a 14/20/28 para aprovechar mejor la altura en todas las
+ * pantallas a la vez — mismo sistema, misma proporción entre niveles, sin
+ * tocar cada padding a mano. `one`/`two` no cambian: son los mínimos
+ * táctiles/de respiración y bajarlos se sentía apretado.
+ */
 export const Spacing = {
   half: 2,
   one: 4,
   two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
+  three: 14,
+  four: 20,
+  five: 28,
+  six: 48,
+} as const;
+
+/**
+ * Escala tipográfica única de la app — `ThemedText` la consume por `type`.
+ * Cada nivel conserva una diferencia clara con el siguiente (jerarquía),
+ * y siempre con su `lineHeight` propio: antes varias pantallas bajaban el
+ * `fontSize` de `title`/`subtitle` pero heredaban el lineHeight 52/44
+ * original, que era la mayor fuente de altura "vacía" en cards y headers.
+ */
+export const Typography = {
+  /** Título de pantalla / diálogo. */
+  title: { fontSize: 24, lineHeight: 30 },
+  /** Título de sección o pregunta. */
+  subtitle: { fontSize: 19, lineHeight: 25 },
+  /** Cuerpo. */
+  body: { fontSize: 15, lineHeight: 21 },
+  /** Texto secundario, labels, botones. */
+  small: { fontSize: 13, lineHeight: 18 },
+  /** Captions, badges, eyebrows. */
+  caption: { fontSize: 11, lineHeight: 14 },
+  /** Número KPI/hero. */
+  stat: { fontSize: 32, lineHeight: 36 },
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+/** Ancho máximo de formularios de auth/onboarding — en tablet/web no se estiran a 800px. */
+export const FormMaxWidth = 420;
 
 /** Sombra real para cards protagonistas, en vez de depender solo del contraste de fondo. */
 export const CardShadow = {

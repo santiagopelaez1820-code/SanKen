@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { TextField } from '@/components/ui/text-field';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { FormMaxWidth, Spacing } from '@/constants/theme';
 import { useAuthStore } from '@/store/auth-store';
 
 export default function Verify2faScreen() {
@@ -75,14 +75,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.four,
-    gap: Spacing.four,
+    gap: Spacing.three,
   },
   title: { textAlign: 'center' },
-  subtitle: { textAlign: 'center', marginBottom: Spacing.two },
+  subtitle: { textAlign: 'center' },
   form: {
-    alignSelf: 'stretch',
-    maxWidth: MaxContentWidth,
-    gap: Spacing.three,
+    width: '100%',
+    maxWidth: FormMaxWidth,
+    gap: Spacing.two + 4,
   },
   error: { color: '#FF4D5E' },
 });

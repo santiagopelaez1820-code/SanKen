@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { router, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Linking, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MessageCircle } from 'lucide-react-native';
@@ -7,6 +7,7 @@ import { formatCurrency } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { Badge } from '@/components/ui/badge';
 import { ErrorState } from '@/components/ui/error-state';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -52,9 +53,7 @@ export default function PedidoDetailScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-          ← Mis pedidos
-        </ThemedText>
+        <BackButton label="Mis pedidos" fallbackHref="/pedidos" />
 
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <ThemedView style={styles.headerRow}>

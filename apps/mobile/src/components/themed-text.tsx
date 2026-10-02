@@ -1,10 +1,10 @@
 import { Platform, StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Fonts, ThemeColor } from '@/constants/theme';
+import { Fonts, ThemeColor, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
 export type ThemedTextProps = TextProps & {
-  type?: 'default' | 'title' | 'small' | 'smallBold' | 'subtitle' | 'link' | 'linkPrimary' | 'code' | 'stat';
+  type?: 'default' | 'title' | 'small' | 'smallBold' | 'caption' | 'subtitle' | 'link' | 'linkPrimary' | 'code' | 'stat';
   themeColor?: ThemeColor;
 };
 
@@ -24,6 +24,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
         type === 'title' && styles.title,
         type === 'small' && styles.small,
         type === 'smallBold' && styles.smallBold,
+        type === 'caption' && styles.caption,
         type === 'subtitle' && styles.subtitle,
         type === 'link' && styles.link,
         type === 'linkPrimary' && styles.linkPrimary,
@@ -36,51 +37,49 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
   );
 }
 
+// Los tamaños viven en `Typography` (constants/theme.ts) — una sola escala
+// para toda la app; acá solo se combinan con el peso de cada variante.
 const styles = StyleSheet.create({
   small: {
-    fontSize: 14,
-    lineHeight: 20,
+    ...Typography.small,
     fontWeight: 500,
   },
   smallBold: {
-    fontSize: 14,
-    lineHeight: 20,
+    ...Typography.small,
     fontWeight: 700,
   },
+  caption: {
+    ...Typography.caption,
+    fontWeight: 600,
+  },
   default: {
-    fontSize: 16,
-    lineHeight: 24,
+    ...Typography.body,
     fontWeight: 500,
   },
   title: {
-    fontSize: 48,
-    fontWeight: 600,
-    lineHeight: 52,
+    ...Typography.title,
+    fontWeight: 700,
   },
   subtitle: {
-    fontSize: 32,
-    lineHeight: 44,
+    ...Typography.subtitle,
     fontWeight: 600,
   },
   link: {
-    lineHeight: 30,
-    fontSize: 14,
+    ...Typography.small,
   },
   linkPrimary: {
-    lineHeight: 30,
-    fontSize: 14,
+    ...Typography.small,
   },
   code: {
     fontFamily: Fonts.mono,
     fontWeight: Platform.select({ android: 700 }) ?? 500,
     fontSize: 12,
   },
-  // Números hero (peso/reps/series/volumen) — mucho más grandes y pesados
-  // que subtitle, con tabular-nums para que no "salten" de ancho al cambiar
-  // de valor mientras se entrena.
+  // Números hero (peso/reps/series/volumen) — más grandes y pesados que
+  // subtitle, con tabular-nums para que no "salten" de ancho al cambiar de
+  // valor mientras se entrena.
   stat: {
-    fontSize: 48,
-    lineHeight: 52,
+    ...Typography.stat,
     fontWeight: 800,
     fontVariant: ['tabular-nums'],
   },

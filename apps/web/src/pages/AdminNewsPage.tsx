@@ -43,7 +43,7 @@ export function AdminNewsPage() {
   })
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Noticias</h1>
 
@@ -97,15 +97,15 @@ export function AdminNewsPage() {
           <ul className="flex flex-col gap-3">
             {news?.map((item) => (
               <li key={item.id} className="rounded-lg border border-border p-3">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1 basis-48">
                     <p className="text-sm font-medium">{item.title}</p>
                     <p className="text-xs text-muted-foreground">{item.body}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {item.published ? "Publicada" : "Borrador"}
                     </p>
                   </div>
-                  <div className="flex shrink-0 gap-2">
+                  <div className="flex shrink-0 flex-wrap gap-2">
                     <Button
                       size="sm"
                       variant="outline"

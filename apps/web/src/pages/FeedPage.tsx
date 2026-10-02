@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import type { ApiSuccess, FeedItem, NewChatMessageNotificationData } from "@sanken/core"
+import { isLinkedNotificationData, type ApiSuccess, type FeedItem, type NewChatMessageNotificationData } from "@sanken/core"
 import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -22,6 +22,28 @@ function FeedItemRow({ item, onRead }: { item: FeedItem; onRead: (item: FeedItem
         <h2 className="font-heading text-lg font-medium">{item.title}</h2>
         <p className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("es-AR")}</p>
         <p className="mt-2 text-sm text-muted-foreground">{item.body}</p>
+      </button>
+    )
+  }
+
+  // Notificaciones con título/cuerpo/link propios (soporte, check-in
+  // semanal): se muestran tal cual y abren su `link`.
+  if (isLinkedNotificationData(item.data)) {
+    const data = item.data
+    return (
+      <button
+        onClick={() => {
+          if (!item.read_at) onRead(item)
+          navigate(data.link)
+        }}
+        className={cn(
+          "w-full rounded-xl border border-border bg-card p-5 text-left",
+          !item.read_at && "border-primary/40 bg-primary/5"
+        )}
+      >
+        <p className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString("es-AR")}</p>
+        <p className="font-medium">{data.title}</p>
+        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{data.body}</p>
       </button>
     )
   }
@@ -80,7 +102,7 @@ export function FeedPage() {
   })
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-2xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Novedades</h1>
 

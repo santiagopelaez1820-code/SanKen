@@ -11,6 +11,7 @@ import {
   FileText,
   Flag,
   LayoutDashboard,
+  LifeBuoy,
   MessageCircle,
   Newspaper,
   Package,
@@ -44,7 +45,7 @@ export function buildNavSections(user: User | null): NavSection[] {
     {
       title: "Principal",
       items: [
-        { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard, primary: true },
+        { label: "Inicio", path: "/dashboard", icon: LayoutDashboard, primary: true },
         { label: "Entrenar", path: "/workout/precheck", icon: Dumbbell, primary: true },
         { label: "Progreso", path: "/progress", icon: BarChart3, primary: true },
         { label: "PR y Rankings", path: "/prs", icon: Trophy, primary: true },
@@ -60,6 +61,7 @@ export function buildNavSections(user: User | null): NavSection[] {
       items: [
         { label: "Novedades", path: "/feed", icon: Bell, badge: "feed" },
         { label: "Chat", path: "/chat", icon: MessageCircle, badge: "chat" },
+        { label: "Soporte", path: "/soporte", icon: LifeBuoy },
         ...(user?.role !== "trainer"
           ? [{ label: "Mi entrenador", path: "/my-trainer", icon: UserSquare2 }]
           : []),
@@ -87,6 +89,7 @@ export function buildNavSections(user: User | null): NavSection[] {
         { label: "Plantillas de rutina", path: "/admin/routine-templates", icon: ClipboardList },
         { label: "Plantillas de retos", path: "/admin/challenge-templates", icon: Flag },
         { label: "Solicitudes de PR", path: "/admin/pr-submissions", icon: Trophy },
+        { label: "Soporte", path: "/admin/soporte", icon: LifeBuoy },
         { label: "Reportes", path: "/admin/reports", icon: FileText },
         { label: "Novedades", path: "/admin/news", icon: Newspaper },
         { label: "Estadísticas", path: "/admin/stats", icon: ScrollText },

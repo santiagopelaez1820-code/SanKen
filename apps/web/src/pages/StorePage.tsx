@@ -40,7 +40,7 @@ export function StorePage() {
     [
       {
         target: headerRef,
-        title: "SanKen Store",
+        title: "Tienda SanKen",
         description: "Suplementos y merch pensados para tu entrenamiento, con envío a todo el país.",
       },
       {
@@ -68,10 +68,10 @@ export function StorePage() {
         >
           <div>
             <p className="sank-eyebrow sank-eyebrow--cyan mb-1">SanKen</p>
-            <h1 className="display-5 sank-stat mb-0">Store</h1>
+            <h1 className="display-5 sank-stat mb-0">Tienda</h1>
           </div>
           {/* position: fixed (no sticky): antes se quedaba junto al título
-              "Store" y desaparecía apenas se bajaba en la lista de
+              "Tienda" y desaparecía apenas se bajaba en la lista de
               productos — el cliente tenía que volver arriba para verlo de
               nuevo. `sticky` no alcanzaba a "engancharse" acá porque su
               contenedor directo (esta fila del título) es angosto — no le

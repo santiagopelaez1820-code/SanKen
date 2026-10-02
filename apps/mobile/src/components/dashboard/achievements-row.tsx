@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: Spacing.four,
     padding: Spacing.three,
-    gap: Spacing.three,
+    gap: Spacing.two,
   },
   header: {
     flexDirection: 'row',
@@ -81,7 +81,7 @@ const styles = StyleSheet.create({
     gap: Spacing.half,
     borderRadius: Spacing.three,
     borderWidth: 1,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 2,
     paddingHorizontal: Spacing.one,
   },
   locked: {

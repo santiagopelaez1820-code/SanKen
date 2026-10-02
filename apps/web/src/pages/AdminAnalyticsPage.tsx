@@ -109,7 +109,7 @@ export function AdminAnalyticsPage() {
   const referenceLabel = PREVIOUS_PERIOD_LABEL[period]
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Analítica de uso</h1>
@@ -118,7 +118,7 @@ export function AdminAnalyticsPage() {
           </p>
         </div>
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
           <ActiveUsersCard
             label="Activos hoy"
             value={overview?.active_today}
@@ -170,7 +170,10 @@ export function AdminAnalyticsPage() {
                     tick={{ fill: tickColor, fontSize: 11 }}
                     tickLine={false}
                     axisLine={{ stroke: axisStroke }}
-                    interval={activity.granularity === "hour" ? 2 : 0}
+                    // Recharts oculta las etiquetas que no entran según el ancho real
+                    // (antes el intervalo era fijo y en celular se encimaban).
+                    interval="preserveStartEnd"
+                    minTickGap={16}
                   />
                   <YAxis
                     tick={{ fill: tickColor, fontSize: 12 }}
@@ -195,7 +198,7 @@ export function AdminAnalyticsPage() {
           </div>
         </section>
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
           <div className="rounded-xl border border-border bg-card px-5 py-4">
             <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">Usuarios registrados</p>
             {overviewLoading ? (

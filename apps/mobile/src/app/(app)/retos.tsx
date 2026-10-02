@@ -288,12 +288,12 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.three,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34 },
+  pageTitle: { fontSize: 24, lineHeight: 30 },
   hero: {
     borderRadius: Spacing.four,
     borderWidth: 1,
-    padding: Spacing.four,
-    gap: Spacing.three,
+    padding: Spacing.three,
+    gap: Spacing.two,
   },
   heroHeader: {
     flexDirection: 'row',
@@ -302,9 +302,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   heroIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -313,8 +313,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   heroTitle: {
-    fontSize: 22,
-    lineHeight: 28,
+    fontSize: 19,
+    lineHeight: 24,
   },
   card: {
     borderRadius: Spacing.four,
@@ -325,8 +325,8 @@ const styles = StyleSheet.create({
   eyebrow: { letterSpacing: 1 },
   progressBlock: { gap: Spacing.one, backgroundColor: 'transparent' },
   progressRow: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: 'transparent' },
-  progressTrack: { height: 8, borderRadius: 4, overflow: 'hidden' },
-  progressFill: { height: '100%', borderRadius: 4 },
+  progressTrack: { height: 6, borderRadius: 3, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 3 },
   leaderboard: {
     gap: Spacing.one,
     borderTopWidth: 1,

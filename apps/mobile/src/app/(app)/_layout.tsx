@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Redirect } from 'expo-router';
 
 import AppTabs from '@/components/app-tabs';
+import { WeeklyCheckinSheet } from '@/components/support/weekly-checkin-sheet';
 import { registerForPushNotificationsAsync } from '@/lib/push';
 import { useAuthStore } from '@/store/auth-store';
 import { useFeedStore } from '@/store/feed-store';
@@ -38,5 +39,10 @@ export default function AppLayout() {
     return <Redirect href="/ubicacion" />;
   }
 
-  return <AppTabs />;
+  return (
+    <>
+      <AppTabs />
+      <WeeklyCheckinSheet />
+    </>
+  );
 }

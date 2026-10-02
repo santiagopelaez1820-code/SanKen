@@ -58,6 +58,7 @@ function TopNavLink({ item, active }: { item: ReturnType<typeof getPrimaryNavIte
 function TopNavOverflowMenu({
   id,
   label,
+  shortLabel,
   icon: Icon,
   sections,
   active,
@@ -66,6 +67,8 @@ function TopNavOverflowMenu({
 }: {
   id: string
   label: string
+  /** Etiqueta corta para laptops (992–1199px), donde la completa no entra. */
+  shortLabel?: string
   icon: typeof MoreHorizontal
   sections: { title: string; items: ReturnType<typeof getPrimaryNavItems> }[]
   active: boolean
@@ -82,7 +85,14 @@ function TopNavOverflowMenu({
         style={{ boxShadow: "none" }}
       >
         <Icon size={16} strokeWidth={active ? 2.4 : 2} className="flex-shrink-0" />
-        <span>{label}</span>
+        {shortLabel ? (
+          <>
+            <span className="d-xl-none">{shortLabel}</span>
+            <span className="d-none d-xl-inline">{label}</span>
+          </>
+        ) : (
+          <span>{label}</span>
+        )}
       </Dropdown.Toggle>
       <Dropdown.Menu>
         {sections.map((section, idx) => (
@@ -193,14 +203,16 @@ export function TopBar() {
       className="d-flex align-items-center justify-content-between px-3 px-lg-4 gap-3"
       style={{ height: 60, borderBottom: "1px solid var(--bs-border-color)", background: "var(--sanken-black)" }}
     >
-      <Link to="/dashboard" className="d-flex align-items-center gap-2 text-decoration-none flex-shrink-0" style={{ color: "inherit" }}>
-        <img src="/logo.png" alt="" width={22} height={22} />
-        <span className="fw-bold d-none d-sm-inline" style={{ fontFamily: "var(--bs-body-font-family)", letterSpacing: "-0.01em" }}>
+      <Link to="/dashboard" aria-label="SanKen — Inicio" className="-m-2 d-flex align-items-center gap-2 p-2 text-decoration-none flex-shrink-0" style={{ color: "inherit" }}>
+        <img src="/logo.png" alt="" width={34} height={34} />
+        <span className="fw-bold d-none d-sm-inline d-lg-none d-xl-inline" style={{ fontFamily: "var(--bs-body-font-family)", letterSpacing: "-0.01em" }}>
           SANKEN
         </span>
       </Link>
 
-      <span className="d-lg-none sank-eyebrow mb-0 text-truncate">{title}</span>
+      {/* me-auto: en móvil el título de la sección va pegado al logo (antes
+          quedaba centrado entre el logo y los íconos de la derecha). */}
+      <span className="d-lg-none sank-eyebrow mb-0 text-truncate me-auto" style={{ marginLeft: -6, minWidth: 0 }}>{title}</span>
 
       <nav className="d-none d-lg-flex align-items-center gap-1 flex-grow-1" style={{ minWidth: 0 }}>
         {/*
@@ -230,6 +242,7 @@ export function TopBar() {
           <TopNavOverflowMenu
             id="topnav-admin-menu"
             label="Administración"
+            shortLabel="Admin"
             icon={Shield}
             sections={[adminSection]}
             active={isAdminActive}

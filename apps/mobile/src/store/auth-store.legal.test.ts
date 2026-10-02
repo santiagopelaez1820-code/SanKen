@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
-import type { User } from '@sanken/core';
+import { currentConsentVersions, type User } from '@sanken/core';
 
 import { api } from '@/lib/api';
 import { useAuthStore } from './auth-store';
@@ -81,7 +81,7 @@ describe('Google sign-up consent', () => {
         accept_terms: true,
         accept_privacy: true,
         accept_health_data: true,
-        legal_versions: { terms: '1.0', privacy: '1.0', health_data: '1.0' },
+        legal_versions: currentConsentVersions(),
       })
     );
     expect(useAuthStore.getState().token).toBe('tok');
@@ -114,7 +114,7 @@ describe('re-acceptance', () => {
 
     expect(mockedPost).toHaveBeenCalledWith('/legal/consents', {
       consents: ['privacy', 'health_data'],
-      legal_versions: { privacy: '1.0', health_data: '1.0' },
+      legal_versions: currentConsentVersions(['privacy', 'health_data']),
     });
     expect(useAuthStore.getState().user?.pending_consents).toEqual([]);
   });

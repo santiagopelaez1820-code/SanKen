@@ -21,8 +21,8 @@
 return [
     'documents' => [
         'terms' => ['version' => '1.0', 'updated_at' => '2026-09-28', 'status' => 'approved'],
-        'privacy' => ['version' => '1.0', 'updated_at' => '2026-09-28', 'status' => 'approved'],
-        'cookies' => ['version' => '1.0', 'updated_at' => '2026-09-28', 'status' => 'approved'],
+        'privacy' => ['version' => '1.2', 'updated_at' => '2026-09-30', 'status' => 'approved'],
+        'cookies' => ['version' => '1.1', 'updated_at' => '2026-09-30', 'status' => 'approved'],
     ],
 
     /*

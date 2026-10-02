@@ -32,11 +32,11 @@ export function AdminReportsPage() {
   })
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Reportes</h1>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {(["pending", "resolved", "dismissed", "all"] as const).map((option) => (
             <Button
               key={option}
@@ -80,7 +80,7 @@ export function AdminReportsPage() {
                       onChange={(e) => setNotesByReport({ ...notesByReport, [report.id]: e.target.value })}
                       className="rounded-lg border border-input bg-background px-2 py-1.5 text-sm"
                     />
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         onClick={() => resolveMutation.mutate({ id: report.id, resolution: "resolved" })}

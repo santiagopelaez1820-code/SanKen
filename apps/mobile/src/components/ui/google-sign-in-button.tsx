@@ -79,7 +79,7 @@ export function GoogleSignInButton({ label, loading, disabled, onPress }: Google
         ) : (
           <>
             <GoogleLogo />
-            <ThemedText type="smallBold" style={{ color: theme.text }}>
+            <ThemedText type="smallBold" style={{ color: theme.text, fontSize: 14, lineHeight: 18 }}>
               {label}
             </ThemedText>
           </>
@@ -96,7 +96,8 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
     borderRadius: Spacing.three,
     borderWidth: 1,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 5,
+    minHeight: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },

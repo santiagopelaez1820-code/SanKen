@@ -100,7 +100,7 @@ export function AdminProductsPage() {
   }
 
   return (
-    <main className="px-6 py-8">
+    <main className="px-4 py-6 sm:px-6 sm:py-8">
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground">Productos</h1>
 
@@ -183,8 +183,8 @@ export function AdminProductsPage() {
             <ul className="divide-y divide-border">
               {products?.map((product) => (
                 <li key={product.id} className="flex flex-col gap-2 py-2.5">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className={`min-w-0 flex-1 text-sm ${product.active ? "" : "opacity-50"}`}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className={`min-w-0 flex-1 basis-48 text-sm ${product.active ? "" : "opacity-50"}`}>
                       {product.name}
                       <span className="ml-1 text-xs text-muted-foreground">
                         · {CATEGORY_LABELS[product.category]} · {formatCurrency(product.price)}

@@ -8,6 +8,7 @@ import {
   Dumbbell,
   Flag,
   History,
+  LifeBuoy,
   LogOut,
   MessageCircle,
   Ruler,
@@ -17,6 +18,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react-native';
+import { SUPPORT_STRINGS } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
@@ -44,7 +46,7 @@ function MenuTile({ item, onPress }: { item: MoreMenuItem; onPress: () => void }
 
   return (
     <Pressable onPress={onPress} style={[styles.tile, { backgroundColor: theme.backgroundElement }]}>
-      <Icon icon={item.icon} size={24} color={theme.text} />
+      <Icon icon={item.icon} size={20} color={theme.text} />
       <ThemedText type="small" style={styles.tileLabel} numberOfLines={1}>
         {item.label}
       </ThemedText>
@@ -100,6 +102,7 @@ export function MoreMenu({ visible, onClose, unreadFeedCount }: MoreMenuProps) {
       : { label: 'Mi entrenador', icon: User, path: '/mi-entrenador' },
     { label: 'Chat', icon: MessageCircle, path: '/chat' },
     { label: 'Novedades', icon: Bell, path: '/novedades', badge: unreadFeedCount },
+    { label: SUPPORT_STRINGS.es.sectionTitle, icon: LifeBuoy, path: '/soporte' },
   ];
 
   const organizacionItems: MoreMenuItem[] = [
@@ -219,7 +222,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.one,
     borderRadius: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 4,
     paddingHorizontal: Spacing.one,
   },
   tileLabel: {
@@ -246,7 +249,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
     borderRadius: Spacing.three,
-    paddingVertical: Spacing.three,
+    paddingVertical: Spacing.two + 4,
     paddingHorizontal: Spacing.three,
   },
   wideRowLabel: {

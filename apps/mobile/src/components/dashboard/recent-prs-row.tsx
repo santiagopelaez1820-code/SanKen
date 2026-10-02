@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: Spacing.four,
     padding: Spacing.three,
-    gap: Spacing.three,
+    gap: Spacing.two,
   },
   header: {
     flexDirection: 'row',

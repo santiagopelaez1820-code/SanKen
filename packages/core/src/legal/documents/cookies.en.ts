@@ -2,7 +2,7 @@ import type { LegalDocumentContent } from '../types';
 
 /**
  * Cookie Policy — English translation of cookies.es.ts.
- * NOT legally reviewed: the Spanish text is the reference version.
+ * Reviewed by the SanKen owner; the Spanish text is the reference version.
  */
 export const cookiesEn: LegalDocumentContent = {
   title: 'Cookie Policy',
@@ -91,7 +91,7 @@ export const cookiesEn: LegalDocumentContent = {
       blocks: [
         {
           type: 'p',
-          text: 'The mobile app does not use browser cookies or advertising/analytics tracking technologies. It keeps in your phone\'s secure storage only what it needs to work (your session, your cart, the workout in progress) and your preferences (visual theme, tutorials seen and whether you enabled notifications). The session is deleted when you sign out, and everything else when you uninstall the app.',
+          text: 'The mobile app does not use browser cookies or advertising/analytics tracking technologies. It keeps in your phone\'s secure storage only what it needs to work (your session, your cart, the workout in progress) and your preferences (visual theme, tutorials seen, whether you enabled notifications and whether you hid the brand card on Home). The session is deleted when you sign out, and everything else when you uninstall the app.',
         },
       ],
     },

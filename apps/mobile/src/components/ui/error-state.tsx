@@ -20,7 +20,7 @@ export function ErrorState({ message, onRetry }: ErrorStateProps) {
   return (
     <ThemedView style={styles.container}>
       <ThemedView type="backgroundElement" style={styles.iconCircle}>
-        <AlertCircle size={24} color={theme.error} />
+        <AlertCircle size={20} color={theme.error} />
       </ThemedView>
       <ThemedText type="smallBold" style={styles.centerText}>
         No pudimos completar esta acción
@@ -39,14 +39,14 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     gap: Spacing.two,
-    paddingVertical: Spacing.five,
+    paddingVertical: Spacing.four,
     paddingHorizontal: Spacing.four,
     backgroundColor: 'transparent',
   },
   iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },

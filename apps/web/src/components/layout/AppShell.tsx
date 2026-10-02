@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav"
 import { RouteProgressBar } from "@/components/layout/RouteProgressBar"
 import { EASE_OUT } from "@/lib/motion"
 import { LegalLinks } from "@/components/legal/LegalLinks"
+import { WeeklyCheckinPrompt } from "@/components/support/WeeklyCheckinPrompt"
 
 export function AppShell() {
   const location = useLocation()
@@ -27,6 +28,7 @@ export function AppShell() {
         </footer>
       </main>
       <BottomNav />
+      <WeeklyCheckinPrompt />
     </div>
   )
 }

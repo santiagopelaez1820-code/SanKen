@@ -152,10 +152,10 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
     gap: Spacing.two,
   },
-  pageTitle: { fontSize: 28, lineHeight: 34, marginBottom: Spacing.two },
+  pageTitle: { fontSize: 24, lineHeight: 30, marginBottom: Spacing.two },
   heroCard: {
     borderRadius: Spacing.four,
-    padding: Spacing.four,
+    padding: Spacing.three,
     alignItems: 'center',
     marginBottom: Spacing.three,
   },
@@ -164,8 +164,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   heroValue: {
-    fontSize: 40,
-    lineHeight: 46,
+    fontSize: 30,
+    lineHeight: 36,
   },
   chartCard: {
     borderRadius: Spacing.four,

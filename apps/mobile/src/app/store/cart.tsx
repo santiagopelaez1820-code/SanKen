@@ -8,6 +8,7 @@ import { formatCurrency } from '@sanken/core';
 import { CartItemRow } from '@/components/store/cart-item-row';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -26,9 +27,7 @@ export default function CartScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-          ← Tienda
-        </ThemedText>
+        <BackButton label="Tienda" fallbackHref="/store" />
         <ThemedText type="title" style={styles.title}>
           Carrito
         </ThemedText>
@@ -93,11 +92,11 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: MaxContentWidth,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
+    paddingTop: Spacing.two,
     paddingBottom: BottomTabInset,
     gap: Spacing.two,
   },
-  title: { fontSize: 26, lineHeight: 32 },
+  title: { fontSize: 24, lineHeight: 30 },
   // El FlatList necesita flex:1 explícito para acotarse dentro de la
   // columna y hacer scroll interno — sin esto trataba de crecer para
   // mostrar todos los items sin límite, empujando el resumen (subtotal +

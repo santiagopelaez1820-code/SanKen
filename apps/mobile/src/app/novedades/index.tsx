@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
-import { router } from 'expo-router';
+import { router, type Href } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { FeedItem, NewChatMessageNotificationData } from '@sanken/core';
+import { isLinkedNotificationData, type FeedItem, type NewChatMessageNotificationData } from '@sanken/core';
 
+import { linkFromNotificationData } from '@/components/notification-link-handler';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { PrimaryButton } from '@/components/ui/primary-button';
@@ -26,6 +27,23 @@ function FeedRow({ item, onPress }: { item: FeedItem; onPress: (item: FeedItem) 
           </ThemedText>
           <ThemedText type="small" themeColor="textSecondary">
             {item.body}
+          </ThemedText>
+        </ThemedView>
+      </Pressable>
+    );
+  }
+
+  // Notificaciones con título/cuerpo/link propios (soporte, check-in semanal).
+  if (isLinkedNotificationData(item.data)) {
+    return (
+      <Pressable onPress={() => onPress(item)} style={styles.pressableCard}>
+        <ThemedView type="backgroundElement" style={[styles.card, unreadStyle]}>
+          <ThemedText type="small" themeColor="textSecondary">
+            {new Date(item.created_at).toLocaleDateString('es-AR')}
+          </ThemedText>
+          <ThemedText type="smallBold">{item.data.title}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary" numberOfLines={2}>
+            {item.data.body}
           </ThemedText>
         </ThemedView>
       </Pressable>
@@ -59,8 +77,8 @@ export default function NovedadesScreen() {
   const handlePress = (item: FeedItem) => {
     markRead(item);
     if (item.feed_type === 'notification') {
-      const data = item.data as unknown as NewChatMessageNotificationData;
-      if (data.conversation_id) router.push(`/chat/${data.conversation_id}`);
+      const link = linkFromNotificationData(item.data);
+      if (link) router.push(link as Href);
     }
   };
 
@@ -121,7 +139,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  pageTitle: { fontSize: 28, lineHeight: 34 },
+  pageTitle: { fontSize: 24, lineHeight: 30 },
   card: { borderRadius: Spacing.three, padding: Spacing.three, gap: Spacing.one },
   // Mismo radio que `card` en el Pressable que lo envuelve — sin esto, el
   // anillo de foco de teclado en web se dibuja como un rectángulo recto

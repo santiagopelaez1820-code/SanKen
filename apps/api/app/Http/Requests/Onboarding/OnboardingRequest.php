@@ -14,6 +14,16 @@ use Illuminate\Validation\Rule;
  */
 class OnboardingRequest extends FormRequest
 {
+    /**
+     * Rango de edad admitido (inclusive). Debe coincidir con
+     * ONBOARDING_MIN_AGE / ONBOARDING_MAX_AGE en
+     * packages/core/src/lib/onboarding-age.ts, que web y mobile usan para
+     * no dejar avanzar el wizard — acá es la validación que manda.
+     */
+    public const MIN_AGE = 15;
+
+    public const MAX_AGE = 70;
+
     public function authorize(): bool
     {
         return true;
@@ -25,7 +35,7 @@ class OnboardingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'age' => ['sometimes', 'integer', 'min:13', 'max:100'],
+            'age' => ['sometimes', 'integer', 'min:'.self::MIN_AGE, 'max:'.self::MAX_AGE],
             'sex' => ['sometimes', Rule::in(['male', 'female'])],
             'height_cm' => ['sometimes', 'numeric', 'min:100', 'max:250'],
             'weight_kg' => ['sometimes', 'numeric', 'min:30', 'max:300'],
@@ -39,6 +49,23 @@ class OnboardingRequest extends FormRequest
             'frequency_days' => ['sometimes', Rule::in(RoutineTemplate::activeFrequencyDays())],
             'equipment_available' => ['sometimes', 'array'],
             'equipment_available.*' => [Rule::in(config('onboarding.equipment'))],
+        ];
+    }
+
+    /**
+     * Mismo texto que muestran web y mobile (ONBOARDING_AGE_MESSAGES) — el
+     * wizard muestra el mensaje de la API tal cual si llegara a rechazarse.
+     *
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        $outOfRange = 'La edad debe estar entre '.self::MIN_AGE.' y '.self::MAX_AGE.' años.';
+
+        return [
+            'age.integer' => 'La edad debe ser un número entero.',
+            'age.min' => $outOfRange,
+            'age.max' => $outOfRange,
         ];
     }
 }

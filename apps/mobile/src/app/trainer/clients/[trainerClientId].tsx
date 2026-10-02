@@ -6,6 +6,7 @@ import type { TrainerClientStatus } from '@sanken/core';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { BackButton } from '@/components/ui/back-button';
 import { PrimaryButton } from '@/components/ui/primary-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
@@ -57,9 +58,7 @@ export default function TrainerClientDetailScreen() {
   return (
     <ThemedView style={styles.root}>
       <SafeAreaView style={styles.safeArea}>
-        <ThemedText type="small" themeColor="textSecondary" onPress={() => router.back()}>
-          ← Mis clientes
-        </ThemedText>
+        <BackButton label="Mis clientes" fallbackHref="/trainer" />
 
         <ThemedText type="title" style={styles.pageTitle}>
           {selectedClient.client.name}
