@@ -250,8 +250,54 @@ con el mismo Bearer token que el resto de la API, guard `sanctum` — ver nota
 en `config/auth.php` sobre por qué el guard por defecto de la app tuvo que
 cambiar de `web` a `sanctum` para que esto funcionara desde el navegador).
 
-## 16. Documentación
+## 15.1 Documentos legales y consentimiento
 
-- OpenAPI 3.1 generado a partir de anotaciones (`dedoc/scramble` o `l5-swagger`) → publicado en `/docs` (protegido en producción).
-- Contract testing con Pest entre backend y clientes vía snapshots de OpenAPI en CI.
-- Postman/Insomnia collection exportada automáticamente en cada release del contrato.
+Ver `docs/08-legal-y-consentimiento.md` para el diseño completo.
+
+| Método | Ruta | Auth | Descripción |
+|---|---|---|---|
+| GET | `/legal/documents` | Pública | Versión vigente de cada documento (`terms`, `privacy`, `cookies`) y consentimientos exigidos. |
+| GET | `/legal/consents` | Sanctum | `pending` (lo que el usuario debe aceptar/re-aceptar) + `history` (append-only). |
+| POST | `/legal/consents` | Sanctum, `throttle:writes` | `{ consents: ["privacy", ...], legal_versions?: {...} }` — registra la versión vigente según el servidor. |
+| GET | `/admin/users/{user}/consents` | `role:super_admin` | Historial de consentimientos de un usuario (solo lectura). |
+
+| DELETE | `/auth/me` | Sanctum, `throttle:5,1` | Elimina la propia cuenta. Body: `confirmation: "ELIMINAR"` + `password` si la cuenta es de correo (`auth_provider` null). 403 para `super_admin`. |
+
+**Bloqueo por consentimientos pendientes** (`EnsureLegalConsentsAccepted`, global en el grupo `api`): un usuario autenticado con documentos pendientes recibe `403 { code: "consent_required", pending: [...] }` en toda ruta salvo `ping`, `legal/*`, `auth/me` (GET y DELETE), `auth/logout`, `auth/email/*` y los DELETE de push. `ApiClient` expone `onConsentRequired` para reaccionar.
+
+Cambios en endpoints existentes:
+
+- `POST /auth/register` exige `accept_terms`, `accept_privacy`, `accept_health_data` = `true` (422 si falta alguno). `legal_versions.<tipo>` opcional: si viene y no es la vigente → 422.
+- `POST /auth/social`: si la cuenta de Google **no existe** y faltan los `accept_*`, responde `200 { requires_consent: true, consents: [...] }` sin crear nada. Cuentas existentes inician sesión igual que antes.
+- `UserResource` incluye `pending_consents: string[]` solo para el propio usuario autenticado (login/registro/`/auth/me`).
+
+## 15.2 Soporte y check-in semanal
+
+Ver `docs/09-soporte-y-checkin.md`. Usuario (Sanctum): `GET/POST /support/tickets`
+(creación `throttle:10,1`), `GET /support/tickets/{id}`,
+`POST /support/tickets/{id}/messages`, `POST /support/tickets/{id}/close`,
+`GET /support/check-ins/current`, `POST /support/check-ins/{id}/answer`,
+`POST /support/check-ins/{id}/postpone`. Equipo (`role:super_admin`):
+`GET /admin/support/tickets`, `GET|PATCH /admin/support/tickets/{id}`,
+`POST /admin/support/tickets/{id}/messages`, `GET /admin/support/stats`,
+`GET /admin/support/staff`.
+
+## 16. Documentación (OpenAPI / Swagger)
+
+OpenAPI 3.1 generado automáticamente desde el código con [Scramble](https://scramble.dedoc.co) (`dedoc/scramble`) y mostrado con Swagger UI. Configuración en `apps/api/config/scramble.php`.
+
+| URL | Contenido |
+|---|---|
+| `GET /docs/api` | Swagger UI. Para probar endpoints protegidos: login, botón **Authorize** y pegar el `token` (sin `Bearer`). |
+| `GET /docs/api.json` | Documento OpenAPI en JSON (importable en Postman/Insomnia). |
+
+- **Acceso**: libre con `APP_ENV=local` (incluido el túnel de ngrok, que apunta al mismo servidor); en cualquier otro entorno responde 403 salvo que se defina el gate `viewApiDocs`.
+- **Qué se infiere solo**: rutas y parámetros de ruta, body y query params desde las reglas de los FormRequests o `$request->validate()`, respuestas desde los API Resources y los `response()->json(...)`, errores 401/403/404/422 y seguridad Bearer en toda ruta con `auth:sanctum`.
+- **Al agregar un endpoint** (Definition of Done):
+  1. La primera línea del PHPDoc del método es el título del endpoint; el resto, su descripción.
+  2. El controller lleva `#[Group('Nombre', weight: N)]`, con el mismo nombre y peso que los demás controllers de esa sección.
+  3. Si la respuesta se arma con colecciones o closures que Scramble no logra tipar, declararla con `@response array{...}` en el PHPDoc.
+  4. `tests/Feature/ApiDocs/ApiDocumentationTest.php` falla si un endpoint de `/api/v1` queda sin título o sin grupo, o si la generación reporta problemas.
+- **Casos especiales**: un FormRequest compartido por POST y PATCH con reglas distintas lleva `@ignoreSchema` en su docblock (si no, el PATCH hereda los campos obligatorios del POST); los DELETE que reciben body lo documentan gracias a `App\Http\ApiDocs\DeleteRequestBodyExtension`.
+- **Comandos**: `php artisan scramble:analyze` (diagnóstico) y `php artisan scramble:export --path=storage/app/openapi.json` (exportar).
+- **Pendiente**: contract testing entre backend y clientes vía snapshots de OpenAPI en CI, y colección de Postman/Insomnia exportada en cada release del contrato.

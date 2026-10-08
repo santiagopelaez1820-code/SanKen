@@ -1,46 +1,77 @@
+# Esta línea sirve para definir el nombre del flujo de trabajo.
 name: Mobile (Expo)
 
+# Esta línea sirve para definir cuándo se ejecuta el flujo.
 on:
+  # Esta línea sirve para ejecutar al hacer push.
   push:
+    # Esta línea sirve para limitar el push a la rama main.
     branches: [main]
+    # Esta línea sirve para limitar a cambios en la app móvil, el núcleo o este flujo.
     paths: ["apps/mobile/**", "packages/core/**", ".github/workflows/mobile.yml"]
+  # Esta línea sirve para ejecutar también en pull requests.
   pull_request:
+    # Esta línea sirve para limitar a cambios en la app móvil, el núcleo o este flujo.
     paths: ["apps/mobile/**", "packages/core/**", ".github/workflows/mobile.yml"]
 
+# Esta línea sirve para declarar los trabajos del flujo.
 jobs:
+  # Esta línea sirve para declarar el trabajo de construcción.
   build:
+    # Esta línea sirve para ejecutar el trabajo en una máquina Ubuntu.
     runs-on: ubuntu-latest
+    # Esta línea sirve para definir valores por defecto de los pasos.
     defaults:
+      # Esta línea sirve para aplicar a los comandos run.
       run:
+        # Esta línea sirve para ejecutar los comandos dentro de apps/mobile.
         working-directory: apps/mobile
+    # Esta línea sirve para declarar los pasos del trabajo.
     steps:
+      # Esta línea sirve para descargar el código del repositorio.
       - uses: actions/checkout@v4
 
+      # Esta línea sirve para abrir el paso que instala Node.
       - name: Setup Node
+        # Esta línea sirve para usar la acción que instala Node.
         uses: actions/setup-node@v4
+        # Esta línea sirve para pasar los parámetros a la acción.
         with:
+          # Esta línea sirve para usar Node 22.
           node-version: "22"
+          # Esta línea sirve para activar la caché de npm.
           cache: "npm"
+          # Esta línea sirve para indicar el archivo de bloqueo para la caché.
           cache-dependency-path: apps/mobile/package-lock.json
 
+      # Esta línea sirve para abrir el paso que instala las dependencias.
       - name: Install dependencies
         # apps/mobile se instala de forma aislada (no es parte del workspace raíz):
         # el tooling de Expo (@expo/cli, expo-router) rompe su resolución de módulos
         # si se hoistea a la raíz del monorepo. @sanken/core se consume vía `file:`.
+        # Esta línea sirve para instalar las dependencias de la app móvil.
         run: npm install
 
+      # Esta línea sirve para abrir el paso que instala las dependencias del núcleo.
       - name: Install @sanken/core dependencies
         # packages/core no es parte del workspace raíz de npm (ver arriba), así
         # que sus propias dependencias (pusher-js, laravel-echo) nunca se instalan
         # solas -- sin este paso, tsc no puede resolver los tipos de esos paquetes
         # al type-checkear código que importa @sanken/core.
+        # Esta línea sirve para instalar las dependencias de @sanken/core.
         run: npm install --prefix ../../packages/core
 
+      # Esta línea sirve para abrir el paso de verificación de tipos.
       - name: Type-check
+        # Esta línea sirve para verificar los tipos con TypeScript.
         run: npx tsc --noEmit
 
+      # Esta línea sirve para abrir el paso de pruebas unitarias.
       - name: Unit tests
+        # Esta línea sirve para ejecutar las pruebas con Jest.
         run: npx jest
 
+      # Esta línea sirve para abrir el paso de exportación web de prueba.
       - name: Export web bundle (smoke test)
+        # Esta línea sirve para exportar el bundle web como prueba rápida.
         run: npx expo export --platform web

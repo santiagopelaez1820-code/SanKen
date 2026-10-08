@@ -1,54 +1,104 @@
+/* Esta línea sirve para importar los estilos de «"tailwindcss"». */
 @import "tailwindcss";
+/* Esta línea sirve para importar los estilos de «"tw-animate-css"». */
 @import "tw-animate-css";
+/* Esta línea sirve para importar los estilos de «"shadcn/tailwind.css"». */
 @import "shadcn/tailwind.css";
+/* Esta línea sirve para importar los estilos de «"@fontsource-variable/geist"». */
 @import "@fontsource-variable/geist";
 
+/* Esta línea sirve para declarar la variante personalizada «dark». */
 @custom-variant dark (&:is(.dark *));
 
+/* Esta línea sirve para abrir el bloque @theme. */
 @theme inline {
+    /* Esta línea sirve para definir la variable CSS «--font-heading» con el valor «var(--font-sans)». */
     --font-heading: var(--font-sans);
+    /* Esta línea sirve para definir la variable CSS «--font-sans» con el valor «'Geist Variable', sans-serif». */
     --font-sans: 'Geist Variable', sans-serif;
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar-ring» con el valor «var(--sidebar-ring)». */
     --color-sidebar-ring: var(--sidebar-ring);
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar-border» con el valor «var(--sidebar-border)». */
     --color-sidebar-border: var(--sidebar-border);
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar-accent-foreground» con el valor «var(--sidebar-accent-foreground)». */
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar-accent» con el valor «var(--sidebar-accent)». */
     --color-sidebar-accent: var(--sidebar-accent);
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar-primary-foreground» con el valor «var(--sidebar-primary-foreground)». */
     --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar-primary» con el valor «var(--sidebar-primary)». */
     --color-sidebar-primary: var(--sidebar-primary);
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar-foreground» con el valor «var(--sidebar-foreground)». */
     --color-sidebar-foreground: var(--sidebar-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-sidebar» con el valor «var(--sidebar)». */
     --color-sidebar: var(--sidebar);
+    /* Esta línea sirve para definir la variable CSS «--color-chart-5» con el valor «var(--chart-5)». */
     --color-chart-5: var(--chart-5);
+    /* Esta línea sirve para definir la variable CSS «--color-chart-4» con el valor «var(--chart-4)». */
     --color-chart-4: var(--chart-4);
+    /* Esta línea sirve para definir la variable CSS «--color-chart-3» con el valor «var(--chart-3)». */
     --color-chart-3: var(--chart-3);
+    /* Esta línea sirve para definir la variable CSS «--color-chart-2» con el valor «var(--chart-2)». */
     --color-chart-2: var(--chart-2);
+    /* Esta línea sirve para definir la variable CSS «--color-chart-1» con el valor «var(--chart-1)». */
     --color-chart-1: var(--chart-1);
+    /* Esta línea sirve para definir la variable CSS «--color-ring» con el valor «var(--ring)». */
     --color-ring: var(--ring);
+    /* Esta línea sirve para definir la variable CSS «--color-input» con el valor «var(--input)». */
     --color-input: var(--input);
+    /* Esta línea sirve para definir la variable CSS «--color-border» con el valor «var(--border)». */
     --color-border: var(--border);
+    /* Esta línea sirve para definir la variable CSS «--color-warning» con el valor «var(--warning)». */
     --color-warning: var(--warning);
+    /* Esta línea sirve para definir la variable CSS «--color-success» con el valor «var(--success)». */
     --color-success: var(--success);
+    /* Esta línea sirve para definir la variable CSS «--color-destructive» con el valor «var(--destructive)». */
     --color-destructive: var(--destructive);
+    /* Esta línea sirve para definir la variable CSS «--color-accent-foreground» con el valor «var(--accent-foreground)». */
     --color-accent-foreground: var(--accent-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-accent» con el valor «var(--accent)». */
     --color-accent: var(--accent);
+    /* Esta línea sirve para definir la variable CSS «--color-muted-foreground» con el valor «var(--muted-foreground)». */
     --color-muted-foreground: var(--muted-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-muted» con el valor «var(--muted)». */
     --color-muted: var(--muted);
+    /* Esta línea sirve para definir la variable CSS «--color-secondary-accent-foreground» con el valor «var(--secondary-accent-foreground)». */
     --color-secondary-accent-foreground: var(--secondary-accent-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-secondary-accent» con el valor «var(--secondary-accent)». */
     --color-secondary-accent: var(--secondary-accent);
+    /* Esta línea sirve para definir la variable CSS «--color-secondary-foreground» con el valor «var(--secondary-foreground)». */
     --color-secondary-foreground: var(--secondary-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-secondary» con el valor «var(--secondary)». */
     --color-secondary: var(--secondary);
+    /* Esta línea sirve para definir la variable CSS «--color-primary-foreground» con el valor «var(--primary-foreground)». */
     --color-primary-foreground: var(--primary-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-primary» con el valor «var(--primary)». */
     --color-primary: var(--primary);
+    /* Esta línea sirve para definir la variable CSS «--color-popover-foreground» con el valor «var(--popover-foreground)». */
     --color-popover-foreground: var(--popover-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-popover» con el valor «var(--popover)». */
     --color-popover: var(--popover);
+    /* Esta línea sirve para definir la variable CSS «--color-card-foreground» con el valor «var(--card-foreground)». */
     --color-card-foreground: var(--card-foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-card» con el valor «var(--card)». */
     --color-card: var(--card);
+    /* Esta línea sirve para definir la variable CSS «--color-foreground» con el valor «var(--foreground)». */
     --color-foreground: var(--foreground);
+    /* Esta línea sirve para definir la variable CSS «--color-background» con el valor «var(--background)». */
     --color-background: var(--background);
+    /* Esta línea sirve para definir la variable CSS «--radius-sm» con el valor «calc(var(--radius) * 0.6)». */
     --radius-sm: calc(var(--radius) * 0.6);
+    /* Esta línea sirve para definir la variable CSS «--radius-md» con el valor «calc(var(--radius) * 0.8)». */
     --radius-md: calc(var(--radius) * 0.8);
+    /* Esta línea sirve para definir la variable CSS «--radius-lg» con el valor «var(--radius)». */
     --radius-lg: var(--radius);
+    /* Esta línea sirve para definir la variable CSS «--radius-xl» con el valor «calc(var(--radius) * 1.4)». */
     --radius-xl: calc(var(--radius) * 1.4);
+    /* Esta línea sirve para definir la variable CSS «--radius-2xl» con el valor «calc(var(--radius) * 1.8)». */
     --radius-2xl: calc(var(--radius) * 1.8);
+    /* Esta línea sirve para definir la variable CSS «--radius-3xl» con el valor «calc(var(--radius) * 2.2)». */
     --radius-3xl: calc(var(--radius) * 2.2);
+    /* Esta línea sirve para definir la variable CSS «--radius-4xl» con el valor «calc(var(--radius) * 2.6)». */
     --radius-4xl: calc(var(--radius) * 2.6);
 }
 
@@ -59,94 +109,176 @@
  * activos — igual que en mobile, ya no dos acentos separados (lima+cyan).
  * Dark mode es la experiencia por defecto; light mode replica Colors.light.
  */
+/* Esta línea sirve para abrir las reglas del selector «:root». */
 :root {
+    /* Esta línea sirve para definir la variable CSS «--background» con el valor «#F5F7FA». */
     --background: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--foreground» con el valor «#0B0B0B». */
     --foreground: #0B0B0B;
+    /* Esta línea sirve para definir la variable CSS «--card» con el valor «#FFFFFF». */
     --card: #FFFFFF;
+    /* Esta línea sirve para definir la variable CSS «--card-foreground» con el valor «#0B0B0B». */
     --card-foreground: #0B0B0B;
+    /* Esta línea sirve para definir la variable CSS «--popover» con el valor «#FFFFFF». */
     --popover: #FFFFFF;
+    /* Esta línea sirve para definir la variable CSS «--popover-foreground» con el valor «#0B0B0B». */
     --popover-foreground: #0B0B0B;
+    /* Esta línea sirve para definir la variable CSS «--primary» con el valor «#0093AD». */
     --primary: #0093AD;
+    /* Esta línea sirve para definir la variable CSS «--primary-foreground» con el valor «#FFFFFF». */
     --primary-foreground: #FFFFFF;
+    /* Esta línea sirve para definir la variable CSS «--secondary» con el valor «#E9EDF1». */
     --secondary: #E9EDF1;
+    /* Esta línea sirve para definir la variable CSS «--secondary-foreground» con el valor «#0B0B0B». */
     --secondary-foreground: #0B0B0B;
+    /* Esta línea sirve para definir la variable CSS «--secondary-accent» con el valor «#00B8D9». */
     --secondary-accent: #00B8D9;
+    /* Esta línea sirve para definir la variable CSS «--secondary-accent-foreground» con el valor «#FFFFFF». */
     --secondary-accent-foreground: #FFFFFF;
+    /* Esta línea sirve para definir la variable CSS «--muted» con el valor «#E9EDF1». */
     --muted: #E9EDF1;
+    /* Esta línea sirve para definir la variable CSS «--muted-foreground» con el valor «#5B6670». */
     --muted-foreground: #5B6670;
+    /* Esta línea sirve para definir la variable CSS «--accent» con el valor «rgba(0, 147, 173, 0.14)». */
     --accent: rgba(0, 147, 173, 0.14);
+    /* Esta línea sirve para definir la variable CSS «--accent-foreground» con el valor «#0093AD». */
     --accent-foreground: #0093AD;
+    /* Esta línea sirve para definir la variable CSS «--success» con el valor «#16A34A». */
     --success: #16A34A;
+    /* Esta línea sirve para definir la variable CSS «--warning» con el valor «#D97706». */
     --warning: #D97706;
+    /* Esta línea sirve para definir la variable CSS «--destructive» con el valor «#DC2626». */
     --destructive: #DC2626;
+    /* Esta línea sirve para definir la variable CSS «--border» con el valor «rgba(0, 0, 0, 0.10)». */
     --border: rgba(0, 0, 0, 0.10);
+    /* Esta línea sirve para definir la variable CSS «--input» con el valor «rgba(0, 0, 0, 0.14)». */
     --input: rgba(0, 0, 0, 0.14);
+    /* Esta línea sirve para definir la variable CSS «--ring» con el valor «#0093AD». */
     --ring: #0093AD;
+    /* Esta línea sirve para definir la variable CSS «--chart-1» con el valor «#0093AD». */
     --chart-1: #0093AD;
+    /* Esta línea sirve para definir la variable CSS «--chart-2» con el valor «#00B8D9». */
     --chart-2: #00B8D9;
+    /* Esta línea sirve para definir la variable CSS «--chart-3» con el valor «#0B0B0B». */
     --chart-3: #0B0B0B;
+    /* Esta línea sirve para definir la variable CSS «--chart-4» con el valor «#00D4FF». */
     --chart-4: #00D4FF;
+    /* Esta línea sirve para definir la variable CSS «--chart-5» con el valor «#16A34A». */
     --chart-5: #16A34A;
+    /* Esta línea sirve para definir la variable CSS «--radius» con el valor «1rem». */
     --radius: 1rem;
+    /* Esta línea sirve para definir la variable CSS «--sidebar» con el valor «#FFFFFF». */
     --sidebar: #FFFFFF;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-foreground» con el valor «#0B0B0B». */
     --sidebar-foreground: #0B0B0B;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-primary» con el valor «#0093AD». */
     --sidebar-primary: #0093AD;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-primary-foreground» con el valor «#FFFFFF». */
     --sidebar-primary-foreground: #FFFFFF;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-accent» con el valor «#E9EDF1». */
     --sidebar-accent: #E9EDF1;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-accent-foreground» con el valor «#0B0B0B». */
     --sidebar-accent-foreground: #0B0B0B;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-border» con el valor «rgba(0, 0, 0, 0.10)». */
     --sidebar-border: rgba(0, 0, 0, 0.10);
+    /* Esta línea sirve para definir la variable CSS «--sidebar-ring» con el valor «#0093AD». */
     --sidebar-ring: #0093AD;
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.dark». */
 .dark {
+    /* Esta línea sirve para definir la variable CSS «--background» con el valor «#080C10». */
     --background: #080C10;
+    /* Esta línea sirve para definir la variable CSS «--foreground» con el valor «#F5F7FA». */
     --foreground: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--card» con el valor «#111820». */
     --card: #111820;
+    /* Esta línea sirve para definir la variable CSS «--card-foreground» con el valor «#F5F7FA». */
     --card-foreground: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--popover» con el valor «#111820». */
     --popover: #111820;
+    /* Esta línea sirve para definir la variable CSS «--popover-foreground» con el valor «#F5F7FA». */
     --popover-foreground: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--primary» con el valor «#00B8D9». */
     --primary: #00B8D9;
+    /* Esta línea sirve para definir la variable CSS «--primary-foreground» con el valor «#080C10». */
     --primary-foreground: #080C10;
+    /* Esta línea sirve para definir la variable CSS «--secondary» con el valor «#151D26». */
     --secondary: #151D26;
+    /* Esta línea sirve para definir la variable CSS «--secondary-foreground» con el valor «#F5F7FA». */
     --secondary-foreground: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--secondary-accent» con el valor «#00D4FF». */
     --secondary-accent: #00D4FF;
+    /* Esta línea sirve para definir la variable CSS «--secondary-accent-foreground» con el valor «#080C10». */
     --secondary-accent-foreground: #080C10;
+    /* Esta línea sirve para definir la variable CSS «--muted» con el valor «#151D26». */
     --muted: #151D26;
+    /* Esta línea sirve para definir la variable CSS «--muted-foreground» con el valor «#9AA6B2». */
     --muted-foreground: #9AA6B2;
+    /* Esta línea sirve para definir la variable CSS «--accent» con el valor «rgba(0, 184, 217, 0.16)». */
     --accent: rgba(0, 184, 217, 0.16);
+    /* Esta línea sirve para definir la variable CSS «--accent-foreground» con el valor «#00D4FF». */
     --accent-foreground: #00D4FF;
+    /* Esta línea sirve para definir la variable CSS «--success» con el valor «#20C997». */
     --success: #20C997;
+    /* Esta línea sirve para definir la variable CSS «--warning» con el valor «#FFB020». */
     --warning: #FFB020;
+    /* Esta línea sirve para definir la variable CSS «--destructive» con el valor «#FF4D5E». */
     --destructive: #FF4D5E;
+    /* Esta línea sirve para definir la variable CSS «--border» con el valor «rgba(255, 255, 255, 0.10)». */
     --border: rgba(255, 255, 255, 0.10);
+    /* Esta línea sirve para definir la variable CSS «--input» con el valor «rgba(255, 255, 255, 0.14)». */
     --input: rgba(255, 255, 255, 0.14);
+    /* Esta línea sirve para definir la variable CSS «--ring» con el valor «#00B8D9». */
     --ring: #00B8D9;
+    /* Esta línea sirve para definir la variable CSS «--chart-1» con el valor «#00B8D9». */
     --chart-1: #00B8D9;
+    /* Esta línea sirve para definir la variable CSS «--chart-2» con el valor «#00D4FF». */
     --chart-2: #00D4FF;
+    /* Esta línea sirve para definir la variable CSS «--chart-3» con el valor «#F5F7FA». */
     --chart-3: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--chart-4» con el valor «#0093AD». */
     --chart-4: #0093AD;
+    /* Esta línea sirve para definir la variable CSS «--chart-5» con el valor «#20C997». */
     --chart-5: #20C997;
+    /* Esta línea sirve para definir la variable CSS «--sidebar» con el valor «#111820». */
     --sidebar: #111820;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-foreground» con el valor «#F5F7FA». */
     --sidebar-foreground: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-primary» con el valor «#00B8D9». */
     --sidebar-primary: #00B8D9;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-primary-foreground» con el valor «#080C10». */
     --sidebar-primary-foreground: #080C10;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-accent» con el valor «#151D26». */
     --sidebar-accent: #151D26;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-accent-foreground» con el valor «#F5F7FA». */
     --sidebar-accent-foreground: #F5F7FA;
+    /* Esta línea sirve para definir la variable CSS «--sidebar-border» con el valor «rgba(255, 255, 255, 0.08)». */
     --sidebar-border: rgba(255, 255, 255, 0.08);
+    /* Esta línea sirve para definir la variable CSS «--sidebar-ring» con el valor «#00B8D9». */
     --sidebar-ring: #00B8D9;
 }
 
+/* Esta línea sirve para abrir el bloque @layer. */
 @layer base {
+  /* Esta línea sirve para abrir las reglas del selector «*». */
   * {
+    /* Esta línea sirve para aplicar las utilidades «border-border outline-ring/50». */
     @apply border-border outline-ring/50;
     }
+  /* Esta línea sirve para abrir las reglas del selector «body». */
   body {
+    /* Esta línea sirve para aplicar las utilidades «bg-background text-foreground». */
     @apply bg-background text-foreground;
     }
+  /* Esta línea sirve para abrir las reglas del selector «button:not(:disabled), [role="button"]:not(:disabled)». */
   button:not(:disabled), [role="button"]:not(:disabled) {
+    /* Esta línea sirve para establecer «cursor» en «pointer». */
     cursor: pointer;
     }
+  /* Esta línea sirve para abrir las reglas del selector «html». */
   html {
+    /* Esta línea sirve para aplicar las utilidades «font-sans». */
     @apply font-sans;
     }
   /*
@@ -155,14 +287,20 @@
    * real de una sola vez, sin tocar cada archivo — parte del pedido de
    * rediseño "más premium, sombras sutiles".
    */
+  /* Esta línea sirve para abrir las reglas del selector «.bg-card». */
   .bg-card {
+    /* Esta línea sirve para aplicar la sombra suave a las tarjetas. */
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.24), 0 8px 24px -12px rgba(0, 0, 0, 0.45);
     }
 }
 
+/* Esta línea sirve para abrir el bloque @layer. */
 @layer utilities {
+  /* Esta línea sirve para abrir el bloque @keyframes. */
   @keyframes shimmer {
+    /* Esta línea sirve para abrir el fotograma «100%» de la animación. */
     100% {
+      /* Esta línea sirve para establecer «transform» en «translateX(100%)». */
       transform: translateX(100%);
     }
   }
@@ -172,16 +310,100 @@
    * que apps premium (Linear/Notion) usan para "esto está cargando de
    * verdad" en vez de un bloque gris estático.
    */
+  /* Esta línea sirve para abrir las reglas del selector «.skeleton-shimmer». */
   .skeleton-shimmer {
+    /* Esta línea sirve para establecer «position» en «relative». */
     position: relative;
+    /* Esta línea sirve para establecer «overflow» en «hidden». */
     overflow: hidden;
   }
+  /* Esta línea sirve para abrir las reglas del selector «.skeleton-shimmer::after». */
   .skeleton-shimmer::after {
+    /* Esta línea sirve para establecer «content» en «""». */
     content: "";
+    /* Esta línea sirve para establecer «position» en «absolute». */
     position: absolute;
+    /* Esta línea sirve para establecer «inset» en «0». */
     inset: 0;
+    /* Esta línea sirve para establecer «transform» en «translateX(-100%)». */
     transform: translateX(-100%);
+    /* Esta línea sirve para pintar el brillo que recorre el esqueleto. */
     background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+    /* Esta línea sirve para establecer «animation» en «shimmer 1.8s infinite». */
     animation: shimmer 1.8s infinite;
   }
+}
+/*
+ * Choque de nombres Bootstrap × Tailwind (auditoría responsive 2026-09-29).
+ * Las dos librerías conviven y comparten nombres de clase con valores
+ * distintos; la regla de Bootstrap gana (va sin @layer y con !important):
+ *
+ * 1) Títulos: Bootstrap da tamaño propio a h1–h6, así que un <h2
+ *    className="text-sm"> salía gigante. Bootstrap no define clases de
+ *    tamaño text-xs…text-4xl, así que cuando un título las lleva la intención
+ *    es inequívoca: se respeta el tamaño de Tailwind.
+ */
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-xs». */
+:is(h1, h2, h3, h4, h5, h6).text-xs { font-size: var(--text-xs, 0.75rem); line-height: var(--text-xs--line-height, 1.333); }
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-sm». */
+:is(h1, h2, h3, h4, h5, h6).text-sm { font-size: var(--text-sm, 0.875rem); line-height: var(--text-sm--line-height, 1.429); }
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-base». */
+:is(h1, h2, h3, h4, h5, h6).text-base { font-size: var(--text-base, 1rem); line-height: var(--text-base--line-height, 1.5); }
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-lg». */
+:is(h1, h2, h3, h4, h5, h6).text-lg { font-size: var(--text-lg, 1.125rem); line-height: var(--text-lg--line-height, 1.556); }
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-xl». */
+:is(h1, h2, h3, h4, h5, h6).text-xl { font-size: var(--text-xl, 1.25rem); line-height: var(--text-xl--line-height, 1.4); }
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-2xl». */
+:is(h1, h2, h3, h4, h5, h6).text-2xl { font-size: var(--text-2xl, 1.5rem); line-height: var(--text-2xl--line-height, 1.333); }
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-3xl». */
+:is(h1, h2, h3, h4, h5, h6).text-3xl { font-size: var(--text-3xl, 1.875rem); line-height: var(--text-3xl--line-height, 1.2); }
+/* Esta línea sirve para definir en una línea las reglas del selector «:is(h1, h2, h3, h4, h5, h6).text-4xl». */
+:is(h1, h2, h3, h4, h5, h6).text-4xl { font-size: var(--text-4xl, 2.25rem); line-height: var(--text-4xl--line-height, 1.111); }
+
+/*
+ * 2) Espaciado nivel 5: en Bootstrap p-5/px-5/gap-5 = 3rem (48px); en
+ *    Tailwind 1.25rem. En celular 48px de relleno por tarjeta (más el del
+ *    contenedor) se come un tercio de la pantalla: por debajo de 576px se
+ *    usa el valor de Tailwind. En tablet/escritorio no cambia nada.
+ */
+/* Esta línea sirve para abrir el bloque @media. */
+@media (max-width: 575.98px) {
+  /* Esta línea sirve para definir en una línea las reglas del selector «.p-5». */
+  .p-5 { padding: 1.25rem !important; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.px-5». */
+  .px-5 { padding-right: 1.25rem !important; padding-left: 1.25rem !important; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.py-5». */
+  .py-5 { padding-top: 1.25rem !important; padding-bottom: 1.25rem !important; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.pt-5». */
+  .pt-5 { padding-top: 1.25rem !important; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.pb-5». */
+  .pb-5 { padding-bottom: 1.25rem !important; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.ps-5». */
+  .ps-5 { padding-left: 1.25rem !important; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.pe-5». */
+  .pe-5 { padding-right: 1.25rem !important; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.gap-5». */
+  .gap-5 { gap: 1.25rem !important; }
+}
+
+/*
+ * Áreas táctiles en celular / pantallas táctiles: los botones sm/xs (28/24px)
+ * y las casillas de Bootstrap (14px) son difíciles de tocar con el dedo. Solo
+ * crece el mínimo en táctil o por debajo de 640px; en escritorio con mouse no
+ * cambia nada.
+ */
+/* Esta línea sirve para abrir el bloque @media. */
+@media (pointer: coarse), (max-width: 639.98px) {
+  /* Esta línea sirve para definir en una línea las reglas del selector «[data-slot="button"]:is([data-size="sm"], [data-size="xs"])». */
+  [data-slot="button"]:is([data-size="sm"], [data-size="xs"]) { min-height: 2.25rem; }
+  /* Esta línea sirve para definir el tamaño mínimo de los botones pequeños con ícono. */
+  [data-slot="button"]:is([data-size="icon"], [data-size="icon-sm"], [data-size="icon-xs"]) { min-width: 2.25rem; min-height: 2.25rem; }
+  /* Esta línea sirve para aplicar a las casillas de verificación. */
+  .form-check:not(.form-switch) > .form-check-input[type="checkbox"],
+  /* Esta línea sirve para aplicar a los radios y ajustar el tamaño y el margen. */
+  .form-check:not(.form-switch) > .form-check-input[type="radio"] { width: 1.25rem; height: 1.25rem; margin-top: 0.1rem; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.form-check:not(.form-switch)». */
+  .form-check:not(.form-switch) { padding-left: 1.875rem; }
+  /* Esta línea sirve para definir en una línea las reglas del selector «.form-check:not(.form-switch) > .form-check-input». */
+  .form-check:not(.form-switch) > .form-check-input { margin-left: -1.875rem; }
 }

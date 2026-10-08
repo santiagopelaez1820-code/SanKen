@@ -1,0 +1,250 @@
+[
+  {
+    "file": ".scratch/shots/1-dashboard.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/10-onboarding-place.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/11-onboarding-last-step.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/12-onboarding-done-dashboard.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/2-rankings.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/3-nutricion.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/3-nutrition.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/4-challenges.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/4-retos.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/5-login-with-link.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/6-register.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/7-register-success-dashboard.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/8-onboarding-step1.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": ".scratch/shots/9-onboarding-mid.png",
+    "module": ".scratch",
+    "reason": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/api/public/favicon.ico",
+    "module": "apps/api",
+    "reason": "Favicon del backend Laravel.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/android-icon-background.png",
+    "module": "apps/mobile",
+    "reason": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": true,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/android-icon-foreground.png",
+    "module": "apps/mobile",
+    "reason": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": true,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/android-icon-monochrome.png",
+    "module": "apps/mobile",
+    "reason": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": true,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/brand-wordmark.png",
+    "module": "apps/mobile",
+    "reason": "Wordmark de la animación de apertura (brand-intro) y de la tarjeta de marca de Inicio: primer cuadro al abrir la app, debe estar disponible al instante y offline.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/favicon.png",
+    "module": "apps/mobile",
+    "reason": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": true,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/icon.png",
+    "module": "apps/mobile",
+    "reason": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": true,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/logo-full.png",
+    "module": "apps/mobile",
+    "reason": "Logo de login, registro y recuperar contraseña: se muestra antes de tener sesión y tiene que verse sin conexión.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/logo.png",
+    "module": "apps/mobile",
+    "reason": "Isotipo del panel admin y del header web de la app: marca fija de la interfaz, 13 KB; desde un CDN agregaría una descarga y parpadeo sin ahorro real.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/splash-icon.png",
+    "module": "apps/mobile",
+    "reason": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": true,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/tabIcons/home.png",
+    "module": "apps/mobile",
+    "reason": "Sin referencias en el código: Metro/Vite no lo empaquetan, así que no ocupa espacio en el APK. Revisar si se puede borrar.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/tabIcons/home@2x.png",
+    "module": "apps/mobile",
+    "reason": "Sin referencias en el código: Metro/Vite no lo empaquetan, así que no ocupa espacio en el APK. Revisar si se puede borrar.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/mobile/assets/images/tabIcons/home@3x.png",
+    "module": "apps/mobile",
+    "reason": "Sin referencias en el código: Metro/Vite no lo empaquetan, así que no ocupa espacio en el APK. Revisar si se puede borrar.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/web/public/brand-wordmark.png",
+    "module": "apps/web",
+    "reason": "Lo sirve el hosting de la web (no va en el APK): favicon y marca de la interfaz, conviene que no dependan de un tercero.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/web/public/favicon.png",
+    "module": "apps/web",
+    "reason": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+    "neededAtBuild": true,
+    "neededForAndroidIos": true,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/web/public/logo-full.png",
+    "module": "apps/web",
+    "reason": "Lo sirve el hosting de la web (no va en el APK): favicon y marca de la interfaz, conviene que no dependan de un tercero.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  },
+  {
+    "file": "apps/web/public/logo.png",
+    "module": "apps/web",
+    "reason": "Lo sirve el hosting de la web (no va en el APK): favicon y marca de la interfaz, conviene que no dependan de un tercero.",
+    "neededAtBuild": false,
+    "neededForAndroidIos": false,
+    "keepLocalRecommended": true
+  }
+]

@@ -1,5 +1,7 @@
+// Esta línea sirve para extraer «getDefaultConfig» de «require('expo/metro-config')».
 const { getDefaultConfig } = require('expo/metro-config');
 
+// Esta línea sirve para declarar «config» con el valor «getDefaultConfig(__dirname)».
 const config = getDefaultConfig(__dirname);
 
 // `barcode-detector` (pulled in by expo-camera's web barcode scanner) ships
@@ -7,12 +9,15 @@ const config = getDefaultConfig(__dirname);
 // https://github.com/expo/expo/discussions/36551. Falling back to `main`
 // (CJS) resolution fixes it without affecting other packages, which all
 // resolved fine before expo-camera was added.
+// Esta línea sirve para asignar «false» a «config.resolver.unstable_enablePackageExports».
 config.resolver.unstable_enablePackageExports = false;
 
 // El SDK de Firebase (firebase/auth) para React Native se resuelve como
 // .cjs — sin esto, Metro puede fallar en resolverlo correctamente en el
 // bundle nativo (aunque funcione en web), causando errores en tiempo de
 // arranque como "Component auth has not been registered yet".
+// Esta línea sirve para llamar a «config.resolver.sourceExts.push» con «'cjs'».
 config.resolver.sourceExts.push('cjs');
 
+// Esta línea sirve para asignar «config» a «module.exports».
 module.exports = config;

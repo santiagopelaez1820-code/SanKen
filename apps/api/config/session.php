@@ -1,7 +1,9 @@
 <?php
 
+// Esta línea sirve para importar el helper Str para manejar textos.
 use Illuminate\Support\Str;
 
+// Esta línea sirve para devolver el arreglo de configuración de las sesiones.
 return [
 
     /*
@@ -18,6 +20,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir dónde se guardan las sesiones (base de datos por defecto).
     'driver' => env('SESSION_DRIVER', 'database'),
 
     /*
@@ -32,8 +35,10 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la duración de la sesión en minutos (120 por defecto).
     'lifetime' => (int) env('SESSION_LIFETIME', 120),
 
+    // Esta línea sirve para definir si la sesión termina al cerrar el navegador.
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
     /*
@@ -47,6 +52,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir si se cifran los datos de la sesión.
     'encrypt' => env('SESSION_ENCRYPT', false),
 
     /*
@@ -60,6 +66,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la carpeta de las sesiones en archivos.
     'files' => storage_path('framework/sessions'),
 
     /*
@@ -73,6 +80,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la conexión de base de datos de las sesiones.
     'connection' => env('SESSION_CONNECTION'),
 
     /*
@@ -86,6 +94,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la tabla de las sesiones.
     'table' => env('SESSION_TABLE', 'sessions'),
 
     /*
@@ -101,6 +110,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el almacén de caché de las sesiones.
     'store' => env('SESSION_STORE'),
 
     /*
@@ -114,6 +124,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la probabilidad (2 de 100) de limpiar sesiones viejas.
     'lottery' => [2, 100],
 
     /*
@@ -127,8 +138,11 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el nombre de la cookie de sesión.
     'cookie' => env(
+        // Esta línea sirve para leerlo de SESSION_COOKIE.
         'SESSION_COOKIE',
+        // Esta línea sirve para usar por defecto el nombre de la app seguido de "-session".
         Str::slug((string) env('APP_NAME', 'laravel')).'-session'
     ),
 
@@ -143,6 +157,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la ruta de la cookie.
     'path' => env('SESSION_PATH', '/'),
 
     /*
@@ -156,6 +171,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el dominio de la cookie.
     'domain' => env('SESSION_DOMAIN'),
 
     /*
@@ -169,6 +185,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir si la cookie solo viaja por HTTPS.
     'secure' => env('SESSION_SECURE_COOKIE'),
 
     /*
@@ -182,6 +199,7 @@ return [
     |
     */
 
+    // Esta línea sirve para impedir que JavaScript lea la cookie.
     'http_only' => env('SESSION_HTTP_ONLY', true),
 
     /*
@@ -199,6 +217,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la política SameSite de la cookie ("lax" por defecto).
     'same_site' => env('SESSION_SAME_SITE', 'lax'),
 
     /*
@@ -212,6 +231,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir si la cookie es particionada.
     'partitioned' => env('SESSION_PARTITIONED_COOKIE', false),
 
 ];

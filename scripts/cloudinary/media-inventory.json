@@ -1,0 +1,573 @@
+{
+  "generatedAt": "2026-10-02T00:42:35.854Z",
+  "note": "Archivos multimedia del repositorio. El multimedia de runtime subido por usuarios/admins vive en el servidor y se audita con `php artisan media:cloudinary status`.",
+  "totals": {
+    "images": 31,
+    "videos": 0,
+    "imageBytes": 1138403,
+    "videoBytes": 0,
+    "mobileBundledBytes": 368622,
+    "migrationCandidates": 0,
+    "bytesThatCouldLeaveTheApk": 0,
+    "notMigratable": 31
+  },
+  "runtimeMediaOnServer": {
+    "description": "Columnas de la base que guardan multimedia subido (migradas por media:cloudinary).",
+    "columns": [
+      {
+        "column": "users.avatar_url",
+        "cloudinaryFolder": "sanken/users/avatars",
+        "publicId": "user_{id}"
+      },
+      {
+        "column": "products.image",
+        "cloudinaryFolder": "sanken/store/products",
+        "publicId": "product_{id}"
+      },
+      {
+        "column": "exercises.video_url",
+        "cloudinaryFolder": "sanken/exercises/videos",
+        "publicId": "exercise_{id}"
+      },
+      {
+        "column": "exercises.image_url",
+        "cloudinaryFolder": "sanken/exercises/images",
+        "publicId": "exercise_{id}"
+      },
+      {
+        "column": "pr_submissions.video_url",
+        "cloudinaryFolder": "sanken/pr-submissions/videos",
+        "publicId": "submission_{id}"
+      },
+      {
+        "column": "news_promotions.image_url",
+        "cloudinaryFolder": "sanken/content/news",
+        "publicId": "news_{id}"
+      },
+      {
+        "column": "body_measurements.progress_photo_url",
+        "cloudinaryFolder": "sanken/users/progress-photos",
+        "publicId": "measurement_{id}"
+      },
+      {
+        "column": "user_profiles.avatar_url",
+        "cloudinaryFolder": "sanken/users/avatars",
+        "publicId": "profile_{id}"
+      }
+    ]
+  },
+  "files": [
+    {
+      "file": "1-dashboard.png",
+      "path": ".scratch/shots/1-dashboard.png",
+      "bytes": 59171,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/1-dashboard"
+    },
+    {
+      "file": "10-onboarding-place.png",
+      "path": ".scratch/shots/10-onboarding-place.png",
+      "bytes": 33347,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/10-onboarding-place"
+    },
+    {
+      "file": "11-onboarding-last-step.png",
+      "path": ".scratch/shots/11-onboarding-last-step.png",
+      "bytes": 13331,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/11-onboarding-last-step"
+    },
+    {
+      "file": "12-onboarding-done-dashboard.png",
+      "path": ".scratch/shots/12-onboarding-done-dashboard.png",
+      "bytes": 43096,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/12-onboarding-done-dashboard"
+    },
+    {
+      "file": "2-rankings.png",
+      "path": ".scratch/shots/2-rankings.png",
+      "bytes": 64480,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/2-rankings"
+    },
+    {
+      "file": "3-nutricion.png",
+      "path": ".scratch/shots/3-nutricion.png",
+      "bytes": 63740,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/3-nutricion"
+    },
+    {
+      "file": "3-nutrition.png",
+      "path": ".scratch/shots/3-nutrition.png",
+      "bytes": 44325,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/3-nutrition"
+    },
+    {
+      "file": "4-challenges.png",
+      "path": ".scratch/shots/4-challenges.png",
+      "bytes": 26086,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/4-challenges"
+    },
+    {
+      "file": "4-retos.png",
+      "path": ".scratch/shots/4-retos.png",
+      "bytes": 63740,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/4-retos"
+    },
+    {
+      "file": "5-login-with-link.png",
+      "path": ".scratch/shots/5-login-with-link.png",
+      "bytes": 17552,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/5-login-with-link"
+    },
+    {
+      "file": "6-register.png",
+      "path": ".scratch/shots/6-register.png",
+      "bytes": 22159,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/6-register"
+    },
+    {
+      "file": "7-register-success-dashboard.png",
+      "path": ".scratch/shots/7-register-success-dashboard.png",
+      "bytes": 28003,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/7-register-success-dashboard"
+    },
+    {
+      "file": "8-onboarding-step1.png",
+      "path": ".scratch/shots/8-onboarding-step1.png",
+      "bytes": 6225,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/8-onboarding-step1"
+    },
+    {
+      "file": "9-onboarding-mid.png",
+      "path": ".scratch/shots/9-onboarding-mid.png",
+      "bytes": 22232,
+      "extension": "png",
+      "type": "image",
+      "module": ".scratch",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Captura de desarrollo: no la usa ninguna app ni entra en ningún bundle.",
+      "proposedCloudinaryFolder": "sanken/content",
+      "proposedPublicId": "sanken/content/9-onboarding-mid"
+    },
+    {
+      "file": "favicon.ico",
+      "path": "apps/api/public/favicon.ico",
+      "bytes": 0,
+      "extension": "ico",
+      "type": "image",
+      "module": "apps/api",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Favicon del backend Laravel.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/favicon"
+    },
+    {
+      "file": "android-icon-background.png",
+      "path": "apps/mobile/assets/images/android-icon-background.png",
+      "bytes": 6274,
+      "extension": "png",
+      "type": "native",
+      "module": "apps/mobile",
+      "referenceCount": 1,
+      "references": [
+        "apps/mobile/app.json:19"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/android-icon-background"
+    },
+    {
+      "file": "android-icon-foreground.png",
+      "path": "apps/mobile/assets/images/android-icon-foreground.png",
+      "bytes": 20645,
+      "extension": "png",
+      "type": "native",
+      "module": "apps/mobile",
+      "referenceCount": 1,
+      "references": [
+        "apps/mobile/app.json:18"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/android-icon-foreground"
+    },
+    {
+      "file": "android-icon-monochrome.png",
+      "path": "apps/mobile/assets/images/android-icon-monochrome.png",
+      "bytes": 7805,
+      "extension": "png",
+      "type": "native",
+      "module": "apps/mobile",
+      "referenceCount": 1,
+      "references": [
+        "apps/mobile/app.json:20"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/android-icon-monochrome"
+    },
+    {
+      "file": "brand-wordmark.png",
+      "path": "apps/mobile/assets/images/brand-wordmark.png",
+      "bytes": 72247,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/mobile",
+      "referenceCount": 5,
+      "references": [
+        "apps/mobile/src/app/(app)/index.tsx:202",
+        "apps/mobile/src/app/(app)/index.tsx:457",
+        "apps/mobile/src/components/brand-intro.tsx:31",
+        "apps/mobile/src/components/brand-intro.tsx:288",
+        "apps/web/src/pages/DashboardPage.tsx:90"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Wordmark de la animación de apertura (brand-intro) y de la tarjeta de marca de Inicio: primer cuadro al abrir la app, debe estar disponible al instante y offline.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/brand-wordmark"
+    },
+    {
+      "file": "favicon.png",
+      "path": "apps/mobile/assets/images/favicon.png",
+      "bytes": 1361,
+      "extension": "png",
+      "type": "native",
+      "module": "apps/mobile",
+      "referenceCount": 2,
+      "references": [
+        "apps/mobile/app.json:27",
+        "apps/web/index.html:5"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/favicon"
+    },
+    {
+      "file": "icon.png",
+      "path": "apps/mobile/assets/images/icon.png",
+      "bytes": 63337,
+      "extension": "png",
+      "type": "native",
+      "module": "apps/mobile",
+      "referenceCount": 10,
+      "references": [
+        "apps/mobile/app.json:7",
+        "apps/mobile/app.json:11",
+        "apps/mobile/app.json:27",
+        "apps/mobile/app.json:35",
+        "apps/mobile/src/components/brand-intro.tsx:28",
+        "apps/web/index.html:5",
+        "packages/core/src/brand/sanken-logo.ts:3",
+        "packages/core/src/brand/sanken-logo.ts:17",
+        "packages/core/src/brand/sanken-logo.ts:58",
+        "packages/core/src/brand/sanken-logo.ts:61"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/icon"
+    },
+    {
+      "file": "logo-full.png",
+      "path": "apps/mobile/assets/images/logo-full.png",
+      "bytes": 174110,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/mobile",
+      "referenceCount": 12,
+      "references": [
+        "apps/mobile/src/app/(app)/index.tsx:198",
+        "apps/mobile/src/app/(auth)/forgot-password.tsx:31",
+        "apps/mobile/src/app/(auth)/forgot-password.tsx:99",
+        "apps/mobile/src/app/(auth)/login.tsx:53",
+        "apps/mobile/src/app/(auth)/login.tsx:131",
+        "apps/mobile/src/app/(auth)/register.tsx:76",
+        "apps/mobile/src/app/legal/aceptar.tsx:44",
+        "apps/mobile/src/components/brand-intro.tsx:31",
+        "apps/mobile/src/components/brand/logo-drawing.tsx:56",
+        "apps/web/src/components/layout/AuthLayout.tsx:16",
+        "apps/web/src/pages/DashboardPage.tsx:87",
+        "apps/web/src/pages/LegalDocumentPage.tsx:133"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Logo de login, registro y recuperar contraseña: se muestra antes de tener sesión y tiene que verse sin conexión.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/logo-full"
+    },
+    {
+      "file": "logo.png",
+      "path": "apps/mobile/assets/images/logo.png",
+      "bytes": 13501,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/mobile",
+      "referenceCount": 4,
+      "references": [
+        "apps/mobile/src/app/admin/index.tsx:16",
+        "apps/mobile/src/components/app-tabs.web.tsx:97",
+        "apps/web/src/components/layout/TopBar.tsx:207",
+        "apps/web/src/pages/AdminPage.tsx:36"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Isotipo del panel admin y del header web de la app: marca fija de la interfaz, 13 KB; desde un CDN agregaría una descarga y parpadeo sin ahorro real.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/logo"
+    },
+    {
+      "file": "splash-icon.png",
+      "path": "apps/mobile/assets/images/splash-icon.png",
+      "bytes": 9342,
+      "extension": "png",
+      "type": "native",
+      "module": "apps/mobile",
+      "referenceCount": 6,
+      "references": [
+        "apps/mobile/app.json:35",
+        "apps/mobile/src/components/brand-intro.tsx:28",
+        "packages/core/src/brand/sanken-logo.ts:3",
+        "packages/core/src/brand/sanken-logo.ts:17",
+        "packages/core/src/brand/sanken-logo.ts:58",
+        "packages/core/src/brand/sanken-logo.ts:61"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/splash-icon"
+    },
+    {
+      "file": "home.png",
+      "path": "apps/mobile/assets/images/tabIcons/home.png",
+      "bytes": 253,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/mobile",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Sin referencias en el código: Metro/Vite no lo empaquetan, así que no ocupa espacio en el APK. Revisar si se puede borrar.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/home"
+    },
+    {
+      "file": "home@2x.png",
+      "path": "apps/mobile/assets/images/tabIcons/home@2x.png",
+      "bytes": 343,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/mobile",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Sin referencias en el código: Metro/Vite no lo empaquetan, así que no ocupa espacio en el APK. Revisar si se puede borrar.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/home"
+    },
+    {
+      "file": "home@3x.png",
+      "path": "apps/mobile/assets/images/tabIcons/home@3x.png",
+      "bytes": 479,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/mobile",
+      "referenceCount": 0,
+      "references": [],
+      "migrate": false,
+      "reasonNotMigrated": "Sin referencias en el código: Metro/Vite no lo empaquetan, así que no ocupa espacio en el APK. Revisar si se puede borrar.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/home"
+    },
+    {
+      "file": "brand-wordmark.png",
+      "path": "apps/web/public/brand-wordmark.png",
+      "bytes": 72247,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/web",
+      "referenceCount": 5,
+      "references": [
+        "apps/mobile/src/app/(app)/index.tsx:202",
+        "apps/mobile/src/app/(app)/index.tsx:457",
+        "apps/mobile/src/components/brand-intro.tsx:31",
+        "apps/mobile/src/components/brand-intro.tsx:288",
+        "apps/web/src/pages/DashboardPage.tsx:90"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Lo sirve el hosting de la web (no va en el APK): favicon y marca de la interfaz, conviene que no dependan de un tercero.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/brand-wordmark"
+    },
+    {
+      "file": "favicon.png",
+      "path": "apps/web/public/favicon.png",
+      "bytes": 1361,
+      "extension": "png",
+      "type": "native",
+      "module": "apps/web",
+      "referenceCount": 2,
+      "references": [
+        "apps/mobile/app.json:27",
+        "apps/web/index.html:5"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Referenciado por app.json (ícono, adaptive icon, splash o favicon): Expo lo necesita durante el build y Android/iOS lo empaquetan como recurso nativo.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/favicon"
+    },
+    {
+      "file": "logo-full.png",
+      "path": "apps/web/public/logo-full.png",
+      "bytes": 174110,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/web",
+      "referenceCount": 12,
+      "references": [
+        "apps/mobile/src/app/(app)/index.tsx:198",
+        "apps/mobile/src/app/(auth)/forgot-password.tsx:31",
+        "apps/mobile/src/app/(auth)/forgot-password.tsx:99",
+        "apps/mobile/src/app/(auth)/login.tsx:53",
+        "apps/mobile/src/app/(auth)/login.tsx:131",
+        "apps/mobile/src/app/(auth)/register.tsx:76",
+        "apps/mobile/src/app/legal/aceptar.tsx:44",
+        "apps/mobile/src/components/brand-intro.tsx:31",
+        "apps/mobile/src/components/brand/logo-drawing.tsx:56",
+        "apps/web/src/components/layout/AuthLayout.tsx:16",
+        "apps/web/src/pages/DashboardPage.tsx:87",
+        "apps/web/src/pages/LegalDocumentPage.tsx:133"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Lo sirve el hosting de la web (no va en el APK): favicon y marca de la interfaz, conviene que no dependan de un tercero.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/logo-full"
+    },
+    {
+      "file": "logo.png",
+      "path": "apps/web/public/logo.png",
+      "bytes": 13501,
+      "extension": "png",
+      "type": "image",
+      "module": "apps/web",
+      "referenceCount": 4,
+      "references": [
+        "apps/mobile/src/app/admin/index.tsx:16",
+        "apps/mobile/src/components/app-tabs.web.tsx:97",
+        "apps/web/src/components/layout/TopBar.tsx:207",
+        "apps/web/src/pages/AdminPage.tsx:36"
+      ],
+      "migrate": false,
+      "reasonNotMigrated": "Lo sirve el hosting de la web (no va en el APK): favicon y marca de la interfaz, conviene que no dependan de un tercero.",
+      "proposedCloudinaryFolder": "sanken/branding",
+      "proposedPublicId": "sanken/branding/logo"
+    }
+  ]
+}
