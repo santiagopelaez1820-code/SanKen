@@ -1,10 +1,15 @@
 <?php
 
+// Esta línea sirve para importar el middleware que cifra las cookies.
 use Illuminate\Cookie\Middleware\EncryptCookies;
+// Esta línea sirve para importar el middleware que valida el token CSRF.
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+// Esta línea sirve para importar el middleware de Sanctum que autentica la sesión.
 use Laravel\Sanctum\Http\Middleware\AuthenticateSession;
+// Esta línea sirve para importar la clase Sanctum.
 use Laravel\Sanctum\Sanctum;
 
+// Esta línea sirve para devolver el arreglo de configuración de Sanctum.
 return [
 
     /*
@@ -18,9 +23,13 @@ return [
     |
     */
 
+    // Esta línea sirve para definir los dominios que usan autenticación por cookies (SANCTUM_STATEFUL_DOMAINS).
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
+        // Esta línea sirve para armar el valor por defecto uniendo dos textos.
         '%s%s',
+        // Esta línea sirve para incluir localhost y 127.0.0.1 con sus puertos comunes.
         'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
+        // Esta línea sirve para incluir la URL de la propia app con su puerto.
         Sanctum::currentApplicationUrlWithPort(),
         // Sanctum::currentRequestHost(),
     ))),
@@ -37,6 +46,7 @@ return [
     |
     */
 
+    // Esta línea sirve para usar el guard "web" para las peticiones con cookies.
     'guard' => ['web'],
 
     /*
@@ -50,6 +60,7 @@ return [
     |
     */
 
+    // Esta línea sirve para hacer que los tokens venzan a los 30 días (43200 minutos).
     'expiration' => 43200,
 
     /*
@@ -65,6 +76,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el prefijo de los tokens.
     'token_prefix' => env('SANCTUM_TOKEN_PREFIX', ''),
 
     /*
@@ -78,9 +90,13 @@ return [
     |
     */
 
+    // Esta línea sirve para definir los middleware que usa Sanctum.
     'middleware' => [
+        // Esta línea sirve para usar el middleware que autentica la sesión.
         'authenticate_session' => AuthenticateSession::class,
+        // Esta línea sirve para usar el middleware que cifra las cookies.
         'encrypt_cookies' => EncryptCookies::class,
+        // Esta línea sirve para usar el middleware que valida el token CSRF.
         'validate_csrf_token' => ValidateCsrfToken::class,
     ],
 

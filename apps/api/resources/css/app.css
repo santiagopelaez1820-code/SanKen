@@ -1,11 +1,19 @@
+/* Esta línea sirve para importar Tailwind CSS. */
 @import 'tailwindcss';
 
+/* Esta línea sirve para indicar a Tailwind que revise las vistas de paginación del framework. */
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+/* Esta línea sirve para indicar que revise las vistas compiladas en storage. */
 @source '../../storage/framework/views/*.php';
+/* Esta línea sirve para indicar que revise las vistas Blade. */
 @source '../**/*.blade.php';
+/* Esta línea sirve para indicar que revise los archivos JavaScript. */
 @source '../**/*.js';
 
+/* Esta línea sirve para definir el tema de Tailwind. */
 @theme {
+    /* Esta línea sirve para definir la fuente por defecto con Instrument Sans y alternativas del sistema. */
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        /* Esta línea sirve para incluir las fuentes de emojis del sistema. */
         'Segoe UI Symbol', 'Noto Color Emoji';
 }

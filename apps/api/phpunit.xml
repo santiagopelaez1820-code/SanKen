@@ -1,36 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Esta línea sirve para abrir la configuración de PHPUnit. -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
 >
+    <!-- Esta línea sirve para abrir las suites de tests. -->
     <testsuites>
+        <!-- Esta línea sirve para definir la suite de tests unitarios. -->
         <testsuite name="Unit">
+            <!-- Esta línea sirve para indicar su carpeta. -->
             <directory>tests/Unit</directory>
         </testsuite>
+        <!-- Esta línea sirve para definir la suite de tests de funcionalidad. -->
         <testsuite name="Feature">
+            <!-- Esta línea sirve para indicar su carpeta. -->
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <!-- Esta línea sirve para abrir el código que se mide. -->
     <source>
+        <!-- Esta línea sirve para incluir los archivos de la carpeta app. -->
         <include>
             <directory>app</directory>
         </include>
     </source>
+    <!-- Esta línea sirve para abrir las variables de entorno de los tests. -->
     <php>
+        <!-- Esta línea sirve para usar el entorno "testing". -->
         <env name="APP_ENV" value="testing"/>
+        <!-- Esta línea sirve para guardar el estado de mantenimiento en un archivo. -->
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
+        <!-- Esta línea sirve para usar pocas rondas de bcrypt para ir más rápido. -->
         <env name="BCRYPT_ROUNDS" value="4"/>
+        <!-- Esta línea sirve para desactivar el tiempo real. -->
         <env name="BROADCAST_CONNECTION" value="null"/>
+        <!-- Esta línea sirve para guardar la caché en memoria. -->
         <env name="CACHE_STORE" value="array"/>
+        <!-- Esta línea sirve para usar SQLite como base de datos. -->
         <env name="DB_CONNECTION" value="sqlite"/>
+        <!-- Esta línea sirve para usar una base en memoria. -->
         <env name="DB_DATABASE" value=":memory:"/>
+        <!-- Esta línea sirve para vaciar la URL de la base de datos. -->
         <env name="DB_URL" value=""/>
+        <!-- Esta línea sirve para guardar los correos en memoria. -->
         <env name="MAIL_MAILER" value="array"/>
+        <!-- Esta línea sirve para guardar los archivos en disco local. -->
+        <env name="MEDIA_STORAGE" value="local"/>
+        <!-- Esta línea sirve para ejecutar la cola de forma inmediata. -->
         <env name="QUEUE_CONNECTION" value="sync"/>
+        <!-- Esta línea sirve para guardar las sesiones en memoria. -->
         <env name="SESSION_DRIVER" value="array"/>
+        <!-- Esta línea sirve para desactivar Pulse. -->
         <env name="PULSE_ENABLED" value="false"/>
+        <!-- Esta línea sirve para desactivar Telescope. -->
         <env name="TELESCOPE_ENABLED" value="false"/>
+        <!-- Esta línea sirve para desactivar Nightwatch. -->
         <env name="NIGHTWATCH_ENABLED" value="false"/>
     </php>
 </phpunit>

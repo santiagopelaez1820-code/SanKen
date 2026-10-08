@@ -8,173 +8,310 @@
 // ---------------------------------------------------------------------------
 
 // Paleta base — valores idénticos a Colors.dark en apps/mobile/theme.ts -----
+/* Esta línea sirve para definir la variable Sass «sanken-black» con el valor «       #080C10». */
 $sanken-black:        #080C10; // fondo principal (mobile: background)
+/* Esta línea sirve para definir la variable Sass «sanken-black-2» con el valor «     #111820». */
 $sanken-black-2:      #111820; // superficie / card (mobile: backgroundElement)
+/* Esta línea sirve para definir la variable Sass «sanken-charcoal» con el valor «    #1D2732». */
 $sanken-charcoal:     #1D2732; // superficie elevada / hover (mobile: backgroundSelected)
+/* Esta línea sirve para definir la variable Sass «sanken-charcoal-2» con «  #263140; // borde / divisor sutil…». */
 $sanken-charcoal-2:   #263140; // borde / divisor sutil
+/* Esta línea sirve para definir la variable Sass «sanken-gray» con el valor «        #9AA6B2». */
 $sanken-gray:         #9AA6B2; // texto secundario (mobile: textSecondary)
+/* Esta línea sirve para definir la variable Sass «sanken-gray-light» con «  #B8C2CC; // texto terciario…». */
 $sanken-gray-light:   #B8C2CC; // texto terciario
+/* Esta línea sirve para definir la variable Sass «sanken-white» con «       #F5F7FA; // (mobile: text)…». */
 $sanken-white:        #F5F7FA; // (mobile: text)
 // Cyan de marca — idéntico al accent de mobile, no un cyan genérico.
+/* Esta línea sirve para definir la variable Sass «sanken-cyan» con el valor «        #00B8D9». */
 $sanken-cyan:         #00B8D9; // acento de marca (mobile: accent)
+/* Esta línea sirve para definir la variable Sass «sanken-cyan-light» con el valor «  #00D4FF». */
 $sanken-cyan-light:   #00D4FF; // hover/glow del acento (mobile: accentSecondary)
+/* Esta línea sirve para definir la variable Sass «sanken-cyan-deep» con «   #0093AD; // active/pressed…». */
 $sanken-cyan-deep:    #0093AD; // active/pressed
+/* Esta línea sirve para definir la variable Sass «sanken-cyan-dim» con el valor «    rgba(0, 184, 217, 0.16)». */
 $sanken-cyan-dim:     rgba(0, 184, 217, 0.16); // fondo tenue para badges/rings
 
+/* Esta línea sirve para definir la variable Sass «sanken-success» con «     #20C997;…». */
 $sanken-success:      #20C997;
+/* Esta línea sirve para definir la variable Sass «sanken-warning» con «     #FFB020;…». */
 $sanken-warning:      #FFB020;
+/* Esta línea sirve para definir la variable Sass «sanken-danger» con «      #FF4D5E;…». */
 $sanken-danger:       #FF4D5E;
+/* Esta línea sirve para definir la variable Sass «sanken-info» con «        #4C8DFF;…». */
 $sanken-info:         #4C8DFF;
 
 // Bootstrap color system ------------------------------------------------------
+/* Esta línea sirve para definir la variable Sass «primary» con «      $sanken-cyan;…». */
 $primary:       $sanken-cyan;
+/* Esta línea sirve para definir la variable Sass «secondary» con «    $sanken-charcoal;…». */
 $secondary:     $sanken-charcoal;
+/* Esta línea sirve para definir la variable Sass «success» con «      $sanken-success;…». */
 $success:       $sanken-success;
+/* Esta línea sirve para definir la variable Sass «warning» con «      $sanken-warning;…». */
 $warning:       $sanken-warning;
+/* Esta línea sirve para definir la variable Sass «danger» con «       $sanken-danger;…». */
 $danger:        $sanken-danger;
+/* Esta línea sirve para definir la variable Sass «info» con «         $sanken-info;…». */
 $info:          $sanken-info;
+/* Esta línea sirve para definir la variable Sass «light» con «        $sanken-white;…». */
 $light:         $sanken-white;
+/* Esta línea sirve para definir la variable Sass «dark» con «         $sanken-black;…». */
 $dark:          $sanken-black;
 
+/* Esta línea sirve para definir la variable Sass «min-contrast-ratio» con el valor «1.6». */
 $min-contrast-ratio: 1.6; // el cyan sobre negro no cumple 4.5:1 con texto blanco encima; se ajusta color-contrast manualmente donde aplica
 
+/* Esta línea sirve para definir la variable Sass «body-bg» con «       $sanken-black;…». */
 $body-bg:        $sanken-black;
+/* Esta línea sirve para definir la variable Sass «body-color» con «     $sanken-white;…». */
 $body-color:      $sanken-white;
+/* Esta línea sirve para definir la variable Sass «body-secondary-color» con «$sanken-gray-light;…». */
 $body-secondary-color: $sanken-gray-light;
+/* Esta línea sirve para definir la variable Sass «body-tertiary-bg» con «$sanken-black-2;…». */
 $body-tertiary-bg: $sanken-black-2;
 
+/* Esta línea sirve para definir la variable Sass «border-color» con «   rgba(255, 255, 255, 0.08);…». */
 $border-color:    rgba(255, 255, 255, 0.08);
 // "Dark Performance": mismo redondeo generoso que mobile (cards a 24px,
 // controles a 16px) — reemplaza las esquinas técnicas de la identidad anterior.
+/* Esta línea sirve para definir la variable Sass «border-radius» con «        0.75rem;…». */
 $border-radius:         0.75rem;
+/* Esta línea sirve para definir la variable Sass «border-radius-sm» con «     0.5rem;…». */
 $border-radius-sm:      0.5rem;
+/* Esta línea sirve para definir la variable Sass «border-radius-lg» con «     1rem;…». */
 $border-radius-lg:      1rem;
+/* Esta línea sirve para definir la variable Sass «border-radius-xl» con «     1.25rem;…». */
 $border-radius-xl:      1.25rem;
+/* Esta línea sirve para definir la variable Sass «border-radius-2xl» con «    1.5rem;…». */
 $border-radius-2xl:     1.5rem;
+/* Esta línea sirve para definir la variable Sass «border-radius-pill» con «   50rem;…». */
 $border-radius-pill:    50rem;
 
 // Tipografía -------------------------------------------------------------
 // Archivo Expanded para display (voz de marca, números hero) + Geist para
 // UI/cuerpo — dos roles tipográficos distintos, no una sola familia para todo.
+/* Esta línea sirve para definir la familia de fuente de la interfaz con alternativas del sistema. */
 $font-family-sans-serif: "Geist Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+/* Esta línea sirve para definir la variable Sass «font-family-base» con «$font-family-sans-serif;…». */
 $font-family-base: $font-family-sans-serif;
+/* Esta línea sirve para definir la familia de fuente de los títulos con alternativas. */
 $headings-font-family: "Archivo Expanded", "Archivo", $font-family-sans-serif;
+/* Esta línea sirve para definir la variable Sass «headings-font-weight» con «800;…». */
 $headings-font-weight: 800;
+/* Esta línea sirve para definir la variable Sass «headings-letter-spacing» con «-0.02em;…». */
 $headings-letter-spacing: -0.02em;
+/* Esta línea sirve para definir la variable Sass «headings-line-height» con «0.98;…». */
 $headings-line-height: 0.98;
+/* Esta línea sirve para definir la variable Sass «font-weight-bold» con «700;…». */
 $font-weight-bold: 700;
+/* Esta línea sirve para definir la variable Sass «display-font-weight» con «800;…». */
 $display-font-weight: 800;
+/* Esta línea sirve para definir la variable Sass «display-line-height» con «0.94;…». */
 $display-line-height: 0.94;
+/* Esta línea sirve para definir la variable Sass «display-font-sizes» con «(…». */
 $display-font-sizes: (
+  /* Esta línea sirve para asignar al nivel «1» el valor «6rem». */
   1: 6rem,
+  /* Esta línea sirve para asignar al nivel «2» el valor «5rem». */
   2: 5rem,
+  /* Esta línea sirve para asignar al nivel «3» el valor «4rem». */
   3: 4rem,
+  /* Esta línea sirve para asignar al nivel «4» el valor «3rem». */
   4: 3rem,
+  /* Esta línea sirve para asignar al nivel «5» el valor «2.25rem». */
   5: 2.25rem,
+  /* Esta línea sirve para asignar al nivel «6» el valor «1.75rem». */
   6: 1.75rem
+/* Esta línea sirve para cerrar el mapa Sass. */
 );
 
 // Componentes --------------------------------------------------------------
+/* Esta línea sirve para definir la variable Sass «card-bg» con «$sanken-black-2;…». */
 $card-bg: $sanken-black-2;
+/* Esta línea sirve para definir la variable Sass «card-border-color» con «$border-color;…». */
 $card-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «card-border-radius» con «$border-radius-2xl;…». */
 $card-border-radius: $border-radius-2xl;
+/* Esta línea sirve para definir la variable Sass «card-cap-bg» con «transparent;…». */
 $card-cap-bg: transparent;
+/* Esta línea sirve para definir la variable Sass «card-spacer-y» con «1.25rem;…». */
 $card-spacer-y: 1.25rem;
+/* Esta línea sirve para definir la variable Sass «card-spacer-x» con «1.25rem;…». */
 $card-spacer-x: 1.25rem;
 
+/* Esta línea sirve para definir la variable Sass «btn-border-radius» con «$border-radius-lg;…». */
 $btn-border-radius: $border-radius-lg;
+/* Esta línea sirve para definir la variable Sass «btn-border-radius-sm» con «$border-radius-sm;…». */
 $btn-border-radius-sm: $border-radius-sm;
+/* Esta línea sirve para definir la variable Sass «btn-border-radius-lg» con «$border-radius-xl;…». */
 $btn-border-radius-lg: $border-radius-xl;
+/* Esta línea sirve para definir la variable Sass «btn-font-weight» con «700;…». */
 $btn-font-weight: 700;
+/* Esta línea sirve para definir la variable Sass «btn-font-family» con «$headings-font-family;…». */
 $btn-font-family: $headings-font-family;
+/* Esta línea sirve para definir la variable Sass «btn-padding-y» con «0.85rem;…». */
 $btn-padding-y: 0.85rem;
+/* Esta línea sirve para definir la variable Sass «btn-padding-x» con «1.75rem;…». */
 $btn-padding-x: 1.75rem;
+/* Esta línea sirve para definir la variable Sass «btn-padding-y-sm» con «0.5rem;…». */
 $btn-padding-y-sm: 0.5rem;
+/* Esta línea sirve para definir la variable Sass «btn-padding-x-sm» con «1.1rem;…». */
 $btn-padding-x-sm: 1.1rem;
+/* Esta línea sirve para definir la variable Sass «btn-padding-y-lg» con «1.1rem;…». */
 $btn-padding-y-lg: 1.1rem;
+/* Esta línea sirve para definir la variable Sass «btn-padding-x-lg» con «2.5rem;…». */
 $btn-padding-x-lg: 2.5rem;
 
+/* Esta línea sirve para definir la variable Sass «badge-border-radius» con «$border-radius-sm;…». */
 $badge-border-radius: $border-radius-sm;
+/* Esta línea sirve para definir la variable Sass «badge-font-weight» con «700;…». */
 $badge-font-weight: 700;
+/* Esta línea sirve para definir la variable Sass «badge-padding-y» con «0.4em;…». */
 $badge-padding-y: 0.4em;
+/* Esta línea sirve para definir la variable Sass «badge-padding-x» con «0.65em;…». */
 $badge-padding-x: 0.65em;
 
+/* Esta línea sirve para definir la variable Sass «progress-bg» con «$sanken-charcoal;…». */
 $progress-bg: $sanken-charcoal;
+/* Esta línea sirve para definir la variable Sass «progress-bar-bg» con «$sanken-cyan;…». */
 $progress-bar-bg: $sanken-cyan;
+/* Esta línea sirve para definir la variable Sass «progress-border-radius» con «$border-radius-sm;…». */
 $progress-border-radius: $border-radius-sm;
+/* Esta línea sirve para definir la variable Sass «progress-height» con «0.375rem;…». */
 $progress-height: 0.375rem;
 
+/* Esta línea sirve para definir la variable Sass «modal-content-bg» con «$sanken-black-2;…». */
 $modal-content-bg: $sanken-black-2;
+/* Esta línea sirve para definir la variable Sass «modal-content-border-color» con «$border-color;…». */
 $modal-content-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «modal-content-border-radius» con «$border-radius-xl;…». */
 $modal-content-border-radius: $border-radius-xl;
+/* Esta línea sirve para definir la variable Sass «modal-backdrop-bg» con «$sanken-black;…». */
 $modal-backdrop-bg: $sanken-black;
+/* Esta línea sirve para definir la variable Sass «modal-backdrop-opacity» con «0.85;…». */
 $modal-backdrop-opacity: 0.85;
 
+/* Esta línea sirve para definir la variable Sass «dropdown-bg» con «$sanken-charcoal;…». */
 $dropdown-bg: $sanken-charcoal;
+/* Esta línea sirve para definir la variable Sass «dropdown-border-color» con «$border-color;…». */
 $dropdown-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «dropdown-link-color» con «$sanken-white;…». */
 $dropdown-link-color: $sanken-white;
+/* Esta línea sirve para definir la variable Sass «dropdown-link-hover-bg» con «rgba(255, 255, 255, 0.06);…». */
 $dropdown-link-hover-bg: rgba(255, 255, 255, 0.06);
+/* Esta línea sirve para definir la variable Sass «dropdown-link-active-bg» con «$sanken-cyan-dim;…». */
 $dropdown-link-active-bg: $sanken-cyan-dim;
+/* Esta línea sirve para definir la variable Sass «dropdown-link-active-color» con «$sanken-cyan-light;…». */
 $dropdown-link-active-color: $sanken-cyan-light;
 
+/* Esta línea sirve para definir la variable Sass «nav-link-color» con «$sanken-gray-light;…». */
 $nav-link-color: $sanken-gray-light;
+/* Esta línea sirve para definir la variable Sass «nav-link-hover-color» con «$sanken-white;…». */
 $nav-link-hover-color: $sanken-white;
+/* Esta línea sirve para definir la variable Sass «navbar-dark-color» con «$sanken-gray-light;…». */
 $navbar-dark-color: $sanken-gray-light;
+/* Esta línea sirve para definir la variable Sass «navbar-dark-hover-color» con «$sanken-white;…». */
 $navbar-dark-hover-color: $sanken-white;
+/* Esta línea sirve para definir la variable Sass «navbar-dark-active-color» con «$sanken-white;…». */
 $navbar-dark-active-color: $sanken-white;
 
+/* Esta línea sirve para definir la variable Sass «offcanvas-bg-color» con «$sanken-black-2;…». */
 $offcanvas-bg-color: $sanken-black-2;
+/* Esta línea sirve para definir la variable Sass «offcanvas-border-color» con «$border-color;…». */
 $offcanvas-border-color: $border-color;
 
+/* Esta línea sirve para definir la variable Sass «list-group-bg» con «transparent;…». */
 $list-group-bg: transparent;
+/* Esta línea sirve para definir la variable Sass «list-group-border-color» con «$border-color;…». */
 $list-group-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «list-group-hover-bg» con «rgba(255, 255, 255, 0.04);…». */
 $list-group-hover-bg: rgba(255, 255, 255, 0.04);
+/* Esta línea sirve para definir la variable Sass «list-group-active-bg» con «$sanken-cyan-dim;…». */
 $list-group-active-bg: $sanken-cyan-dim;
+/* Esta línea sirve para definir la variable Sass «list-group-active-border-color» con «$sanken-cyan;…». */
 $list-group-active-border-color: $sanken-cyan;
+/* Esta línea sirve para definir la variable Sass «list-group-active-color» con «$sanken-white;…». */
 $list-group-active-color: $sanken-white;
 
+/* Esta línea sirve para definir la variable Sass «input-bg» con «$sanken-charcoal;…». */
 $input-bg: $sanken-charcoal;
+/* Esta línea sirve para definir la variable Sass «input-color» con «$sanken-white;…». */
 $input-color: $sanken-white;
+/* Esta línea sirve para definir la variable Sass «input-border-color» con «$border-color;…». */
 $input-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «input-focus-border-color» con «$sanken-cyan;…». */
 $input-focus-border-color: $sanken-cyan;
+/* Esta línea sirve para definir la variable Sass «input-focus-box-shadow» con «0 0 0 0.2rem rgba(0, 184, 217, 0.25);…». */
 $input-focus-box-shadow: 0 0 0 0.2rem rgba(0, 184, 217, 0.25);
+/* Esta línea sirve para definir la variable Sass «input-placeholder-color» con «$sanken-gray;…». */
 $input-placeholder-color: $sanken-gray;
 
+/* Esta línea sirve para definir la variable Sass «table-color» con «$sanken-white;…». */
 $table-color: $sanken-white;
+/* Esta línea sirve para definir la variable Sass «table-bg» con «transparent;…». */
 $table-bg: transparent;
+/* Esta línea sirve para definir la variable Sass «table-border-color» con «$border-color;…». */
 $table-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «table-striped-bg» con «rgba(255, 255, 255, 0.02);…». */
 $table-striped-bg: rgba(255, 255, 255, 0.02);
+/* Esta línea sirve para definir la variable Sass «table-hover-bg» con «rgba(255, 255, 255, 0.04);…». */
 $table-hover-bg: rgba(255, 255, 255, 0.04);
 
+/* Esta línea sirve para definir la variable Sass «tooltip-bg» con «$sanken-charcoal;…». */
 $tooltip-bg: $sanken-charcoal;
+/* Esta línea sirve para definir la variable Sass «tooltip-color» con «$sanken-white;…». */
 $tooltip-color: $sanken-white;
 
+/* Esta línea sirve para definir la variable Sass «popover-bg» con «$sanken-charcoal;…». */
 $popover-bg: $sanken-charcoal;
+/* Esta línea sirve para definir la variable Sass «popover-border-color» con «$border-color;…». */
 $popover-border-color: $border-color;
 
+/* Esta línea sirve para definir la variable Sass «toast-background-color» con «$sanken-charcoal;…». */
 $toast-background-color: $sanken-charcoal;
+/* Esta línea sirve para definir la variable Sass «toast-border-color» con «$border-color;…». */
 $toast-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «toast-header-background-color» con «$sanken-charcoal;…». */
 $toast-header-background-color: $sanken-charcoal;
 
+/* Esta línea sirve para definir la variable Sass «accordion-bg» con «transparent;…». */
 $accordion-bg: transparent;
+/* Esta línea sirve para definir la variable Sass «accordion-border-color» con «$border-color;…». */
 $accordion-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «accordion-button-active-bg» con «$sanken-cyan-dim;…». */
 $accordion-button-active-bg: $sanken-cyan-dim;
+/* Esta línea sirve para definir la variable Sass «accordion-button-active-color» con «$sanken-cyan-light;…». */
 $accordion-button-active-color: $sanken-cyan-light;
 
+/* Esta línea sirve para definir la variable Sass «pagination-bg» con «transparent;…». */
 $pagination-bg: transparent;
+/* Esta línea sirve para definir la variable Sass «pagination-border-color» con «$border-color;…». */
 $pagination-border-color: $border-color;
+/* Esta línea sirve para definir la variable Sass «pagination-color» con «$sanken-white;…». */
 $pagination-color: $sanken-white;
+/* Esta línea sirve para definir la variable Sass «pagination-hover-bg» con «rgba(255, 255, 255, 0.06);…». */
 $pagination-hover-bg: rgba(255, 255, 255, 0.06);
+/* Esta línea sirve para definir la variable Sass «pagination-active-bg» con «$sanken-cyan;…». */
 $pagination-active-bg: $sanken-cyan;
+/* Esta línea sirve para definir la variable Sass «pagination-active-border-color» con «$sanken-cyan;…». */
 $pagination-active-border-color: $sanken-cyan;
+/* Esta línea sirve para definir la variable Sass «pagination-active-color» con «$sanken-black;…». */
 $pagination-active-color: $sanken-black;
 
+/* Esta línea sirve para definir la variable Sass «spinner-width» con «1.5rem;…». */
 $spinner-width: 1.5rem;
+/* Esta línea sirve para definir la variable Sass «spinner-height» con «1.5rem;…». */
 $spinner-height: 1.5rem;
 
+/* Esta línea sirve para definir la variable Sass «link-color» con «$sanken-cyan-light;…». */
 $link-color: $sanken-cyan-light;
+/* Esta línea sirve para definir la variable Sass «link-hover-color» con «$sanken-cyan;…». */
 $link-hover-color: $sanken-cyan;
+/* Esta línea sirve para definir la variable Sass «link-decoration» con «none;…». */
 $link-decoration: none;
 
+/* Esta línea sirve para definir la variable Sass «enable-negative-margins» con «true;…». */
 $enable-negative-margins: true;
+/* Esta línea sirve para definir la variable Sass «enable-shadows» con «false;…». */
 $enable-shadows: false;

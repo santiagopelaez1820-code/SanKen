@@ -1,5 +1,6 @@
 <?php
 
+// Esta línea sirve para devolver el arreglo de configuración de las colas.
 return [
 
     /*
@@ -13,6 +14,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la conexión por defecto (QUEUE_CONNECTION, "database" por defecto).
     'default' => env('QUEUE_CONNECTION', 'database'),
 
     /*
@@ -29,62 +31,104 @@ return [
     |
     */
 
+    // Esta línea sirve para definir las conexiones disponibles.
     'connections' => [
 
+        // Esta línea sirve para configurar la cola sincrónica (ejecuta los trabajos en el momento).
         'sync' => [
+            // Esta línea sirve para usar el driver sync.
             'driver' => 'sync',
         ],
 
+        // Esta línea sirve para configurar la cola en base de datos.
         'database' => [
+            // Esta línea sirve para usar el driver database.
             'driver' => 'database',
+            // Esta línea sirve para definir la conexión de base de datos.
             'connection' => env('DB_QUEUE_CONNECTION'),
+            // Esta línea sirve para definir la tabla de trabajos.
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
+            // Esta línea sirve para definir el nombre de la cola.
             'queue' => env('DB_QUEUE', 'default'),
+            // Esta línea sirve para reintentar un trabajo si tarda más de 90 segundos.
             'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),
+            // Esta línea sirve para despachar los trabajos sin esperar a que termine la transacción.
             'after_commit' => false,
         ],
 
+        // Esta línea sirve para configurar Beanstalkd.
         'beanstalkd' => [
+            // Esta línea sirve para usar el driver beanstalkd.
             'driver' => 'beanstalkd',
+            // Esta línea sirve para definir el host.
             'host' => env('BEANSTALKD_QUEUE_HOST', 'localhost'),
+            // Esta línea sirve para definir el nombre de la cola.
             'queue' => env('BEANSTALKD_QUEUE', 'default'),
+            // Esta línea sirve para reintentar un trabajo si tarda más de 90 segundos.
             'retry_after' => (int) env('BEANSTALKD_QUEUE_RETRY_AFTER', 90),
+            // Esta línea sirve para evitar esperar por trabajos nuevos.
             'block_for' => 0,
+            // Esta línea sirve para despachar los trabajos sin esperar a que termine la transacción.
             'after_commit' => false,
         ],
 
+        // Esta línea sirve para configurar Amazon SQS.
         'sqs' => [
+            // Esta línea sirve para usar el driver sqs.
             'driver' => 'sqs',
+            // Esta línea sirve para definir la clave de AWS.
             'key' => env('AWS_ACCESS_KEY_ID'),
+            // Esta línea sirve para definir el secreto de AWS.
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
+            // Esta línea sirve para definir el prefijo de la URL de la cola.
             'prefix' => env('SQS_PREFIX', 'https://sqs.us-east-1.amazonaws.com/your-account-id'),
+            // Esta línea sirve para definir el nombre de la cola.
             'queue' => env('SQS_QUEUE', 'default'),
+            // Esta línea sirve para definir el sufijo.
             'suffix' => env('SQS_SUFFIX'),
+            // Esta línea sirve para definir la región.
             'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+            // Esta línea sirve para despachar los trabajos sin esperar a que termine la transacción.
             'after_commit' => false,
         ],
 
+        // Esta línea sirve para configurar Redis.
         'redis' => [
+            // Esta línea sirve para usar el driver redis.
             'driver' => 'redis',
+            // Esta línea sirve para usar la conexión "default" de Redis.
             'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            // Esta línea sirve para definir el nombre de la cola.
             'queue' => env('REDIS_QUEUE', 'default'),
+            // Esta línea sirve para reintentar un trabajo si tarda más de 90 segundos.
             'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 90),
+            // Esta línea sirve para dejar sin tiempo de espera por trabajos nuevos.
             'block_for' => null,
+            // Esta línea sirve para despachar los trabajos sin esperar a que termine la transacción.
             'after_commit' => false,
         ],
 
+        // Esta línea sirve para configurar la cola diferida (corre después de enviar la respuesta).
         'deferred' => [
+            // Esta línea sirve para usar el driver deferred.
             'driver' => 'deferred',
         ],
 
+        // Esta línea sirve para configurar la cola en segundo plano.
         'background' => [
+            // Esta línea sirve para usar el driver background.
             'driver' => 'background',
         ],
 
+        // Esta línea sirve para configurar la cola con respaldo.
         'failover' => [
+            // Esta línea sirve para usar el driver failover.
             'driver' => 'failover',
+            // Esta línea sirve para definir las conexiones en orden de preferencia.
             'connections' => [
+                // Esta línea sirve para usar primero la base de datos.
                 'database',
+                // Esta línea sirve para usar la cola diferida si falla.
                 'deferred',
             ],
         ],
@@ -102,8 +146,11 @@ return [
     |
     */
 
+    // Esta línea sirve para configurar los lotes de trabajos.
     'batching' => [
+        // Esta línea sirve para definir la base de datos.
         'database' => env('DB_CONNECTION', 'sqlite'),
+        // Esta línea sirve para usar la tabla job_batches.
         'table' => 'job_batches',
     ],
 
@@ -120,9 +167,13 @@ return [
     |
     */
 
+    // Esta línea sirve para configurar los trabajos fallidos.
     'failed' => [
+        // Esta línea sirve para definir el driver (database-uuids por defecto).
         'driver' => env('QUEUE_FAILED_DRIVER', 'database-uuids'),
+        // Esta línea sirve para definir la base de datos.
         'database' => env('DB_CONNECTION', 'sqlite'),
+        // Esta línea sirve para usar la tabla failed_jobs.
         'table' => 'failed_jobs',
     ],
 

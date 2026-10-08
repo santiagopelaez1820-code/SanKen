@@ -18,10 +18,15 @@
  * responsable de SanKen / un profesional jurídico. No bloquea nada — es
  * informativo y se muestra en las páginas de cada documento.
  */
+// Esta línea sirve para devolver el arreglo de configuración legal.
 return [
+    // Esta línea sirve para definir los documentos legales vigentes.
     'documents' => [
+        // Esta línea sirve para definir la versión vigente de los Términos y Condiciones.
         'terms' => ['version' => '1.0', 'updated_at' => '2026-09-28', 'status' => 'approved'],
+        // Esta línea sirve para definir la versión vigente de la Política de Privacidad.
         'privacy' => ['version' => '1.2', 'updated_at' => '2026-09-30', 'status' => 'approved'],
+        // Esta línea sirve para definir la versión vigente de la Política de Cookies.
         'cookies' => ['version' => '1.1', 'updated_at' => '2026-09-30', 'status' => 'approved'],
     ],
 
@@ -36,9 +41,13 @@ return [
      * La Política de Cookies NO figura acá: su consentimiento es por
      * navegador (banner de la web), no por cuenta.
      */
+    // Esta línea sirve para definir los consentimientos que se piden al usuario.
     'consents' => [
+        // Esta línea sirve para atar la aceptación de los Términos a su documento.
         'terms' => ['document' => 'terms'],
+        // Esta línea sirve para atar la aceptación de la Privacidad a su documento.
         'privacy' => ['document' => 'privacy'],
+        // Esta línea sirve para atar la autorización de datos de salud a la Política de Privacidad.
         'health_data' => ['document' => 'privacy'],
     ],
 ];

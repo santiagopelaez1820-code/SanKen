@@ -1,5 +1,6 @@
 <?php
 
+// Esta línea sirve para devolver el arreglo de configuración de la aplicación.
 return [
 
     /*
@@ -13,6 +14,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el nombre de la app (APP_NAME, "Laravel" por defecto).
     'name' => env('APP_NAME', 'Laravel'),
 
     /*
@@ -26,6 +28,7 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el entorno (APP_ENV, "production" por defecto).
     'env' => env('APP_ENV', 'production'),
 
     /*
@@ -39,6 +42,7 @@ return [
     |
     */
 
+    // Esta línea sirve para activar o desactivar el modo debug (APP_DEBUG).
     'debug' => (bool) env('APP_DEBUG', false),
 
     /*
@@ -52,8 +56,10 @@ return [
     |
     */
 
+    // Esta línea sirve para definir la URL base de la API (APP_URL).
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Esta línea sirve para definir la URL del frontend web (FRONTEND_URL) para los enlaces de los correos.
     'frontend_url' => env('FRONTEND_URL'),
 
     /**
@@ -62,6 +68,7 @@ return [
      * En formato internacional sin '+' (ej. 573001234567). Vacío = el
      * botón simplemente no aparece, no es un error.
      */
+    // Esta línea sirve para definir el número de WhatsApp de atención de SanKen.
     'support_whatsapp_number' => env('SUPPORT_WHATSAPP_NUMBER'),
 
     /*
@@ -75,6 +82,7 @@ return [
     |
     */
 
+    // Esta línea sirve para usar la zona horaria UTC.
     'timezone' => 'UTC',
 
     /*
@@ -88,10 +96,13 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el idioma de la app (APP_LOCALE).
     'locale' => env('APP_LOCALE', 'en'),
 
+    // Esta línea sirve para definir el idioma de respaldo.
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
+    // Esta línea sirve para definir el idioma de los datos falsos de prueba (Faker).
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
 
     /*
@@ -105,12 +116,17 @@ return [
     |
     */
 
+    // Esta línea sirve para definir el algoritmo de cifrado.
     'cipher' => 'AES-256-CBC',
 
+    // Esta línea sirve para definir la clave de cifrado (APP_KEY).
     'key' => env('APP_KEY'),
 
+    // Esta línea sirve para definir las claves de cifrado anteriores.
     'previous_keys' => [
+        // Esta línea sirve para tomar solo las claves no vacías.
         ...array_filter(
+            // Esta línea sirve para separar por comas las claves de APP_PREVIOUS_KEYS.
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))
         ),
     ],
@@ -128,8 +144,11 @@ return [
     |
     */
 
+    // Esta línea sirve para configurar el modo mantenimiento.
     'maintenance' => [
+        // Esta línea sirve para definir dónde se guarda el estado de mantenimiento (archivo por defecto).
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
+        // Esta línea sirve para definir el almacén de caché si se usa el driver "cache".
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 

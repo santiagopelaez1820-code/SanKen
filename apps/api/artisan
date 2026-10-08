@@ -1,18 +1,25 @@
 #!/usr/bin/env php
 <?php
 
+// Esta línea sirve para importar la clase Application de Laravel.
 use Illuminate\Foundation\Application;
+// Esta línea sirve para importar la clase que lee los argumentos de la consola.
 use Symfony\Component\Console\Input\ArgvInput;
 
+// Esta línea sirve para guardar el momento en que empezó el comando.
 define('LARAVEL_START', microtime(true));
 
 // Register the Composer autoloader...
+// Esta línea sirve para cargar el autoloader de Composer.
 require __DIR__.'/vendor/autoload.php';
 
 // Bootstrap Laravel and handle the command...
+// Esta línea sirve para crear la aplicación de Laravel.
 /** @var Application $app */
 $app = require_once __DIR__.'/bootstrap/app.php';
 
+// Esta línea sirve para ejecutar el comando de consola recibido.
 $status = $app->handleCommand(new ArgvInput);
 
+// Esta línea sirve para terminar con el código de salida del comando.
 exit($status);

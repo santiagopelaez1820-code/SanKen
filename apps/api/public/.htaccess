@@ -1,25 +1,39 @@
+# Esta línea sirve para activar estas reglas solo si el módulo mod_rewrite está disponible.
 <IfModule mod_rewrite.c>
+    # Esta línea sirve para aplicar lo siguiente solo si está el módulo mod_negotiation.
     <IfModule mod_negotiation.c>
+        # Esta línea sirve para desactivar MultiViews y el listado de carpetas.
         Options -MultiViews -Indexes
     </IfModule>
 
+    # Esta línea sirve para activar el motor de reescritura de URLs.
     RewriteEngine On
 
     # Handle Authorization Header
+    # Esta línea sirve para revisar si la petición trae el encabezado Authorization.
     RewriteCond %{HTTP:Authorization} .
+    # Esta línea sirve para pasar el encabezado Authorization a PHP.
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
     # Handle X-XSRF-Token Header
+    # Esta línea sirve para revisar si la petición trae el encabezado X-XSRF-Token.
     RewriteCond %{HTTP:x-xsrf-token} .
+    # Esta línea sirve para pasar el encabezado X-XSRF-Token a PHP.
     RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
 
     # Redirect Trailing Slashes If Not A Folder...
+    # Esta línea sirve para revisar que la ruta no sea una carpeta.
     RewriteCond %{REQUEST_FILENAME} !-d
+    # Esta línea sirve para revisar si la URL termina en "/".
     RewriteCond %{REQUEST_URI} (.+)/$
+    # Esta línea sirve para redirigir (301) a la misma URL sin la barra final.
     RewriteRule ^ %1 [L,R=301]
 
     # Send Requests To Front Controller...
+    # Esta línea sirve para revisar que la ruta no sea una carpeta existente.
     RewriteCond %{REQUEST_FILENAME} !-d
+    # Esta línea sirve para revisar que la ruta no sea un archivo existente.
     RewriteCond %{REQUEST_FILENAME} !-f
+    # Esta línea sirve para enviar la petición a index.php.
     RewriteRule ^ index.php [L]
 </IfModule>

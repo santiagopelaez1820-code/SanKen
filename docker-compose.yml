@@ -1,39 +1,75 @@
+# Esta línea sirve para definir el nombre del proyecto de Docker Compose.
 name: sanken
 
+# Esta línea sirve para declarar los servicios.
 services:
+  # Esta línea sirve para declarar el servicio MySQL.
   mysql:
+    # Esta línea sirve para usar la imagen de MySQL 8.4.
     image: mysql:8.4
+    # Esta línea sirve para nombrar el contenedor sanken-mysql.
     container_name: sanken-mysql
+    # Esta línea sirve para reiniciar el contenedor salvo que se detenga a mano.
     restart: unless-stopped
+    # Esta línea sirve para definir las variables de entorno.
     environment:
+      # Esta línea sirve para crear la base de datos sanken.
       MYSQL_DATABASE: sanken
+      # Esta línea sirve para crear el usuario sanken.
       MYSQL_USER: sanken
+      # Esta línea sirve para definir la contraseña del usuario.
       MYSQL_PASSWORD: sanken
+      # Esta línea sirve para definir la contraseña de root.
       MYSQL_ROOT_PASSWORD: sanken_root
+    # Esta línea sirve para publicar los puertos.
     ports:
+      # Esta línea sirve para mapear el puerto 3306.
       - "3306:3306"
+    # Esta línea sirve para declarar los volúmenes.
     volumes:
+      # Esta línea sirve para guardar los datos de MySQL en un volumen.
       - sanken_mysql_data:/var/lib/mysql
+    # Esta línea sirve para definir la comprobación de salud.
     healthcheck:
+      # Esta línea sirve para ejecutar mysqladmin ping para comprobar que responde.
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-psanken_root"]
+      # Esta línea sirve para comprobar cada 5 segundos.
       interval: 5s
+      # Esta línea sirve para esperar 5 segundos como máximo por comprobación.
       timeout: 5s
+      # Esta línea sirve para reintentar hasta 10 veces.
       retries: 10
 
+  # Esta línea sirve para declarar el servicio Redis.
   redis:
+    # Esta línea sirve para usar la imagen de Redis 7.
     image: redis:7-alpine
+    # Esta línea sirve para nombrar el contenedor sanken-redis.
     container_name: sanken-redis
+    # Esta línea sirve para reiniciar el contenedor salvo que se detenga a mano.
     restart: unless-stopped
+    # Esta línea sirve para publicar los puertos.
     ports:
+      # Esta línea sirve para mapear el puerto 6379.
       - "6379:6379"
+    # Esta línea sirve para declarar los volúmenes.
     volumes:
+      # Esta línea sirve para guardar los datos de Redis en un volumen.
       - sanken_redis_data:/data
+    # Esta línea sirve para definir la comprobación de salud.
     healthcheck:
+      # Esta línea sirve para ejecutar redis-cli ping para comprobar que responde.
       test: ["CMD", "redis-cli", "ping"]
+      # Esta línea sirve para comprobar cada 5 segundos.
       interval: 5s
+      # Esta línea sirve para esperar 5 segundos como máximo por comprobación.
       timeout: 5s
+      # Esta línea sirve para reintentar hasta 10 veces.
       retries: 10
 
+# Esta línea sirve para declarar los volúmenes con nombre.
 volumes:
+  # Esta línea sirve para declarar el volumen de datos de MySQL.
   sanken_mysql_data:
+  # Esta línea sirve para declarar el volumen de datos de Redis.
   sanken_redis_data:

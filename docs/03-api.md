@@ -282,8 +282,22 @@ Ver `docs/09-soporte-y-checkin.md`. Usuario (Sanctum): `GET/POST /support/ticket
 `POST /admin/support/tickets/{id}/messages`, `GET /admin/support/stats`,
 `GET /admin/support/staff`.
 
-## 16. Documentación
+## 16. Documentación (OpenAPI / Swagger)
 
-- OpenAPI 3.1 generado a partir de anotaciones (`dedoc/scramble` o `l5-swagger`) → publicado en `/docs` (protegido en producción).
-- Contract testing con Pest entre backend y clientes vía snapshots de OpenAPI en CI.
-- Postman/Insomnia collection exportada automáticamente en cada release del contrato.
+OpenAPI 3.1 generado automáticamente desde el código con [Scramble](https://scramble.dedoc.co) (`dedoc/scramble`) y mostrado con Swagger UI. Configuración en `apps/api/config/scramble.php`.
+
+| URL | Contenido |
+|---|---|
+| `GET /docs/api` | Swagger UI. Para probar endpoints protegidos: login, botón **Authorize** y pegar el `token` (sin `Bearer`). |
+| `GET /docs/api.json` | Documento OpenAPI en JSON (importable en Postman/Insomnia). |
+
+- **Acceso**: libre con `APP_ENV=local` (incluido el túnel de ngrok, que apunta al mismo servidor); en cualquier otro entorno responde 403 salvo que se defina el gate `viewApiDocs`.
+- **Qué se infiere solo**: rutas y parámetros de ruta, body y query params desde las reglas de los FormRequests o `$request->validate()`, respuestas desde los API Resources y los `response()->json(...)`, errores 401/403/404/422 y seguridad Bearer en toda ruta con `auth:sanctum`.
+- **Al agregar un endpoint** (Definition of Done):
+  1. La primera línea del PHPDoc del método es el título del endpoint; el resto, su descripción.
+  2. El controller lleva `#[Group('Nombre', weight: N)]`, con el mismo nombre y peso que los demás controllers de esa sección.
+  3. Si la respuesta se arma con colecciones o closures que Scramble no logra tipar, declararla con `@response array{...}` en el PHPDoc.
+  4. `tests/Feature/ApiDocs/ApiDocumentationTest.php` falla si un endpoint de `/api/v1` queda sin título o sin grupo, o si la generación reporta problemas.
+- **Casos especiales**: un FormRequest compartido por POST y PATCH con reglas distintas lleva `@ignoreSchema` en su docblock (si no, el PATCH hereda los campos obligatorios del POST); los DELETE que reciben body lo documentan gracias a `App\Http\ApiDocs\DeleteRequestBodyExtension`.
+- **Comandos**: `php artisan scramble:analyze` (diagnóstico) y `php artisan scramble:export --path=storage/app/openapi.json` (exportar).
+- **Pendiente**: contract testing entre backend y clientes vía snapshots de OpenAPI en CI, y colección de Postman/Insomnia exportada en cada release del contrato.

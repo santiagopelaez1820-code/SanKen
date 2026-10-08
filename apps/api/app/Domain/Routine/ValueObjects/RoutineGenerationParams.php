@@ -1,5 +1,7 @@
 <?php
 
+// Esta línea sirve para ubicar esta clase en el espacio de nombres de los objetos de valor de rutina.
+
 namespace App\Domain\Routine\ValueObjects;
 
 /**
@@ -11,13 +13,20 @@ namespace App\Domain\Routine\ValueObjects;
  * de qué ejercicios y en qué orden, pero cuánto de eso se usa y con qué
  * series/reps/descanso lo decide esto.
  */
+// Esta línea sirve para declarar el objeto con los parámetros de generación de una rutina.
 final readonly class RoutineGenerationParams
 {
+    // Esta línea sirve para declarar el constructor con sus propiedades.
     public function __construct(
+        // Esta línea sirve para guardar el máximo de ejercicios por día.
         public int $maxExercisesPerDay,
+        // Esta línea sirve para guardar las series por ejercicio.
         public int $setsPerExercise,
+        // Esta línea sirve para guardar el rango de repeticiones.
         public string $targetReps,
+        // Esta línea sirve para guardar los segundos de descanso.
         public int $restSeconds,
+        // Esta línea sirve para guardar el RPE objetivo.
         public float $targetRpe,
     ) {}
 }

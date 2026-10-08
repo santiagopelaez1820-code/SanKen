@@ -1,8 +1,14 @@
+<!-- Esta línea sirve para declarar que el documento usa HTML5. -->
 <!doctype html>
+<!-- Esta línea sirve para abrir el documento HTML en inglés. -->
 <html lang="en">
+  <!-- Esta línea sirve para abrir la cabecera con los metadatos de la página. -->
   <head>
+    <!-- Esta línea sirve para definir la codificación de caracteres UTF-8. -->
     <meta charset="UTF-8" />
+    <!-- Esta línea sirve para definir el ícono de la pestaña del navegador. -->
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Esta línea sirve para abrir el script que aplica el tema antes del primer pintado. -->
     <script>
       // Aplica el modo claro/oscuro ANTES del primer paint -- sin esto, la
       // página siempre nacería oscura (el flash de un instante) y recién
@@ -26,17 +32,25 @@
         }
       })();
     </script>
+    <!-- Esta línea sirve para definir el ancho del viewport para pantallas móviles. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Esta línea sirve para precargar la conexión con Google Fonts. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <!-- Esta línea sirve para precargar la conexión con el servidor de fuentes de Google. -->
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Esta línea sirve para cargar la hoja de estilos de la fuente Archivo Expanded. -->
     <link
       href="https://fonts.googleapis.com/css2?family=Archivo+Expanded:wght@700;800;900&display=swap"
       rel="stylesheet"
     />
+    <!-- Esta línea sirve para definir el título de la pestaña del navegador. -->
     <title>Sanken</title>
   </head>
+  <!-- Esta línea sirve para abrir el cuerpo de la página. -->
   <body>
+    <!-- Esta línea sirve para crear el contenedor donde React monta la aplicación. -->
     <div id="root"></div>
+    <!-- Esta línea sirve para cargar el punto de entrada de la aplicación como módulo. -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

@@ -1,5 +1,7 @@
 <?php
 
+// Esta línea sirve para ubicar esta clase en el espacio de nombres de las reglas de validación.
+
 namespace App\Rules;
 
 /**
@@ -14,7 +16,9 @@ namespace App\Rules;
  * dígitos) pasaba la validación porque el largo total caía dentro del rango
  * aunque no hubiera ni un dígito.
  */
+// Esta línea sirve para declarar la clase con el formato de teléfono compartido.
 final class PhoneFormat
 {
+    // Esta línea sirve para definir la expresión regular: 7 a 15 dígitos, "+" inicial opcional, espacios y guiones.
     public const REGEX = '/^(?=(?:[^0-9]*[0-9]){7,15}[^0-9]*$)\+?[0-9 \-]{7,20}$/';
 }

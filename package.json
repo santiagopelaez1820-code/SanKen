@@ -8,6 +8,11 @@
   "scripts": {
     "dev:web": "npm run dev --workspace=apps/web",
     "dev:mobile": "npm --prefix apps/mobile run start",
-    "build:web": "npm run build --workspace=apps/web"
+    "build:web": "npm run build --workspace=apps/web",
+    "cloudinary:inventory": "node scripts/cloudinary/inventory.mjs",
+    "cloudinary:status": "cd apps/api && php artisan media:cloudinary status",
+    "cloudinary:migrate": "cd apps/api && php artisan media:cloudinary migrate",
+    "cloudinary:verify": "cd apps/api && php artisan media:cloudinary verify",
+    "cloudinary:cleanup": "cd apps/api && php artisan media:cloudinary cleanup"
   }
 }

@@ -3,6 +3,8 @@
  * en español suelen escribir coma decimal en vez de punto. Repetido
  * idéntico en varias pantallas (PRs, medidas corporales) antes de esto.
  */
+// Esta línea sirve para declarar la función «parseDecimalInput».
 export function parseDecimalInput(value: string): number {
+  // Esta línea sirve para devolver «Number(value.replace(',', '.'))».
   return Number(value.replace(',', '.'));
 }

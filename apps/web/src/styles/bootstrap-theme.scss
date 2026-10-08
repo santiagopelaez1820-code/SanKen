@@ -6,7 +6,9 @@
 // Bootstrap no expone por variables.
 // ---------------------------------------------------------------------------
 
+/* Esta línea sirve para importar los estilos de «"./sanken-variables"». */
 @import "./sanken-variables";
+/* Esta línea sirve para importar los estilos de «"bootstrap/scss/bootstrap"». */
 @import "bootstrap/scss/bootstrap";
 
 // ---------------------------------------------------------------------------
@@ -27,18 +29,31 @@
 // (para lo poco de Bootstrap que las usa en runtime). El resto (por
 // componente) se corrige en las reglas de abajo.
 // ---------------------------------------------------------------------------
+/* Esta línea sirve para agregar el selector «:root» a la lista. */
 :root,
+/* Esta línea sirve para abrir las reglas del selector «[data-bs-theme="dark"]». */
 [data-bs-theme="dark"] {
+  /* Esta línea sirve para definir la variable CSS «--sanken-black» con el valor «#{$sanken-black}». */
   --sanken-black: #{$sanken-black};
+  /* Esta línea sirve para definir la variable CSS «--sanken-black-2» con el valor «#{$sanken-black-2}». */
   --sanken-black-2: #{$sanken-black-2};
+  /* Esta línea sirve para definir la variable CSS «--sanken-charcoal» con el valor «#{$sanken-charcoal}». */
   --sanken-charcoal: #{$sanken-charcoal};
+  /* Esta línea sirve para definir la variable CSS «--sanken-charcoal-2» con el valor «#{$sanken-charcoal-2}». */
   --sanken-charcoal-2: #{$sanken-charcoal-2};
+  /* Esta línea sirve para definir la variable CSS «--sanken-gray» con el valor «#{$sanken-gray}». */
   --sanken-gray: #{$sanken-gray};
+  /* Esta línea sirve para definir la variable CSS «--sanken-gray-light» con el valor «#{$sanken-gray-light}». */
   --sanken-gray-light: #{$sanken-gray-light};
+  /* Esta línea sirve para definir la variable CSS «--sanken-white» con el valor «#{$sanken-white}». */
   --sanken-white: #{$sanken-white};
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan» con el valor «#{$sanken-cyan}». */
   --sanken-cyan: #{$sanken-cyan};
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan-light» con el valor «#{$sanken-cyan-light}». */
   --sanken-cyan-light: #{$sanken-cyan-light};
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan-deep» con el valor «#{$sanken-cyan-deep}». */
   --sanken-cyan-deep: #{$sanken-cyan-deep};
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan-dim» con el valor «#{$sanken-cyan-dim}». */
   --sanken-cyan-dim: #{$sanken-cyan-dim};
   // Texto/ícono sobre una superficie de acento cyan (botón primario, FAB,
   // link activo del rail, badges de contador) — SIEMPRE oscuro fijo, en los
@@ -46,28 +61,42 @@
   // claro encima. No usar --sanken-black acá: esa SÍ se invierte por modo
   // (es el rol "fondo de página"), y usarla dejaría el texto casi invisible
   // sobre el botón cyan en modo claro.
+  /* Esta línea sirve para definir la variable CSS «--sanken-on-accent» con el valor «#0B0B0B». */
   --sanken-on-accent: #0B0B0B;
   // Overlay neutro para estados hover sobre una superficie oscura/clara —
   // blanco translúcido en dark, negro translúcido en light (el mismo
   // overlay blanco quedaría invisible sobre un fondo claro).
+  /* Esta línea sirve para definir la variable CSS «--sanken-overlay-hover» con el valor «rgba(255, 255, 255, 0.06)». */
   --sanken-overlay-hover: rgba(255, 255, 255, 0.06);
   // Fondo semitransparente con blur de la bottom nav — mismo color que
   // --sanken-black pero con alpha, no puede derivarse de la var sola.
+  /* Esta línea sirve para definir la variable CSS «--sanken-nav-blur-bg» con el valor «rgba(8, 12, 16, 0.92)». */
   --sanken-nav-blur-bg: rgba(8, 12, 16, 0.92);
 
   // Bootstrap ya compila estos vía $body-bg/$body-color/etc, pero
   // [data-bs-theme=dark] los redefine acá explícitamente por si algo (o
   // alguien en el futuro) depende del atributo en vez de heredar de :root.
+  /* Esta línea sirve para definir la variable CSS «--bs-body-bg» con el valor «#{$sanken-black}». */
   --bs-body-bg: #{$sanken-black};
+  /* Esta línea sirve para definir la variable CSS «--bs-body-color» con el valor «#{$sanken-white}». */
   --bs-body-color: #{$sanken-white};
+  /* Esta línea sirve para definir la variable CSS «--bs-emphasis-color» con el valor «#{$sanken-white}». */
   --bs-emphasis-color: #{$sanken-white};
+  /* Esta línea sirve para definir la variable CSS «--bs-secondary-color» con el valor «#{$sanken-gray-light}». */
   --bs-secondary-color: #{$sanken-gray-light};
+  /* Esta línea sirve para definir la variable CSS «--bs-secondary-bg» con el valor «#{$sanken-charcoal}». */
   --bs-secondary-bg: #{$sanken-charcoal};
+  /* Esta línea sirve para definir la variable CSS «--bs-tertiary-color» con el valor «#{rgba($sanken-white, 0.6)}». */
   --bs-tertiary-color: #{rgba($sanken-white, 0.6)};
+  /* Esta línea sirve para definir la variable CSS «--bs-tertiary-bg» con el valor «#{$sanken-black-2}». */
   --bs-tertiary-bg: #{$sanken-black-2};
+  /* Esta línea sirve para definir la variable CSS «--bs-border-color» con el valor «#{$border-color}». */
   --bs-border-color: #{$border-color};
+  /* Esta línea sirve para definir la variable CSS «--bs-link-color» con el valor «#{$sanken-cyan-light}». */
   --bs-link-color: #{$sanken-cyan-light};
+  /* Esta línea sirve para definir la variable CSS «--bs-link-hover-color» con el valor «#{$sanken-cyan}». */
   --bs-link-hover-color: #{$sanken-cyan};
+  /* Esta línea sirve para establecer «color-scheme» en «dark». */
   color-scheme: dark;
 }
 
@@ -75,59 +104,102 @@
 // Colors.light en apps/mobile/src/constants/theme.ts y :root (sin .dark) en
 // src/index.css, para que los tres sistemas (mobile, web Tailwind, web
 // Bootstrap) coincidan en modo claro.
+/* Esta línea sirve para abrir las reglas del selector «[data-bs-theme="light"]». */
 [data-bs-theme="light"] {
+  /* Esta línea sirve para definir la variable CSS «--sanken-black» con el valor «#F5F7FA». */
   --sanken-black: #F5F7FA; // fondo principal
+  /* Esta línea sirve para definir la variable CSS «--sanken-black-2» con el valor «#FFFFFF». */
   --sanken-black-2: #FFFFFF; // superficie / card
+  /* Esta línea sirve para definir la variable CSS «--sanken-charcoal» con el valor «#E9EDF1». */
   --sanken-charcoal: #E9EDF1; // superficie elevada / hover / input
+  /* Esta línea sirve para definir la variable CSS «--sanken-charcoal-2» con el valor «#DCE3E9». */
   --sanken-charcoal-2: #DCE3E9; // borde / divisor sutil
+  /* Esta línea sirve para definir la variable CSS «--sanken-gray» con el valor «#5B6670». */
   --sanken-gray: #5B6670; // texto secundario
+  /* Esta línea sirve para definir la variable CSS «--sanken-gray-light» con el valor «#7C8A96». */
   --sanken-gray-light: #7C8A96; // texto terciario
+  /* Esta línea sirve para definir la variable CSS «--sanken-white» con el valor «#0B0B0B». */
   --sanken-white: #0B0B0B; // texto principal
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan» con el valor «#0093AD». */
   --sanken-cyan: #0093AD; // acento de marca (más saturado que en dark para contraste AA sobre fondo claro)
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan-light» con el valor «#00B8D9». */
   --sanken-cyan-light: #00B8D9; // hover/glow del acento
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan-deep» con el valor «#00708A». */
   --sanken-cyan-deep: #00708A; // active/pressed
+  /* Esta línea sirve para definir la variable CSS «--sanken-cyan-dim» con el valor «rgba(0, 147, 173, 0.14)». */
   --sanken-cyan-dim: rgba(0, 147, 173, 0.14); // fondo tenue para badges/rings
+  /* Esta línea sirve para definir la variable CSS «--sanken-on-accent» con el valor «#0B0B0B». */
   --sanken-on-accent: #0B0B0B; // mismo valor que en dark a propósito, ver comentario arriba
+  /* Esta línea sirve para definir la variable CSS «--sanken-overlay-hover» con el valor «rgba(0, 0, 0, 0.05)». */
   --sanken-overlay-hover: rgba(0, 0, 0, 0.05);
+  /* Esta línea sirve para definir la variable CSS «--sanken-nav-blur-bg» con el valor «rgba(245, 247, 250, 0.85)». */
   --sanken-nav-blur-bg: rgba(245, 247, 250, 0.85);
 
+  /* Esta línea sirve para definir la variable CSS «--bs-body-bg» con el valor «#F5F7FA». */
   --bs-body-bg: #F5F7FA;
+  /* Esta línea sirve para definir la variable CSS «--bs-body-color» con el valor «#0B0B0B». */
   --bs-body-color: #0B0B0B;
+  /* Esta línea sirve para definir la variable CSS «--bs-emphasis-color» con el valor «#0B0B0B». */
   --bs-emphasis-color: #0B0B0B;
+  /* Esta línea sirve para definir la variable CSS «--bs-secondary-color» con el valor «#5B6670». */
   --bs-secondary-color: #5B6670;
+  /* Esta línea sirve para definir la variable CSS «--bs-secondary-bg» con el valor «#E9EDF1». */
   --bs-secondary-bg: #E9EDF1;
+  /* Esta línea sirve para definir la variable CSS «--bs-tertiary-color» con el valor «rgba(11, 11, 11, 0.6)». */
   --bs-tertiary-color: rgba(11, 11, 11, 0.6);
+  /* Esta línea sirve para definir la variable CSS «--bs-tertiary-bg» con el valor «#FFFFFF». */
   --bs-tertiary-bg: #FFFFFF;
+  /* Esta línea sirve para definir la variable CSS «--bs-border-color» con el valor «rgba(0, 0, 0, 0.1)». */
   --bs-border-color: rgba(0, 0, 0, 0.1);
+  /* Esta línea sirve para definir la variable CSS «--bs-link-color» con el valor «#0093AD». */
   --bs-link-color: #0093AD;
+  /* Esta línea sirve para definir la variable CSS «--bs-link-hover-color» con el valor «#00708A». */
   --bs-link-hover-color: #00708A;
+  /* Esta línea sirve para establecer «color-scheme» en «light». */
   color-scheme: light;
 }
 
+/* Esta línea sirve para abrir las reglas del selector «body». */
 body {
+  /* Esta línea sirve para establecer «min-height» en «100svh». */
   min-height: 100svh;
+  /* Esta línea sirve para establecer «background-color» en «var(--sanken-black)». */
   background-color: var(--sanken-black);
+  /* Esta línea sirve para establecer «color» en «var(--sanken-white)». */
   color: var(--sanken-white);
 }
 
 // Cards con profundidad real en vez de bordes planos — dos capas de sombra
 // suave (una de contacto, otra ambiental) en lugar de un único box-shadow
 // genérico de Bootstrap.
+/* Esta línea sirve para abrir las reglas del selector «.sank-surface». */
 .sank-surface {
+  /* Esta línea sirve para establecer «box-shadow» (valor en las líneas siguientes). */
   box-shadow:
+    /* Esta línea sirve para agregar el selector «0 1px 2px rgba(0, 0, 0, 0.3)» a la lista. */
     0 1px 2px rgba(0, 0, 0, 0.3),
+    /* Esta línea sirve para agregar la segunda sombra más suave y profunda. */
     0 12px 28px -16px rgba(0, 0, 0, 0.55);
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-surface--interactive». */
 .sank-surface--interactive {
+  /* Esta línea sirve para animar el movimiento, la sombra y el borde al cambiar. */
   transition: transform 200ms ease-out, box-shadow 200ms ease-out, border-color 200ms ease-out;
 
+  /* Esta línea sirve para agregar el selector «&:hover» a la lista. */
   &:hover,
+  /* Esta línea sirve para abrir las reglas del selector «&:focus-visible». */
   &:focus-visible {
+    /* Esta línea sirve para establecer «transform» en «translateY(-2px)». */
     transform: translateY(-2px);
+    /* Esta línea sirve para establecer «border-color» en «rgba(0, 184, 217, 0.35)». */
     border-color: rgba(0, 184, 217, 0.35);
+    /* Esta línea sirve para establecer «box-shadow» (valor en las líneas siguientes). */
     box-shadow:
+      /* Esta línea sirve para agregar el selector «0 2px 4px rgba(0, 0, 0, 0.35)» a la lista. */
       0 2px 4px rgba(0, 0, 0, 0.35),
+      /* Esta línea sirve para agregar la sombra elevada en el estado hover. */
       0 20px 36px -18px rgba(0, 0, 0, 0.65);
   }
 }
@@ -135,143 +207,229 @@ body {
 // Botón primario: bloque cyan plano y sólido, esquina redondeada como en
 // mobile — no un gradiente suave de SaaS. La fuerza viene del contraste
 // duro negro/cyan, no de una simulación de "brillo".
+/* Esta línea sirve para abrir las reglas del selector «.btn-primary». */
 .btn-primary {
+  /* Esta línea sirve para establecer «background» en «var(--sanken-cyan)». */
   background: var(--sanken-cyan);
+  /* Esta línea sirve para establecer «border-color» en «var(--sanken-cyan)». */
   border-color: var(--sanken-cyan);
+  /* Esta línea sirve para establecer «color» en «var(--sanken-on-accent)». */
   color: var(--sanken-on-accent);
+  /* Esta línea sirve para establecer «text-transform» en «uppercase». */
   text-transform: uppercase;
+  /* Esta línea sirve para establecer «letter-spacing» en «0.04em». */
   letter-spacing: 0.04em;
 
+  /* Esta línea sirve para agregar el selector «&:hover» a la lista. */
   &:hover,
+  /* Esta línea sirve para abrir las reglas del selector «&:focus-visible». */
   &:focus-visible {
+    /* Esta línea sirve para establecer «background» en «var(--sanken-cyan-light)». */
     background: var(--sanken-cyan-light);
+    /* Esta línea sirve para establecer «border-color» en «var(--sanken-cyan-light)». */
     border-color: var(--sanken-cyan-light);
+    /* Esta línea sirve para establecer «color» en «var(--sanken-on-accent)». */
     color: var(--sanken-on-accent);
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «&:active». */
   &:active {
+    /* Esta línea sirve para establecer «background» en «var(--sanken-cyan-deep)». */
     background: var(--sanken-cyan-deep);
+    /* Esta línea sirve para establecer «border-color» en «var(--sanken-cyan-deep)». */
     border-color: var(--sanken-cyan-deep);
   }
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.btn-lg, .btn-sm». */
 .btn-lg, .btn-sm {
+  /* Esta línea sirve para establecer «text-transform» en «uppercase». */
   text-transform: uppercase;
+  /* Esta línea sirve para establecer «letter-spacing» en «0.04em». */
   letter-spacing: 0.04em;
 }
 
 // SankButton variant="ghost" — texto siempre legible sobre cualquier fondo
 // oscuro (outline-secondary de Bootstrap usa $secondary, casi invisible).
+/* Esta línea sirve para abrir las reglas del selector «.sank-ghost-btn». */
 .sank-ghost-btn {
+  /* Esta línea sirve para establecer «color» en «var(--sanken-gray-light) !important». */
   color: var(--sanken-gray-light) !important;
 
+  /* Esta línea sirve para agregar el selector «&:hover:not(:disabled)» a la lista. */
   &:hover:not(:disabled),
+  /* Esta línea sirve para abrir las reglas del selector «&:focus-visible:not(:disabled)». */
   &:focus-visible:not(:disabled) {
+    /* Esta línea sirve para establecer «color» en «var(--sanken-white) !important». */
     color: var(--sanken-white) !important;
+    /* Esta línea sirve para establecer «background» en «var(--sanken-overlay-hover) !important». */
     background: var(--sanken-overlay-hover) !important;
   }
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.btn-outline-primary». */
 .btn-outline-primary {
+  /* Esta línea sirve para establecer «color» en «var(--sanken-cyan-light)». */
   color: var(--sanken-cyan-light);
+  /* Esta línea sirve para establecer «border-color» en «rgba(0, 184, 217, 0.5)». */
   border-color: rgba(0, 184, 217, 0.5);
 
+  /* Esta línea sirve para agregar el selector «&:hover» a la lista. */
   &:hover,
+  /* Esta línea sirve para abrir las reglas del selector «&:focus-visible». */
   &:focus-visible {
+    /* Esta línea sirve para establecer «background» en «var(--sanken-cyan-dim)». */
     background: var(--sanken-cyan-dim);
+    /* Esta línea sirve para establecer «color» en «var(--sanken-cyan-light)». */
     color: var(--sanken-cyan-light);
+    /* Esta línea sirve para establecer «border-color» en «var(--sanken-cyan)». */
     border-color: var(--sanken-cyan);
   }
 }
 
 // Skeleton / shimmer para estados de carga — coherente entre todas las
 // páginas migradas a Bootstrap.
+/* Esta línea sirve para abrir el bloque @keyframes. */
 @keyframes sank-shimmer {
+  /* Esta línea sirve para abrir el fotograma «100%» de la animación. */
   100% {
+    /* Esta línea sirve para establecer «transform» en «translateX(100%)». */
     transform: translateX(100%);
   }
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-skeleton». */
 .sank-skeleton {
+  /* Esta línea sirve para establecer «position» en «relative». */
   position: relative;
+  /* Esta línea sirve para establecer «overflow» en «hidden». */
   overflow: hidden;
+  /* Esta línea sirve para establecer «background» en «var(--sanken-charcoal)». */
   background: var(--sanken-charcoal);
+  /* Esta línea sirve para establecer «border-radius» en «$border-radius». */
   border-radius: $border-radius;
 
+  /* Esta línea sirve para abrir las reglas del selector «&::after». */
   &::after {
+    /* Esta línea sirve para establecer «content» en «""». */
     content: "";
+    /* Esta línea sirve para establecer «position» en «absolute». */
     position: absolute;
+    /* Esta línea sirve para establecer «inset» en «0». */
     inset: 0;
+    /* Esta línea sirve para establecer «transform» en «translateX(-100%)». */
     transform: translateX(-100%);
+    /* Esta línea sirve para pintar el brillo con un degradado. */
     background: linear-gradient(90deg, transparent, var(--sanken-overlay-hover), transparent);
+    /* Esta línea sirve para establecer «animation» en «sank-shimmer 1.8s infinite». */
     animation: sank-shimmer 1.8s infinite;
   }
 }
 
 // Texto/números tabulares para estadísticas que cambian en vivo.
+/* Esta línea sirve para abrir las reglas del selector «.sank-tabular-nums». */
 .sank-tabular-nums {
+  /* Esta línea sirve para establecer «font-variant-numeric» en «tabular-nums». */
   font-variant-numeric: tabular-nums;
 }
 
 // Navegación (Sidebar / Offcanvas) — indicador activo cyan discreto, sin
 // llenar el link entero de color.
+/* Esta línea sirve para abrir las reglas del selector «.sank-nav-link». */
 .sank-nav-link {
+  /* Esta línea sirve para establecer «color» en «var(--sanken-gray-light)». */
   color: var(--sanken-gray-light);
+  /* Esta línea sirve para animar el color de fondo y del texto. */
   transition: background-color 150ms ease-out, color 150ms ease-out;
+  /* Esta línea sirve para establecer «position» en «relative». */
   position: relative;
 
+  /* Esta línea sirve para agregar el selector «&:hover» a la lista. */
   &:hover,
+  /* Esta línea sirve para abrir las reglas del selector «&:focus-visible». */
   &:focus-visible {
+    /* Esta línea sirve para establecer «color» en «var(--sanken-white)». */
     color: var(--sanken-white);
+    /* Esta línea sirve para establecer «background» en «var(--sanken-overlay-hover)». */
     background: var(--sanken-overlay-hover);
   }
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-nav-link-active». */
 .sank-nav-link-active {
+  /* Esta línea sirve para establecer «color» en «var(--sanken-cyan-light)». */
   color: var(--sanken-cyan-light);
+  /* Esta línea sirve para establecer «background» en «var(--sanken-cyan-dim)». */
   background: var(--sanken-cyan-dim);
+  /* Esta línea sirve para establecer «position» en «relative». */
   position: relative;
 
+  /* Esta línea sirve para abrir las reglas del selector «&::before». */
   &::before {
+    /* Esta línea sirve para establecer «content» en «""». */
     content: "";
+    /* Esta línea sirve para establecer «position» en «absolute». */
     position: absolute;
+    /* Esta línea sirve para establecer «left» en «0». */
     left: 0;
+    /* Esta línea sirve para establecer «top» en «50%». */
     top: 50%;
+    /* Esta línea sirve para establecer «transform» en «translateY(-50%)». */
     transform: translateY(-50%);
+    /* Esta línea sirve para establecer «width» en «3px». */
     width: 3px;
+    /* Esta línea sirve para establecer «height» en «1.1rem». */
     height: 1.1rem;
+    /* Esta línea sirve para establecer «border-radius» en «0 2px 2px 0». */
     border-radius: 0 2px 2px 0;
+    /* Esta línea sirve para establecer «background» en «var(--sanken-cyan)». */
     background: var(--sanken-cyan);
   }
 }
 
 // Etiqueta "eyebrow" — mayúsculas, tracking amplio, uso constante para
 // encabezar secciones en vez de simplemente subir el tamaño del título.
+/* Esta línea sirve para abrir las reglas del selector «.sank-eyebrow». */
 .sank-eyebrow {
+  /* Esta línea sirve para establecer «font-size» en «0.7rem». */
   font-size: 0.7rem;
+  /* Esta línea sirve para establecer «font-weight» en «800». */
   font-weight: 800;
+  /* Esta línea sirve para establecer «letter-spacing» en «0.16em». */
   letter-spacing: 0.16em;
+  /* Esta línea sirve para establecer «text-transform» en «uppercase». */
   text-transform: uppercase;
+  /* Esta línea sirve para establecer «color» en «var(--sanken-gray-light)». */
   color: var(--sanken-gray-light);
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-eyebrow--cyan». */
 .sank-eyebrow--cyan {
+  /* Esta línea sirve para establecer «color» en «var(--sanken-cyan-light)». */
   color: var(--sanken-cyan-light);
 }
 
 // Número hero — tipografía display, tabular, sin decoración. La escala es lo
 // que le da peso, no el color.
+/* Esta línea sirve para abrir las reglas del selector «.sank-stat». */
 .sank-stat {
+  /* Esta línea sirve para establecer «font-family» en «$headings-font-family». */
   font-family: $headings-font-family;
+  /* Esta línea sirve para establecer «font-weight» en «800». */
   font-weight: 800;
+  /* Esta línea sirve para establecer «line-height» en «0.95». */
   line-height: 0.95;
+  /* Esta línea sirve para establecer «letter-spacing» en «-0.02em». */
   letter-spacing: -0.02em;
+  /* Esta línea sirve para establecer «font-variant-numeric» en «tabular-nums». */
   font-variant-numeric: tabular-nums;
 }
 
 // Borde hairline cyan — detalle de marca en superficies hero, en vez de
 // depender solo de un fondo tintado.
+/* Esta línea sirve para abrir las reglas del selector «.sank-hairline». */
 .sank-hairline {
+  /* Esta línea sirve para establecer «border» en «1px solid rgba(0, 184, 217, 0.25)». */
   border: 1px solid rgba(0, 184, 217, 0.25);
 }
 
@@ -280,45 +438,74 @@ body {
 // el rail lateral de solo iconos. Nunca solo icono: el nombre siempre va al
 // lado para que no haya que adivinar qué hace cada botón.
 // ---------------------------------------------------------------------------
+/* Esta línea sirve para abrir las reglas del selector «.sank-topnav-link». */
 .sank-topnav-link {
+  /* Esta línea sirve para establecer «display» en «flex». */
   display: flex;
+  /* Esta línea sirve para establecer «flex-shrink» en «0». */
   flex-shrink: 0;
+  /* Esta línea sirve para establecer «align-items» en «center». */
   align-items: center;
+  /* Esta línea sirve para establecer «gap» en «0.4rem». */
   gap: 0.4rem;
+  /* Esta línea sirve para establecer «height» en «36px». */
   height: 36px;
+  /* Esta línea sirve para establecer «padding» en «0 0.7rem». */
   padding: 0 0.7rem;
+  /* Esta línea sirve para establecer «color» en «var(--sanken-gray-light)». */
   color: var(--sanken-gray-light);
+  /* Esta línea sirve para establecer «font-size» en «0.82rem». */
   font-size: 0.82rem;
+  /* Esta línea sirve para establecer «font-weight» en «600». */
   font-weight: 600;
+  /* Esta línea sirve para establecer «white-space» en «nowrap». */
   white-space: nowrap;
+  /* Esta línea sirve para establecer «border-radius» en «$border-radius-sm». */
   border-radius: $border-radius-sm;
+  /* Esta línea sirve para animar el color y el fondo. */
   transition: color 150ms ease-out, background-color 150ms ease-out;
 
   // Laptops (992–1199px): un poco más compacto para que entren todos los
   // módulos principales sin tener que deslizar la barra.
+  /* Esta línea sirve para abrir el bloque @media. */
   @media (min-width: 992px) and (max-width: 1199.98px) {
+    /* Esta línea sirve para establecer «gap» en «0.3rem». */
     gap: 0.3rem;
+    /* Esta línea sirve para establecer «padding» en «0 0.4rem». */
     padding: 0 0.4rem;
   }
 
+  /* Esta línea sirve para abrir el bloque @media. */
   @media (min-width: 1200px) and (max-width: 1279.98px) {
+    /* Esta línea sirve para establecer «padding» en «0 0.55rem». */
     padding: 0 0.55rem;
   }
 
+  /* Esta línea sirve para agregar el selector «&:hover» a la lista. */
   &:hover,
+  /* Esta línea sirve para abrir las reglas del selector «&:focus-visible». */
   &:focus-visible {
+    /* Esta línea sirve para establecer «color» en «var(--sanken-white)». */
     color: var(--sanken-white);
+    /* Esta línea sirve para establecer «background» en «var(--sanken-overlay-hover)». */
     background: var(--sanken-overlay-hover);
   }
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-topnav-link-active». */
 .sank-topnav-link-active {
+  /* Esta línea sirve para establecer «color» en «var(--sanken-on-accent)». */
   color: var(--sanken-on-accent);
+  /* Esta línea sirve para establecer «background» en «var(--sanken-cyan)». */
   background: var(--sanken-cyan);
 
+  /* Esta línea sirve para agregar el selector «&:hover» a la lista. */
   &:hover,
+  /* Esta línea sirve para abrir las reglas del selector «&:focus-visible». */
   &:focus-visible {
+    /* Esta línea sirve para establecer «color» en «var(--sanken-on-accent)». */
     color: var(--sanken-on-accent);
+    /* Esta línea sirve para establecer «background» en «var(--sanken-cyan-light)». */
     background: var(--sanken-cyan-light);
   }
 }
@@ -326,11 +513,16 @@ body {
 // Sin `display`: se combina con las utilidades d-none/d-lg-flex de Bootstrap
 // en vez de pisarlas (a diferencia de .sank-scroll-x, que fija flex fijo).
 // Deja deslizar la nav en vez de recortarla en laptops/ventanas angostas.
+/* Esta línea sirve para abrir las reglas del selector «.sank-topnav-scroll». */
 .sank-topnav-scroll {
+  /* Esta línea sirve para establecer «overflow-x» en «auto». */
   overflow-x: auto;
+  /* Esta línea sirve para establecer «scrollbar-width» en «none». */
   scrollbar-width: none;
 
+  /* Esta línea sirve para abrir las reglas del selector «&::-webkit-scrollbar». */
   &::-webkit-scrollbar {
+    /* Esta línea sirve para establecer «display» en «none». */
     display: none;
   }
 }
@@ -339,64 +531,112 @@ body {
 // Bottom navigation (mobile) — reemplaza el patrón hamburguesa+drawer como
 // navegación primaria. FAB central para la acción de mayor frecuencia.
 // ---------------------------------------------------------------------------
+/* Esta línea sirve para abrir las reglas del selector «.sank-bottom-nav». */
 .sank-bottom-nav {
+  /* Esta línea sirve para establecer «position» en «fixed». */
   position: fixed;
+  /* Esta línea sirve para establecer «left» en «0». */
   left: 0;
+  /* Esta línea sirve para establecer «right» en «0». */
   right: 0;
+  /* Esta línea sirve para establecer «bottom» en «0». */
   bottom: 0;
+  /* Esta línea sirve para establecer «z-index» en «1030». */
   z-index: 1030;
+  /* Esta línea sirve para establecer «display» en «flex». */
   display: flex;
+  /* Esta línea sirve para establecer «align-items» en «stretch». */
   align-items: stretch;
+  /* Esta línea sirve para establecer «height» en «64px». */
   height: 64px;
+  /* Esta línea sirve para establecer «background» en «var(--sanken-nav-blur-bg)». */
   background: var(--sanken-nav-blur-bg);
+  /* Esta línea sirve para establecer «backdrop-filter» en «blur(16px)». */
   backdrop-filter: blur(16px);
+  /* Esta línea sirve para establecer «-webkit-backdrop-filter» en «blur(16px)». */
   -webkit-backdrop-filter: blur(16px);
+  /* Esta línea sirve para establecer «border-top» en «1px solid var(--bs-border-color)». */
   border-top: 1px solid var(--bs-border-color);
+  /* Esta línea sirve para establecer «padding-bottom» en «env(safe-area-inset-bottom)». */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-bottom-nav-link». */
 .sank-bottom-nav-link {
+  /* Esta línea sirve para establecer «flex» en «1». */
   flex: 1;
+  /* Esta línea sirve para establecer «display» en «flex». */
   display: flex;
+  /* Esta línea sirve para establecer «flex-direction» en «column». */
   flex-direction: column;
+  /* Esta línea sirve para establecer «align-items» en «center». */
   align-items: center;
+  /* Esta línea sirve para establecer «justify-content» en «center». */
   justify-content: center;
+  /* Esta línea sirve para establecer «gap» en «2px». */
   gap: 2px;
+  /* Esta línea sirve para establecer «color» en «var(--sanken-gray)». */
   color: var(--sanken-gray);
+  /* Esta línea sirve para establecer «font-size» en «0.62rem». */
   font-size: 0.62rem;
+  /* Esta línea sirve para establecer «font-weight» en «700». */
   font-weight: 700;
+  /* Esta línea sirve para establecer «text-transform» en «uppercase». */
   text-transform: uppercase;
+  /* Esta línea sirve para establecer «letter-spacing» en «0.03em». */
   letter-spacing: 0.03em;
+  /* Esta línea sirve para establecer «transition» en «color 150ms ease-out». */
   transition: color 150ms ease-out;
 
+  /* Esta línea sirve para abrir las reglas del selector «&:hover». */
   &:hover {
+    /* Esta línea sirve para establecer «color» en «var(--sanken-gray-light)». */
     color: var(--sanken-gray-light);
   }
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-bottom-nav-link-active». */
 .sank-bottom-nav-link-active {
+  /* Esta línea sirve para establecer «color» en «var(--sanken-cyan)». */
   color: var(--sanken-cyan);
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-bottom-nav-fab». */
 .sank-bottom-nav-fab {
+  /* Esta línea sirve para establecer «width» en «52px». */
   width: 52px;
+  /* Esta línea sirve para establecer «height» en «52px». */
   height: 52px;
+  /* Esta línea sirve para establecer «border-radius» en «16px». */
   border-radius: 16px;
+  /* Esta línea sirve para establecer «background» en «var(--sanken-cyan)». */
   background: var(--sanken-cyan);
+  /* Esta línea sirve para establecer «color» en «var(--sanken-on-accent)». */
   color: var(--sanken-on-accent);
+  /* Esta línea sirve para establecer «display» en «flex». */
   display: flex;
+  /* Esta línea sirve para establecer «align-items» en «center». */
   align-items: center;
+  /* Esta línea sirve para establecer «justify-content» en «center». */
   justify-content: center;
+  /* Esta línea sirve para establecer «margin-top» en «-30px». */
   margin-top: -30px;
+  /* Esta línea sirve para establecer «box-shadow» en «0 6px 20px -4px rgba(0, 184, 217, 0.55)». */
   box-shadow: 0 6px 20px -4px rgba(0, 184, 217, 0.55);
+  /* Esta línea sirve para establecer «border» en «3px solid var(--sanken-black)». */
   border: 3px solid var(--sanken-black);
+  /* Esta línea sirve para establecer «flex-shrink» en «0». */
   flex-shrink: 0;
 }
 
+/* Esta línea sirve para abrir las reglas del selector «.sank-content-safe-bottom». */
 .sank-content-safe-bottom {
+  /* Esta línea sirve para establecer «padding-bottom» en «76px». */
   padding-bottom: 76px;
 
+  /* Esta línea sirve para aplicar los estilos solo desde el breakpoint lg. */
   @include media-breakpoint-up(lg) {
+    /* Esta línea sirve para establecer «padding-bottom» en «0». */
     padding-bottom: 0;
   }
 }
@@ -410,13 +650,20 @@ body {
  * del todo con un margen chico. Necesita fondo sólido explícito: al ser
  * sticky, el contenido de la lista sigue haciendo scroll por debajo.
  */
+/* Esta línea sirve para abrir las reglas del selector «.sank-sticky-bottom-bar». */
 .sank-sticky-bottom-bar {
+  /* Esta línea sirve para establecer «position» en «sticky». */
   position: sticky;
+  /* Esta línea sirve para establecer «bottom» en «76px». */
   bottom: 76px;
+  /* Esta línea sirve para establecer «z-index» en «10». */
   z-index: 10;
+  /* Esta línea sirve para establecer «background» en «var(--sanken-black-2)». */
   background: var(--sanken-black-2);
 
+  /* Esta línea sirve para aplicar los estilos solo desde el breakpoint lg. */
   @include media-breakpoint-up(lg) {
+    /* Esta línea sirve para establecer «bottom» en «16px». */
     bottom: 16px;
   }
 }
@@ -431,71 +678,112 @@ body {
 // puntualmente cada uno para modo claro; Tooltip/Popover/Toast/Accordion/
 // Pagination/Table no se usan en ningún lado, no hace falta tocarlos.
 // ---------------------------------------------------------------------------
+/* Esta línea sirve para abrir las reglas del selector «[data-bs-theme="light"]». */
 [data-bs-theme="light"] {
+  /* Esta línea sirve para abrir las reglas del selector «.form-control». */
   .form-control {
+    /* Esta línea sirve para establecer «color» en «var(--sanken-white)». */
     color: var(--sanken-white);
+    /* Esta línea sirve para establecer «background-color» en «var(--sanken-charcoal)». */
     background-color: var(--sanken-charcoal);
 
+    /* Esta línea sirve para abrir las reglas del selector «&::placeholder». */
     &::placeholder {
+      /* Esta línea sirve para establecer «color» en «var(--sanken-gray)». */
       color: var(--sanken-gray);
     }
 
+    /* Esta línea sirve para abrir las reglas del selector «&:focus». */
     &:focus {
+      /* Esta línea sirve para establecer «color» en «var(--sanken-white)». */
       color: var(--sanken-white);
+      /* Esta línea sirve para establecer «background-color» en «var(--sanken-charcoal)». */
       background-color: var(--sanken-charcoal);
     }
 
+    /* Esta línea sirve para abrir las reglas del selector «&:disabled». */
     &:disabled {
+      /* Esta línea sirve para establecer «background-color» en «var(--sanken-charcoal-2)». */
       background-color: var(--sanken-charcoal-2);
     }
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «.card». */
   .card {
+    /* Esta línea sirve para definir la variable CSS «--bs-card-bg» con el valor «var(--sanken-black-2)». */
     --bs-card-bg: var(--sanken-black-2);
+    /* Esta línea sirve para definir la variable CSS «--bs-card-border-color» con el valor «var(--bs-border-color)». */
     --bs-card-border-color: var(--bs-border-color);
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «.modal-content». */
   .modal-content {
+    /* Esta línea sirve para definir la variable CSS «--bs-modal-bg» con el valor «var(--sanken-black-2)». */
     --bs-modal-bg: var(--sanken-black-2);
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «.modal-backdrop». */
   .modal-backdrop {
+    /* Esta línea sirve para definir la variable CSS «--bs-backdrop-bg» con el valor «var(--sanken-black)». */
     --bs-backdrop-bg: var(--sanken-black);
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «.offcanvas». */
   .offcanvas {
+    /* Esta línea sirve para definir la variable CSS «--bs-offcanvas-bg» con el valor «var(--sanken-black-2)». */
     --bs-offcanvas-bg: var(--sanken-black-2);
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «.nav». */
   .nav {
+    /* Esta línea sirve para definir la variable CSS «--bs-nav-link-color» con el valor «var(--sanken-gray-light)». */
     --bs-nav-link-color: var(--sanken-gray-light);
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «.dropdown-menu». */
   .dropdown-menu {
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-bg» con el valor «var(--sanken-charcoal)». */
     --bs-dropdown-bg: var(--sanken-charcoal);
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-border-color» con el valor «var(--bs-border-color)». */
     --bs-dropdown-border-color: var(--bs-border-color);
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-link-color» con el valor «var(--sanken-white)». */
     --bs-dropdown-link-color: var(--sanken-white);
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-link-hover-color» con el valor «var(--sanken-white)». */
     --bs-dropdown-link-hover-color: var(--sanken-white);
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-link-hover-bg» con el valor «var(--sanken-overlay-hover)». */
     --bs-dropdown-link-hover-bg: var(--sanken-overlay-hover);
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-link-active-color» con el valor «var(--sanken-cyan-light)». */
     --bs-dropdown-link-active-color: var(--sanken-cyan-light);
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-link-active-bg» con el valor «var(--sanken-cyan-dim)». */
     --bs-dropdown-link-active-bg: var(--sanken-cyan-dim);
+    /* Esta línea sirve para definir la variable CSS «--bs-dropdown-header-color» con el valor «var(--sanken-gray-light)». */
     --bs-dropdown-header-color: var(--sanken-gray-light);
   }
 }
 
 // Scrollbar horizontal fina para carruseles/listas nativas en móvil.
+/* Esta línea sirve para abrir las reglas del selector «.sank-scroll-x». */
 .sank-scroll-x {
+  /* Esta línea sirve para establecer «display» en «flex». */
   display: flex;
+  /* Esta línea sirve para establecer «overflow-x» en «auto». */
   overflow-x: auto;
+  /* Esta línea sirve para establecer «scroll-snap-type» en «x mandatory». */
   scroll-snap-type: x mandatory;
+  /* Esta línea sirve para establecer «-webkit-overflow-scrolling» en «touch». */
   -webkit-overflow-scrolling: touch;
+  /* Esta línea sirve para establecer «scrollbar-width» en «none». */
   scrollbar-width: none;
 
+  /* Esta línea sirve para abrir las reglas del selector «&::-webkit-scrollbar». */
   &::-webkit-scrollbar {
+    /* Esta línea sirve para establecer «display» en «none». */
     display: none;
   }
 
+  /* Esta línea sirve para abrir las reglas del selector «> *». */
   > * {
+    /* Esta línea sirve para establecer «scroll-snap-align» en «start». */
     scroll-snap-align: start;
   }
 }
@@ -503,12 +791,17 @@ body {
 // Aviso de cookies (components/legal/CookieBanner.tsx): flota sobre el
 // contenido sin bloquearlo. En pantallas con la barra inferior visible se
 // ubica por encima de ella para no tapar la navegación.
+/* Esta línea sirve para abrir las reglas del selector «.sank-cookie-banner». */
 .sank-cookie-banner {
+  /* Esta línea sirve para establecer «bottom» en «calc(env(safe-area-inset-bottom) + 12px)». */
   bottom: calc(env(safe-area-inset-bottom) + 12px);
 }
 
+/* Esta línea sirve para abrir el bloque @media. */
 @media (max-width: 991.98px) {
+  /* Esta línea sirve para abrir las reglas del selector «body:has(.sank-bottom-nav) .sank-cookie-banner». */
   body:has(.sank-bottom-nav) .sank-cookie-banner {
+    /* Esta línea sirve para establecer «bottom» en «calc(64px + env(safe-area-inset-bottom) + 12px)». */
     bottom: calc(64px + env(safe-area-inset-bottom) + 12px);
   }
 }

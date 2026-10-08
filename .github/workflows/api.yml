@@ -1,70 +1,126 @@
+# Esta línea sirve para definir el nombre del flujo de trabajo.
 name: API (Laravel)
 
+# Esta línea sirve para definir cuándo se ejecuta el flujo.
 on:
+  # Esta línea sirve para ejecutar al hacer push.
   push:
+    # Esta línea sirve para limitar el push a la rama main.
     branches: [main]
+    # Esta línea sirve para limitar a cambios en la API o en este flujo.
     paths: ["apps/api/**", ".github/workflows/api.yml"]
+  # Esta línea sirve para ejecutar también en pull requests.
   pull_request:
+    # Esta línea sirve para limitar a cambios en la API o en este flujo.
     paths: ["apps/api/**", ".github/workflows/api.yml"]
 
+# Esta línea sirve para definir valores por defecto de los pasos.
 defaults:
+  # Esta línea sirve para aplicar a los comandos run.
   run:
+    # Esta línea sirve para ejecutar los comandos dentro de apps/api.
     working-directory: apps/api
 
+# Esta línea sirve para declarar los trabajos del flujo.
 jobs:
+  # Esta línea sirve para declarar el trabajo de pruebas.
   test:
+    # Esta línea sirve para ejecutar el trabajo en una máquina Ubuntu.
     runs-on: ubuntu-latest
 
+    # Esta línea sirve para declarar los servicios que acompañan al trabajo.
     services:
+      # Esta línea sirve para declarar el servicio MySQL.
       mysql:
+        # Esta línea sirve para usar la imagen de MySQL 8.4.
         image: mysql:8.4
+        # Esta línea sirve para definir las variables de entorno del servicio.
         env:
+          # Esta línea sirve para permitir conectarse con contraseña vacía.
           MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+          # Esta línea sirve para crear la base de datos de pruebas.
           MYSQL_DATABASE: sanken_testing
+        # Esta línea sirve para publicar el puerto 3306.
         ports: ["3306:3306"]
+        # Esta línea sirve para definir las opciones del contenedor.
         options: >-
           --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=5s --health-retries=10
+      # Esta línea sirve para declarar el servicio Redis.
       redis:
+        # Esta línea sirve para usar la imagen de Redis 7.
         image: redis:7-alpine
+        # Esta línea sirve para publicar el puerto 6379.
         ports: ["6379:6379"]
+        # Esta línea sirve para definir las opciones del contenedor.
         options: >-
           --health-cmd="redis-cli ping" --health-interval=5s --health-timeout=5s --health-retries=10
 
+    # Esta línea sirve para declarar los pasos del trabajo.
     steps:
+      # Esta línea sirve para descargar el código del repositorio.
       - uses: actions/checkout@v4
 
+      # Esta línea sirve para abrir el paso que instala PHP.
       - name: Setup PHP
+        # Esta línea sirve para usar la acción que instala PHP.
         uses: shivammathur/setup-php@v2
+        # Esta línea sirve para pasar los parámetros a la acción.
         with:
+          # Esta línea sirve para instalar PHP 8.4.
           php-version: "8.4"
+          # Esta línea sirve para instalar las extensiones de PHP necesarias.
           extensions: mbstring, curl, xml, zip, bcmath, gd, intl, redis, pdo_mysql
+          # Esta línea sirve para desactivar la cobertura de código.
           coverage: none
 
+      # Esta línea sirve para abrir el paso que instala dependencias de Composer.
       - name: Install Composer dependencies
+        # Esta línea sirve para instalar las dependencias de Composer sin interacción.
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      # Esta línea sirve para abrir el paso que copia el archivo de entorno.
       - name: Copy environment file
+        # Esta línea sirve para copiar el .env.example como .env.
         run: cp .env.example .env
 
+      # Esta línea sirve para abrir el paso que genera la clave de la aplicación.
       - name: Generate app key
+        # Esta línea sirve para generar la clave de la aplicación.
         run: php artisan key:generate
 
+      # Esta línea sirve para abrir el paso de análisis de estilo con Pint.
       - name: Lint (Pint)
+        # Esta línea sirve para verificar el estilo del código sin modificarlo.
         run: vendor/bin/pint --test
 
+      # Esta línea sirve para abrir el paso que ejecuta las migraciones.
       - name: Run migrations
+        # Esta línea sirve para definir las variables de entorno del paso.
         env:
+          # Esta línea sirve para apuntar a la base de datos local.
           DB_HOST: 127.0.0.1
+          # Esta línea sirve para usar la base de datos de pruebas.
           DB_DATABASE: sanken_testing
+          # Esta línea sirve para usar el usuario root.
           DB_USERNAME: root
+          # Esta línea sirve para usar contraseña vacía.
           DB_PASSWORD: ""
+        # Esta línea sirve para ejecutar las migraciones sin pedir confirmación.
         run: php artisan migrate --force
 
+      # Esta línea sirve para abrir el paso que ejecuta las pruebas.
       - name: Run tests
+        # Esta línea sirve para definir las variables de entorno del paso.
         env:
+          # Esta línea sirve para apuntar a la base de datos local.
           DB_HOST: 127.0.0.1
+          # Esta línea sirve para usar la base de datos de pruebas.
           DB_DATABASE: sanken_testing
+          # Esta línea sirve para usar el usuario root.
           DB_USERNAME: root
+          # Esta línea sirve para usar contraseña vacía.
           DB_PASSWORD: ""
+          # Esta línea sirve para apuntar a Redis local.
           REDIS_HOST: 127.0.0.1
+        # Esta línea sirve para ejecutar las pruebas de Laravel.
         run: php artisan test

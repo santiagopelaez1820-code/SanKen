@@ -1,18 +1,30 @@
+/* Esta línea sirve para abrir las reglas del selector «:root». */
 :root {
+  /* Esta línea sirve para establecer «--font-display» (valor en las líneas siguientes). */
   --font-display:
+    /* Esta línea sirve para listar las fuentes sans-serif del sistema para la interfaz. */
     Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
+    /* Esta línea sirve para completar la lista con las fuentes de emoji. */
     Segoe UI Symbol, Noto Color Emoji;
+  /* Esta línea sirve para establecer «--font-mono» (valor en las líneas siguientes). */
   --font-mono:
+    /* Esta línea sirve para listar las fuentes monoespaciadas del sistema. */
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+  /* Esta línea sirve para listar las fuentes redondeadas con alternativas. */
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
+  /* Esta línea sirve para definir la variable CSS «--font-serif» con el valor «Georgia, 'Times New Roman', serif». */
   --font-serif: Georgia, 'Times New Roman', serif;
   /* Mismo valor que Colors.light.accent en constants/theme.ts */
+  /* Esta línea sirve para definir la variable CSS «--focus-ring-color» con el valor «#0093ad». */
   --focus-ring-color: #0093ad;
 }
 
+/* Esta línea sirve para abrir el bloque @media. */
 @media (prefers-color-scheme: dark) {
+  /* Esta línea sirve para abrir las reglas del selector «:root». */
   :root {
     /* Mismo valor que Colors.dark.accent en constants/theme.ts */
+    /* Esta línea sirve para definir la variable CSS «--focus-ring-color» con el valor «#00b8d9». */
     --focus-ring-color: #00b8d9;
   }
 }
@@ -31,11 +43,16 @@
  * teclado (Tab), nunca al hacer click con el mouse — se verificó que el
  * navegador ya distingue esto correctamente para estos elementos.
  */
+/* Esta línea sirve para abrir las reglas del selector «[tabindex]:focus». */
 [tabindex]:focus {
+  /* Esta línea sirve para establecer «outline» en «none». */
   outline: none;
 }
 
+/* Esta línea sirve para abrir las reglas del selector «[tabindex]:focus-visible». */
 [tabindex]:focus-visible {
+  /* Esta línea sirve para establecer «outline» en «2px solid var(--focus-ring-color)». */
   outline: 2px solid var(--focus-ring-color);
+  /* Esta línea sirve para establecer «outline-offset» en «2px». */
   outline-offset: 2px;
 }
