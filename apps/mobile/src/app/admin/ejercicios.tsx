@@ -329,7 +329,7 @@ export default function AdminEjerciciosScreen() {
             {/* Esta línea sirve para mostrar el valor «editingId ? 'Editar ejercicio' : 'Nuevo ejercicio'» dentro de «ThemedText». */}
             <ThemedText type="smallBold">{editingId ? 'Editar ejercicio' : 'Nuevo ejercicio'}</ThemedText>
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «form.name}».
               value={form.name}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».
@@ -357,7 +357,7 @@ export default function AdminEjerciciosScreen() {
             {/* Esta línea sirve para mostrar el componente «ChipRow». */}
             <ChipRow options={TYPE_OPTIONS} value={form.type} onChange={(type) => setForm({ ...form, type })} />
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «form.instructions}».
               value={form.instructions}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».

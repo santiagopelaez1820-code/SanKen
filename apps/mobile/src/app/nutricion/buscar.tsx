@@ -70,7 +70,7 @@ export default function BuscarAlimentoScreen() {
           {/* Esta línea sirve para abrir el componente «View». */}
           <View style={styles.searchRow}>
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «query}».
               value={query}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».

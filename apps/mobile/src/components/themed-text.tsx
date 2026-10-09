@@ -57,6 +57,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
         style,
       ]}
       // Esta línea sirve para mostrar el valor «...rest».
+      allowFontScaling={false}
       {...rest}
     />
   );

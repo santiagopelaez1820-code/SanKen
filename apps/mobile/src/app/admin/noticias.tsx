@@ -69,7 +69,7 @@ export default function AdminNoticiasScreen() {
             {/* Esta línea sirve para mostrar el texto «Nueva noticia» dentro de «ThemedText». */}
             <ThemedText type="smallBold">Nueva noticia</ThemedText>
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «title}».
               value={title}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».
@@ -82,7 +82,7 @@ export default function AdminNoticiasScreen() {
               style={[styles.input, { borderColor: theme.backgroundSelected, color: theme.text }]}
             />
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «body}».
               value={body}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».

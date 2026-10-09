@@ -26,6 +26,7 @@ import { SankEmptyState } from "@/components/ui/SankEmptyState"
 import { ProductCard } from "@/components/store/ProductCard"
 // Esta línea sirve para importar «CategoryChips» desde «@/components/store/CategoryChips».
 import { CategoryChips } from "@/components/store/CategoryChips"
+import { SourcingBanner } from "@/components/store/SourcingBanner"
 // Esta línea sirve para importar «TutorialOverlay» desde «@/components/tutorial/TutorialOverlay».
 import { TutorialOverlay } from "@/components/tutorial/TutorialOverlay"
 // Esta línea sirve para importar «useTutorial» desde «@/hooks/use-tutorial».
@@ -186,6 +187,10 @@ export function StorePage() {
               </span>
             )}
           </Link>
+        </motion.div>
+
+        <motion.div variants={fadeInUp}>
+          <SourcingBanner />
         </motion.div>
 
         {/* Esta línea sirve para mostrar el elemento solo si «isLoading». */}

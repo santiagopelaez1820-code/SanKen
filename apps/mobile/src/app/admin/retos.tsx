@@ -125,7 +125,7 @@ export default function AdminRetosScreen() {
             {/* Esta línea sirve para mostrar el texto «Nueva plantilla» dentro de «ThemedText». */}
             <ThemedText type="smallBold">Nueva plantilla</ThemedText>
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «code}».
               value={code}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».
@@ -140,7 +140,7 @@ export default function AdminRetosScreen() {
               style={[styles.input, { borderColor: theme.backgroundSelected, color: theme.text }]}
             />
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «title}».
               value={title}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».
@@ -153,7 +153,7 @@ export default function AdminRetosScreen() {
               style={[styles.input, { borderColor: theme.backgroundSelected, color: theme.text }]}
             />
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «description}».
               value={description}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».
@@ -245,7 +245,7 @@ export default function AdminRetosScreen() {
             </View>
 
             {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-            <TextInput
+            <TextInput allowFontScaling={false}
               // Esta línea sirve para pasar la propiedad «value» con el valor «target}».
               value={target}
               // Esta línea sirve para asignar el manejador del evento «onChangeText».

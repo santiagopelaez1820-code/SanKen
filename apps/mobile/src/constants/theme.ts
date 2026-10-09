@@ -7,7 +7,7 @@
 import '@/global.css';
 
 // Esta línea sirve para importar «Platform» desde «react-native».
-import { Platform } from 'react-native';
+import { Dimensions, PixelRatio, Platform } from 'react-native';
 
 // Paleta de marca SANKEN mobile — "Dark Performance": negro azulado profundo
 // + cian como acento único de identidad. NO es la misma paleta que la web
@@ -122,6 +122,21 @@ export const Fonts = Platform.select({
 });
 
 /**
+ * Factor de escala por ancho de pantalla (referencia 390dp). Hace que espaciado,
+ * tipografía y alturas fijas guarden la misma proporción en celulares angostos
+ * o anchos. Se acota para no deformar el diseño; en web queda en 1.
+ */
+const REFERENCE_WIDTH = 390;
+const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
+export const ScreenScale =
+  Platform.OS === 'web' ? 1 : Math.min(1.12, Math.max(0.88, Math.min(windowWidth, windowHeight) / REFERENCE_WIDTH));
+
+/** Escala un valor en dp según el ancho de pantalla, alineado a píxel físico. */
+export function scaled(value: number) {
+  return PixelRatio.roundToNearestPixel(value * ScreenScale);
+}
+
+/**
  * Escala de espaciado "compacta" (SanKen 2.0): three/four/five bajaron de
  * 16/24/32 a 14/20/28 para aprovechar mejor la altura en todas las
  * pantallas a la vez — mismo sistema, misma proporción entre niveles, sin
@@ -129,7 +144,7 @@ export const Fonts = Platform.select({
  * táctiles/de respiración y bajarlos se sentía apretado.
  */
 // Esta línea sirve para declarar «Spacing» con el valor «{».
-export const Spacing = {
+const BaseSpacing = {
   // Esta línea sirve para declarar la propiedad «half» con el valor o tipo «2».
   half: 2,
   // Esta línea sirve para declarar la propiedad «one» con el valor o tipo «4».
@@ -147,6 +162,10 @@ export const Spacing = {
 // Esta línea sirve para cerrar la paleta como constante de solo lectura.
 } as const;
 
+export const Spacing = Object.fromEntries(
+  Object.entries(BaseSpacing).map(([k, v]) => [k, k === 'half' ? v : scaled(v)]),
+) as { [K in keyof typeof BaseSpacing]: number };
+
 /**
  * Escala tipográfica única de la app — `ThemedText` la consume por `type`.
  * Cada nivel conserva una diferencia clara con el siguiente (jerarquía),
@@ -155,7 +174,7 @@ export const Spacing = {
  * original, que era la mayor fuente de altura "vacía" en cards y headers.
  */
 // Esta línea sirve para declarar «Typography» con el valor «{».
-export const Typography = {
+const BaseTypography = {
   /** Título de pantalla / diálogo. */
   // Esta línea sirve para declarar la propiedad «title» con el valor o tipo «{ fontSize: 24, lineHeight: 30 }».
   title: { fontSize: 24, lineHeight: 30 },
@@ -177,8 +196,15 @@ export const Typography = {
 // Esta línea sirve para cerrar la lista como constante de solo lectura.
 } as const;
 
+export const Typography = Object.fromEntries(
+  Object.entries(BaseTypography).map(([k, v]) => [
+    k,
+    { fontSize: Math.round(v.fontSize * ScreenScale), lineHeight: Math.round(v.lineHeight * ScreenScale) },
+  ]),
+) as { [K in keyof typeof BaseTypography]: { fontSize: number; lineHeight: number } };
+
 // Esta línea sirve para declarar «BottomTabInset» con el valor «Platform.select({ ios: 50, android: 80 }) ?? 0».
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
+export const BottomTabInset = scaled(Platform.select({ ios: 50, android: 80 }) ?? 0);
 // Esta línea sirve para declarar «MaxContentWidth» con el valor «800».
 export const MaxContentWidth = 800;
 /** Ancho máximo de formularios de auth/onboarding — en tablet/web no se estiran a 800px. */

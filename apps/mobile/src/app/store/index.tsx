@@ -15,6 +15,7 @@ import type { ProductCategory } from '@sanken/core';
 import { CATEGORY_LABELS, CategoryChips } from '@/components/store/category-chips';
 // Esta línea sirve para importar «ProductCard» desde «@/components/store/product-card».
 import { ProductCard } from '@/components/store/product-card';
+import { SourcingBanner } from '@/components/store/sourcing-banner';
 // Esta línea sirve para importar «ThemedText» desde «@/components/themed-text».
 import { ThemedText } from '@/components/themed-text';
 // Esta línea sirve para importar «ThemedView» desde «@/components/themed-view».
@@ -213,6 +214,7 @@ export default function StoreScreen() {
               <View ref={headerListRef} style={styles.headerList}>
                 {/* Esta línea sirve para abrir el componente «SearchField». */}
                 <SearchField value={query} onChangeText={setQuery} placeholder="Buscar productos…" />
+                <SourcingBanner />
                 {/* Esta línea sirve para mostrar el contenido dinámico «{/* Con una búsqueda activa, los destacados solo empujarían». */}
                 {/* Con una búsqueda activa, los destacados solo empujarían
                     // Esta línea sirve para cerrar el comentario sobre los resultados fuera de pantalla.

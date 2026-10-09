@@ -113,7 +113,7 @@ export function LogMealForm({ food, onLogged }: LogMealFormProps) {
         {/* Esta línea sirve para abrir el componente «View». */}
         <View style={styles.quantityCenter}>
           {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-          <TextInput
+          <TextInput allowFontScaling={false}
             // Esta línea sirve para pasar la propiedad «value» con el valor «grams}».
             value={grams}
             // Esta línea sirve para asignar el manejador del evento «onChangeText».

@@ -41,7 +41,7 @@ export function TextField({ label, style, secureTextEntry, ...props }: TextField
       {/* Esta línea sirve para abrir el componente «View». */}
       <View style={styles.inputWrap}>
         {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-        <TextInput
+        <TextInput allowFontScaling={false}
           // Esta línea sirve para pasar la propiedad «placeholderTextColor» con el valor «colors.textSecondary}».
           placeholderTextColor={colors.textSecondary}
           // Esta línea sirve para pasar la propiedad «secureTextEntry» con el valor «isPasswordField && !isVisible}».
