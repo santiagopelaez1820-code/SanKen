@@ -31,7 +31,7 @@ export function SearchField({ value, onChangeText, placeholder = 'Buscar…', ..
       {/* Esta línea sirve para abrir el componente «Icon». */}
       <Icon icon={Search} size={16} color={theme.textSecondary} />
       {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-      <TextInput
+      <TextInput allowFontScaling={false}
         // Esta línea sirve para pasar la propiedad «value» con el valor «value}».
         value={value}
         // Esta línea sirve para asignar el manejador del evento «onChangeText».

@@ -162,7 +162,7 @@ export default function AdminReportesScreen() {
                 // Esta línea sirve para abrir un fragmento que agrupa elementos sin añadir nodo.
                 <>
                   {/* Esta línea sirve para abrir el elemento «TextInput» con sus atributos en varias líneas. */}
-                  <TextInput
+                  <TextInput allowFontScaling={false}
                     // Esta línea sirve para pasar la propiedad «value» con el valor «notesByReport[report.id] ?? ''}».
                     value={notesByReport[report.id] ?? ''}
                     // Esta línea sirve para asignar el manejador del evento «onChangeText».

@@ -472,7 +472,7 @@ export function BrandIntro({ started, onFinish }: BrandIntroProps) {
             {/* Esta línea sirve para abrir el componente «Animated.View». */}
             <Animated.View style={sloganStyle}>
               {/* Esta línea sirve para mostrar el valor «SLOGAN» dentro de «Text». */}
-              <Text style={[styles.slogan, { fontSize: sloganSize }]}>{SLOGAN}</Text>
+              <Text allowFontScaling={false} style={[styles.slogan, { fontSize: sloganSize }]}>{SLOGAN}</Text>
             </Animated.View>
           </Animated.View>
         </View>
